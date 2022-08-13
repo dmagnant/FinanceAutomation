@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+    <h1>Welcome to the Finance Automator</h1>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="run_script">Run script</button>
+    </form>
+    <a href="{% url 'usd' %}">USD</a>
+    <a href="{% url 'marketresearch' %}">Market Research</a>
+    <a href="{% url 'crypto' %}">Crypto</a>
+
+{% endblock %}
