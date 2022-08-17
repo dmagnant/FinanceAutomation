@@ -79,6 +79,8 @@ def openGnuCashBook(directory, type, readOnly, openIfLocked):
         book = directory + r"\Finances\Personal Finances\Finance.gnucash"
     elif type == 'Home':
         book = directory + r"\Stuff\Home\Finances\Home.gnucash"
+    elif type == 'Test':
+        book = directory + r"\Finances\Personal Finances\test.gnucash"
     try:
         myBook = piecash.open_book(book, readonly=readOnly, open_if_lock=openIfLocked)
     except GnucashException:
@@ -140,6 +142,8 @@ def getAccountPath(account):
             return "Assets:Liquid Assets:My Constant"
         case 'PRE':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Presearch"
+        case 'Sofi':
+            return "Assets:Liquid Assets:Sofi"        
         case 'TIAA':
             return "Assets:Liquid Assets:TIAA"
         case 'VanguardPension':
@@ -163,24 +167,25 @@ def setDirectory():
 def configureDriverOptions(browser, asUser=True):
     if browser == "Edge":
         options = webdriver.EdgeOptions()
-        if asUser:
-            options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\Microsoft\Edge\User Data")
+        # following options not compatible to Chrome remote debugging window
+        options.add_experimental_option('excludeSwitches', ['enable-logging'])
+        options.add_experimental_option("detach", True)
+        profile = {"download.prompt_for_download": False}
+        options.add_experimental_option("prefs", profile)
+        # if asUser:
+        #     options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\Microsoft\Edge\User Data")
     else:        
         options = webdriver.ChromeOptions()
     if browser == "Chrome":
+        options.add_experimental_option("debuggerAddress","localhost:9222")
         if asUser:
             options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\Google\Chrome\User Data")
     elif browser == "Brave":
         options.binary_location = "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe"
         if asUser:
             options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\BraveSoftware\Brave-Browser\User Data")
-
-    # options.add_experimental_option('excludeSwitches', ['enable-logging'])
-    options.add_experimental_option("debuggerAddress","localhost:9222")
-    # options.add_experimental_option("detach", True)
+    # applicable to all        
     options.add_argument("start-maximized")
-    # profile = {"download.prompt_for_download": False}
-    # options.add_experimental_option("prefs", profile)
     return options
 
 def updateWebDriver(directory, browser, version):
@@ -585,6 +590,8 @@ def importUniqueTransactionsToGnuCash(account, transactionsCSV, gnuCSV, myBook, 
         gnuAccount = "Assets:Ally Checking Account"
     elif account == 'M1':
         gnuAccount = "Assets:Liquid Assets:M1 Spend"
+    elif account == 'Sofi':
+        gnuAccount = "Assets:Liquid Assets:Sofi"
     
     # retrieve transactions from GnuCash for the same date range
     transactions = [tr for tr in myBook.transactions
