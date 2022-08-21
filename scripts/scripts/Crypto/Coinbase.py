@@ -7,7 +7,7 @@ from pycoingecko import CoinGeckoAPI
 
 from Eternl import runEternl
 from Exodus import runExodus
-from Functions.Functions import (openWebDriver, getAccountPath,
+from Functions import (openWebDriver, getAccountPath,
                        getCryptocurrencyPrice, getGnuCashBalance,
                        openGnuCashBook, setDirectory, showMessage,
                        updateCryptoPrices, updateSpreadsheet)

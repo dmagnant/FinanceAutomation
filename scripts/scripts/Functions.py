@@ -340,17 +340,6 @@ def getStartAndEndOfPreviousMonth(today, month, year):
         enddate = today.replace(month=month - 1, day=31)
     return [startdate, enddate]
 
-def getDateRange(today, numDays):
-    # Gather last 3 days worth of transactions
-    currentDate = today.date()    
-    dateRange = currentDate.isoformat()
-    day = 1
-    while day <= numDays:
-        dayBefore = (currentDate - timedelta(days=day)).isoformat()
-        dateRange = dateRange + dayBefore
-        day += 1
-    return dateRange
-
 def modifyTransactionDescription(description, amount="0.00"):
     if "INTERNET TRANSFER FROM ONLINE SAVINGS ACCOUNT XXXXXX9703" in description.upper():
         description = "Tessa Deposit"
@@ -581,6 +570,12 @@ def formatTransactionVariables(account, row):
         amount = Decimal(row[2])
         fromAccount = "Assets:Liquid Assets:M1 Spend"
         reviewTransPath = row[0] + ", " + row[1] + ", " + row[2] + "\n"
+    elif account == 'Sofi':
+        postDate = datetime.strptime(row[0], '%Y-%m-%d')
+        description = row[1]
+        amount = Decimal(row[2])
+        fromAccount = "Assets:Liquid Assets:Sofi"
+        reviewTransPath = row[0] + ", " + row[1] + ", " + row[2] + "\n"          
     return [postDate, description, amount, ccPayment, fromAccount, reviewTransPath]
 
 def importUniqueTransactionsToGnuCash(account, transactionsCSV, gnuCSV, myBook, driver, directory, dateRange, lineStart=1):

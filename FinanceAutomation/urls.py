@@ -28,5 +28,4 @@ urlpatterns = [
     # path('marketresearch', marketResearch, name="marketresearch"),
     path('scripts/', include('scripts.urls')),
     path('accounts/', include('accounts.urls')),
-
 ]

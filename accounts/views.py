@@ -6,6 +6,9 @@ from scripts.scripts.Functions import openWebDriver, showMessage
 from scripts.scripts.MarketResearch.Swagbucks import contentDiscovery
 
 # Create your views here.
+def accounts(request):
+    return render(request,"accounts/accounts.html")
+
 def swagbucks(request):
     driver = openWebDriver("Chrome")
     print(request)
