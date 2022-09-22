@@ -1,0 +1,32 @@
+if __name__ == '__main__' or __name__ == "Daily_MR":
+    from Functions import openWebDriver
+    from AmazonGC import confirmAmazonGCBalance
+    from Bing import runBing
+    from Pinecone import runPinecone
+    from Presearch_MR import runPresearch
+    from Swagbucks import runSwagbucks
+    from Tellwut import runTellwut
+else:
+    from .Functions import openWebDriver
+    from .AmazonGC import confirmAmazonGCBalance
+    from .Bing import runBing
+    from .Pinecone import runPinecone
+    from .Presearch_MR import runPresearch
+    from .Swagbucks import runSwagbucks
+    from .Tellwut import runTellwut
+
+def runDailyMR():
+    driver1 = openWebDriver("Edge")
+    driver1.maximize_window()
+    runBing(driver1)
+    driver1.quit()
+    driver = openWebDriver("Chrome")
+    driver.implicitly_wait(5)
+    runPresearch(driver)
+    runTellwut(driver)
+    confirmAmazonGCBalance(driver)
+    runPinecone(driver)
+    runPresearch(driver)
+    runSwagbucks(driver, True)
+if __name__ == '__main__':
+    runDailyMR()

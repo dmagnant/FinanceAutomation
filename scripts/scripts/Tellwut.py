@@ -1,15 +1,25 @@
 import time
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException, WebDriverException
-import sys
-sys.path.append("..")
-from ..Functions import openWebDriver, showMessage
 
-def login(driver):
+if __name__ == '__main__' or __name__ == "Tellwut":
+    from Functions import openWebDriver, showMessage, findWindow
+else:
+    from .Functions import showMessage, findWindow
+
+def locateTellWutWindow(driver):
+    found = findWindow(driver, "Paid Surveys and Earn Rewards")
+    if not found:
+        tellwutLogin(driver)
+    else:
+        driver.switch_to.window(found)
+        time.sleep(1)
+
+def tellwutLogin(driver):
     driver.execute_script("window.open('https://www.tellwut.com/signin');")
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
     try:
-        getBalance(driver)
+        getTellWutBalance(driver)
     except NoSuchElementException:
         print('not already logged in or balance element not found')
         # click Sign In
@@ -18,22 +28,15 @@ def login(driver):
         except NoSuchElementException:
             showMessage('Captcha or Sign in button not found', "complete captcha, then click OK. If fails, confirm element for sign in")
             driver.find_element(By.XPATH, "/html/body/div[1]/main/div[2]/div[2]/div[1]/form/div[6]/div/button").click()
+    driver.get("https://www.tellwut.com/")
+
     
-def getBalance(driver):
+def getTellWutBalance(driver):
+    locateTellWutWindow(driver)
     return driver.find_element(By.XPATH, "/html/body/div/header/div/div/div/div[4]/div/div/div[2]/div[1]/div[1]").text
 
-def completeSurveys(driver):
-    if len(driver.window_handles) > 1:
-        for i in driver.window_handles:
-            driver.switch_to.window(i)
-            if "Paid Surveys and Earn Rewards" in driver.title:
-                found = True
-        if not found:
-            login(driver)
-    else:
-        if "Paid Surveys and Earn Rewards" not in driver.title:
-            login(driver)
-    driver.get("https://www.tellwut.com/")
+def completeTellWutSurveys(driver):
+    locateTellWutWindow(driver)
     while True:
             try:
                 # look for "Start Survey" button
@@ -64,26 +67,23 @@ def completeSurveys(driver):
             # Click Submit
             driver.find_element(By.XPATH, "//input[@id='survey_form_submit']").click()
             time.sleep(3)
-            # re-load the webpage to load new survey
-            try: 
-                driver.get("https://www.tellwut.com")
-            except WebDriverException:
-                print('refresh error caught')
+            driver.get("https://www.tellwut.com")
             time.sleep(2)
 
-def redeemRewards(driver):
-    balance = getBalance(driver)
-    if int(balance) >= 4000:
-        driver.get("https://www.tellwut.com/product/143--10-Amazon-com-e-Gift-Card.html")
-        driver.find_element(By.ID, "checkout_form_submit").click()
-        driver.find_element(By.ID, "form_button").click()
-        driver.find_element(By.ID, "accept-additional").click()
-        time.sleep(3)
+def redeemTellWutRewards(driver):
+    locateTellWutWindow(driver)
+    driver.get("https://www.tellwut.com/product/143--10-Amazon-com-e-Gift-Card.html")
+    driver.find_element(By.ID, "checkout_form_submit").click()
+    driver.find_element(By.ID, "form_button").click()
+    driver.find_element(By.ID, "accept-additional").click()
+    time.sleep(3)
 
 def runTellwut(driver):
-    login(driver)
-    completeSurveys(driver)
-    redeemRewards(driver)
+    tellwutLogin(driver)
+    completeTellWutSurveys(driver)
+    balance = getTellWutBalance(driver)
+    if int(balance) >= 4000:
+        redeemTellWutRewards(driver)
 
 if __name__ == '__main__':
     driver = openWebDriver("Chrome")

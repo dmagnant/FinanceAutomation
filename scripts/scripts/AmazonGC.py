@@ -1,9 +1,10 @@
 from selenium.webdriver.common.by import By
 
-import sys
-sys.path.append("..")
-from ..Functions import (openWebDriver, openGnuCashBook, setDirectory,
-                       showMessage, setDirectory)
+if __name__ == '__main__' or __name__ == "AmazonGC":
+    from Functions import (openGnuCashBook, openWebDriver, setDirectory,
+                           showMessage)
+else:
+    from .Functions import openGnuCashBook, setDirectory, showMessage
 
 def confirmAmazonGCBalance(driver):
     directory = setDirectory()

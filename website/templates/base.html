@@ -13,10 +13,11 @@
     {% endblock %}
 
     <a href="{% url 'welcome' %}">Home</a>
-    <a href="{% url 'usd' %}">USD</a>
+    {% comment %} <a href="{% url 'usd' %}">USD</a>
     <a href="{% url 'marketresearch' %}">Market Research</a>
-    <a href="{% url 'crypto' %}">Crypto</a>
-    <a href="{% url 'accounts' %}">Accounts</a>
+    <a href="{% url 'crypto' %}">Crypto</a> {% endcomment %}
+    {% comment %} <a href="{% url 'accounts' %}">Accounts</a> {% endcomment %}
+    <a href="{% url 'scripts' %}">Scripts</a>
 
 </body>
 </html>

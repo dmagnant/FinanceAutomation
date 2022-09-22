@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Swagbucks{% endblock %}
+
+{% block content %}
+    <h1>Swagbucks</h1>
+    <form method="post">
+        {% csrf_token %}
+        <input type="checkbox" name="Run Alu" checked="checked">Run Alu?</input>
+        <button type="submit" name="main">Main</button>
+    </form>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="login">Login</button>
+    </form>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="alu">Alus Revenge</button>
+    </form>    
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="content">Content Discovery</button>
+    </form>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="search">Search</button>
+    </form>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="balance">Balance</button>
+    </form>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="rewards">Rewards</button>
+    </form>
+
+{% endblock %}

@@ -13,13 +13,16 @@ from selenium.common.exceptions import (ElementClickInterceptedException,
 from selenium.webdriver.common.by import By
 
 # from matplotlib import pyplot as plt
-import sys
-sys.path.append("..")
-from ..Functions import (openWebDriver, getPassword, getUsername,
+
+from scripts.scripts.Functions import (openWebDriver, getPassword, getUsername,
                        setDirectory, showMessage)
 
+if __name__ == '__main__' or __name__ == "Cointiply":
+    from Functions import openWebDriver, getPassword, getUsername, setDirectory, showMessage
+else:
+    from .Functions import getPassword, getUsername, setDirectory, showMessage
 
-def login(directory, driver):
+def cointiplyLogin(directory, driver):
     driver.get("https://cointiply.com/login")
     #Login
     try:
@@ -231,7 +234,7 @@ def nextRun(driver):
 
 
 def runCointiply(directory, driver, faucetRun=True):
-    login(directory, driver)    
+    cointiplyLogin(directory, driver)    
     runFaucet(driver, faucetRun)
     ptcAds(directory, driver)
     return nextRun(driver)

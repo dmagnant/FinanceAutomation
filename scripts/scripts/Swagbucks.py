@@ -11,17 +11,25 @@ from selenium.common.exceptions import (ElementClickInterceptedException,
                                         WebDriverException)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-# import os, os.path
-import sys
-sys.path.append("..")
-from ..Functions import openWebDriver, showMessage
+    
+if __name__ == '__main__' or __name__ == "Swagbucks":
+    from Functions import openWebDriver, showMessage, findWindow
+else:
+    from .Functions import showMessage, findWindow
 
-def login(driver):
+def locateSwagBucksWindow(driver):
+    found = findWindow(driver, "| Swagbucks")
+    if not found:
+        swagBucksLogin(driver)
+    else:
+        driver.switch_to.window(found)
+        time.sleep(1)    
+
+def swagBucksLogin(driver):
     driver.execute_script("window.open('https://www.swagbucks.com/');")
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-    showMessage('test', 'test')
 
-def contentDiscovery(driver):
+def swagBuckscontentDiscovery(driver):
     driver.execute_script("window.open('https://www.swagbucks.com/discover/explore');")
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
     num = 1
@@ -163,16 +171,7 @@ def toDoList(driver):
         list_item_num += 1
 
 def swagbucksSearch(driver):
-    if len(driver.window_handles) > 1:
-        for i in driver.window_handles:
-            driver.switch_to.window(i)
-            if "| Swagbucks" in driver.title:
-                found = True
-        if not found:
-            login(driver)
-    else:
-        if "| Swagbucks" not in driver.title:
-            login(driver)
+    locateSwagBucksWindow(driver)
     driver.implicitly_wait(3)
     delay = [1, 2, 3]
     searches = 0
@@ -217,21 +216,37 @@ def swagbucksSearch(driver):
         except WebDriverException:
             num = 3
 
+def getSwagBucksBalance(driver):
+    locateSwagBucksWindow(driver)
+    return driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/header/nav/section[2]/div[1]/p/var").text.replace('SB', '')
+
+def claimSwagBucksRewards(driver):
+    locateSwagBucksWindow(driver)
+    # Paypal $10 rewards page
+    driver.get("https://www.swagbucks.com/p/prize/28353/PayPal-10")
+    time.sleep(4)
+    # Claim Reward
+    driver.find_element(By.ID,"redeemBtnHolder").click()
+    # CONTINUE HERE #
+
 def runSwagbucks(driver, run_Alu):
     # closeExpressVPN()
     driver.implicitly_wait(2)
-    login(driver)
+    swagBucksLogin(driver)
     try:
         driver.find_element(By.ID, "lightboxExit").click()
     except (ElementNotInteractableException, NoSuchElementException):
         exception = "caught"
     runAlusRevenge(driver, run_Alu)
-    contentDiscovery(driver)
+    swagBuckscontentDiscovery(driver)
     dailyPoll(driver)
     openTabs(driver)
     toDoList(driver)
     swagbucksSearch(driver)
-
+    balance = getSwagBucksBalance(driver)
+    if int(balance) > 1000:
+        claimSwagBucksRewards(driver)
+    
 if __name__ == '__main__':
     driver = openWebDriver("Chrome")
     driver.implicitly_wait(5)
