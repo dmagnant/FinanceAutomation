@@ -22,10 +22,6 @@ def crypto(request):
             i = scripts.index(script)
             script = script.replace('.py','')
             scripts[i] = script
-            # try:
-            #     Script.objects.get(name=script, type="crypto")
-            # except ObjectDoesNotExist:
-            #     Script.objects.create(name=script, type="crypto")
         else:
             scripts.remove(script)
     return render(request,"scripts/crypto.html",{'scripts':scripts})

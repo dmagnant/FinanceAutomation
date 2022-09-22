@@ -11,14 +11,19 @@ from selenium.common.exceptions import (ElementClickInterceptedException,
                                         WebDriverException)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-# import sys
-# sys.path.append("..")
-# from Functions import openWebDriver, showMessage
-# from Functions import openWebDriver, closeExpressVPN, showMessage
+# import os, os.path
+import sys
+sys.path.append("..")
+from ..Functions import openWebDriver, showMessage
+
+def login(driver):
+    driver.execute_script("window.open('https://www.swagbucks.com/');")
+    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    showMessage('test', 'test')
 
 def contentDiscovery(driver):
-    driver.get("https://www.swagbucks.com/discover/explore")
-    mainWindow = driver.window_handles[0]
+    driver.execute_script("window.open('https://www.swagbucks.com/discover/explore');")
+    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
     num = 1
     while (num <= 20):
         contentPath = "/html/body/div[2]/div[3]/div[1]/div[1]/main/div[2]/div[1]/section[" + str(num) + "]/button"
@@ -36,7 +41,7 @@ def contentDiscovery(driver):
     while len(driver.window_handles) > 1:
         driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
         driver.close()
-    driver.switch_to.window(mainWindow)
+    driver.switch_to.window(driver.window_handles[0])
 
 def runAlusRevenge(driver, run_Alu):
     if run_Alu:
@@ -50,8 +55,8 @@ def runAlusRevenge(driver, run_Alu):
         Alu.moveTo(10, 10)
         Alu.resizeTo(100, 100)          
         Alu.maximize()
-        # click Play for Free
         driver.implicitly_wait(20)
+        # click Play for Free
         driver.find_element(By.ID, "gamesItemBtn").click()
         time.sleep(3)
         redeemed = 0
@@ -59,21 +64,25 @@ def runAlusRevenge(driver, run_Alu):
             game_over_text = ""
             num = 0
             # click Play Now
-            pyautogui.leftClick(850, 972)
+            pyautogui.leftClick(850, 950)
+            pyautogui.leftClick(850, 950)
             time.sleep(1)
             # click Play Now (again)
-            pyautogui.leftClick(938, 803)
-            time.sleep(1)
+            pyautogui.leftClick(938, 795)
+            pyautogui.leftClick(938, 795)            
+            time.sleep(2)
             # click to remove "goal screen" and start game
             pyautogui.leftClick(872, 890)
-            time.sleep(2)
+            pyautogui.leftClick(872, 890)            
+            time.sleep(4)
             # click tiles
-            pyautogui.leftClick(680, 1000)
-            pyautogui.leftClick(750, 1000)
-            pyautogui.leftClick(825, 1000)
-            pyautogui.leftClick(900, 1000)
-            pyautogui.leftClick(975, 1000)
-            pyautogui.leftClick(1025, 1000)
+            pyautogui.leftClick(680, 980)
+            pyautogui.leftClick(680, 980)
+            pyautogui.leftClick(750, 980)
+            pyautogui.leftClick(825, 980)
+            pyautogui.leftClick(900, 980)
+            pyautogui.leftClick(975, 980)
+            pyautogui.leftClick(1025, 980)
             time.sleep(25)
             while num < 5:
                 # if Game over screen up
@@ -106,21 +115,11 @@ def dailyPoll(driver):
     driver.close()
 
 def openTabs(driver):
-    # #AdGate Media
-    # driver.execute_script("window.open('https://www.swagbucks.com/discover/offer-walls/151/adgate-media');")
-    # # switch to last window
-    # driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-
     #Inbox
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
     driver.execute_script("window.open('https://www.swagbucks.com/g/inbox');")
     # switch to last window
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-
-    # #Answer
-    # driver.execute_script("window.open('https://www.swagbucks.com/surveys');")
-    # # switch to last window
-    # driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
 
 def toDoList(driver):
     # To Do List
@@ -164,8 +163,16 @@ def toDoList(driver):
         list_item_num += 1
 
 def swagbucksSearch(driver):
-    search_window = driver.window_handles[0]
-    driver.switch_to.window(search_window)
+    if len(driver.window_handles) > 1:
+        for i in driver.window_handles:
+            driver.switch_to.window(i)
+            if "| Swagbucks" in driver.title:
+                found = True
+        if not found:
+            login(driver)
+    else:
+        if "| Swagbucks" not in driver.title:
+            login(driver)
     driver.implicitly_wait(3)
     delay = [1, 2, 3]
     searches = 0
@@ -210,11 +217,10 @@ def swagbucksSearch(driver):
         except WebDriverException:
             num = 3
 
-def runSwagbucks(driver, run_Alu, location="home"):
+def runSwagbucks(driver, run_Alu):
     # closeExpressVPN()
     driver.implicitly_wait(2)
-    driver.get("https://www.swagbucks.com/")
-    driver.maximize_window()
+    login(driver)
     try:
         driver.find_element(By.ID, "lightboxExit").click()
     except (ElementNotInteractableException, NoSuchElementException):
@@ -222,14 +228,11 @@ def runSwagbucks(driver, run_Alu, location="home"):
     runAlusRevenge(driver, run_Alu)
     contentDiscovery(driver)
     dailyPoll(driver)
-    if location == "home":
-        openTabs(driver)
+    openTabs(driver)
     toDoList(driver)
-    if location == "home":
-        swagbucksSearch(driver)
-
+    swagbucksSearch(driver)
 
 if __name__ == '__main__':
     driver = openWebDriver("Chrome")
     driver.implicitly_wait(5)
-    runSwagbucks(driver, False, location="home")
+    runSwagbucks(driver, False)

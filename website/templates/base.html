@@ -11,5 +11,12 @@
 <body>
     {% block content %}
     {% endblock %}
+
+    <a href="{% url 'welcome' %}">Home</a>
+    <a href="{% url 'usd' %}">USD</a>
+    <a href="{% url 'marketresearch' %}">Market Research</a>
+    <a href="{% url 'crypto' %}">Crypto</a>
+    <a href="{% url 'accounts' %}">Accounts</a>
+
 </body>
 </html>

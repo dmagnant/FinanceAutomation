@@ -4,11 +4,8 @@
 
 {% block content %}
     <h1>Accounts</h1>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="login">Login</button>
-    </form>
-    <a href="{% url 'welcome' %}">Home</a>
-    <a href="{% url 'usd' %}">USD</a>
-    <a href="{% url 'marketresearch' %}">Market Research</a>
+    {% for script in scripts %}
+    <a href="{% url script %}">{{script}}</a>
+    <br>
+    {% endfor %}
 {% endblock %}

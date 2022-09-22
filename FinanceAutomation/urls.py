@@ -23,9 +23,6 @@ from scripts.views import*
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', welcome, name="welcome"),
-    # path('usd', usd, name="usd"),
-    # path('crypto', crypto, name="crypto"),
-    # path('marketresearch', marketResearch, name="marketresearch"),
     path('scripts/', include('scripts.urls')),
     path('accounts/', include('accounts.urls')),
 ]

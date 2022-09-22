@@ -9,8 +9,6 @@
             {% csrf_token %}
             <button type="submit" name={{script}}>{{script}}</button>
         </form>
-        {% endfor %}
-    <a href="{% url 'welcome' %}">Home</a>
-    <a href="{% url 'usd' %}">USD</a>
-    <a href="{% url 'marketresearch' %}">Market Research</a>
+    {% endfor %}
+
 {% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Cointiply{% endblock %}
+
+{% block content %}
+    <h1>Cointiply</h1>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="main">Main</button>
+    </form>
+{% endblock %}
