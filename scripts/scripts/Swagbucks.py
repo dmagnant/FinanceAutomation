@@ -13,17 +13,20 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
     
 if __name__ == '__main__' or __name__ == "Swagbucks":
-    from Functions import openWebDriver, showMessage, findWindow
+    from Functions.GeneralFunctions import showMessage
+    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
 else:
-    from .Functions import showMessage, findWindow
+    from .Functions.GeneralFunctions import showMessage
+    from .Functions.WebDriverFunctions import findWindowByUrl
+    
 
 def locateSwagBucksWindow(driver):
-    found = findWindow(driver, "| Swagbucks")
+    found = findWindowByUrl(driver, "swagbucks.com")
     if not found:
         swagBucksLogin(driver)
     else:
         driver.switch_to.window(found)
-        time.sleep(1)    
+        time.sleep(1)
 
 def swagBucksLogin(driver):
     driver.execute_script("window.open('https://www.swagbucks.com/');")
@@ -218,7 +221,7 @@ def swagbucksSearch(driver):
 
 def getSwagBucksBalance(driver):
     locateSwagBucksWindow(driver)
-    return driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/header/nav/section[2]/div[1]/p/var").text.replace('SB', '')
+    return driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/header/nav/section[2]/div[1]/p/var").text.replace('SB', '').replace(',', '')
 
 def claimSwagBucksRewards(driver):
     locateSwagBucksWindow(driver)
@@ -227,7 +230,14 @@ def claimSwagBucksRewards(driver):
     time.sleep(4)
     # Claim Reward
     driver.find_element(By.ID,"redeemBtnHolder").click()
-    # CONTINUE HERE #
+    # Claim a Gift Card
+    driver.find_element(By.ID,"redeemBtn").click()
+    # Confirm (order details)
+    driver.find_element(By.ID,"confirmOrderCta").click()
+    # enter childhood nickname
+    driver.find_element(By.ID,"securityQuestionInput").send_keys("Tiger")
+    # click Submit
+    driver.find_element(By.ID,"verifyViaSecurityQuestionCta").click()
 
 def runSwagbucks(driver, run_Alu):
     # closeExpressVPN()

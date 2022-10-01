@@ -1,6 +1,6 @@
 import time
 from matplotlib import pyplot as plt
-
+from datetime import datetime
 import cv2
 import numpy as np
 import pyautogui
@@ -14,14 +14,13 @@ from selenium.webdriver.common.by import By
 
 # from matplotlib import pyplot as plt
 
-from scripts.scripts.Functions import (openWebDriver, getPassword, getUsername,
-                       setDirectory, showMessage)
-
 if __name__ == '__main__' or __name__ == "Cointiply":
-    from Functions import openWebDriver, getPassword, getUsername, setDirectory, showMessage
+    from Functions.GeneralFunctions import getPassword, getUsername, setDirectory, showMessage
+    from Functions.WebDriverFunctions import openWebDriver    
 else:
-    from .Functions import getPassword, getUsername, setDirectory, showMessage
-
+    from .Functions.GeneralFunctions import getPassword, getUsername, setDirectory, showMessage
+    from .Functions.WebDriverFunctions import openWebDriver
+    
 def cointiplyLogin(directory, driver):
     driver.get("https://cointiply.com/login")
     #Login
@@ -232,6 +231,28 @@ def nextRun(driver):
                 print('time left not accurately captured, check web element')
     return minsLeftForFaucet
 
+def calculateNextRun(minsLeftForFaucet):
+    now = datetime.now().time().replace(second=0, microsecond=0)
+    if now.hour == 23:
+        nextRunMinute = 0
+        nextRunHour = 0
+    elif now.hour == 18:
+        nextRunMinute = 0
+        nextRunHour = 19
+        minsLeftForFaucet = 61 - now.minute
+    else:
+        nextRunMinute = now.minute + minsLeftForFaucet
+        nextRunHour = now.hour
+        if (nextRunMinute >= 60):
+            nextRunMinute = abs(nextRunMinute - 60)
+            nextRunHour += 1 if nextRunHour < 23 else 0
+    if nextRunMinute < 0 or nextRunMinute > 59:
+        showMessage('Next Run Minute is off', 'Nextrunminute = ' + str(nextRunMinute))
+    nextRun = now.replace(hour=nextRunHour, minute=nextRunMinute)
+    print('next run at ', str(nextRun.hour) + ":" + "{:02d}".format(nextRun.minute))
+    if nextRun.hour == 0:
+        minsLeftForFaucet -= datetime.now().time().minute
+    time.sleep(minsLeftForFaucet * 60)
 
 def runCointiply(directory, driver, faucetRun=True):
     cointiplyLogin(directory, driver)    

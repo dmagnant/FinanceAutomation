@@ -6,9 +6,10 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Bing":
-    from Functions import getPassword, getUsername, setDirectory, openWebDriver
+    from Functions.GeneralFunctions import setDirectory
+    from Functions.WebDriverFunctions import openWebDriver
 else:
-    from .Functions import getPassword, getUsername, setDirectory
+    from .Functions.GeneralFunctions import setDirectory
 
 def bingLogin(driver):
     directory = setDirectory()
@@ -17,14 +18,10 @@ def bingLogin(driver):
     try:
         # click Sign in
         driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/main/section/div[1]/div[2]/section/div[1]/a[2]").click()
-        # enter username
-        # driver.find_element(By.ID, "i0116").send_keys(getUsername(directory, 'Bing Rewards'))
         time.sleep(1)
         # click Next
         driver.find_element(By.ID, "idSIButton9").click()
         time.sleep(1)
-        # enter password
-        # driver.find_element(By.ID, "i0118").send_keys(getPassword(directory, 'Bing Rewards'))
         time.sleep(1)
         # click Sign in
         driver.find_element(By.ID, "idSIButton9").click()

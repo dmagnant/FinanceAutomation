@@ -1,14 +1,16 @@
 import time
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException, WebDriverException
+from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException
 
 if __name__ == '__main__' or __name__ == "Tellwut":
-    from Functions import openWebDriver, showMessage, findWindow
+    from Functions.GeneralFunctions import showMessage
+    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
 else:
-    from .Functions import showMessage, findWindow
+    from .Functions.GeneralFunctions import showMessage
+    from .Functions.WebDriverFunctions import findWindowByUrl
 
 def locateTellWutWindow(driver):
-    found = findWindow(driver, "Paid Surveys and Earn Rewards")
+    found = findWindowByUrl(driver, "tellwut.com")
     if not found:
         tellwutLogin(driver)
     else:
@@ -37,6 +39,7 @@ def getTellWutBalance(driver):
 
 def completeTellWutSurveys(driver):
     locateTellWutWindow(driver)
+    driver.implicitly_wait(2)
     while True:
             try:
                 # look for "Start Survey" button
@@ -89,4 +92,5 @@ if __name__ == '__main__':
     driver = openWebDriver("Chrome")
     driver.implicitly_wait(3)
     runTellwut(driver)
+
     

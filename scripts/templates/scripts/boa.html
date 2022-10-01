@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Bank of America{% endblock %}
+
+{% block content %}
+    <h1>Bank of America</h1>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="main_P">Main Personal</button>
+    </form>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="main_J">Main Joint</button>
+    </form>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="login">Login</button>
+    </form>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="balance_P">Balance Personal</button>
+    </form>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="balance_J">Balance Joint</button>
+    </form>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="rewards_P">Rewards Personal</button>
+    </form>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="rewards_J">Rewrds Joint</button>
+    </form>
+{% endblock %}

@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Presearch{% endblock %}
+{% block title %}Discover{% endblock %}
 
 {% block content %}
-    <h1>Presearch</h1>
+    <h1>Discover</h1>
     <form method="post">
         {% csrf_token %}
-        <button type="submit" name="redeemRewards">Redeem Rewards</button>
+        <button type="submit" name="main">Main</button>
     </form>
     <form method="post">
         {% csrf_token %}
@@ -14,10 +14,10 @@
     </form>
     <form method="post">
         {% csrf_token %}
-        <button type="submit" name="search">Search</button>
+        <button type="submit" name="balance">Balance</button>
     </form>
     <form method="post">
         {% csrf_token %}
-        <button type="submit" name="balance">Balance</button>
+        <button type="submit" name="rewards">Rewards</button>
     </form>
 {% endblock %}
