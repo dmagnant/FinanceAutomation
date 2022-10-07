@@ -20,18 +20,20 @@ else:
     from .Functions.SpreadsheetFunctions import updateSpreadsheet
     from .Functions.WebDriverFunctions import findWindowByUrl
 
-
-def presearchLogin(driver):
-    driver.execute_script("window.open('https://presearch.com/');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-
-def searchUsingPresearch(driver):
+def locatePresearchWindow(driver):
     found = findWindowByUrl(driver, "presearch.com")
     if not found:
         presearchLogin(driver)
     else:
         driver.switch_to.window(found)
         time.sleep(1)    
+
+def presearchLogin(driver):
+    driver.execute_script("window.open('https://presearch.com/');")
+    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+
+def searchUsingPresearch(driver):
+    locatePresearchWindow(driver)
     search_prefix = "https://presearch.com/search?q="
     search_term = None
     while search_term is None:
@@ -45,9 +47,8 @@ def searchUsingPresearch(driver):
     time.sleep(1)
 
 def claimPresearchRewards(driver):
-    driver.execute_script("window.open('https://nodes.presearch.org/dashboard');")
-    # switch to last window
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    locatePresearchWindow(driver)
+    driver.get("https://nodes.presearch.org/dashboard")   
     try:
         availToStake = float(driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
     except NoSuchElementException:
@@ -122,7 +123,7 @@ if __name__ == '__main__':
     directory = setDirectory()
     driver = openWebDriver("Chrome")
     driver.implicitly_wait(5)
-    presearchLogin(driver)
+    locatePresearchWindow(driver)
     searchUsingPresearch(driver)
     response = presearchRewardsRedemptionAndBalanceUpdates(driver)
     print('balance: ' + str(response[0]))

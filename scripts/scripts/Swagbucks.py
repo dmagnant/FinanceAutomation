@@ -19,7 +19,6 @@ else:
     from .Functions.GeneralFunctions import showMessage
     from .Functions.WebDriverFunctions import findWindowByUrl
     
-
 def locateSwagBucksWindow(driver):
     found = findWindowByUrl(driver, "swagbucks.com")
     if not found:

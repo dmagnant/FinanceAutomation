@@ -20,6 +20,13 @@ else:
     from .Functions.TransactionFunctions import modifyTransactionDescription
     from .Functions.WebDriverFunctions import findWindowByUrl
 
+def locateSofiWindow(driver):
+    found = findWindowByUrl(driver, "sofi.com")
+    if not found:
+        sofiLogin(driver)
+    else:
+        driver.switch_to.window(found)
+        time.sleep(1) 
 
 def sofiLogin(driver):
     directory = setDirectory()
@@ -48,12 +55,7 @@ def sofiLogin(driver):
         exception = "logged in"
 
 def getSofiBalanceAndOrientPage(driver, account):
-    found = findWindowByUrl(driver, "sofi.com")
-    if not found:
-        sofiLogin(driver)
-    else:
-        driver.switch_to.window(found)
-        time.sleep(1) 
+    locateSofiWindow(driver)
     driver.get("https://www.sofi.com/my/money/account/#/1000028154579/account-detail") if account == 'Checking' else driver.get("https://www.sofi.com/my/money/account/1000028154560/account-detail")
     time.sleep(2)
     table = 1
@@ -109,8 +111,8 @@ def getTransactionsFromSofiWebsite(driver, dateRange, sofiActivity, today, table
 def runSofiAccount(driver, dateRange, today, account):
     directory = setDirectory()
     balanceAndPageOrientation = getSofiBalanceAndOrientPage(driver, account)
-    sofiActivity = directory + r"\Projects\Coding\Python\BankingAutomation\Resources\sofi.csv"
-    gnuSofiActivity = directory + r"\Projects\Coding\Python\BankingAutomation\Resources\gnu_sofi.csv"
+    sofiActivity = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\sofi.csv"
+    gnuSofiActivity = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\gnu_sofi.csv"
     open(sofiActivity, 'w', newline='').truncate()
     open(gnuSofiActivity, 'w', newline='').truncate()
     getTransactionsFromSofiWebsite(driver, dateRange, sofiActivity, today, balanceAndPageOrientation[1], balanceAndPageOrientation[2])
@@ -119,7 +121,7 @@ def runSofiAccount(driver, dateRange, today, account):
     return [balanceAndPageOrientation[0], reviewTrans]
 
 def runSofi(driver):
-    sofiLogin(driver)
+    locateSofiWindow(driver)
     today = datetime.today()
     dateRange = getStartAndEndOfDateRange(today, today.month, today.year, 5)
     checking = runSofiAccount(driver, dateRange, today, "Checking")

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Update Goals{% endblock %}
+
+{% block content %}
+    <h1>Update Goals</h1>
+    <label for="accounts">Accounts </label>
+    <form method="post" id="Account">
+        <input type="radio" id="Personal" name="accounts" value="Personal" required>
+        <label for="Personal">Personal</label><br>
+        <input type="radio" id="Joint" name="accounts" value="Joint">
+        <label for="Joint">Joint</label><br>
+    <label for="Timeframe">Timeframe </label><br>
+        <input type="radio" id="Month" name="TimeFrame" value="Month" required>
+        <label for="Month">Month</label><br>
+        <input type="radio" id="YTD" name="TimeFrame" value="YTD">
+        <label for="YTD">YTD</label><br>        
+        {% csrf_token %}
+        <button type="submit" name="main">Main</button>
+    </form>
+{% endblock %}

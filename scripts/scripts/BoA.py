@@ -21,19 +21,15 @@ else:
 def locateBoAWindowAndOpenAccount(driver, account):
     found = findWindowByUrl(driver, "secure.bankofamerica.com")
     if not found:
-        boALogin(driver)
+        boALogin(driver, account)
     else:
         driver.switch_to.window(found)
         time.sleep(1)
-    driver.get("https://secure.bankofamerica.com/myaccounts/brain/redirect.go?target=accountsoverview&request_locale=en-us&source=adc&fsd=y")
-    partialLink = 'Customized Cash Rewards Visa Signature - 8549' if account == 'p' else 'Travel Rewards Visa Signature - 8955'
-    driver.find_element(By.PARTIAL_LINK_TEXT, partialLink).click()
-    time.sleep(1)
-
+        
 def boALogin(driver, account):
     directory = setDirectory()
-    # account = p for personal or j for joint
-    driver.get("https://www.bankofamerica.com/")
+    driver.execute_script("window.open('https://www.bankofamerica.com/');")
+    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])   
     # login
     driver.find_element(By.ID, "onlineId1").send_keys(getUsername(directory, 'BoA CC'))
     driver.find_element(By.ID, "passcode1").send_keys(getPassword(directory, 'BoA CC'))
@@ -74,7 +70,7 @@ def boALogin(driver, account):
         driver.find_element(By.XPATH, "//*[@id='sasi-overlay-module-modalClose']/span[1]").click()
     except NoSuchElementException:
         exception = "Caught"
-    partialLink = 'Customized Cash Rewards Visa Signature - 8549' if account == 'p' else 'Travel Rewards Visa Signature - 8955'
+    partialLink = 'Customized Cash Rewards Visa Signature - 8549' if account == "Personal" else 'Travel Rewards Visa Signature - 8955'
     driver.find_element(By.PARTIAL_LINK_TEXT, partialLink).click()
     time.sleep(3)
 
@@ -86,30 +82,22 @@ def exportBoATransactions(driver, account, today):
     # click Previous transactions
     driver.find_element(By.PARTIAL_LINK_TEXT, "Previous transactions").click()
     # click Download, select microsoft excel
-    ## had to edit div1/div2 on 1/19/22
-    try: 
-        driver.find_element(By.XPATH, "/html/body/div[1]/div/div[4]/div[1]/div/div[5]/div[2]/div[1]/div/div[1]/a").click()
-        driver.find_element(By.XPATH, "/html/body/div[1]/div/div[4]/div[1]/div/div[5]/div[2]/div[1]/div/div[3]/div/div[3]/div[1]/select").send_keys("m")
-    except NoSuchElementException:
-        driver.find_element(By.XPATH, "/html/body/div[1]/div/div[4]/div[1]/div/div[5]/div[2]/div[2]/div/div[1]/a").click()
-        driver.find_element(By.XPATH, "/html/body/div[1]/div/div[4]/div[1]/div/div[5]/div[2]/div[2]/div/div[3]/div/div[3]/div[1]/select").send_keys("m")
+    driver.find_element(By.XPATH, "/html/body/div[1]/div/div[4]/div[1]/div/div[5]/div[2]/div[2]/div/div[1]/a").click()
+    driver.find_element(By.XPATH, "/html/body/div[1]/div/div[4]/div[1]/div/div[5]/div[2]/div[2]/div/div[3]/div/div[3]/div[1]/select").send_keys("m")
     driver.execute_script("window.scrollTo(0, 300)")
     # click Download Transactions
-    try: 
-        driver.find_element(By.XPATH, "/html/body/div[1]/div/div[4]/div[1]/div/div[5]/div[2]/div[1]/div/div[3]/div/div[4]/div[2]/a/span").click()
-    except NoSuchElementException:
-        driver.find_element(By.XPATH, "/html/body/div[1]/div/div[4]/div[1]/div/div[5]/div[2]/div[2]/div/div[3]/div/div[4]/div[2]/a/span").click()
+    driver.find_element(By.XPATH, "/html/body/div[1]/div/div[4]/div[1]/div/div[5]/div[2]/div[2]/div/div[3]/div/div[4]/div[2]/a/span").click()
+
     year = today.year
     stmtMonth = today.strftime("%B")
     stmtYear = str(year)
-    accountNum = "_8549.csv" if account == 'p' else "_8955.csv"
+    accountNum = "_8549.csv" if account == "Personal" else "_8955.csv"
     return os.path.join(r"C:\Users\dmagn\Downloads", stmtMonth + stmtYear + accountNum)
-    # time.sleep(2)
-
 
 def claimBoARewards(driver, account):
-    locateBoAWindowAndOpenAccount(driver, account)  
-    if account == 'p':
+    locateBoAWindowAndOpenAccount(driver, account)
+    driver.implicitly_wait(10)
+    if account == "Personal":
         # # REDEEM REWARDS
         # click on View/Redeem menu
         driver.find_element(By.XPATH, "/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[3]/a").click()
@@ -186,7 +174,7 @@ def locateAndUpdateSpreadsheetForBoA(driver, BoA, account, today):
     if month == 12:
         year = year + 1
 
-    if account == 'p':
+    if account == "Personal":
         updateSpreadsheet(directory, 'Checking Balance', year, 'BoA', month, BoA, 'BoA CC')
         updateSpreadsheet(directory, 'Checking Balance', year, 'BoA', month, BoA, 'BoA CC', True)
         driver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1684fQ-gW5A0uOf7s45p9tC4GiEE5s5_fjO5E7dgVI1s/edit#gid=1688093622');")
@@ -198,25 +186,24 @@ def locateAndUpdateSpreadsheetForBoA(driver, BoA, account, today):
 
 def runBoA(driver, account):
     directory = setDirectory()
-    # account = p for personal or j for joint
     locateBoAWindowAndOpenAccount(driver, account)
-    BoA = getBoABalance(driver)
+    BoA = getBoABalance(driver, account)
     today = datetime.today()
     transactionsCSV = exportBoATransactions(driver, account, today)
     claimBoARewards(driver, account)
-    myBook = openGnuCashBook('Finance', False, False) if account == 'p' else openGnuCashBook('Home', False, False)
-    importAccount = 'BoA' if account == 'p' else 'BoA-joint'
+    myBook = openGnuCashBook('Finance', False, False) if account == "Personal" else openGnuCashBook('Home', False, False)
+    importAccount = 'BoA' if account == "Personal" else 'BoA-joint'
     reviewTrans = importGnuTransaction(importAccount, transactionsCSV, myBook, driver, directory)
     BoAGnu = getGnuCashBalance(myBook, importAccount)
     locateAndUpdateSpreadsheetForBoA(driver, BoA, account, today)
     if reviewTrans:
-        os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash") if account == 'p' else os.startfile(directory + r"\Stuff\Home\Finances\Home.gnucash")
+        os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash") if account == "Personal" else os.startfile(directory + r"\Stuff\Home\Finances\Home.gnucash")
     showMessage("Balances + Review", f'BoA Balance: {BoA} \n' f'GnuCash BoA Balance: {BoAGnu} \n \n' f'Review transactions:\n{reviewTrans}')
     driver.quit()
     # startExpressVPN()
 
 if __name__ == '__main__':
-    SET_ACCOUNT_VARIABLE = 'p'
+    SET_ACCOUNT_VARIABLE = "Personal" # Personal or Joint
     driver = openWebDriver("Chrome")
     driver.implicitly_wait(5)
     runBoA(driver, SET_ACCOUNT_VARIABLE)

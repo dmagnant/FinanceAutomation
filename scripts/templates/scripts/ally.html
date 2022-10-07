@@ -6,14 +6,8 @@
     <h1>Ally</h1>
     <form method="post">
         {% csrf_token %}
-        <button type="submit" name="main">Main</button>
-    </form>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="login">Login</button>
-    </form>
-    <form method="post">
-        {% csrf_token %}
+        <button type="submit" name="main">Main</button><br>
+        <button type="submit" name="login">Login</button><br>
         <button type="submit" name="balance">Balance</button>
     </form>
 {% endblock %}

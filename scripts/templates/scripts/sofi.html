@@ -6,18 +6,9 @@
     <h1>Sofi</h1>
     <form method="post">
         {% csrf_token %}
-        <button type="submit" name="main">Main</button>
-    </form>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="login">Login</button>
-    </form>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="checkingBalance">Checking Balance</button>
-    </form>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="savingsBalance">Savings Balance</button>
+        <button type="submit" name="main">Main</button><br>
+        <button type="submit" name="login">Login</button><br>
+        <button type="submit" name="checkingBalance">Checking Balance</button><br>
+        <button type="submit" name="savingsBalance">Savings Balance</button><br>
     </form>
 {% endblock %}

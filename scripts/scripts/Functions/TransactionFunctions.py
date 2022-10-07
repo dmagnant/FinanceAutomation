@@ -19,14 +19,14 @@ def modifyTransactionDescription(description, amount="0.00"):
         description = "Jonny payment"
     elif "SAVINGS - 3467" in description.upper():
         description = "Savings Transfer"
+    elif "ALLY BANK TRANSFER" in description.upper():
+        description = "Dan Deposit"
     elif "ALLY BANK" in description.upper():
         description = "Ally Transfer"
     elif "M1 FINANCE" in description.upper():
         description = "IRA Transfer"
     elif "CITY OF MILWAUKE B2P*MILWWA" in description.upper():
         description = "Water Bill"
-    elif "REQUESTED TRANSFER FROM DAN S MAGNANT" in description.upper():
-        description = "Dan Deposit"
     elif "DOVENMUEHLE MTG MORTG PYMT" in description.upper():
         description = "Mortgage Payment"
     elif "NORTHWESTERN MUT" in description.upper():
@@ -45,14 +45,14 @@ def modifyTransactionDescription(description, amount="0.00"):
         description = "Amex CC"
     elif "COINBASE" in description.upper():
         description = "Crypto purchase"
-    elif "CHASE CREDIT CRD RWRD" in description.upper():
+    elif "CHASE CREDIT CRD" in description.upper() and float(amount) > 0:
         description = "Chase CC Rewards"
-    elif "CHASE CREDIT CRD" in description.upper():
+    elif "CHASE CREDIT CRD" in description.upper() and float(amount) < 0:
         description = "Chase CC"
-    elif "DISCOVER E-PAYMENT" in description.upper():
-        description = "Discover CC"
     elif "DISCOVER CASH AWARD" in description.upper():
-        description = "Discover CC Rewards"
+        description = "Discover CC Rewards"        
+    elif "DISCOVER" in description.upper():
+        description = "Discover CC"
     elif "BARCLAYCARD US" in description.upper():
         description = "Barclays CC"
     elif "BARCLAYCARD US ACH REWARD" in description.upper():
@@ -125,7 +125,7 @@ def setToAccount(account, row):
     elif "Barclays CC" in row[rowNum]:
         toAccount = "Liabilities:Credit Cards:BarclayCard CashForward"
     elif "Ally Transfer" in row[rowNum]:
-        toAccount = "Expenses:Joint Expenses"
+        toAccount = "Expenses:Joint Expenses"    
     elif "BP#" in row[rowNum]:
         toAccount = "Expenses:Transportation:Gas (Vehicle)"
     elif "CAT DOCTOR" in row[rowNum]:

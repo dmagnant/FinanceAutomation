@@ -47,7 +47,7 @@ def claimPineConeRewards(driver):
     driver.find_element(By.XPATH, "/html/body/div[2]/div/div/div[3]/div/div[3]/div/table/tbody/tr[5]/td/form/button").click()
 
 def runPinecone(driver):
-    pineConeLogin(driver)
+    locatePineconeWindow(driver)
     balance = getPineConeBalance(driver)
     if float(balance) >= 300:
         claimPineConeRewards(driver)

@@ -3,3 +3,15 @@ body {
     color: cornflowerblue;
     background-color: black;
 }
+
+a, a:visited {
+    color:lightskyblue
+}
+
+a:hover {
+    color:white
+}
+
+a:active {
+    color:red
+}

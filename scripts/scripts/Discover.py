@@ -42,7 +42,6 @@ def discoverLogin(driver):
         driver.find_element(By.XPATH, "//*[@id='root']/div[4]/div/div/button/img").click()
     except (NoSuchElementException, ElementNotInteractableException, AttributeError):
         exception = "caught"
-    showMessage("Login Check", 'Confirm Login to , (manually if necessary) \n' 'Then click OK \n')
 
 
 def getDiscoverBalance(driver):

@@ -6,7 +6,7 @@ from .GnuCashFunctions import updateCryptoPriceInGnucash
 
 
 def updateSpreadsheet(directory, sheetTitle, tabTitle, account, month, value, symbol="$", modified=False):
-    jsonCreds = directory + r"\Projects\Coding\Python\BankingAutomation\Resources\creds.json"
+    jsonCreds = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
     sheet = gspread.service_account(filename=jsonCreds).open(sheetTitle)
     worksheet = sheet.worksheet(str(tabTitle))
     cell = getCell(account, month)
@@ -98,7 +98,7 @@ def getSheetKey(sheetTitle, tabTitle, worksheet, cellToUpdate):
 def updateCryptoPrices():
     print('updating coin prices')
     directory = setDirectory()
-    jsonCreds = directory + r"\Projects\Coding\Python\BankingAutomation\Resources\creds.json"
+    jsonCreds = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
     sheet = gspread.service_account(filename=jsonCreds).open('Asset Allocation')
     worksheet = sheet.worksheet(str('Cryptocurrency'))
     nameColumn = 'A'

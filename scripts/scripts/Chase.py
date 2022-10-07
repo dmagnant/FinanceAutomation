@@ -1,9 +1,10 @@
 import os
 import time
 from datetime import datetime
+import pyautogui
 
 from selenium.common.exceptions import (ElementClickInterceptedException,
-                                        NoSuchElementException)
+                                        NoSuchElementException, ElementNotInteractableException)
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Chase":
@@ -26,14 +27,17 @@ def locateChaseWindow(driver):
         time.sleep(1)     
 
 def chaseLogin(driver):
-    driver.execute_script("window.open('https://www.chase.com/');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])    
-    time.sleep(2)
-    # login
-    showMessage("Login Manually", 'login manually \n' 'Then click OK \n')
-    driver.get("https://secure07a.chase.com/web/auth/dashboard#/dashboard/overviewAccounts/overview/multiProduct;flyout=accountSummary,818208017,CARD,BAC")
-    # time.sleep(2)
+    driver.implicitly_wait(5)
+    driver.execute_script("window.open('https://secure07a.chase.com/web/auth/dashboard#/dashboard/overviewAccounts/overview/index');")
+    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    time.sleep(15)
+    pyautogui.press('tab')
+    pyautogui.press('tab')
+    pyautogui.press('tab')
+    pyautogui.press('tab')
+    pyautogui.press('enter')
 
+    
 def getChaseBalance(driver):
     locateChaseWindow(driver)    
     return driver.find_element(By.ID, "accountCurrentBalanceLinkWithReconFlyoutValue").text.strip('$')
@@ -62,22 +66,23 @@ def exportChaseTransactions(driver, today):
     currentDate = yearTo + monthTo + day
     return r'C:\Users\dmagn\Downloads\Chase2715_Activity' + fromDate + toDate + currentDate + '.csv'
 
-
 def claimChaseRewards(driver):
     locateChaseWindow(driver)
+    time.sleep(1)
     driver.get("https://ultimaterewardspoints.chase.com/cash-back?lang=en")
-    try:
+    # points balance
+    balance = driver.find_element(By.XPATH,"//*[@id='pointsBalanceId']/div/span[1]").text
+    if float(balance) > 0:
         # Deposit into a Bank Account
-        driver.find_element(By.XPATH, "/html/body/the-app/main/ng-component/main/div/section[2]/div[2]/form/div[6]/ul/li[2]/label").click()
-        # Click Continue
-        driver.find_element(By.XPATH, "/html/body/the-app/main/ng-component/main/div/section[2]/div[2]/form/div[7]/button").click()
-        # Click Confirm & Submit
-        driver.find_element(By.ID, "cash_back_button_submit").click()
-    except NoSuchElementException:
-        exception = "caught"
-    except ElementClickInterceptedException:
-        exception = "caught"
-
+        driver.find_element(By.XPATH, "//*[@id='cashBackStart']/section[1]/div[2]/form/div[5]/div[1]/div[2]/selectable-tile/div/mds-fieldset/div/mds-selectable-tile/div/div/span").click()
+        pyautogui.press('tab')
+        pyautogui.press('enter')
+        time.sleep(2)
+        driver.find_element(By.ID, "main").click()
+        pyautogui.press('tab')
+        pyautogui.press('tab')
+        pyautogui.press('enter')                
+        
 def locateAndUpdateSpreadsheetForChase(driver, chase, today):
     directory = setDirectory()
     # switch worksheets if running in December (to next year's worksheet)

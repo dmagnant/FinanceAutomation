@@ -5,19 +5,18 @@
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet"
-          href="{% static 'website/style.css' %}">
+    href="{% static 'website/style.css' %}">
     <link rel="shortcut icon" href="{%  static 'favicon.ico' %}">
 </head>
 <body>
     {% block content %}
     {% endblock %}
-
+    
     <a href="{% url 'welcome' %}">Home</a>
     {% comment %} <a href="{% url 'usd' %}">USD</a>
     <a href="{% url 'marketresearch' %}">Market Research</a>
     <a href="{% url 'crypto' %}">Crypto</a> {% endcomment %}
     {% comment %} <a href="{% url 'accounts' %}">Accounts</a> {% endcomment %}
     <a href="{% url 'scripts' %}">Scripts</a>
-
 </body>
 </html>

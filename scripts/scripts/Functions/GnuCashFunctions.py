@@ -133,7 +133,7 @@ def importGnuTransaction(account, transactionsCSV, myBook, driver, directory, li
     return reviewTrans
 
 def importUniqueTransactionsToGnuCash(account, transactionsCSV, gnuCSV, myBook, driver, directory, dateRange, lineStart=1):
-    importCSV = directory + r"\Projects\Coding\Python\BankingAutomation\Resources\import.csv"
+    importCSV = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\import.csv"
     open(importCSV, 'w', newline='').truncate()
     if account == 'Ally':
         gnuAccount = "Assets:Ally Checking Account"

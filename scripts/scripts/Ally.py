@@ -11,28 +11,36 @@ if __name__ == '__main__' or __name__ == "Ally":
                                             setDirectory, showMessage)
     from Functions.GnuCashFunctions import openGnuCashBook, importUniqueTransactionsToGnuCash
     from Functions.TransactionFunctions import modifyTransactionDescription
-    from Functions.WebDriverFunctions import openWebDriver
+    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
 else:
     from .Functions.GeneralFunctions import (closeExpressVPN, getPassword,
                                             getStartAndEndOfDateRange,
                                             setDirectory, showMessage)
     from .Functions.GnuCashFunctions import openGnuCashBook, importUniqueTransactionsToGnuCash
     from .Functions.TransactionFunctions import modifyTransactionDescription
-    from .Functions.WebDriverFunctions import openWebDriver
+    from .Functions.WebDriverFunctions import findWindowByUrl
+
+def locateAllyWindow(driver):
+    found = findWindowByUrl(driver, "secure.ally.com")
+    if not found:
+        allyLogin(driver)
+    else:
+        driver.switch_to.window(found)
+        time.sleep(1)
 
 def allyLogin(driver):
     directory = setDirectory()
     # closeExpressVPN()
-    driver.implicitly_wait(5)
-    driver.execute_script("window.open('https://secure.ally.com/');")
+    driver.implicitly_wait(10)
+    driver.execute_script("window.open('https://ally.com/');")
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
     time.sleep(1)
-    # login
-    # enter password # changed 1/21/22
-    driver.find_element(By.ID, "password").send_keys(getPassword(directory, 'Ally Bank'))
-    time.sleep(1)
-    # click Log In
-    driver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div/div[1]/form/div[3]/button/span").click()
+    # click Login
+    driver.find_element(By.ID,"login").click()
+    # enter Password (username already filled in)
+    driver.find_element(By.ID,"allysf-login-v2-password-367761b575af35f6ccb5b53e96b2fa2d").send_keys(getPassword(directory, 'Ally Bank'))
+    # click Login
+    driver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button").click()
     time.sleep(5)
     # check if error message is seen
     try:
@@ -43,7 +51,8 @@ def allyLogin(driver):
     return loggedIn
 
 def getAllyBalance(driver):
-    return driver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div[2]/div/div[2]/div/table/tbody/tr/td[3]/div").text.replace('$', '').replace(',', '')
+    locateAllyWindow(driver)
+    return driver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div[2]/div/div[1]/div[2]/div/table/tbody/tr/td[3]/div").text.replace('$', '').replace(',', '')
 
 def setAllyTransactionElementRoot(row, column):
     return "/html/body/div/div[1]/main/div/div/div/div[1]/section/div[2]/div/span/table/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/div/"
@@ -81,23 +90,19 @@ def captureAllyTransactions(driver, dateRange, allyActivity):
 
 def runAlly(driver):
     directory = setDirectory()
-    loggedIn = allyLogin(driver)
-    if loggedIn:
-        ally = getAllyBalance(driver)
-        allyActivity = directory + r"\Projects\Coding\Python\BankingAutomation\Resources\ally.csv"
-        open(allyActivity, 'w', newline='').truncate()
-        dateRange = getStartAndEndOfDateRange(datetime.today(), datetime.today().month, datetime.today().year, 8)
-        captureAllyTransactions(driver, dateRange, allyActivity)
-        myBook = openGnuCashBook('Home', False, False)
-        gnuAllyActivity = directory + r"\Projects\Coding\Python\BankingAutomation\Resources\gnu_ally.csv"
-        open(gnuAllyActivity, 'w', newline='').truncate()
-        # Compare against existing transactions in GnuCash and import new ones
-        reviewTrans = importUniqueTransactionsToGnuCash('Ally', allyActivity, gnuAllyActivity, myBook, driver, directory, dateRange, 0)
-    else:
-        ally = 0.00
-        reviewTrans = ''
+    locateAllyWindow(driver)
+    ally = getAllyBalance(driver)
+    allyActivity = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\ally.csv"
+    open(allyActivity, 'w', newline='').truncate()
+    dateRange = getStartAndEndOfDateRange(datetime.today(), datetime.today().month, datetime.today().year, 8)
+    captureAllyTransactions(driver, dateRange, allyActivity)
+    myBook = openGnuCashBook('Home', False, False)
+    gnuAllyActivity = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\gnu_ally.csv"
+    open(gnuAllyActivity, 'w', newline='').truncate()
+    # Compare against existing transactions in GnuCash and import new ones
+    reviewTrans = importUniqueTransactionsToGnuCash('Ally', allyActivity, gnuAllyActivity, myBook, driver, directory, dateRange, 0)
     return [ally, reviewTrans]
-
+    
 if __name__ == '__main__':
     driver = openWebDriver("Chrome")
     driver.implicitly_wait(5)

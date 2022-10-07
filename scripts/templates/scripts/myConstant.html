@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}MyConstant{% endblock %}
+
+{% block content %}
+    <h1>MyConstant</h1>
+    <label for="type">Currency Type </label>
+    <form method="post" id="type">
+        <input type="radio" id="USD" name="type" value="USD" required>
+        <label for="html">USD</label><br>
+        <input type="radio" id="Crypto" name="type" value="Crypto">
+        <label for="css">Crypto</label><br>
+        {% csrf_token %}
+        <button type="submit" name="main">Main</button>
+        <button type="submit" name="balance">Balance</button>
+    </form>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="login">Login</button>
+    </form>
+{% endblock %}

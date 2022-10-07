@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Monthly Banking{% endblock %}
+
+{% block content %}
+    <h1>Monthly Banking</h1>
+    <label for="type">Currency Type </label>
+    <form method="post" id="type">
+        <input type="radio" id="USD" name="type" value="USD" required>
+        <label for="html">USD</label><br>
+        <input type="radio" id="Crypto" name="type" value="Crypto">
+        <label for="css">Crypto</label><br>
+        <input type="radio" id="Both" name="type" value="Both">
+        <label for="css">Both</label><br>
+        {% csrf_token %}
+        <button type="submit" name="main">Main</button>
+    </form>
+    <a href="http://127.0.0.1:8000/scripts/eternl">Eternl</a><br>
+    <a href="http://127.0.0.1:8000/scripts/exodus">Exodus</a><br>
+    <a href="http://127.0.0.1:8000/scripts/healthEquity">Health Equity</a><br>
+    <a href="http://127.0.0.1:8000/scripts/ioPay">IoPay</a><br>
+    <a href="http://127.0.0.1:8000/scripts/kraken">Kraken</a><br>
+    <a href="http://127.0.0.1:8000/scripts/midas">Midas</a><br>
+    <a href="http://127.0.0.1:8000/scripts/myConstant">MyConstant</a><br>
+    <a href="http://127.0.0.1:8000/scripts/presearch">Presearch</a><br>
+    <a href="http://127.0.0.1:8000/scripts/worthy">Worthy</a><br>
+{% endblock %}

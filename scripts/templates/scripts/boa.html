@@ -5,31 +5,16 @@
 {% block content %}
     <h1>Bank of America</h1>
     <form method="post">
+        <label for="account">Account </label><br>
+        <form method="post" id="account">
+            <input type="radio" id="Personal" name="account" value="Personal" required>
+            <label for="Personal">Personal</label><br>
+            <input type="radio" id="Joint" name="account" value="Joint">
+            <label for="Joint">Joint</label><br>
         {% csrf_token %}
-        <button type="submit" name="main_P">Main Personal</button>
-    </form>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="main_J">Main Joint</button>
-    </form>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="login">Login</button>
-    </form>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="balance_P">Balance Personal</button>
-    </form>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="balance_J">Balance Joint</button>
-    </form>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="rewards_P">Rewards Personal</button>
-    </form>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="rewards_J">Rewrds Joint</button>
+        <button type="submit" name="main">Main</button><br>
+        <button type="submit" name="login">Login</button><br>
+        <button type="submit" name="balance">Balance</button><br>
+        <button type="submit" name="rewards">Rewards</button><br>
     </form>
 {% endblock %}
