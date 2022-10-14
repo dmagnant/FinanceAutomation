@@ -1,0 +1,94 @@
+import time
+from datetime import datetime
+from decimal import Decimal
+
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+
+if __name__ == '__main__' or __name__ == "HealthEquity":
+    from Functions.GeneralFunctions import showMessage, getStartAndEndOfDateRange
+    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
+else:
+    from .Functions.GeneralFunctions import showMessage, getStartAndEndOfDateRange
+    from .Functions.WebDriverFunctions import findWindowByUrl
+    
+def locateHealthEquityWindow(driver):
+    found = findWindowByUrl(driver, "member.my.healthequity.com")
+    if not found:
+        healthEquitylogin(driver)
+    else:
+        driver.switch_to.window(found)
+        time.sleep(1)
+
+def healthEquitylogin(driver):
+    driver.execute_script("window.open('https://member.my.healthequity.com/hsa/21895515-010');")
+    # switch to last window
+    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    # Login
+    # click Login
+    try:
+        driver.find_element(By.ID, "ctl00_modulePageContent_btnLogin").click()
+        # Two-Step Authentication
+        try:
+            # send code to phone
+            driver.find_element(By.XPATH, "//*[@id='sendEmailTextVoicePanel']/div[5]/span[1]/span/label/span/strong").click()
+            # Send confirmation code
+            driver.find_element(By.ID, "sendOtp").click()
+            # enter text code
+            showMessage("Confirmation Code", "Enter code then click OK")
+            # Remember me
+            driver.find_element(By.XPATH, "//*[@id='VerifyOtpPanel']/div[4]/div[1]/div/label/span").click()
+            # click Confirm
+            driver.find_element(By.ID, "verifyOtp").click()
+        except NoSuchElementException:
+            exception = "already verified"
+    except NoSuchElementException:
+        exception = "already logged in"
+    time.sleep(1)
+
+def getHealthEquityBalances(driver, lastmonth):
+    locateHealthEquityWindow(driver)
+    HE_hsa_avail_bal = driver.find_element(By.XPATH, "//*[@id='21895515-020']/div/hqy-hsa-tab/div/div[2]/div/span[1]").text.strip('$').replace(',','')
+    HE_hsa_invest_bal = driver.find_element(By.XPATH, "//*[@id='21895515-020']/div/hqy-hsa-tab/div/div[2]/span[2]/span[1]").text.strip('$').replace(',','')
+    HE_hsa_balance = float(HE_hsa_avail_bal) + float(HE_hsa_invest_bal)
+    vanguard401k = driver.find_element(By.XPATH, "//*[@id='retirementAccounts']/li/a/div/ul/li/span[2]").text.strip('$').replace(',','')
+    vanguard401kbal = float(vanguard401k)
+    # click Manage HSA Investments
+    driver.find_element(By.XPATH, "//*[@id='hsaInvestment']/div/div/a").click()
+    time.sleep(1)
+    # click Portfolio performance
+    driver.find_element(By.ID, "EditPortfolioTab").click()
+    time.sleep(4)
+    # enter Start Date and End Date
+    num = 0
+    while num < 10:
+        driver.find_element(By.ID, "startDate").click()
+        driver.find_element(By.ID, "startDate").send_keys(Keys.BACKSPACE)
+        driver.find_element(By.ID, "endDate").click()
+        driver.find_element(By.ID, "endDate").send_keys(Keys.BACKSPACE)  
+        num += 1
+    driver.find_element(By.ID, "startDate").send_keys(datetime.strftime(lastmonth[0], '%m/%d/%Y'))
+    driver.find_element(By.ID, "endDate").send_keys(datetime.strftime(lastmonth[1], '%m/%d/%Y'))
+    # click Refresh
+    driver.find_element(By.ID, "fundPerformanceRefresh").click()
+    time.sleep(1)
+    # Capture Dividends
+    HE_hsa_dividends = Decimal(driver.find_element(By.XPATH, "//*[@id='EditPortfolioTab-panel']/member-portfolio-edit-display/member-overall-portfolio-performance-display/div[1]/div/div[3]/div/span").text.strip('$').strip(','))
+    return [HE_hsa_balance, HE_hsa_dividends, vanguard401kbal]
+
+def runHealthEquity(driver, lastMonth):
+    locateHealthEquityWindow(driver)
+    return getHealthEquityBalances(driver, lastMonth)
+
+if __name__ == '__main__':
+    driver = openWebDriver("Chrome")
+    driver.implicitly_wait(3)
+    today = datetime.today()
+    year = today.year
+    month = today.month
+    lastMonth = getStartAndEndOfDateRange(today, month, year, "month")
+    response = runHealthEquity(driver, lastMonth)
+    print('HSA balance: ' + str(response[0]))
+    print('401k balance: ' + str(response[2]))
+    
