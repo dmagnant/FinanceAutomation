@@ -43,6 +43,8 @@ def modifyTransactionDescription(description, amount="0.00"):
         description = "Alliant Transfer"        
     elif "AMEX EPAYMENT" in description.upper():
         description = "Amex CC"
+    elif "SPECTRUM" in description.upper():
+        description = "Internet Bill"
     elif "COINBASE" in description.upper():
         description = "Crypto purchase"
     elif "CHASE CREDIT CRD" in description.upper() and float(amount) > 0:
@@ -104,6 +106,8 @@ def setToAccount(account, row):
         toAccount = "Assets:Non-Liquid Assets:CryptoCurrency"
     elif "Pinecone Research" in row[rowNum]:
         toAccount = "Income:Market Research"
+    elif "Internet Bill" in row[rowNum]:
+        toAccount = "Expenses:Utilities:Internet"
     elif "IRA Transfer" in row[rowNum]:
         toAccount = "Assets:Non-Liquid Assets:Roth IRA"
     elif "Lending Club" in row[rowNum]:
@@ -253,10 +257,8 @@ def formatTransactionVariables(account, row):
 def getEnergyBillAmounts(driver, directory, amount, energyBillNum):
     if energyBillNum == 1:
         closeExpressVPN()
-        # Get balances from Arcadia
         driver.execute_script("window.open('https://login.arcadia.com/email');")
         driver.implicitly_wait(5)
-        # switch to last window
         driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
         # get around bot-prevention by logging in twice
         num = 1
@@ -287,14 +289,13 @@ def getEnergyBillAmounts(driver, directory, amount, energyBillNum):
         if num == 3:
             showMessage("Login Check", 'Confirm Login to Arcadia, (manually if necessary) \n' 'Then click OK \n')
     else:
-        # switch to last window
         driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
         driver.get("https://home.arcadia.com/dashboard/2072648/billing")
     statementRow = 1
     statementFound = "no"                     
     while statementFound == "no":
         # Capture statement balance
-        arcadiaBalance = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div[2]/div[2]/div/div[2]/li[" + str(statementRow) + "]/div[2]/div/p")
+        arcadiaBalance = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div[2]/div[2]/div/div[2]/li[" + str(statementRow) + "]/div[2]/div[2]/div[1]/div/p")
         formattedAmount = "{:.2f}".format(abs(amount))
         if arcadiaBalance.text.strip('$') == formattedAmount:
             # click to view statement

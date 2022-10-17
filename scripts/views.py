@@ -293,6 +293,9 @@ def myConstant(request):
     return render(request,"scripts/myconstant.html")
 
 def paypal(request):
+    if request.method == 'POST':
+        driver = openWebDriver("Chrome")
+        driver.implicitly_wait(5)
     if "main" in request.POST:
         runPaypal(driver)
     elif "login" in request.POST:

@@ -55,12 +55,11 @@ def runDailyBank():
         f'Review transactions (Sofi Checking):\n {sofi[0][1]} \n'
         f'Review transactions (Sofi Savings):\n {sofi[1][1]} \n'
         f'Review transactions (Ally):\n {ally[1]}')
-
     sofiLogout(driver)
     allyLogout(driver)
     while len(driver.window_handles) > 1:
         driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
         driver.close()
-        
+
 if __name__ == '__main__':
     runDailyBank()

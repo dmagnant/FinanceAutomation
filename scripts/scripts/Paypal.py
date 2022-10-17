@@ -37,7 +37,7 @@ def payPalLogin(driver):
             driver.find_element(By.XPATH,"//*[@id='recaptcha-anchor']/div[1]").click()
             time.sleep(3)
             print('clicked')
-        except NoSuchElementException:
+        except (NoSuchElementException, AttributeError):
             exception = "no captcha presented"
     except NoSuchElementException:
         exception = "already logged in"
