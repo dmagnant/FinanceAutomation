@@ -19,7 +19,7 @@ def pineConeLogin(driver):
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
     # click login
     driver.find_element(By.XPATH, "//*[@id='mainContainer']/div/div/div[1]/div/form/button").click()
-    time.sleep(3)
+    time.sleep(6)
 
 def getPineConeBalance(driver):
     locatePineconeWindow(driver)    

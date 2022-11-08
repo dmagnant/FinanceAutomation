@@ -46,11 +46,11 @@ def runDailyBank():
         os.startfile(directory + r"\Stuff\Home\Finances\Home.gnucash")
     showMessage("Balances + Review", 
         f'Sofi Checking: {sofi[0][0]} \n'
-        f'GnuCash Balance: {sofiCheckingGnu} \n \n'
-        f'Sofi Savings: {sofi[1][0]} \n'
-        f'GnuCash Balance: {sofiSavingsGnu} \n \n'
-        f'Ally Balance: {ally[0]} \n'
-        f'GnuCash Balance: {allyGnu} \n \n'    
+        f'  Gnu Balance: {sofiCheckingGnu} \n \n'
+        f' Sofi Savings: {sofi[1][0]} \n'
+        f'  Gnu Balance: {sofiSavingsGnu} \n \n'
+        f'Ally Checking: {ally[0]} \n'
+        f'  Gnu Balance: {allyGnu} \n \n'
         f'Crypto Balance: {cryptoBalance} \n \n'
         f'Review transactions (Sofi Checking):\n {sofi[0][1]} \n'
         f'Review transactions (Sofi Savings):\n {sofi[1][1]} \n'

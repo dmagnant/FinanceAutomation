@@ -59,7 +59,7 @@ def completeTellWutSurveys(driver):
             for i in driver.find_elements(By.XPATH, "//input[@type='radio']"):
                 try:
                     i.click()
-                except ElementNotInteractableException:
+                except (ElementNotInteractableException, ElementClickInterceptedException):
                     exception = "caught"
             # click on all checkboxes
             for i in driver.find_elements(By.XPATH,"//input[@type='checkbox']"):

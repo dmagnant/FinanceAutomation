@@ -60,7 +60,7 @@ def getCoinBalance(driver, coin):
         # select coin
         driver.find_element(By.XPATH, "//*[@id='layout']/div[2]/div/div/div/div[2]/div[2]/form/div[1]/div[2]/div/div/div/a/div/div[1]").click()
         time.sleep(6)
-        return driver.find_element(By.XPATH, "//*[@id='layout']/div[2]/div/div/div/div[2]/div[2]/form/div[2]/div[2]/span/span/span").text
+        return float(driver.find_element(By.XPATH, "//*[@id='layout']/div[2]/div/div/div/div[2]/div[2]/form/div[2]/div[2]/span/span/span").text)
 
 def getMyConstantBalances(driver, type):
     locateMyConstantWindow(driver)

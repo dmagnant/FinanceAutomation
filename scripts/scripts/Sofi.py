@@ -30,10 +30,10 @@ def locateSofiWindow(driver):
 
 def sofiLogin(driver):
     directory = setDirectory()
-    driver.execute_script("window.open('https://www.sofi.com');")
+    driver.execute_script("window.open('https://login.sofi.com/u/login?state=hKFo2SBrOGMtTVZSUHZPalVPbEUyZmJyWXhyV3pYMU9lSzhEUKFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIGptNWpvQnRQQlFtSHFJT216N0dfLU1aZFBUbWFqVXl6o2NpZNkgNkxuc0xDc2ZGRUVMbDlTQzBDaWNPdkdlb2JvZXFab2I');")
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
     # click Login
-    driver.find_element(By.XPATH, "//*[@id='login-cta-container']/a").click()
+    driver.find_element(By.XPATH, "//*[@id='widget_block']/main/section/div/div/div/form/div[2]/button").click()
     try:
         # click LOG IN
         driver.find_element(By.XPATH, "//*[@id='widget_block']/main/section/div/div/div/form/div[2]/button").click()
@@ -133,7 +133,7 @@ def runSofiAccount(driver, dateRange, today, account):
 def runSofi(driver):
     locateSofiWindow(driver)
     today = datetime.today()
-    dateRange = getStartAndEndOfDateRange(today, today.month, today.year, 5)
+    dateRange = getStartAndEndOfDateRange(today, today.month, today.year, 7)
     checking = runSofiAccount(driver, dateRange, today, "Checking")
     savings = runSofiAccount(driver, dateRange, today, "Savings")
     # switch back to checking page

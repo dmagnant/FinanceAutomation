@@ -101,7 +101,7 @@ def setToAccount(account, row):
     elif "GOOGLE FI" in row[rowNum].upper() or "GOOGLE *FI" in row[rowNum].upper():
         toAccount = "Expenses:Utilities:Phone"
     elif "Alliant Transfer" in row[rowNum]:
-        toAccount = "Assets:Liquid Assets:Promos:alliant"        
+        toAccount = "Assets:Liquid Assets:Promos:Alliant"        
     elif "CRYPTO PURCHASE" in row[rowNum].upper():
         toAccount = "Assets:Non-Liquid Assets:CryptoCurrency"
     elif "Pinecone Research" in row[rowNum]:

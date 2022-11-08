@@ -1,5 +1,5 @@
 import time
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Midas":
@@ -23,19 +23,19 @@ def locateMidasWindow(driver):
         time.sleep(1)
 
 def midasLogin(driver):
-    driver.execute_script("window.open('https://midas.investments/?login=true');")
+    driver.execute_script("window.open('https://app.midas.investments/?login=true&&');")
     # switch to last window
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
     try: 
         # click Google
-        driver.find_element(By.XPATH, "//*[@id='app-dialogs-root']/div[1]/div/div/button[1]").click()
+        driver.find_element(By.XPATH, "/html/body/div[1]/div[3]/div[1]/div[2]/div/div/button[1]").click()
         # time.sleep(3)
         driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
         token = getOTP('midas')
         driver.find_element(By.ID, "input").send_keys(token)
         time.sleep(3)
         driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-    except NoSuchElementException:
+    except (NoSuchElementException, StaleElementReferenceException):
         exception = "already logged in"
 
 def getMidasBalances(driver):

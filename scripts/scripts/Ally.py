@@ -52,9 +52,11 @@ def allyLogin(driver):
 
 def allyLogout(driver):
     locateAllyWindow(driver)
+    # Click Profile and Settings
+    driver.find_element(By.XPATH, "//*[@id='app']/div[1]/header/div[1]/div/nav/div/div[3]/div/button/p").click()
     # click Log out
-    driver.find_element(By.XPATH, "//*[@id='link-button-1a585a21-d9a2-4a35-a77d-ed84974f2324']/span").click()
-    
+    driver.find_element(By.XPATH, "//*[@id='profile-menu-logout']/span").click()
+
 def getAllyBalance(driver):
     locateAllyWindow(driver)
     return driver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div[2]/div/div[1]/div[2]/div/table/tbody/tr/td[3]/div").text.replace('$', '').replace(',', '')
@@ -99,7 +101,7 @@ def runAlly(driver):
     ally = getAllyBalance(driver)
     allyActivity = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\ally.csv"
     open(allyActivity, 'w', newline='').truncate()
-    dateRange = getStartAndEndOfDateRange(datetime.today(), datetime.today().month, datetime.today().year, 8)
+    dateRange = getStartAndEndOfDateRange(datetime.today(), datetime.today().month, datetime.today().year, 7)
     captureAllyTransactions(driver, dateRange, allyActivity)
     myBook = openGnuCashBook('Home', False, False)
     gnuAllyActivity = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\gnu_ally.csv"

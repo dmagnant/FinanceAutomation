@@ -106,7 +106,7 @@ def barclays(request):
 
 def bing(request):
     if request.method == 'POST':
-        driver = openWebDriver("Edge")
+        driver = openWebDriver("Edge", False)
         driver.implicitly_wait(5)
         if "main" in request.POST:
             runBing(driver)
@@ -270,7 +270,7 @@ def monthlyBank(request):
                 f'NM HSA: {usdbalances[4]} \n')
             elif currency == "Crypto":
                 cryptoBalance = runCrypto(driver, today)
-                print('Crypto Balance: ' + cryptoBalance)
+                print('Crypto Balance: ' + str(cryptoBalance))
             elif currency == "Both":
                 runMonthlyBank()
     return render(request,"scripts/monthlyBank.html")

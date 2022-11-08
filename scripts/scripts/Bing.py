@@ -105,9 +105,6 @@ def runBing(driver):
     if int(balance) >= 5250:
         claimBingRewards(driver)
 
-from selenium.webdriver.chrome.service import Service
-from selenium import webdriver
-
 if __name__ == '__main__':
     directory = setDirectory()
     driver = openWebDriver("Edge", False)
