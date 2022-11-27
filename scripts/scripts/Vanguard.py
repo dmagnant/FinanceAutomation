@@ -62,9 +62,9 @@ def getVanguardBalanceAndInterestYTD(driver):
     #scroll down
     pyautogui.scroll(-1000)
     # Get Total Account Balance
-    pensionBalance = driver.find_element(By.XPATH, "/html/body/div[3]/div/app-dashboard-root/app-assets-details/app-balance-details/div/div[3]/div[3]/div/app-details-card/div/div/div[1]/div[3]/h4").text.strip('$').replace(',', '')
+    pensionBalance = driver.find_element(By.XPATH, "/html/body/div[3]/div/app-personalized-dashboard-root/app-assets-details/app-balance-details/div/div[3]/div[3]/div/app-details-card/div/div/div[1]/div[3]/h4").text.strip('$').replace(',', '')                          
     # Get Interest YTD
-    interestYTD = driver.find_element(By.XPATH, "/html/body/div[3]/div/app-dashboard-root/app-assets-details/app-balance-details/div/div[3]/div[4]/div/app-details-card/div/div/div[1]/div[3]/h4").text.strip('$').replace(',', '')
+    interestYTD = driver.find_element(By.XPATH, "/html/body/div[3]/div/app-personalized-dashboard-root/app-assets-details/app-balance-details/div/div[3]/div[4]/div/app-details-card/div/div/div[1]/div[3]/h4").text.strip('$').replace(',', '')
     return [pensionBalance, interestYTD]
 
 

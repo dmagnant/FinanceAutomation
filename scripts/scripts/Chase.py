@@ -2,9 +2,6 @@ import os
 import time
 from datetime import datetime
 import pyautogui
-
-from selenium.common.exceptions import (ElementClickInterceptedException,
-                                        NoSuchElementException, ElementNotInteractableException)
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Chase":
@@ -37,7 +34,6 @@ def chaseLogin(driver):
     pyautogui.press('tab')
     pyautogui.press('enter')
 
-    
 def getChaseBalance(driver):
     locateChaseWindow(driver)    
     return driver.find_element(By.ID, "accountCurrentBalanceLinkWithReconFlyoutValue").text.strip('$')

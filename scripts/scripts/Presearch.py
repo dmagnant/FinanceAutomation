@@ -1,4 +1,3 @@
-from cProfile import run
 import time
 
 from random_words import RandomWords

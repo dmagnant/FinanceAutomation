@@ -35,7 +35,6 @@ def bingLogin(driver):
 
 def bingActivities(driver):
     # gather "points" links
-    # pointsLinks = driver.find_elements(By.CSS_SELECTOR, "mee-rewards-daily-set-item-content")
     pointsLinks = driver.find_elements(By.CSS_SELECTOR, "div.actionLink.x-hidden-vp1")
 
     # click on first link
@@ -78,7 +77,7 @@ def bingActivities(driver):
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
 
 def getBingBalance(driver):
-    return driver.find_element(By.XPATH, "//*[@id='rewardsBanner']/div/div/div[2]/div[1]/mee-rewards-user-status-banner-item/mee-rewards-user-status-banner-balance/div/div/div/div/div/p/mee-rewards-counter-animation/span").text.replace(',', '')
+    return driver.find_element(By.XPATH, "//*[@id='balanceToolTipDiv']/p/mee-rewards-counter-animation/span").text.replace(',', '')
 
 def claimBingRewards(driver):
     # go to $5 Amazon gift card link

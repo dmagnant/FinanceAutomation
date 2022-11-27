@@ -1,7 +1,8 @@
 
 import gspread
+import time
 from .GeneralFunctions import getCryptocurrencyPrice, setDirectory, showMessage
-
+from .WebDriverFunctions import findWindowByUrl
 from .GnuCashFunctions import updateCryptoPriceInGnucash
 
 
@@ -71,10 +72,12 @@ def getCell(account, month):
                 return ['H10', 'J10']
             case 'IOTX':
                 return ['H11', 'J11']
+            case 'LRC':
+                return ['H12', 'J12'] 
             case 'DOT':
-                return ['H12', 'J12']            
+                return ['H13', 'J13']          
             case 'PRE':
-                return ['H13', 'J13']
+                return ['H14', 'J14']
 
     cell = (getCellArray(account))[month - 1]
     return cell
@@ -95,8 +98,19 @@ def getSheetKey(sheetTitle, tabTitle, worksheet, cellToUpdate):
     worksheetKey = worksheet.acell(keyColumn + cellToUpdate[1:]).value
     return worksheetKey
 
-def updateCryptoPrices():
+def updateCryptoPrices(driver):
     print('updating coin prices')
+    url = "https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=623829469"
+    found = findWindowByUrl(driver, url)
+    if not found:
+        driver.execute_script("window.open('" + url + "');")
+        driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    else:
+        driver.switch_to.window(found)
+        time.sleep(1)
+    coinNames = []
+    coinSymbols = []
+    # capture coin names and symbols from spreadsheet into arrays
     directory = setDirectory()
     jsonCreds = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
     sheet = gspread.service_account(filename=jsonCreds).open('Asset Allocation')
@@ -110,13 +124,21 @@ def updateCryptoPrices():
         coinName = worksheet.acell(nameColumn+str(row)).value
         if coinName != None:
             coinName = coinName.lower()
-            coinSymbol = worksheet.acell(symbolColumn+str(row)).value
+            coinSymbol = worksheet.acell(symbolColumn+str(row)).value            
             if coinName == 'eth2':
                 coinName = 'ethereum'
                 coinSymbol = 'ETH'
-            price = format(getCryptocurrencyPrice(coinName)[coinName]['usd'], ".2f")
-            updateCryptoPriceInGnucash(coinSymbol, price)
-            worksheet.update((priceColumn+str(row)), float(price))
+            coinNames.append(coinName)
+            coinSymbols.append(coinSymbol)
             row += 1
         else:
             stillCoins = False
+    # get prices from coingecko in a single call
+    coinPrices = getCryptocurrencyPrice(coinNames)
+    # update coin prices in Gnucash and spreadsheet
+    for coin in coinNames:
+        i = coinNames.index(coin)
+        symbol = coinSymbols[i]
+        price = format(coinPrices[coin]["usd"], ".2f")
+        updateCryptoPriceInGnucash(symbol, price)
+        worksheet.update((priceColumn + str(i + 2)), float(price))

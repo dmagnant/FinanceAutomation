@@ -6,7 +6,8 @@
     <h1>Daily Banking</h1>
     <form method="post">
         {% csrf_token %}
-        <button type="submit" name="main">Main</button>
+        <button type="submit" name="main">Main</button><br>
+        <button type="submit" name="prices">Crypto Price Refresh</button>
     </form>
     <a href="http://127.0.0.1:8000/scripts/ally">Ally</a><br>
     <a href="http://127.0.0.1:8000/scripts/paypal">Paypal</a><br>

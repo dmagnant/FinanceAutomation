@@ -127,7 +127,7 @@ def claimBoARewards(driver, account):
             driver.find_element(By.ID, "complete-otr-confirm").click()
         except ElementNotInteractableException:
             exception = "caught"
-    elif account == 'j': # may need to address minimum of 2500 points restriction
+    elif account == 'Joint': # may need to address minimum of 2500 points restriction
         # click View/Redeem
         driver.find_element(By.XPATH,"/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[2]/a").click()
         # click Redeem Points

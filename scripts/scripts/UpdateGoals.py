@@ -1,5 +1,4 @@
 from datetime import datetime
-
 import gspread
 
 if __name__ == '__main__' or __name__ == "UpdateGoals":

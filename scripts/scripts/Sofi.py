@@ -66,7 +66,7 @@ def sofiLogout(driver):
 
 def getSofiBalanceAndOrientPage(driver, account):
     locateSofiWindow(driver)
-    driver.get("https://www.sofi.com/my/money/account/#/1000028154579/account-detail") if account == 'Checking' else driver.get("https://www.sofi.com/my/money/account/1000028154560/account-detail")
+    driver.get("https://www.sofi.com/my/money/account/1000028154579/account-detail") if account == 'Checking' else driver.get("https://www.sofi.com/my/money/account/1000028154560/account-detail")
     time.sleep(2)
     table = 1
     div = '2' if account == 'Checking' else '3'
@@ -141,12 +141,14 @@ def runSofi(driver):
     return [checking, savings]
 
 if __name__ == '__main__':
-    directory = setDirectory()
+    # directory = setDirectory()
     driver = openWebDriver("Chrome")
     driver.implicitly_wait(5)
-    response = runSofi(driver)
-    print('checking balance: ' + response[0][0])
-    print('transactions to review: ' + response[0][1])
-    print('savings balance: ' + response[1][0])
-    print('transactions to review: ' + response[1][1])
-    sofiLogout(driver)
+    # response = runSofi(driver)
+    # print('checking balance: ' + response[0][0])
+    # print('transactions to review: ' + response[0][1])
+    # print('savings balance: ' + response[1][0])
+    # print('transactions to review: ' + response[1][1])
+    # sofiLogout(driver)
+    balance = driver.find_element(By.XPATH, "/html/body/div/main/div[3]/div[2]/table[1]/tbody/tr[1]/td[6]/span").text
+    print(balance)

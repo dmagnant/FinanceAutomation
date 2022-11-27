@@ -1,12 +1,18 @@
 import csv
+import os
 from datetime import datetime
 from decimal import Decimal
+from os import listdir
 
 import piecash
-from .TransactionFunctions import formatTransactionVariables, getEnergyBillAmounts, modifyTransactionDescription, setToAccount
-from .GeneralFunctions import setDirectory, showMessage
-
 from piecash import GnucashException, Price, Split, Transaction
+
+from .GeneralFunctions import (getStartAndEndOfDateRange, setDirectory,
+                               showMessage)
+from .TransactionFunctions import (formatTransactionVariables,
+                                   getEnergyBillAmounts,
+                                   modifyTransactionDescription, setToAccount)
+
 
 def openGnuCashBook(type, readOnly, openIfLocked):
     directory=setDirectory()
@@ -203,7 +209,6 @@ def writeGnuTransaction(myBook, description, postDate, amount, fromAccount, toAc
     book.close()
     
 def updateCryptoPriceInGnucash(symbol, coinPrice):
-    directory = setDirectory()
     myBook = openGnuCashBook('Finance', False, False)
     try: 
         gnuCashPrice = myBook.prices(commodity=myBook.commodities(mnemonic=symbol), currency=myBook.currencies(mnemonic="USD"), date=datetime.today().date())  # raise a KeyError if Price does not exist
@@ -250,3 +255,16 @@ def getDollarsInvestedPerCoin(symbol):
                 total += abs(float(amount))
     print(f'total $ invested in {symbol}: ' + str(total))
     return total            
+
+def purgeOldGnucashFiles():
+    directory = setDirectory()
+    today = datetime.today()
+    dateRange = getStartAndEndOfDateRange(today, today.month, today.year, 14)
+    directories = [directory + r'\Finances\Personal Finances', directory + r'\Stuff\Home\Finances']
+    for d in directories:
+        directory = d
+        for fileName in listdir(directory):
+            filePath = (directory + r'\'' + fileName).replace("'",'')
+            fileModifiedDate = datetime.fromtimestamp(os.path.getmtime(filePath)).date()
+            if fileModifiedDate < dateRange[0]:
+                os.remove(filePath)

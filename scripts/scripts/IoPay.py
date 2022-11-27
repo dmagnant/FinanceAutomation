@@ -7,7 +7,6 @@ else:
     from .Functions.GnuCashFunctions import (updateCoinQuantityFromStakingInGnuCash, updateCryptoPriceInGnucash)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet
 
-
 def runIoPay():
     directory = setDirectory()
     showMessage('IOTX balance via IoPay Desktop',"Open IoPay Desktop and Connect Ledger \n"

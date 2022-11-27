@@ -38,6 +38,7 @@ def configureDriverOptions(browser, asUser=True):
     return options
 
 def updateWebDriver(browser, version):
+    directory = setDirectory()
     if (browser == "Chrome" or browser == "Brave"):
         url = "https://chromedriver.chromium.org/downloads"
         filePath = r"C:\Users\dmagn\Downloads\chromedriver_win32.zip"
@@ -55,11 +56,11 @@ def updateWebDriver(browser, version):
         driver.get(url)
     time.sleep(3)
     with zipfile.ZipFile(filePath, 'r') as zip_ref:
-        zip_ref.extractall(r"G:\My Drive\Projects\Coding\webdrivers")
+        zip_ref.extractall(directory + r"\Projects\Coding\webdrivers")
     driver.quit()
     os.remove(filePath)
     if browser == "Edge":
-        shutil.rmtree(r"G:\My Drive\Projects\Coding\webdrivers\Driver_Notes")
+        shutil.rmtree(directory + r"\Projects\Coding\webdrivers\Driver_Notes")
 
 def openWebDriver(browser, asUser=True):
     directory = setDirectory()

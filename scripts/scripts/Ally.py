@@ -62,7 +62,7 @@ def getAllyBalance(driver):
     return driver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div[2]/div/div[1]/div[2]/div/table/tbody/tr/td[3]/div").text.replace('$', '').replace(',', '')
 
 def setAllyTransactionElementRoot(row, column):
-    return "/html/body/div/div[1]/main/div/div/div/div[1]/section/div[2]/div/span/table/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/div/"
+    return "/html/body/div/div[1]/main/div/div/div/div[1]/section/div[2]/div/table/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/div/"
 
 def captureAllyTransactions(driver, dateRange, allyActivity):
      # click Joint Checking link

@@ -161,8 +161,13 @@ def coinbase(request):
     return render(request,"scripts/coinbase.html")
 
 def dailyBank(request):
-    if "main" in request.POST:
-        runDailyBank()
+    if request.method == 'POST':
+        driver = openWebDriver("Chrome")
+        driver.implicitly_wait(5)
+        if "main" in request.POST:
+            runDailyBank()
+        elif "prices" in request.POST:
+            updateCryptoPrices(driver)
     return render(request,"scripts/dailyBank.html")
 
 def dailyMR(request):

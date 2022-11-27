@@ -68,4 +68,3 @@ def getTotalCryptoInvestmentInDollars(directory=setDirectory()):
     print('total: ', total)
     return total
 
-# getTotalCryptoInvestmentInDollars()

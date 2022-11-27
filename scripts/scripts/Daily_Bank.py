@@ -4,7 +4,7 @@ import os.path
 if __name__ == '__main__' or __name__ == "Daily_Bank":
     from Functions.GeneralFunctions import showMessage, setDirectory
     from Functions.WebDriverFunctions import openWebDriver
-    from Functions.GnuCashFunctions import openGnuCashBook, getGnuCashBalance
+    from Functions.GnuCashFunctions import openGnuCashBook, getGnuCashBalance, purgeOldGnucashFiles
     from Functions.SpreadsheetFunctions import updateCryptoPrices
     from Ally import runAlly, allyLogout
     from Paypal import runPaypal
@@ -13,7 +13,7 @@ if __name__ == '__main__' or __name__ == "Daily_Bank":
 else:
     from .Functions.GeneralFunctions import showMessage, setDirectory
     from .Functions.WebDriverFunctions import openWebDriver
-    from .Functions.GnuCashFunctions import openGnuCashBook, getGnuCashBalance
+    from .Functions.GnuCashFunctions import openGnuCashBook, getGnuCashBalance, purgeOldGnucashFiles
     from .Functions.SpreadsheetFunctions import updateCryptoPrices
     from .Ally import runAlly, allyLogout
     from .Paypal import runPaypal
@@ -34,7 +34,7 @@ def runDailyBank():
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
     driver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=623829469');")
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-    updateCryptoPrices()
+    updateCryptoPrices(driver)
     cryptoBalance = round(getGnuCashBalance(Finance, 'Crypto'), 2)
     ally = runAlly(driver)
     Home = openGnuCashBook('Home', True, True)
@@ -48,7 +48,7 @@ def runDailyBank():
         f'Sofi Checking: {sofi[0][0]} \n'
         f'  Gnu Balance: {sofiCheckingGnu} \n \n'
         f' Sofi Savings: {sofi[1][0]} \n'
-        f'  Gnu Balance: {sofiSavingsGnu} \n \n'
+        f' Gnu Balance: {sofiSavingsGnu} \n \n'
         f'Ally Checking: {ally[0]} \n'
         f'  Gnu Balance: {allyGnu} \n \n'
         f'Crypto Balance: {cryptoBalance} \n \n'
@@ -60,6 +60,7 @@ def runDailyBank():
     while len(driver.window_handles) > 1:
         driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
         driver.close()
+    purgeOldGnucashFiles()
 
 if __name__ == '__main__':
     runDailyBank()
