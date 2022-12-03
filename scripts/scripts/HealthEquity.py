@@ -8,17 +8,16 @@ from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "HealthEquity":
     from Functions.GeneralFunctions import showMessage, getStartAndEndOfDateRange
-    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
+    from Classes.WebDriver import Driver
 else:
     from .Functions.GeneralFunctions import showMessage, getStartAndEndOfDateRange
-    from .Functions.WebDriverFunctions import findWindowByUrl
     
 def locateHealthEquityWindow(driver):
-    found = findWindowByUrl(driver, "member.my.healthequity.com")
+    found = driver.findWindowByUrl("member.my.healthequity.com")
     if not found:
-        healthEquitylogin(driver)
+        healthEquitylogin(driver.webDriver)
     else:
-        driver.switch_to.window(found)
+        driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def healthEquitylogin(driver):
@@ -49,6 +48,7 @@ def healthEquitylogin(driver):
 
 def getHealthEquityBalances(driver, lastmonth):
     locateHealthEquityWindow(driver)
+    driver = driver.webDriver
     HE_hsa_avail_bal = driver.find_element(By.XPATH, "//*[@id='21895515-020']/div/hqy-hsa-tab/div/div[2]/div/span[1]").text.strip('$').replace(',','')
     HE_hsa_invest_bal = driver.find_element(By.XPATH, "//*[@id='21895515-020']/div/hqy-hsa-tab/div/div[2]/span[2]/span[1]").text.strip('$').replace(',','')
     HE_hsa_balance = float(HE_hsa_avail_bal) + float(HE_hsa_invest_bal)
@@ -77,18 +77,13 @@ def getHealthEquityBalances(driver, lastmonth):
     HE_hsa_dividends = Decimal(driver.find_element(By.XPATH, "//*[@id='EditPortfolioTab-panel']/member-portfolio-edit-display/member-overall-portfolio-performance-display/div[1]/div/div[3]/div/span").text.strip('$').strip(','))
     return [HE_hsa_balance, HE_hsa_dividends, vanguard401kbal]
 
-def runHealthEquity(driver, lastMonth):
-    locateHealthEquityWindow(driver)
-    return getHealthEquityBalances(driver, lastMonth)
-
 if __name__ == '__main__':
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(3)
+    driver = Driver("Chrome")
     today = datetime.today()
     year = today.year
     month = today.month
     lastMonth = getStartAndEndOfDateRange(today, month, year, "month")
-    response = runHealthEquity(driver, lastMonth)
+    response = getHealthEquityBalances(driver, lastMonth)
     print('HSA balance: ' + str(response[0]))
     print('401k balance: ' + str(response[2]))
     

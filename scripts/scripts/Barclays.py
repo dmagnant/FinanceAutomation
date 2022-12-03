@@ -10,19 +10,18 @@ if __name__ == '__main__' or __name__ == "Barclays":
     from Functions.GeneralFunctions import (getPassword, getUsername, setDirectory, showMessage)
     from Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from Functions.SpreadsheetFunctions import updateSpreadsheet
-    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
+    from Classes.WebDriver import Driver
 else:
     from .Functions.GeneralFunctions import (getPassword, getUsername, setDirectory, showMessage)
     from .Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet
-    from .Functions.WebDriverFunctions import findWindowByUrl
 
 def locateBarclaysWindow(driver):
-    found = findWindowByUrl(driver, "barclaycardus.com")
+    found = driver.findWindowByUrl("barclaycardus.com")
     if not found:
-        barclaysLogin(driver)
+        barclaysLogin(driver.webDriver)
     else:
-        driver.switch_to.window(found)
+        driver.webDriver.switch_to.window(found)
         time.sleep(1)     
 
 def barclaysLogin(driver):
@@ -69,7 +68,7 @@ def barclaysLogin(driver):
 
 def getBarclaysBalance(driver):
     locateBarclaysWindow(driver)     
-    return driver.find_element(By.XPATH, "/html/body/section[2]/div[4]/div[2]/div[1]/section[1]/div/div/div[2]/div/div[2]/div[1]/div").text.strip('-').strip('$')
+    return driver.webDriver.find_element(By.XPATH, "/html/body/section[2]/div[4]/div[2]/div[1]/section[1]/div/div/div[2]/div/div[2]/div[1]/div").text.strip('-').strip('$')
 
 def exportBarclaysTransactions(driver, today):
     # # EXPORT TRANSACTIONS
@@ -109,24 +108,23 @@ def claimBarclaysRewards(driver):
     locateBarclaysWindow(driver)      
     # # REDEEM REWARDS
     # click on Rewards & Benefits
-    driver.find_element(By.XPATH, "/html/body/section[2]/div[1]/nav/div/ul/li[4]/a").click()
+    driver.webDriver.find_element(By.XPATH, "/html/body/section[2]/div[1]/nav/div/ul/li[4]/a").click()
     # click on Redeem my cash rewards
-    driver.find_element(By.XPATH, "//*[@id='rewards-benefits-container']/div[1]/ul/li[3]/a").click()
+    driver.webDriver.find_element(By.XPATH, "//*[@id='rewards-benefits-container']/div[1]/ul/li[3]/a").click()
     # click on Direct Deposit or Statement Credit
-    driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/div[1]/div/div/div[2]/ul/li[1]/div/a").click()
+    driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/div[1]/div/div/div[2]/ul/li[1]/div/a").click()
     # click on Continue
-    driver.find_element(By.ID, "redeem-continue").click()
+    driver.webDriver.find_element(By.ID, "redeem-continue").click()
     # Click "select an option" (for method of rewards)
-    driver.find_element(By.XPATH, "//*[@id='mor_dropDown0']").click()
-    driver.find_element(By.XPATH, "//*[@id='mor_dropDown0']").send_keys(KeysView.DOWN)
-    driver.find_element(By.XPATH, "//*[@id='mor_dropDown0']").send_keys(KeysView.ENTER)
+    driver.webDriver.find_element(By.XPATH, "//*[@id='mor_dropDown0']").click()
+    driver.webDriver.find_element(By.XPATH, "//*[@id='mor_dropDown0']").send_keys(KeysView.DOWN)
+    driver.webDriver.find_element(By.XPATH, "//*[@id='mor_dropDown0']").send_keys(KeysView.ENTER)
     time.sleep(1)
     # Click Continue
-    driver.find_element(By.XPATH, "//*[@id='achModal-continue']").click()
+    driver.webDriver.find_element(By.XPATH, "//*[@id='achModal-continue']").click()
     time.sleep(1)
     # click on Redeem Now
-    driver.find_element(By.XPATH, "/html/body/section[2]/div[4]/div[2]/cashback/div/div[2]/div/ui-view/redeem/div/review/div/div/div/div/div[2]/form/div[3]/div/div[1]/button").click()
-
+    driver.webDriver.find_element(By.XPATH, "/html/body/section[2]/div[4]/div[2]/cashback/div/div[2]/div/ui-view/redeem/div/review/div/div/div/div/div[2]/form/div[3]/div/div[1]/button").click()
 
 def locateAndUpdateSpreadsheetForBarclays(driver, barclays, today):
     directory = setDirectory()
@@ -147,19 +145,18 @@ def runBarclays(driver):
     barclays = getBarclaysBalance(driver)
     rewardsBalance = float(driver.find_element(By.XPATH, "//*[@id='rewardsTile']/div[2]/div/div[2]/div[1]/div").text.strip('$'))
     today = datetime.today()
-    transactionsCSV = exportBarclaysTransactions(driver, today)
+    transactionsCSV = exportBarclaysTransactions(driver.webDriver, today)
     if rewardsBalance > 50:
         claimBarclaysRewards(driver, rewardsBalance)
     myBook = openGnuCashBook('Finance', False, False)
-    reviewTrans = importGnuTransaction('Barclays', transactionsCSV, myBook, driver, directory, 5)
+    reviewTrans = importGnuTransaction('Barclays', transactionsCSV, myBook, driver.webDriver, directory, 5)
     barclaysGnu = getGnuCashBalance(myBook, 'Barclays')
-    locateAndUpdateSpreadsheetForBarclays(driver, barclays, today)
+    locateAndUpdateSpreadsheetForBarclays(driver.webDriver, barclays, today)
     if reviewTrans:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
     showMessage("Balances + Review", f'Barclays balance: {barclays} \n' f'GnuCash Barclays balance: {barclaysGnu} \n \n' f'Review transactions:\n{reviewTrans}')
-    driver.quit()
+    driver.close()
 
 if __name__ == '__main__':
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(3)
+    driver = Driver("Chrome")
     runBarclays(driver)

@@ -9,19 +9,18 @@ if __name__ == '__main__' or __name__ == "Amex":
     from Functions.GeneralFunctions import (getPassword, getUsername, setDirectory, showMessage)
     from Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from Functions.SpreadsheetFunctions import updateSpreadsheet
-    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
+    from Classes.WebDriver import Driver
 else:
     from .Functions.GeneralFunctions import (getPassword, getUsername, setDirectory, showMessage)
     from .Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet
-    from .Functions.WebDriverFunctions import findWindowByUrl
 
 def locateAmexWindow(driver):
-    found = findWindowByUrl(driver, "global.americanexpress.com")
+    found = driver.findWindowByUrl("global.americanexpress.com")
     if not found:
-        amexLogin(driver)
+        amexLogin(driver.webDriver)
     else:
-        driver.switch_to.window(found)
+        driver.webDriver.switch_to.window(found)
         time.sleep(1) 
         
 def amexLogin(driver):
@@ -41,7 +40,7 @@ def amexLogin(driver):
 
 def getAmexBalance(driver):
     locateAmexWindow(driver)
-    return driver.find_element(By.XPATH, "//*[@id='axp-balance-payment']/div[1]/div[1]/div/div[1]/div/div/span[1]/div").text.replace('$', '')
+    return driver.webDriver.find_element(By.XPATH, "//*[@id='axp-balance-payment']/div[1]/div[1]/div/div[1]/div/div/span[1]/div").text.replace('$', '')
 
 def exportAmexTransactions(driver):
     driver.find_element(By.XPATH, "//*[@id='axp-balance-payment']/div[2]/div[2]/div/div[1]/div[1]/div/a").click()
@@ -66,12 +65,12 @@ def exportAmexTransactions(driver):
 
 def claimAmexRewards(driver):
     locateAmexWindow(driver)   
-    driver.get("https://global.americanexpress.com/rewards")
-    rewardsBalance = driver.find_element(By.ID, "globalmrnavpointbalance").text.replace('$', '')
+    driver.webDriver.get("https://global.americanexpress.com/rewards")
+    rewardsBalance = driver.webDriver.find_element(By.ID, "globalmrnavpointbalance").text.replace('$', '')
     if float(rewardsBalance) > 0:
-        driver.find_element(By.ID, "rewardsInput").send_keys(rewardsBalance)
-        driver.find_element(By.XPATH, "//*[@id='continue-btn']/span").click()
-        driver.find_element(By.XPATH, "//*[@id='use-dollars-btn']/span").click()
+        driver.webDriver.find_element(By.ID, "rewardsInput").send_keys(rewardsBalance)
+        driver.webDriver.find_element(By.XPATH, "//*[@id='continue-btn']/span").click()
+        driver.webDriver.find_element(By.XPATH, "//*[@id='use-dollars-btn']/span").click()
 
 def locateAndUpdateSpreadsheetForAmex(driver, amex):
     directory = setDirectory()
@@ -92,18 +91,17 @@ def runAmex(driver):
     directory = setDirectory()
     locateAmexWindow(driver)
     amex = getAmexBalance(driver)
-    exportAmexTransactions(driver)
+    exportAmexTransactions(driver.webDriver)
     claimAmexRewards(driver)
     myBook = openGnuCashBook('Finance', False, False)
-    reviewTrans = importGnuTransaction('Amex', r'C:\Users\dmagn\Downloads\activity.csv', myBook, driver, directory)
+    reviewTrans = importGnuTransaction('Amex', r'C:\Users\dmagn\Downloads\activity.csv', myBook, driver.webDriver, directory)
     amexGnu = getGnuCashBalance(myBook, 'Amex')
-    locateAndUpdateSpreadsheetForAmex(driver, amex)
+    locateAndUpdateSpreadsheetForAmex(driver.webDriver, amex)
     if reviewTrans:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
     showMessage("Balances + Review", f'Amex Balance: {amex} \n' f'GnuCash Amex Balance: {amexGnu} \n \n' f'Review transactions:\n{reviewTrans}')
-    driver.quit()
+    driver.close()
 
 if __name__ == '__main__':
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(5)
+    driver = Driver("Chrome")
     runAmex(driver)

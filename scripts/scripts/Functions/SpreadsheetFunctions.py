@@ -101,7 +101,8 @@ def getSheetKey(sheetTitle, tabTitle, worksheet, cellToUpdate):
 def updateCryptoPrices(driver):
     print('updating coin prices')
     url = "https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=623829469"
-    found = findWindowByUrl(driver, url)
+    found = driver.findWindowByUrl(url)
+    driver = driver.webDriver
     if not found:
         driver.execute_script("window.open('" + url + "');")
         driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])

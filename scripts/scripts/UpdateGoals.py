@@ -1,13 +1,16 @@
 from datetime import datetime
+
 import gspread
 
 if __name__ == '__main__' or __name__ == "UpdateGoals":
-    from Functions.GeneralFunctions import showMessage, setDirectory, getStartAndEndOfDateRange
-    from Functions.WebDriverFunctions import openWebDriver
+    from Classes.WebDriver import Driver
+    from Functions.GeneralFunctions import (getStartAndEndOfDateRange,
+                                            setDirectory, showMessage)
     from Functions.GnuCashFunctions import openGnuCashBook
 else:
-    from .Functions.GeneralFunctions import showMessage, setDirectory, getStartAndEndOfDateRange
-    from .Functions.WebDriverFunctions import openWebDriver
+    from .Classes.WebDriver import Driver
+    from .Functions.GeneralFunctions import (getStartAndEndOfDateRange,
+                                             setDirectory, showMessage)
     from .Functions.GnuCashFunctions import openGnuCashBook  
 
 def getTransactionTotal(dateRange, gnuAccount, mybook):
@@ -164,13 +167,12 @@ def updateSpreadsheet(directory, account, month, value, accounts='Personal'):
 
 def runUpdateGoals(accounts, timeframe):
     directory = setDirectory()
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(3)
+    driver = Driver("Chrome")
     if accounts == "Personal":
-        driver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=1813404638');")
+        driver.webDriver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=1813404638');")
     elif accounts == "Joint":
-        driver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1oP3U7y8qywvXG9U_zYXgjFfqHrCyPtUDl4zPDftFCdM/edit#gid=1436385671');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+        driver.webDriver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1oP3U7y8qywvXG9U_zYXgjFfqHrCyPtUDl4zPDftFCdM/edit#gid=1436385671');")
+    driver.webDriver.switch_to.window(driver.webDriver.window_handles[len(driver.webDriver.window_handles)-1])
     today = datetime.today()
     dateRange = getStartAndEndOfDateRange(today, today.month, today.year, timeframe)
     mybook = openGnuCashBook('Finance', True, True) if accounts == 'Personal' else openGnuCashBook('Home', False, False)

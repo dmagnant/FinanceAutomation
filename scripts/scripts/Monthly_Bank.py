@@ -3,32 +3,30 @@ from decimal import Decimal
 
 if __name__ == '__main__' or __name__ == "Monthly_Bank":
     from Functions.GeneralFunctions import showMessage, setDirectory, getStartAndEndOfDateRange
-    from Functions.WebDriverFunctions import openWebDriver
+    from Classes.WebDriver import Driver
     from Functions.GnuCashFunctions import openGnuCashBook, getGnuCashBalance, writeGnuTransaction
     from Functions.SpreadsheetFunctions import updateSpreadsheet
     from Eternl import runEternl
     from Exodus import runExodus
-    from HealthEquity import runHealthEquity
+    from HealthEquity import getHealthEquityBalances
     from IoPay import runIoPay
     from Kraken import runKraken
-    from Midas import runMidas
     from MyConstant import runMyConstant
     from Presearch import presearchRewardsRedemptionAndBalanceUpdates
-    from Worthy import runWorthy
+    from Worthy import getWorthyBalance
 else:
     from .Functions.GeneralFunctions import showMessage, setDirectory, getStartAndEndOfDateRange
-    from .Functions.WebDriverFunctions import openWebDriver
+    from .Classes.WebDriver import Driver
     from .Functions.GnuCashFunctions import openGnuCashBook, getGnuCashBalance, writeGnuTransaction
     from .Functions.SpreadsheetFunctions import updateSpreadsheet
     from .Eternl import runEternl
     from .Exodus import runExodus
-    from .HealthEquity import runHealthEquity
+    from .HealthEquity import getHealthEquityBalances
     from .IoPay import runIoPay
     from .Kraken import runKraken
-    from .Midas import runMidas
     from .MyConstant import runMyConstant
     from .Presearch import presearchRewardsRedemptionAndBalanceUpdates
-    from .Worthy import runWorthy    
+    from .Worthy import getWorthyBalance 
 
 def runUSD(driver, today):
     directory = setDirectory()
@@ -36,8 +34,8 @@ def runUSD(driver, today):
     month = today.month
     lastMonth = getStartAndEndOfDateRange(today, today.month, today.year, "month")
     myConstantBalance = runMyConstant(driver, "USD")
-    worthyBalance = runWorthy(driver)
-    HEBalances = runHealthEquity(driver, lastMonth)
+    worthyBalance = getWorthyBalance(driver)
+    HEBalances = getHealthEquityBalances(driver, lastMonth)
 
     mybook = openGnuCashBook('Finance', False, False)
     constantInterest = Decimal(myConstantBalance - float(getGnuCashBalance(mybook, 'MyConstant')))
@@ -55,7 +53,7 @@ def runUSD(driver, today):
     updateSpreadsheet(directory, 'Asset Allocation', year, 'Bonds', month, float(bonds), 'Liquid Assets')
     updateSpreadsheet(directory, 'Asset Allocation', year, 'Liquid Assets', month, float(liquidAssets), 'Liquid Assets')
     updateSpreadsheet(directory, 'Asset Allocation', year, 'Vanguard401k', month, HEBalances[2], '401k')
-    driver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=2058576150');")
+    driver.webDriver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=2058576150');")
 
     return [myConstantBalance, worthyBalance, liquidAssets, HEBalances[2], HEBalances[0]]
 
@@ -63,9 +61,8 @@ def runCrypto(driver, today):
     directory = setDirectory()
     year = today.year
     month = today.month
-    driver.implicitly_wait(5)
-    driver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=623829469');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.webDriver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=623829469');")
+    driver.webDriver.switch_to.window(driver.webDriver.window_handles[len(driver.webDriver.window_handles)-1])
     # runMyConstant(driver, "Crypto")
     runEternl(driver)
     runKraken(driver)
@@ -80,8 +77,7 @@ def runCrypto(driver, today):
 
 def runMonthlyBank():
     today = datetime.today()
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(6)
+    driver = Driver("Chrome")
     usdbalances = runUSD(driver, today)
     cryptoBalance = runCrypto(driver, today)
     showMessage("Balances", 
@@ -92,9 +88,9 @@ def runMonthlyBank():
                 f'NM HSA: {usdbalances[4]} \n'
                 f'Crypto Portfolio worth: {cryptoBalance}')
 
-    while len(driver.window_handles) > 1:
-        driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-        driver.close()
+    while len(driver.webDriver.window_handles) > 1:
+        driver.webDriver.switch_to.window(driver.webDriver.window_handles[len(driver.webDriver.window_handles)-1])
+        driver.webDriver.close()
 
 if __name__ == '__main__':
     runMonthlyBank()

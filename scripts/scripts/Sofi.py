@@ -11,21 +11,20 @@ if __name__ == '__main__' or __name__ == "Sofi":
                                             setDirectory, showMessage)
     from Functions.GnuCashFunctions import openGnuCashBook, importUniqueTransactionsToGnuCash
     from Functions.TransactionFunctions import modifyTransactionDescription
-    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
+    from Classes.WebDriver import Driver
 else:
     from .Functions.GeneralFunctions import (closeExpressVPN, getPassword,
                                             getStartAndEndOfDateRange,
                                             setDirectory, showMessage)
     from .Functions.GnuCashFunctions import openGnuCashBook, importUniqueTransactionsToGnuCash
     from .Functions.TransactionFunctions import modifyTransactionDescription
-    from .Functions.WebDriverFunctions import findWindowByUrl
 
 def locateSofiWindow(driver):
-    found = findWindowByUrl(driver, "sofi.com")
+    found = driver.findWindowByUrl("sofi.com")
     if not found:
-        sofiLogin(driver)
+        sofiLogin(driver.webDriver)
     else:
-        driver.switch_to.window(found)
+        driver.webDriver.switch_to.window(found)
         time.sleep(1) 
 
 def sofiLogin(driver):
@@ -58,25 +57,25 @@ def sofiLogin(driver):
 
 def sofiLogout(driver):
     locateSofiWindow(driver)
-    driver.get("https://www.sofi.com/member-home")
+    driver.webDriver.get("https://www.sofi.com/member-home")
     # click Name on top right
-    driver.find_element(By.XPATH, "//*[@id='root']/header/nav/div[3]/div[2]/button").click()
+    driver.webDriver.find_element(By.XPATH, "//*[@id='root']/header/nav/div[3]/div[2]/button").click()
     # click Log out
-    driver.find_element(By.XPATH, "//*[@id='user-dropdown']/div/div/a[4]").click()
+    driver.webDriver.find_element(By.XPATH, "//*[@id='user-dropdown']/div/div/a[4]").click()
 
 def getSofiBalanceAndOrientPage(driver, account):
     locateSofiWindow(driver)
-    driver.get("https://www.sofi.com/my/money/account/1000028154579/account-detail") if account == 'Checking' else driver.get("https://www.sofi.com/my/money/account/1000028154560/account-detail")
+    driver.webDriver.get("https://www.sofi.com/my/money/account/1000028154579/account-detail") if account == 'Checking' else driver.webDriver.get("https://www.sofi.com/my/money/account/1000028154560/account-detail")
     time.sleep(2)
     table = 1
     div = '2' if account == 'Checking' else '3'
-    def findBalanceElement(driver, table, div):
+    def findBalanceElement(webDriver, table, div):
         xpath = "/html/body/div/main/div[3]/div[" + div + "]/table[" + str(table)  + "]/tbody/tr[1]/td[6]/span"
-        return driver.find_element(By.XPATH, xpath).text.strip('$').replace(',', '')
-    balance = findBalanceElement(driver, table, div)
+        return webDriver.find_element(By.XPATH, xpath).text.strip('$').replace(',', '')
+    balance = findBalanceElement(driver.webDriver, table, div)
     if balance == "": # Pending transactions will load as table 1 with a blank balance. if pending transactions exist, move to next Table
         table += 1
-        balance = findBalanceElement(driver, table, div)
+        balance = findBalanceElement(driver.webDriver, table, div)
     return [balance, table, div]
 
 def setSofiTransactionElementRoot(table, row, column, div):
@@ -125,9 +124,9 @@ def runSofiAccount(driver, dateRange, today, account):
     gnuSofiActivity = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\gnu_sofi.csv"
     open(sofiActivity, 'w', newline='').truncate()
     open(gnuSofiActivity, 'w', newline='').truncate()
-    getTransactionsFromSofiWebsite(driver, dateRange, sofiActivity, today, balanceAndPageOrientation[1], balanceAndPageOrientation[2])
+    getTransactionsFromSofiWebsite(driver.webDriver, dateRange, sofiActivity, today, balanceAndPageOrientation[1], balanceAndPageOrientation[2])
     myBook = openGnuCashBook('Finance', False, False)
-    reviewTrans = importUniqueTransactionsToGnuCash('Sofi ' + account, sofiActivity, gnuSofiActivity, myBook, driver, directory, dateRange, 0)
+    reviewTrans = importUniqueTransactionsToGnuCash('Sofi ' + account, sofiActivity, gnuSofiActivity, myBook, driver.webDriver, directory, dateRange, 0)
     return [balanceAndPageOrientation[0], reviewTrans]
 
 def runSofi(driver):
@@ -137,12 +136,11 @@ def runSofi(driver):
     checking = runSofiAccount(driver, dateRange, today, "Checking")
     savings = runSofiAccount(driver, dateRange, today, "Savings")
     # switch back to checking page
-    driver.get("https://www.sofi.com/my/money/account/#/1000028154579/account-detail")
+    driver.webDriver.get("https://www.sofi.com/my/money/account/#/1000028154579/account-detail")
     return [checking, savings]
 
 if __name__ == '__main__':
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(5)
+    driver = Driver("Chrome")
     response = runSofi(driver)
     print('checking balance: ' + response[0][0])
     print('transactions to review: ' + response[0][1])

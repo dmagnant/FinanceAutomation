@@ -14,17 +14,16 @@ from selenium.webdriver.common.keys import Keys
     
 if __name__ == '__main__' or __name__ == "Swagbucks":
     from Functions.GeneralFunctions import showMessage
-    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
+    from Classes.WebDriver import Driver
 else:
     from .Functions.GeneralFunctions import showMessage
-    from .Functions.WebDriverFunctions import findWindowByUrl
     
 def locateSwagBucksWindow(driver):
-    found = findWindowByUrl(driver, "swagbucks.com")
+    found = driver.findWindowByUrl("swagbucks.com")
     if not found:
-        swagBucksLogin(driver)
+        swagBucksLogin(driver.webDriver)
     else:
-        driver.switch_to.window(found)
+        driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def swagBucksLogin(driver):
@@ -196,6 +195,7 @@ def swagbucksInbox(driver):
 
 def swagbucksSearch(driver):
     locateSwagBucksWindow(driver)
+    driver = driver.webDriver
     driver.implicitly_wait(3)
     delay = [1, 2, 3]
     searches = 0
@@ -242,10 +242,11 @@ def swagbucksSearch(driver):
 
 def getSwagBucksBalance(driver):
     locateSwagBucksWindow(driver)
-    return driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/header/nav/section[2]/div[1]/p/var").text.replace('SB', '').replace(',', '')
+    return driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[1]/header/nav/section[2]/div[1]/p/var").text.replace('SB', '').replace(',', '')
 
 def claimSwagBucksRewards(driver):
     locateSwagBucksWindow(driver)
+    driver = driver.webDriver
     # Paypal $10 rewards page
     driver.get("https://www.swagbucks.com/p/prize/28353/PayPal-10")
     time.sleep(4)
@@ -262,24 +263,23 @@ def claimSwagBucksRewards(driver):
 
 def runSwagbucks(driver, run_Alu):
     # closeExpressVPN()
-    driver.implicitly_wait(2)
-    swagBucksLogin(driver)
+    driver.webDriver.implicitly_wait(2)
+    swagBucksLogin(driver.webDriver)
     try:
-        driver.find_element(By.ID, "lightboxExit").click()
+        driver.webDriver.find_element(By.ID, "lightboxExit").click()
     except (ElementNotInteractableException, NoSuchElementException):
         exception = "caught"
-    runAlusRevenge(driver, run_Alu)
-    swagBuckscontentDiscovery(driver)
-    dailyPoll(driver)
-    openTabs(driver)
-    toDoList(driver)
-    swagbucksInbox(driver)
+    runAlusRevenge(driver.webDriver, run_Alu)
+    swagBuckscontentDiscovery(driver.webDriver)
+    dailyPoll(driver.webDriver)
+    openTabs(driver.webDriver)
+    toDoList(driver.webDriver)
+    swagbucksInbox(driver.webDriver)
     swagbucksSearch(driver)
     balance = getSwagBucksBalance(driver)
     if int(balance) > 1000:
         claimSwagBucksRewards(driver)
     
 if __name__ == '__main__':
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(5)
+    driver = Driver("Chrome")
     runSwagbucks(driver, True)

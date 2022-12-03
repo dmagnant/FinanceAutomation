@@ -214,7 +214,6 @@ def ptcAds(directory, driver):
         else:
             still_ads = False
 
-
 def nextRun(driver):
     minsLeftForFaucet = 60
     if runFaucet:
@@ -259,7 +258,6 @@ def runCointiply(directory, driver, faucetRun=True):
     runFaucet(driver, faucetRun)
     ptcAds(directory, driver)
     return nextRun(driver)
-
 
 if __name__ == '__main__':
     directory = setDirectory()

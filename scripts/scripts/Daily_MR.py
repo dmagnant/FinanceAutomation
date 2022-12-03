@@ -1,5 +1,5 @@
 if __name__ == '__main__' or __name__ == "Daily_MR":
-    from Functions.WebDriverFunctions import openWebDriver
+    from Classes.WebDriver import Driver
     from AmazonGC import confirmAmazonGCBalance
     from Bing import runBing
     from Pinecone import runPinecone
@@ -7,7 +7,7 @@ if __name__ == '__main__' or __name__ == "Daily_MR":
     from Swagbucks import runSwagbucks
     from Tellwut import runTellwut
 else:
-    from .Functions.WebDriverFunctions import openWebDriver
+    from .Classes.WebDriver import Driver
     from .AmazonGC import confirmAmazonGCBalance
     from .Bing import runBing
     from .Pinecone import runPinecone
@@ -16,11 +16,10 @@ else:
     from .Tellwut import runTellwut
 
 def runDailyMR():
-    driver1 = openWebDriver("Edge", False)
-    runBing(driver1)
+    driver1 = Driver("Edge", False)
+    runBing(driver1.webDriver)
     driver1.quit()
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(5)
+    driver = Driver("Chrome")    
     searchUsingPresearch(driver)
     runTellwut(driver)
     confirmAmazonGCBalance(driver)

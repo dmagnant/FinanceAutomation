@@ -8,20 +8,19 @@ if __name__ == '__main__' or __name__ == "Chase":
     from Functions.GeneralFunctions import (setDirectory, showMessage)
     from Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from Functions.SpreadsheetFunctions import updateSpreadsheet
-    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
+    from Classes.WebDriver import Driver
 else:
     from .Functions.GeneralFunctions import (setDirectory, showMessage)
     from .Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet
-    from .Functions.WebDriverFunctions import findWindowByUrl
 
 def locateChaseWindow(driver):
-    found = findWindowByUrl(driver, "chase.com/web/auth")
+    found = driver.findWindowByUrl("chase.com/web/auth")
     if not found:
-        chaseLogin(driver)
+        chaseLogin(driver.webDriver)
     else:
-        driver.switch_to.window(found)
-        time.sleep(1)     
+        driver.webDriver.switch_to.window(found)
+        time.sleep(1)
 
 def chaseLogin(driver):
     driver.implicitly_wait(5)
@@ -36,7 +35,7 @@ def chaseLogin(driver):
 
 def getChaseBalance(driver):
     locateChaseWindow(driver)    
-    return driver.find_element(By.ID, "accountCurrentBalanceLinkWithReconFlyoutValue").text.strip('$')
+    return driver.webDriver.find_element(By.ID, "accountCurrentBalanceLinkWithReconFlyoutValue").text.strip('$')
 
 def exportChaseTransactions(driver, today):
     # click on Activity since last statement
@@ -65,16 +64,16 @@ def exportChaseTransactions(driver, today):
 def claimChaseRewards(driver):
     locateChaseWindow(driver)
     time.sleep(1)
-    driver.get("https://ultimaterewardspoints.chase.com/cash-back?lang=en")
+    driver.webDriver.get("https://ultimaterewardspoints.chase.com/cash-back?lang=en")
     # points balance
-    balance = driver.find_element(By.XPATH,"//*[@id='pointsBalanceId']/div/span[1]").text
+    balance = driver.webDriver.find_element(By.XPATH,"//*[@id='pointsBalanceId']/div/span[1]").text
     if float(balance) > 0:
         # Deposit into a Bank Account
-        driver.find_element(By.XPATH, "//*[@id='cashBackStart']/section[1]/div[2]/form/div[5]/div[1]/div[2]/selectable-tile/div/mds-fieldset/div/mds-selectable-tile/div/div/span").click()
+        driver.webDriver.find_element(By.XPATH, "//*[@id='cashBackStart']/section[1]/div[2]/form/div[5]/div[1]/div[2]/selectable-tile/div/mds-fieldset/div/mds-selectable-tile/div/div/span").click()
         pyautogui.press('tab')
         pyautogui.press('enter')
         time.sleep(2)
-        driver.find_element(By.ID, "main").click()
+        driver.webDriver.find_element(By.ID, "main").click()
         pyautogui.press('tab')
         pyautogui.press('tab')
         pyautogui.press('enter')                
@@ -97,18 +96,17 @@ def runChase(driver):
     locateChaseWindow(driver)
     chase = getChaseBalance(driver)
     today = datetime.today()
-    transactionsCSV = exportChaseTransactions(driver, today)
+    transactionsCSV = exportChaseTransactions(driver.webDriver, today)
     claimChaseRewards(driver)
     myBook = openGnuCashBook('Finance', False, False)
-    reviewTrans = importGnuTransaction('Chase', transactionsCSV, myBook, driver, directory)
+    reviewTrans = importGnuTransaction('Chase', transactionsCSV, myBook, driver.webDriver, directory)
     chaseGnu = getGnuCashBalance(myBook, 'Chase')
-    locateAndUpdateSpreadsheetForChase(driver, chase, today)
+    locateAndUpdateSpreadsheetForChase(driver.webDriver, chase, today)
     if reviewTrans:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
     showMessage("Balances + Review", f'Chase Balance: {chase} \n' f'GnuCash Chase Balance: {chaseGnu} \n \n' f'Review transactions:\n{reviewTrans}')
-    driver.quit()
+    driver.close()
 
 if __name__ == '__main__':
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(5)
+    driver = Driver("Chrome")
     runChase(driver)

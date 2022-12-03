@@ -2,16 +2,14 @@ import time
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Pinecone":
-    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
-else:
-    from .Functions.WebDriverFunctions import findWindowByUrl
+    from Classes.WebDriver import Driver
 
 def locatePineconeWindow(driver):
-    found = findWindowByUrl(driver, "members.pineconeresearch.com")
+    found = driver.findWindowByUrl("members.pineconeresearch.com")
     if not found:
-        pineConeLogin(driver)
+        pineConeLogin(driver.webDriver)
     else:
-        driver.switch_to.window(found)
+        driver.webDriver.switch_to.window(found)
         time.sleep(1)    
     
 def pineConeLogin(driver):
@@ -25,11 +23,12 @@ def getPineConeBalance(driver):
     locatePineconeWindow(driver)    
     balance = ''
     while balance == '':
-        balance = driver.find_element(By.XPATH, "//*[@id='basic-navbar-nav']/div/form/button/div").text
+        balance = driver.webDriver.find_element(By.XPATH, "//*[@id='basic-navbar-nav']/div/form/button/div").text
     return balance
     
 def claimPineConeRewards(driver):
     locatePineconeWindow(driver)    
+    driver = driver.webDriver
     # Click Redeem
     driver.find_element(By.ID, "3").click()
     time.sleep(3)
@@ -53,7 +52,6 @@ def runPinecone(driver):
         claimPineConeRewards(driver)
 
 if __name__ == '__main__':
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(5)
+    driver = Driver("Chrome")
     runPinecone(driver)
     

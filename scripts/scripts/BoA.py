@@ -11,19 +11,18 @@ if __name__ == '__main__' or __name__ == "BoA":
     from Functions.GeneralFunctions import (getPassword, getUsername, setDirectory, showMessage)
     from Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from Functions.SpreadsheetFunctions import updateSpreadsheet
-    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
+    from Classes.WebDriver import Driver
 else:
     from .Functions.GeneralFunctions import (getPassword, getUsername, setDirectory, showMessage)
     from .Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet
-    from .Functions.WebDriverFunctions import findWindowByUrl
 
 def locateBoAWindowAndOpenAccount(driver, account):
-    found = findWindowByUrl(driver, "secure.bankofamerica.com")
+    found = driver.findWindowByUrl("secure.bankofamerica.com")
     if not found:
-        boALogin(driver, account)
+        boALogin(driver.webDriver, account)
     else:
-        driver.switch_to.window(found)
+        driver.webDriver.switch_to.window(found)
         time.sleep(1)
         
 def boALogin(driver, account):
@@ -76,7 +75,7 @@ def boALogin(driver, account):
 
 def getBoABalance(driver, account):
     locateBoAWindowAndOpenAccount(driver, account)
-    return driver.find_element(By.XPATH, "/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[3]/div[4]/div[3]/div/div[2]/div[2]/div[2]").text.replace('$','').replace(',','')
+    return driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[3]/div[4]/div[3]/div/div[2]/div[2]/div[2]").text.replace('$','').replace(',','')
 
 def exportBoATransactions(driver, account, today):
     # click Previous transactions
@@ -96,6 +95,7 @@ def exportBoATransactions(driver, account, today):
 
 def claimBoARewards(driver, account):
     locateBoAWindowAndOpenAccount(driver, account)
+    driver = driver.webDriver
     driver.implicitly_wait(10)
     if account == "Personal":
         # # REDEEM REWARDS
@@ -189,21 +189,20 @@ def runBoA(driver, account):
     locateBoAWindowAndOpenAccount(driver, account)
     BoA = getBoABalance(driver, account)
     today = datetime.today()
-    transactionsCSV = exportBoATransactions(driver, account, today)
+    transactionsCSV = exportBoATransactions(driver.webDriver, account, today)
     claimBoARewards(driver, account)
     myBook = openGnuCashBook('Finance', False, False) if account == "Personal" else openGnuCashBook('Home', False, False)
     importAccount = 'BoA' if account == "Personal" else 'BoA-joint'
-    reviewTrans = importGnuTransaction(importAccount, transactionsCSV, myBook, driver, directory)
+    reviewTrans = importGnuTransaction(importAccount, transactionsCSV, myBook, driver.webDriver, directory)
     BoAGnu = getGnuCashBalance(myBook, importAccount)
     locateAndUpdateSpreadsheetForBoA(driver, BoA, account, today)
     if reviewTrans:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash") if account == "Personal" else os.startfile(directory + r"\Stuff\Home\Finances\Home.gnucash")
     showMessage("Balances + Review", f'BoA Balance: {BoA} \n' f'GnuCash BoA Balance: {BoAGnu} \n \n' f'Review transactions:\n{reviewTrans}')
-    driver.quit()
+    driver.close()
     # startExpressVPN()
 
 if __name__ == '__main__':
     SET_ACCOUNT_VARIABLE = "Personal" # Personal or Joint
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(5)
+    driver = Driver("Chrome")
     runBoA(driver, SET_ACCOUNT_VARIABLE)

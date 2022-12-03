@@ -58,7 +58,7 @@ def ally(request):
             print('balance: ' + str(response[0]))
             print('transactions to review: ' + str(response[1]))
         elif "login" in request.POST:
-            locateAllyWindow(driver.webDriver)
+            locateAllyWindow(driver)
         elif "balance" in request.POST:
             balance = getAllyBalance(driver.webDriver)
             print(balance)
@@ -69,7 +69,7 @@ def amazon(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
-            balance = confirmAmazonGCBalance(driver.webDriver)
+            balance = confirmAmazonGCBalance(driver)
     return render(request,"scripts/amazon.html", {'balance':balance})
 
 def amex(request):
@@ -78,7 +78,7 @@ def amex(request):
         if "main" in request.POST:
             runAmex(driver.webDriver)
         elif "login" in request.POST:
-            locateAmexWindow(driver.webDriver)
+            locateAmexWindow(driver)
         elif "balance" in request.POST:
             balance = getAmexBalance(driver.webDriver)
             print(balance)
@@ -92,7 +92,7 @@ def barclays(request):
         if "main" in request.POST:
             runBarclays(driver.webDriver)
         elif "login" in request.POST:
-            locateBarclaysWindow(driver.webDriver)
+            locateBarclaysWindow(driver)
         elif "balance" in request.POST:
             balance = getBarclaysBalance(driver.webDriver)
             print(balance)
@@ -137,7 +137,7 @@ def chase(request):
         if "main" in request.POST:
             runChase(driver.webDriver)
         elif "login" in request.POST:
-            locateChaseWindow(driver.webDriver)
+            locateChaseWindow(driver)
         elif "balance" in request.POST:
             balance = getChaseBalance(driver.webDriver)
             print(balance)
@@ -172,7 +172,7 @@ def discover(request):
         if "main" in request.POST:
             runDiscover(driver.webDriver)
         elif "login" in request.POST:
-            locateDiscoverWindow(driver.webDriver)
+            locateDiscoverWindow(driver)
         elif "balance" in request.POST:
             balance = getDiscoverBalance(driver.webDriver)
             print(balance)
@@ -188,7 +188,7 @@ def eternl(request):
             for coin in response:
                 coin.getData()
         elif "login" in request.POST:
-            locateEternlWindow(driver.webDriver)
+            locateEternlWindow(driver)
     return render(request,"scripts/eternl.html")
 
 def exodus(request):
@@ -206,11 +206,11 @@ def healthEquity(request):
             year = today.year
             month = today.month
             lastMonth = getStartAndEndOfDateRange(today, month, year, "month")
-            response = runHealthEquity(driver, lastMonth) if "main" in request.POST else getHealthEquityBalances(driver, lastMonth)
+            response = getHealthEquityBalances(driver, lastMonth)
             print('HSA balance: ' + str(response[0]))
             print('401k balance: ' + str(response[2]))
         elif "login" in request.POST:
-            locateHealthEquityWindow(driver.webDriver)
+            locateHealthEquityWindow(driver)
     return render(request,"scripts/healthEquity.html")
 
 def ioPay(request):
@@ -229,7 +229,7 @@ def kraken(request):
             print('dot balance: ' + str(response[0]))
             print('eth2 balance: ' + str(response[1]))
         elif "login" in request.POST:
-            locateKrakenWindow(driver.webDriver)
+            locateKrakenWindow(driver)
     return render(request,"scripts/kraken.html")
 
 def midas(request):
@@ -240,7 +240,7 @@ def midas(request):
             print('btc balance: ' + str(response[0]))
             print('eth balance: ' + str(response[1]))
         elif "login" in request.POST:
-            locateMidasWindow(driver.webDriver)
+            locateMidasWindow(driver)
     return render(request,"scripts/midas.html")
 
 def monthlyBank(request):
@@ -277,7 +277,7 @@ def myConstant(request):
                 print('btc balance: ' + str(response[0]))
                 print('eth balance: ' + str(response[1]))
         elif "login" in request.POST:
-            locateMyConstantWindow(driver.webDriver)
+            locateMyConstantWindow(driver)
     return render(request,"scripts/myconstant.html")
 
 def paypal(request):
@@ -286,7 +286,7 @@ def paypal(request):
     if "main" in request.POST:
         runPaypal(driver.webDriver)
     elif "login" in request.POST:
-        locatePayPalWindow(driver.webDriver)
+        locatePayPalWindow(driver)
     return render(request,"scripts/paypal.html")
 
 def pinecone(request):
@@ -295,7 +295,7 @@ def pinecone(request):
         if "main" in request.POST:
             runPinecone(driver.webDriver)
         elif "login" in request.POST:
-            locatePineconeWindow(driver.webDriver)
+            locatePineconeWindow(driver)
         elif "balance" in request.POST:
             balance = getPineConeBalance(driver.webDriver)
             print(balance)
@@ -310,7 +310,7 @@ def presearch(request):
         if "rewards" in request.POST:
             presearchRewardsRedemptionAndBalanceUpdates(directory, driver)
         elif "login" in request.POST:
-            locatePresearchWindow(driver.webDriver)          
+            locatePresearchWindow(driver)          
         elif "balance" in request.POST:
             balance = getPresearchBalance(driver.webDriver)
             print(balance[0])
@@ -325,7 +325,7 @@ def sofi(request):
             sofiBalanceAndTransactions = runSofi(driver.webDriver)
             print(sofiBalanceAndTransactions)
         elif "login" in request.POST:
-            locateSofiWindow(driver.webDriver)
+            locateSofiWindow(driver)
         elif "checkingBalance" in request.POST:
             balance = getSofiBalanceAndOrientPage(driver, "Checking")[0]
             print('checking balance: ', balance)
@@ -340,7 +340,7 @@ def swagbucks(request):
         if "main" in request.POST:
             runSwagbucks(driver, True) if "Run Alu" in request.POST else runSwagbucks(driver, False)
         elif "login" in request.POST:
-            locateSwagBucksWindow(driver.webDriver)
+            locateSwagBucksWindow(driver)
         elif "alu" in request.POST:
             runAlusRevenge(driver, True)
         elif "content" in request.POST:
@@ -360,7 +360,7 @@ def tellwut(request):
         if "main" in request.POST:
             runTellwut(driver.webDriver)
         elif "login" in request.POST:
-            locateTellWutWindow(driver.webDriver)
+            locateTellWutWindow(driver)
         elif "surveys" in request.POST:
             completeTellWutSurveys(driver.webDriver)            
         elif "balance" in request.POST:
@@ -385,7 +385,7 @@ def vanguard(request):
         if "main" in request.POST:
             runVanguard(driver.webDriver)
         elif "login" in request.POST:
-            locateVanguardWindow(driver.webDriver)
+            locateVanguardWindow(driver)
         elif "balance" in request.POST:
             balance = getVanguardBalanceAndInterestYTD(driver.webDriver)
             print(balance[0])
@@ -395,10 +395,10 @@ def worthy(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST or "balance" in request.POST:
-            response = runWorthy(driver.webDriver) if "main" in request.POST else getWorthyBalance(driver.webDriver)
+            response = getWorthyBalance(driver)
             print(f'total balance: {response}')
         elif "login" in request.POST:
-            locateWorthyWindow(driver.webDriver)
+            locateWorthyWindow(driver)
     return render(request,"scripts/worthy.html")
 
 def marketResearch(request):

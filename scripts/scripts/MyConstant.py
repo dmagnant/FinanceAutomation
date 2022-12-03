@@ -7,19 +7,18 @@ from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "MyConstant":
     from Functions.GeneralFunctions import (setDirectory, showMessage, getOTP, getUsername, getPassword)
-    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
     from Classes.Asset import Crypto
+    from Classes.WebDriver import Driver    
 else:
     from .Functions.GeneralFunctions import (setDirectory, showMessage, getOTP, getUsername, getPassword)
-    from .Functions.WebDriverFunctions import findWindowByUrl
     from .Classes.Asset import Crypto
 
 def locateMyConstantWindow(driver):
-    found = findWindowByUrl(driver, "www.myconstant.com")
+    found = driver.findWindowByUrl("www.myconstant.com")
     if not found:
-        myConstantLogin(driver)
+        myConstantLogin(driver.webDriver)
     else:
-        driver.switch_to.window(found)
+        driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def myConstantLogin(driver):
@@ -66,10 +65,10 @@ def getMyConstantBalances(driver, type, coinList=None):
         pyautogui.moveTo(1650, 167)
         time.sleep(8)
         # capture and format Bonds balance
-        usdBalance = Decimal(driver.find_element(By.ID, "acc_balance").text.strip('$').replace(',',''))
+        usdBalance = Decimal(driver.webDriver.find_element(By.ID, "acc_balance").text.strip('$').replace(',',''))
         return float(round(usdBalance, 2))
     elif (type == "Crypto"):
-        driver.get('https://www.myconstant.com/lend-crypto-to-earn-interest')
+        driver.webDriver.get('https://www.myconstant.com/lend-crypto-to-earn-interest')
         pyautogui.moveTo(1700, 145)
         time.sleep(2)
         # get coin balances
@@ -79,7 +78,6 @@ def getMyConstantBalances(driver, type, coinList=None):
             elif coin.name == "Ethereum":
                 coin.setBalance(getCoinBalance(driver, (coin.name)))
         return coinList
-
 
 def runMyConstant(driver, type):
     locateMyConstantWindow(driver)
@@ -93,8 +91,7 @@ def runMyConstant(driver, type):
     return balances
 
 if __name__ == '__main__':
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(3)
+    driver = Driver("Chrome")
     type = "Crypto"
     response = runMyConstant(driver, type)
     if (type == "USD"):

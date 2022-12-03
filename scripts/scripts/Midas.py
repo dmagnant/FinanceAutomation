@@ -4,19 +4,18 @@ from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Midas":
     from Functions.GeneralFunctions import (setDirectory, getOTP)
-    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
-    from Classes.Asset import Crypto    
+    from Classes.Asset import Crypto
+    from Classes.WebDriver import Driver  
 else:
     from .Functions.GeneralFunctions import (setDirectory, getOTP)
-    from .Functions.WebDriverFunctions import findWindowByUrl
     from .Classes.Asset import Crypto    
 
 def locateMidasWindow(driver):
-    found = findWindowByUrl(driver, "app.midas.investments")
+    found = driver.findWindowByUrl("app.midas.investments")
     if not found:
-        midasLogin(driver)
+        midasLogin(driver.webDriver)
     else:
-        driver.switch_to.window(found)
+        driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def midasLogin(driver):
@@ -37,9 +36,9 @@ def midasLogin(driver):
 
 def getMidasBalances(driver, coinList):
     locateMidasWindow(driver)    
-    driver.get("https://midas.investments/assets")
+    driver.webDriver.get("https://midas.investments/assets")
     for coin in coinList:
-        coinBalance = float(driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/main/ul/li[1]/div/div[3]/div[1]/span[2]").text.replace(coin.symbol, ''))
+        coinBalance = float(driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[2]/main/ul/li[1]/div/div[3]/div[1]/span[2]").text.replace(coin.symbol, ''))
         coin.setBalance(coinBalance)
     return coinList
 
@@ -55,8 +54,7 @@ def runMidas(driver):
 
 if __name__ == '__main__':
     directory = setDirectory()
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(3)
+    driver = Driver("Chrome")
     response = runMidas(driver)
     for coin in response:
         coin.getData()

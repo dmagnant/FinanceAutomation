@@ -11,20 +11,19 @@ if __name__ == '__main__' or __name__ == "Vanguard":
     from Functions.GeneralFunctions import (setDirectory, showMessage, getUsername, getPassword, getStartAndEndOfDateRange)
     from Functions.GnuCashFunctions import (openGnuCashBook, getGnuCashBalance, writeGnuTransaction)
     from Functions.SpreadsheetFunctions import updateSpreadsheet
-    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
+    from Classes.WebDriver import Driver
 else:
     from .Functions.GeneralFunctions import (setDirectory, showMessage, getUsername, getPassword, getStartAndEndOfDateRange)
     from .Functions.GnuCashFunctions import (openGnuCashBook, getGnuCashBalance, writeGnuTransaction)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet
-    from .Functions.WebDriverFunctions import findWindowByUrl
     
 
 def locateVanguardWindow(driver):
-    found = findWindowByUrl(driver, "ownyourfuture.vanguard.com/main")
+    found = driver.findWindowByUrl("ownyourfuture.vanguard.com/main")
     if not found:
-        vanguardLogin(driver)
+        vanguardLogin(driver.webDriver)
     else:
-        driver.switch_to.window(found)
+        driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def vanguardLogin(driver):
@@ -55,16 +54,16 @@ def vanguardLogin(driver):
 def getVanguardBalanceAndInterestYTD(driver):
     locateVanguardWindow(driver)    
     # navigate to asset details page (click view all assets)
-    driver.get('https://ownyourfuture.vanguard.com/main/dashboard/assets-details')
+    driver.webDriver.get('https://ownyourfuture.vanguard.com/main/dashboard/assets-details')
     time.sleep(2)
     # move cursor to middle window
     pyautogui.moveTo(500, 500)
     #scroll down
     pyautogui.scroll(-1000)
     # Get Total Account Balance
-    pensionBalance = driver.find_element(By.XPATH, "/html/body/div[3]/div/app-personalized-dashboard-root/app-assets-details/app-balance-details/div/div[3]/div[3]/div/app-details-card/div/div/div[1]/div[3]/h4").text.strip('$').replace(',', '')                          
+    pensionBalance = driver.webDriver.find_element(By.XPATH, "/html/body/div[3]/div/app-personalized-dashboard-root/app-assets-details/app-balance-details/div/div[3]/div[3]/div/app-details-card/div/div/div[1]/div[3]/h4").text.strip('$').replace(',', '')                          
     # Get Interest YTD
-    interestYTD = driver.find_element(By.XPATH, "/html/body/div[3]/div/app-personalized-dashboard-root/app-assets-details/app-balance-details/div/div[3]/div[4]/div/app-details-card/div/div/div[1]/div[3]/h4").text.strip('$').replace(',', '')
+    interestYTD = driver.webDriver.find_element(By.XPATH, "/html/body/div[3]/div/app-personalized-dashboard-root/app-assets-details/app-balance-details/div/div[3]/div[4]/div/app-details-card/div/div/div[1]/div[3]/h4").text.strip('$').replace(',', '')
     return [pensionBalance, interestYTD]
 
 
@@ -107,12 +106,10 @@ def runVanguard(driver):
     vanguardGnu = getGnuCashBalance(myBook, 'VanguardPension')
     updateSpreadsheet(directory, 'Asset Allocation', today.year, 'VanguardPension', today.month, float(balanceAndInterestYTD[0]))
     os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
-    driver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=2058576150');")
+    driver.webDriver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=2058576150');")
     showMessage("Balances",f'Pension Balance: {balanceAndInterestYTD[0]} \n'f'GnuCash Pension Balance: {vanguardGnu} \n'f'Interest earned: {values[0]} \n'f'Total monthly contributions: {values[1]} \n')
 
 if __name__ == '__main__':
-    directory = setDirectory()
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(5)
+    driver = Driver("Chrome")
     runVanguard(driver)
     

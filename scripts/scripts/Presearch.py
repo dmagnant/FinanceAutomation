@@ -7,21 +7,19 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Presearch":
-    from Classes.Cryptocurrency import Crypto
+    from Classes.Asset import Crypto
     from Functions.GeneralFunctions import setDirectory, showMessage
-    from Functions.WebDriverFunctions import findWindowByUrl, openWebDriver
-
+    from Classes.WebDriver import Driver
 else:
     from .Classes.Asset import Crypto
     from .Functions.GeneralFunctions import setDirectory, showMessage
-    from .Functions.WebDriverFunctions import findWindowByUrl
 
 def locatePresearchWindow(driver):
-    found = findWindowByUrl(driver, "presearch.com")
+    found = driver.findWindowByUrl("presearch.com")
     if not found:
-        presearchLogin(driver)
+        presearchLogin(driver.webDriver)
     else:
-        driver.switch_to.window(found)
+        driver.webDriver.switch_to.window(found)
         time.sleep(1)    
 
 def presearchLogin(driver):
@@ -37,13 +35,14 @@ def searchUsingPresearch(driver):
     time.sleep(1)
     search_path = search_prefix + search_term
     try:
-        driver.get(search_path)
+        driver.webDriver.get(search_path)
     except WebDriverException:
         showMessage('check issue', f'target frame detached error when trying to attempt {search_path}')
     time.sleep(1)
 
 def claimPresearchRewards(driver):
     locatePresearchWindow(driver)
+    driver = driver.webDriver
     driver.get("https://nodes.presearch.org/dashboard")   
     try:
         availToStake = float(driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
@@ -92,7 +91,8 @@ def claimPresearchRewards(driver):
             num += 1
 
 def getPresearchBalance(driver):
-    found = findWindowByUrl(driver, "presearch.com/dashboard")
+    found = driver.findWindowByUrl("presearch.com/dashboard")
+    driver = driver.webDriver
     if not found:
         driver.execute_script("window.open('https://nodes.presearch.org/dashboard');")
         driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
@@ -116,8 +116,7 @@ def presearchRewardsRedemptionAndBalanceUpdates(driver):
     
 if __name__ == '__main__':
     directory = setDirectory()
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(5)
+    driver = Driver("Chrome")
     locatePresearchWindow(driver)
     searchUsingPresearch(driver)
     response = presearchRewardsRedemptionAndBalanceUpdates(driver)

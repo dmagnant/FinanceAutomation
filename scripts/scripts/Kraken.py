@@ -6,19 +6,18 @@ from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Kraken":
     from Functions.GeneralFunctions import (setDirectory, getCryptocurrencyPrice, getOTP, getUsername, getPassword)
-    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
-    from Classes.Asset import Crypto    
+    from Classes.Asset import Crypto
+    from Classes.WebDriver import Driver  
 else:
     from .Functions.GeneralFunctions import (setDirectory, getCryptocurrencyPrice, getOTP, getUsername, getPassword)
-    from .Functions.WebDriverFunctions import findWindowByUrl
     from .Classes.Asset import Crypto
     
 def locateKrakenWindow(driver):
-    found = findWindowByUrl(driver, "kraken.com")
+    found = driver.findWindowByUrl("kraken.com")
     if not found:
-        krakenLogin(driver)
+        krakenLogin(driver.webDriver)
     else:
-        driver.switch_to.window(found)
+        driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def krakenLogin(driver):
@@ -43,12 +42,12 @@ def krakenLogin(driver):
 
 def getKrakenBalances(driver):
     locateKrakenWindow(driver)
-    driver.get('https://www.kraken.com/u/history/ledger')
+    driver.webDriver.get('https://www.kraken.com/u/history/ledger')
     eth2Balance = ''
     num = 1
     while num < 20:
-        balance = driver.find_element(By.XPATH, "//*[@id='__next']/div/main/div/div[2]/div/div/div[3]/div[2]/div/div[" + str(num) + "]/div/div[7]/div/div/span/span/span").text
-        coin = driver.find_element(By.XPATH, "//*[@id='__next']/div/main/div/div[2]/div/div/div[3]/div[2]/div/div[" + str(num) + "]/div/div[7]/div/div/div").text
+        balance = driver.webDriver.find_element(By.XPATH, "//*[@id='__next']/div/main/div/div[2]/div/div/div[3]/div[2]/div/div[" + str(num) + "]/div/div[7]/div/div/span/span/span").text
+        coin = driver.webDriver.find_element(By.XPATH, "//*[@id='__next']/div/main/div/div[2]/div/div/div[3]/div[2]/div/div[" + str(num) + "]/div/div[7]/div/div/div").text
         if coin == 'ETH2':
             if not eth2Balance:
                 eth2Balance = float(balance)
@@ -69,8 +68,7 @@ def runKraken(driver):
     return coinList
 
 if __name__ == '__main__':
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(2)
+    driver = Driver("Chrome")
     response = runKraken(driver)
     for coin in response:
         coin.getData()

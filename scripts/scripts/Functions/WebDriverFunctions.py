@@ -12,7 +12,6 @@ from selenium.common.exceptions import (InvalidArgumentException,
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 
-
 def configureDriverOptions(browser, asUser=True):
     if browser == "Edge":
         options = webdriver.EdgeOptions()

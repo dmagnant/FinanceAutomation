@@ -11,19 +11,18 @@ if __name__ == '__main__' or __name__ == "Discover":
     from Functions.GeneralFunctions import (getPassword, setDirectory, showMessage)
     from Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from Functions.SpreadsheetFunctions import updateSpreadsheet
-    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
+    from Classes.WebDriver import Driver
 else:
     from .Functions.GeneralFunctions import (getPassword, setDirectory, showMessage)
     from .Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet
-    from .Functions.WebDriverFunctions import findWindowByUrl
 
 def locateDiscoverWindow(driver):
-    found = findWindowByUrl(driver, "discover.com")
+    found = driver.findWindowByUrl("discover.com")
     if not found:
-        discoverLogin(driver)
+        discoverLogin(driver.webDriver)
     else:
-        driver.switch_to.window(found)
+        driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def discoverLogin(driver):
@@ -43,12 +42,11 @@ def discoverLogin(driver):
     except (NoSuchElementException, ElementNotInteractableException, AttributeError):
         exception = "caught"
 
-
 def getDiscoverBalance(driver):
     locateDiscoverWindow(driver)
-    driver.get("https://card.discover.com/cardmembersvcs/statements/app/activity#/current")
+    driver.webDriver.get("https://card.discover.com/cardmembersvcs/statements/app/activity#/current")
     time.sleep(1)
-    return driver.find_element(By.ID, "new-balance").text.strip('$')
+    return driver.webDriver.find_element(By.ID, "new-balance").text.strip('$')
 
 def exportDiscoverTransactions(driver, today):
     # Click on Download
@@ -64,25 +62,23 @@ def exportDiscoverTransactions(driver, today):
     stmtMonth = today.strftime('%m')
     return r"C:\Users\dmagn\Downloads\Discover-Statement-" + stmtYear + stmtMonth + "12.csv"
 
-
 def claimDiscoverRewards(driver):
     locateDiscoverWindow(driver)    
-    driver.get("https://card.discover.com/cardmembersvcs/rewards/app/redemption?ICMPGN=AC_NAV_L3_REDEEM#/cash")
+    driver.webDriver.get("https://card.discover.com/cardmembersvcs/rewards/app/redemption?ICMPGN=AC_NAV_L3_REDEEM#/cash")
     try:
         # Click Electronic Deposit to your bank account
-        driver.find_element(By.ID, "electronic-deposit").click()
+        driver.webDriver.find_element(By.ID, "electronic-deposit").click()
         time.sleep(1)
         # Click Redeem All link
-        driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/main/div/div/section/div[2]/div/form/div[2]/fieldset/div[3]/div[2]/span[2]/button").click()
+        driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[1]/main/div/div/section/div[2]/div/form/div[2]/fieldset/div[3]/div[2]/span[2]/button").click()
         time.sleep(1)
         # Click Continue
-        driver.find_element(By.XPATH, "//*[@id='cashbackForm']/div[4]/input").click()
+        driver.webDriver.find_element(By.XPATH, "//*[@id='cashbackForm']/div[4]/input").click()
         time.sleep(1)
         # Click Submit
-        driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/main/div/div/section/div[2]/div/div/div/div[1]/div/div/div[2]/div/button[1]").click()
+        driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[1]/main/div/div/section/div[2]/div/div/div/div[1]/div/div/div[2]/div/button[1]").click()
     except (NoSuchElementException, ElementClickInterceptedException):
         exception = "caught"
-
 
 def locateAndUpdateSpreadsheetForDiscover(driver, discover, today):
     directory = setDirectory()    
@@ -97,24 +93,22 @@ def locateAndUpdateSpreadsheetForDiscover(driver, discover, today):
     # Display Checking Balance spreadsheet
     driver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1684fQ-gW5A0uOf7s45p9tC4GiEE5s5_fjO5E7dgVI1s/edit#gid=1688093622');")
 
-
 def runDiscover(driver):
     directory = setDirectory()    
     locateDiscoverWindow(driver)
     discover = getDiscoverBalance(driver)
     today = datetime.today()
-    transactionsCSV = exportDiscoverTransactions(driver, today)
+    transactionsCSV = exportDiscoverTransactions(driver.webDriver, today)
     claimDiscoverRewards(driver)
     myBook = openGnuCashBook('Finance', False, False)
-    reviewTrans = importGnuTransaction('Discover', transactionsCSV, myBook, driver, directory)
+    reviewTrans = importGnuTransaction('Discover', transactionsCSV, myBook, driver.webDriver, directory)
     discoverGnu = getGnuCashBalance(myBook, 'Discover')
-    locateAndUpdateSpreadsheetForDiscover(driver, discover, today)
+    locateAndUpdateSpreadsheetForDiscover(driver.webDriver, discover, today)
     if reviewTrans:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
     showMessage("Balances + Review", f'Discover Balance: {discover} \n' f'GnuCash Discover Balance: {discoverGnu} \n \n' f'Review transactions:\n{reviewTrans}')
-    driver.quit()
+    driver.close()
 
 if __name__ == '__main__':
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(6)
+    driver = Driver("Chrome")
     runDiscover(driver)

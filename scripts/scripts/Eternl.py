@@ -4,16 +4,17 @@ import time
 if __name__ == '__main__' or __name__ == "Eternl":
     from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
     from Classes.Asset import Crypto
+    from Classes.WebDriver import Driver
 else:
     from .Functions.WebDriverFunctions import findWindowByUrl
     from .Classes.Asset import Crypto
 
 def locateEternlWindow(driver):
-    found = findWindowByUrl(driver, "eternl.io/app/mainnet")
+    found = driver.findWindowByUrl("eternl.io/app/mainnet")
     if not found:
-        eternlLogin(driver)
+        eternlLogin(driver.webDriver)
     else:
-        driver.switch_to.window(found)
+        driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def eternlLogin(driver):
@@ -24,7 +25,7 @@ def eternlLogin(driver):
     
 def getEternlBalance(driver):
     locateEternlWindow(driver)
-    return float(driver.find_element(By.XPATH, "//*[@id='cc-main-container']/div/div[1]/div/main/div[1]/div/div[1]/div/div[1]/div[2]/div/div/div/div[1]/div").text.strip('(initializing)').replace('\n', '').strip('₳').replace(',', ''))
+    return float(driver.webDriver.find_element(By.XPATH, "//*[@id='cc-main-container']/div/div[1]/div/main/div[1]/div/div[1]/div/div[1]/div[2]/div/div/div/div[1]/div").text.strip('(initializing)').replace('\n', '').strip('₳').replace(',', ''))
 
 def runEternl(driver):
     Cardano = Crypto("Cardano")
@@ -34,7 +35,7 @@ def runEternl(driver):
     return [Cardano]
 
 if __name__ == '__main__':
-    driver = openWebDriver("Chrome")
+    driver = Driver("Chrome")
     response = runEternl(driver)
     for coin in response:
         coin.getData()

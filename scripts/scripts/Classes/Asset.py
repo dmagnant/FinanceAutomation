@@ -93,7 +93,7 @@ class Crypto(Asset):
         account = self.symbol if account == None else account
         updateCryptoPriceInGnucash(self.symbol, format(self.price, ".2f"))
         
-class USD:
+class USD(Asset):
     "this is a class for tracking USD information"
     def __init__(self, name):
         self.name = name

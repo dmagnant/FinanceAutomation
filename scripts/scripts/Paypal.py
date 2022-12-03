@@ -5,17 +5,16 @@ from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Paypal":
     from Functions.GeneralFunctions import getPassword, setDirectory
-    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
+    from Classes.WebDriver import Driver
 else:
     from .Functions.GeneralFunctions import getPassword, setDirectory
-    from .Functions.WebDriverFunctions import findWindowByUrl
 
 def locatePayPalWindow(driver):
-    found = findWindowByUrl(driver, "paypal.com/myaccount")
+    found = driver.findWindowByUrl("paypal.com/myaccount")
     if not found:
-        payPalLogin(driver)
+        payPalLogin(driver.webDriver)
     else:
-        driver.switch_to.window(found)
+        driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def payPalLogin(driver):
@@ -57,10 +56,8 @@ def transferMoney(driver):
     
 def runPaypal(driver):
     locatePayPalWindow(driver)
-    transferMoney(driver)
+    transferMoney(driver.webDriver)
     
 if __name__ == '__main__':
-    directory = setDirectory()
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(5)
+    driver = Driver("Chrome")
     runPaypal(driver)

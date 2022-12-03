@@ -4,17 +4,16 @@ from selenium.common.exceptions import NoSuchElementException, ElementNotInterac
 
 if __name__ == '__main__' or __name__ == "Tellwut":
     from Functions.GeneralFunctions import showMessage
-    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
+    from Classes.WebDriver import Driver
 else:
     from .Functions.GeneralFunctions import showMessage
-    from .Functions.WebDriverFunctions import findWindowByUrl
 
 def locateTellWutWindow(driver):
-    found = findWindowByUrl(driver, "tellwut.com")
+    found = driver.findWindowByUrl("tellwut.com")
     if not found:
-        tellwutLogin(driver)
+        tellwutLogin(driver.webDriver)
     else:
-        driver.switch_to.window(found)
+        driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def tellwutLogin(driver):
@@ -35,10 +34,11 @@ def tellwutLogin(driver):
     
 def getTellWutBalance(driver):
     locateTellWutWindow(driver)
-    return driver.find_element(By.XPATH, "/html/body/div/header/div/div/div/div[4]/div/div/div[2]/div[1]/div[1]").text
+    return driver.webDriver.find_element(By.XPATH, "/html/body/div/header/div/div/div/div[4]/div/div/div[2]/div[1]/div[1]").text
 
 def completeTellWutSurveys(driver):
     locateTellWutWindow(driver)
+    driver = driver.webDriver
     driver.implicitly_wait(2)
     while True:
             try:
@@ -75,21 +75,20 @@ def completeTellWutSurveys(driver):
 
 def redeemTellWutRewards(driver):
     locateTellWutWindow(driver)
-    driver.get("https://www.tellwut.com/product/143--10-Amazon-com-e-Gift-Card.html")
-    driver.find_element(By.ID, "checkout_form_submit").click()
-    driver.find_element(By.ID, "form_button").click()
-    driver.find_element(By.ID, "accept-additional").click()
+    driver.webDriver.get("https://www.tellwut.com/product/143--10-Amazon-com-e-Gift-Card.html")
+    driver.webDriver.find_element(By.ID, "checkout_form_submit").click()
+    driver.webDriver.find_element(By.ID, "form_button").click()
+    driver.webDriver.find_element(By.ID, "accept-additional").click()
     time.sleep(3)
 
 def runTellwut(driver):
-    tellwutLogin(driver)
+    locateTellWutWindow(driver)
     completeTellWutSurveys(driver)
     balance = getTellWutBalance(driver)
     if int(balance) >= 4000:
         redeemTellWutRewards(driver)
 
 if __name__ == '__main__':
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(3)
-    tellwutLogin(driver)
+    driver = Driver("Chrome")
+    runTellwut(driver)
     

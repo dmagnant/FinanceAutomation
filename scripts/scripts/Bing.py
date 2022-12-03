@@ -6,10 +6,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Bing":
-    from Functions.GeneralFunctions import setDirectory
-    from Functions.WebDriverFunctions import openWebDriver
-else:
-    from .Functions.GeneralFunctions import setDirectory
+    from Classes.WebDriver import Driver
 
 def bingLogin(driver):
     driver.get('https://rewards.microsoft.com/')
@@ -107,7 +104,6 @@ def runBing(driver):
         claimBingRewards(driver)
 
 if __name__ == '__main__':
-    driver = openWebDriver("Edge", False)
-    driver.implicitly_wait(3)
-    runBing(driver)
+    driver = Driver("Edge", False)
+    runBing(driver.webDriver)
     
