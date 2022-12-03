@@ -6,16 +6,13 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "MyConstant":
-    from Functions.GeneralFunctions import (setDirectory, showMessage, getCryptocurrencyPrice, getOTP, getUsername, getPassword)
-    from Functions.GnuCashFunctions import (updateCoinQuantityFromStakingInGnuCash, updateCryptoPriceInGnucash)
-    from Functions.SpreadsheetFunctions import updateSpreadsheet
+    from Functions.GeneralFunctions import (setDirectory, showMessage, getOTP, getUsername, getPassword)
     from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
+    from Classes.Asset import Crypto
 else:
-    from .Functions.GeneralFunctions import (setDirectory, showMessage, getCryptocurrencyPrice, getOTP, getUsername, getPassword)
-    from .Functions.GnuCashFunctions import (updateCoinQuantityFromStakingInGnuCash, updateCryptoPriceInGnucash)
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet
+    from .Functions.GeneralFunctions import (setDirectory, showMessage, getOTP, getUsername, getPassword)
     from .Functions.WebDriverFunctions import findWindowByUrl
-    
+    from .Classes.Asset import Crypto
 
 def locateMyConstantWindow(driver):
     found = findWindowByUrl(driver, "www.myconstant.com")
@@ -44,13 +41,12 @@ def myConstantLogin(driver):
         char = 0
         time.sleep(2)
         while char < 6:
-            xpath_start = "//*[@id='layout']/div[2]/div/div/div[2]/div/div/div/div[3]/div/div/div["
+            xpath_start = "//*[@id='layout']/div[3]/div/div/div[2]/div/div/div/div[3]/div/div/div["            
             driver.find_element(By.XPATH, xpath_start + str(char + 1) + "]/input").send_keys(token[char])
             char += 1
         time.sleep(6)
     except NoSuchElementException:
         exception = "caught"
-
 
 def getCoinBalance(driver, coin):
         # click dropdown menu
@@ -62,7 +58,7 @@ def getCoinBalance(driver, coin):
         time.sleep(6)
         return float(driver.find_element(By.XPATH, "//*[@id='layout']/div[2]/div/div/div/div[2]/div[2]/form/div[2]/div[2]/span/span/span").text)
 
-def getMyConstantBalances(driver, type):
+def getMyConstantBalances(driver, type, coinList=None):
     locateMyConstantWindow(driver)
     if (type == "USD"):
         pyautogui.moveTo(1650, 167)
@@ -77,32 +73,26 @@ def getMyConstantBalances(driver, type):
         pyautogui.moveTo(1700, 145)
         time.sleep(2)
         # get coin balances
-        btcBalance = getCoinBalance(driver, ('BTC'))
-        ethBalance = getCoinBalance(driver, ('ETHEREUM'))
-        return [btcBalance, ethBalance]
+        for coin in coinList:
+            if coin.name == "Bitcoin":
+                coin.setBalance(getCoinBalance(driver, (coin.symbol)))
+            elif coin.name == "Ethereum":
+                coin.setBalance(getCoinBalance(driver, (coin.name)))
+        return coinList
 
 
 def runMyConstant(driver, type):
-    directory = setDirectory()
     locateMyConstantWindow(driver)
-    balances = getMyConstantBalances(driver, type)
+    Bitcoin = Crypto("Bitcoin")
+    Ethereum = Crypto("Ethereum")
+    balances = getMyConstantBalances(driver, type, [Bitcoin, Ethereum])
     if (type == "Crypto"):
-        # BTC
-        updateSpreadsheet(directory, 'Asset Allocation', 'Cryptocurrency', 'BTC-MyConstant', 1, balances[0], "BTC")
-        updateCoinQuantityFromStakingInGnuCash(balances[0], 'BTC-MyConstant')
-        btcPrice = getCryptocurrencyPrice('bitcoin')['bitcoin']['usd']
-        updateSpreadsheet(directory, 'Asset Allocation', 'Cryptocurrency', 'BTC-MyConstant', 2, btcPrice, "BTC")
-        updateCryptoPriceInGnucash('BTC', format(btcPrice, ".2f"))
-        # ETH
-        updateSpreadsheet(directory, 'Asset Allocation', 'Cryptocurrency', 'ETH-MyConstant', 1, balances[1], "ETH")
-        updateCoinQuantityFromStakingInGnuCash(balances[1], 'ETH-MyConstant')
-        ethPrice = getCryptocurrencyPrice('ethereum')['ethereum']['usd']
-        updateSpreadsheet(directory, 'Asset Allocation', 'Cryptocurrency', 'ETH-MyConstant', 2, ethPrice, "ETH")
-        updateCryptoPriceInGnucash('ETH', format(ethPrice, ".2f"))
+        for coin in balances:
+            account = coin.symbol + "-MyConstant"
+            coin.updateSpreadsheetAndGnuCash(account)
     return balances
 
 if __name__ == '__main__':
-    directory = setDirectory()
     driver = openWebDriver("Chrome")
     driver.implicitly_wait(3)
     type = "Crypto"
@@ -110,5 +100,5 @@ if __name__ == '__main__':
     if (type == "USD"):
         print('myconstant balance: ' + str(response))
     elif (type == "Crypto"):
-        print('btc balance: ' + str(response[0]))
-        print('eth balance: ' + str(response[1]))
+        for coin in response:
+            coin.getData()

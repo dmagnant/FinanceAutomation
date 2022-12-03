@@ -12,7 +12,10 @@ else:
     from .Functions.GeneralFunctions import setDirectory
 
 def bingLogin(driver):
-    directory = setDirectory()
+    driver.get('https://rewards.microsoft.com/')
+    time.sleep(2)
+    driver.maximize_window()
+    driver.implicitly_wait(1)
     time.sleep(1)
     # login
     try:
@@ -97,7 +100,6 @@ def claimBingRewards(driver):
         exception = "caught"
 
 def runBing(driver):
-    driver.get('https://rewards.microsoft.com/')
     bingLogin(driver)
     bingActivities(driver)
     balance = getBingBalance(driver)
@@ -105,7 +107,6 @@ def runBing(driver):
         claimBingRewards(driver)
 
 if __name__ == '__main__':
-    directory = setDirectory()
     driver = openWebDriver("Edge", False)
     driver.implicitly_wait(3)
     runBing(driver)

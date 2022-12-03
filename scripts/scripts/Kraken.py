@@ -5,15 +5,13 @@ from selenium.common.exceptions import (NoSuchElementException,
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Kraken":
-    from Functions.GeneralFunctions import (setDirectory, showMessage, getCryptocurrencyPrice, getOTP, getUsername, getPassword)
-    from Functions.GnuCashFunctions import (updateCoinQuantityFromStakingInGnuCash, updateCryptoPriceInGnucash)
-    from Functions.SpreadsheetFunctions import updateSpreadsheet
+    from Functions.GeneralFunctions import (setDirectory, getCryptocurrencyPrice, getOTP, getUsername, getPassword)
     from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
+    from Classes.Asset import Crypto    
 else:
-    from .Functions.GeneralFunctions import (setDirectory, showMessage, getCryptocurrencyPrice, getOTP, getUsername, getPassword)
-    from .Functions.GnuCashFunctions import (updateCoinQuantityFromStakingInGnuCash, updateCryptoPriceInGnucash)
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet
+    from .Functions.GeneralFunctions import (setDirectory, getCryptocurrencyPrice, getOTP, getUsername, getPassword)
     from .Functions.WebDriverFunctions import findWindowByUrl
+    from .Classes.Asset import Crypto
     
 def locateKrakenWindow(driver):
     found = findWindowByUrl(driver, "kraken.com")
@@ -43,51 +41,37 @@ def krakenLogin(driver):
         exception = 'already logged in'
     time.sleep(2)
 
-
 def getKrakenBalances(driver):
     locateKrakenWindow(driver)
     driver.get('https://www.kraken.com/u/history/ledger')
-    dotBalance = ''
     eth2Balance = ''
     num = 1
     while num < 20:
         balance = driver.find_element(By.XPATH, "//*[@id='__next']/div/main/div/div[2]/div/div/div[3]/div[2]/div/div[" + str(num) + "]/div/div[7]/div/div/span/span/span").text
         coin = driver.find_element(By.XPATH, "//*[@id='__next']/div/main/div/div[2]/div/div/div[3]/div[2]/div/div[" + str(num) + "]/div/div[7]/div/div/div").text
-        if coin == 'DOT':
-            if not dotBalance:
-                dotBalance = float(balance)
-        elif coin == 'ETH2':
+        if coin == 'ETH2':
             if not eth2Balance:
                 eth2Balance = float(balance)
-        num = 21 if eth2Balance and dotBalance else num + 1
-    
-    return [dotBalance, eth2Balance]
+        num = 21 if eth2Balance else num + 1
+    return [eth2Balance]
 
 def runKraken(driver):
-    directory = setDirectory()
     locateKrakenWindow(driver)
+    Ethereum2 = Crypto("Ethereum2")
     balances = getKrakenBalances(driver)
-    
-    updateSpreadsheet(directory, 'Asset Allocation', 'Cryptocurrency', 'DOT', 1, balances[0], "DOT")
-    updateCoinQuantityFromStakingInGnuCash(balances[0], 'DOT')
-    dotPrice = getCryptocurrencyPrice('polkadot')['polkadot']['usd']
-    updateSpreadsheet(directory, 'Asset Allocation', 'Cryptocurrency', 'DOT', 2, dotPrice, "DOT")
-    updateCryptoPriceInGnucash('DOT', format(dotPrice, ".2f"))
-
-    updateSpreadsheet(directory, 'Asset Allocation', 'Cryptocurrency', 'ETH2', 1, balances[1], "ETH2")
-    updateCoinQuantityFromStakingInGnuCash(balances[1], 'ETH2')
-    eth2Price = getCryptocurrencyPrice('ethereum')['ethereum']['usd']
-    updateSpreadsheet(directory, 'Asset Allocation', 'Cryptocurrency', 'ETH-Kraken', 2, eth2Price, "ETH")
-    updateSpreadsheet(directory, 'Asset Allocation', 'Cryptocurrency', 'ETH2', 2, eth2Price, "ETH2")
-    updateCryptoPriceInGnucash('ETH', format(eth2Price, ".2f"))
-    updateCryptoPriceInGnucash('ETH2', format(eth2Price, ".2f"))
-
-    return balances
+    coinList = [Ethereum2]
+    for coin in coinList:
+        if coin.name == "Ethereum2":
+            Ethereum2.setBalance(balances[0])
+            Ethereum2.setPrice(getCryptocurrencyPrice('ethereum')['ethereum']['usd'])
+            Ethereum2.updateBalanceInSpreadSheet()
+            Ethereum2.updateBalanceInGnuCash()
+    return coinList
 
 if __name__ == '__main__':
-    directory = setDirectory()
     driver = openWebDriver("Chrome")
     driver.implicitly_wait(2)
-    response = runKraken(directory, driver)
-    print('dot balance: ' + str(response[0]))
-    print('eth2 balance: ' + str(response[1]))
+    response = runKraken(driver)
+    for coin in response:
+        coin.getData()
+        

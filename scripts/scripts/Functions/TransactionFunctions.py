@@ -7,7 +7,6 @@ from .GeneralFunctions import closeExpressVPN, getPassword, getUsername, showMes
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
-
 def modifyTransactionDescription(description, amount="0.00"):
     if "INTERNET TRANSFER FROM ONLINE SAVINGS ACCOUNT XXXXXX9703" in description.upper():
         description = "Tessa Deposit"

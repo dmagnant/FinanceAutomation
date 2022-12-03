@@ -1,22 +1,19 @@
 import time
 
 from random_words import RandomWords
-from selenium.common.exceptions import WebDriverException
-import time
-
+from selenium.common.exceptions import (NoSuchElementException,
+                                        WebDriverException)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import NoSuchElementException
 
 if __name__ == '__main__' or __name__ == "Presearch":
-    from Functions.GeneralFunctions import setDirectory, showMessage, getCryptocurrencyPrice
-    from Functions.GnuCashFunctions import updateCoinQuantityFromStakingInGnuCash, updateCryptoPriceInGnucash
-    from Functions.SpreadsheetFunctions import updateSpreadsheet
-    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
+    from Classes.Cryptocurrency import Crypto
+    from Functions.GeneralFunctions import setDirectory, showMessage
+    from Functions.WebDriverFunctions import findWindowByUrl, openWebDriver
+
 else:
-    from .Functions.GeneralFunctions import setDirectory, showMessage, getCryptocurrencyPrice
-    from .Functions.GnuCashFunctions import updateCoinQuantityFromStakingInGnuCash, updateCryptoPriceInGnucash
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet
+    from .Classes.Asset import Crypto
+    from .Functions.GeneralFunctions import setDirectory, showMessage
     from .Functions.WebDriverFunctions import findWindowByUrl
 
 def locatePresearchWindow(driver):
@@ -104,19 +101,18 @@ def getPresearchBalance(driver):
         time.sleep(1)
     searchRewards = float(driver.find_element(By.XPATH, '/html/body/div[1]/header/div[2]/div[2]/div/div[1]/div/div[1]/div/span[1]').text.strip(' PRE'))
     stakedTokens = float(driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[1]/div/h2').text.strip(' PRE').replace(',', ''))
-    preTotal = searchRewards + stakedTokens
-    return [preTotal, stakedTokens]
+    balance = searchRewards + stakedTokens
+    return balance
 
 def presearchRewardsRedemptionAndBalanceUpdates(driver):
-    directory = setDirectory()
     driver.implicitly_wait(5)
+    Presearch = Crypto("Presearch")
     claimPresearchRewards(driver)
-    balances = getPresearchBalance(driver)
-    updateSpreadsheet(directory, 'Asset Allocation', 'Cryptocurrency', 'PRE', 1, balances[0], "PRE")
-    updateCoinQuantityFromStakingInGnuCash(balances[0], 'PRE')
-    prePrice = getCryptocurrencyPrice('presearch')['presearch']['usd']
-    updateSpreadsheet(directory, 'Asset Allocation', 'Cryptocurrency', 'PRE', 2, prePrice, "PRE")
-    updateCryptoPriceInGnucash('PRE', format(prePrice, ".2f"))        
+    preBalance = getPresearchBalance(driver)
+    Presearch.setBalance(preBalance)
+    Presearch.setPrice(Presearch.getPriceFromCoinGecko())
+    Presearch.updateSpreadsheetAndGnuCash()
+    return [Presearch]
     
 if __name__ == '__main__':
     directory = setDirectory()
@@ -125,6 +121,5 @@ if __name__ == '__main__':
     locatePresearchWindow(driver)
     searchUsingPresearch(driver)
     response = presearchRewardsRedemptionAndBalanceUpdates(driver)
-    print('balance: ' + str(response[0]))
-    presearchRewardsRedemptionAndBalanceUpdates(driver, "text")
-    
+    for coin in response:
+        coin.getData()

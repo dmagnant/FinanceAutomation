@@ -219,7 +219,6 @@ def updateCryptoPriceInGnucash(symbol, coinPrice):
     myBook.close()
 
 def updateCoinQuantityFromStakingInGnuCash(coinQuantity, coinSymbol):
-    directory = setDirectory()
     myBook = openGnuCashBook('Finance', False, False)
     gnuBalance = getGnuCashBalance(myBook, coinSymbol)
     coinDifference = Decimal(coinQuantity) - Decimal(gnuBalance)
@@ -239,7 +238,6 @@ def updateCoinQuantityFromStakingInGnuCash(coinQuantity, coinSymbol):
         f'is it rounding issue?')
 
 def getDollarsInvestedPerCoin(symbol):
-    directory=setDirectory()
     # get dollars invested balance (must be run per coin)
     mybook = openGnuCashBook('Finance', True, True)
     gnu_account = getAccountPath(symbol)

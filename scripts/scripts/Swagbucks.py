@@ -118,7 +118,7 @@ def dailyPoll(driver):
         # click on first answer
         driver.find_element(By.CSS_SELECTOR, "td.pollCheckbox").click()
         # click Vote & Earn
-        driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/div[2]/div[1]/div/div[2]/div[2]/div[1]/div[5]/div[2]/div[2]/div[1]/div[1]").click()
+        driver.find_element(By.XPATH, "/html/body/div[1]/div[3]/div[2]/div[1]/div/div[2]/div[2]/div[1]/div[5]/div[2]/div[2]/div[1]/div[1]").click()
     except NoSuchElementException:
         exception = "already answered"
     driver.close()
@@ -178,7 +178,7 @@ def swagbucksInbox(driver):
             contentPath = "/html/body/div[1]/div[3]/div[1]/div[1]/main/div/div[2]/div/div[3]/div[1]/a/div[2]/span"
             driver.find_element(By.XPATH, contentPath).click()
             description = driver.find_element(By.XPATH, "/html/body/div[1]/div[3]/div[1]/div[1]/main/h1").text
-            if description == "Click & Earn Every Day!":
+            if "Earn Every" in description:
                 # click continue
                 driver.find_element(By.XPATH, "/html/body/div[1]/div[3]/div[1]/div[1]/main/div[5]/div[1]/div[1]/div/a").click()
                 time.sleep(2)
@@ -283,4 +283,3 @@ if __name__ == '__main__':
     driver = openWebDriver("Chrome")
     driver.implicitly_wait(5)
     runSwagbucks(driver, True)
-    

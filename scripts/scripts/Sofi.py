@@ -141,14 +141,11 @@ def runSofi(driver):
     return [checking, savings]
 
 if __name__ == '__main__':
-    # directory = setDirectory()
     driver = openWebDriver("Chrome")
     driver.implicitly_wait(5)
-    # response = runSofi(driver)
-    # print('checking balance: ' + response[0][0])
-    # print('transactions to review: ' + response[0][1])
-    # print('savings balance: ' + response[1][0])
-    # print('transactions to review: ' + response[1][1])
-    # sofiLogout(driver)
-    balance = driver.find_element(By.XPATH, "/html/body/div/main/div[3]/div[2]/table[1]/tbody/tr[1]/td[6]/span").text
-    print(balance)
+    response = runSofi(driver)
+    print('checking balance: ' + response[0][0])
+    print('transactions to review: ' + response[0][1])
+    print('savings balance: ' + response[1][0])
+    print('transactions to review: ' + response[1][1])
+    sofiLogout(driver)

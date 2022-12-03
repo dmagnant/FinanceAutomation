@@ -63,4 +63,11 @@ def runDailyBank():
     purgeOldGnucashFiles()
 
 if __name__ == '__main__':
-    runDailyBank()
+    # runDailyBank()
+    # driver = openWebDriver("Chrome")
+    # updateCryptoPrices(driver)
+    Finance = openGnuCashBook('Finance', True, True)
+    with Finance as book:
+        balance = book.accounts(fullname="Assets:Non-Liquid Assets:CryptoCurrency:Algorand").get_balance()
+    book.close()
+    print(balance)

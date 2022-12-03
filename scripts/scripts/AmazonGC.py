@@ -4,6 +4,7 @@ if __name__ == '__main__' or __name__ == "AmazonGC":
     from Functions.GeneralFunctions import showMessage
     from Functions.WebDriverFunctions import openWebDriver
     from Functions.GnuCashFunctions import openGnuCashBook, getGnuCashBalance
+    from Classes.WebDriver import Driver
 else:
     from .Functions.GeneralFunctions import showMessage
     from .Functions.WebDriverFunctions import openWebDriver
