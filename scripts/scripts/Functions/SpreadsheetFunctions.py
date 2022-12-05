@@ -2,9 +2,7 @@
 import gspread
 import time
 from .GeneralFunctions import getCryptocurrencyPrice, setDirectory, showMessage
-from .WebDriverFunctions import findWindowByUrl
 from .GnuCashFunctions import updateCryptoPriceInGnucash
-
 
 def updateSpreadsheet(directory, sheetTitle, tabTitle, account, month, value, symbol="$", modified=False):
     jsonCreds = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"

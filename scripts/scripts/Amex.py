@@ -10,10 +10,12 @@ if __name__ == '__main__' or __name__ == "Amex":
     from Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from Functions.SpreadsheetFunctions import updateSpreadsheet
     from Classes.WebDriver import Driver
+    from Classes.Asset import USD
 else:
     from .Functions.GeneralFunctions import (getPassword, getUsername, setDirectory, showMessage)
     from .Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet
+    from .Classes.Asset import USD
 
 def locateAmexWindow(driver):
     found = driver.findWindowByUrl("global.americanexpress.com")
@@ -72,34 +74,21 @@ def claimAmexRewards(driver):
         driver.webDriver.find_element(By.XPATH, "//*[@id='continue-btn']/span").click()
         driver.webDriver.find_element(By.XPATH, "//*[@id='use-dollars-btn']/span").click()
 
-def locateAndUpdateSpreadsheetForAmex(driver, amex):
-    directory = setDirectory()
-    # get current date
-    today = datetime.today()
-    month = today.month
-    year = today.year
-    # switch worksheets if running in December (to next year's worksheet)
-    if month == 12:
-        year = year + 1
-    amexNeg = float(amex.strip('$')) * -1
-    updateSpreadsheet(directory, 'Checking Balance', year, 'Amex', month, amexNeg, "Amex CC")
-    updateSpreadsheet(directory, 'Checking Balance', year, 'Amex', month, amexNeg, "Amex CC", True)
-    # Display Checking Balance spreadsheet
-    driver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1684fQ-gW5A0uOf7s45p9tC4GiEE5s5_fjO5E7dgVI1s/edit#gid=1688093622');")
-
 def runAmex(driver):
     directory = setDirectory()
+    myBook = openGnuCashBook('Finance', False, False)
     locateAmexWindow(driver)
-    amex = getAmexBalance(driver)
+    Amex = USD("Amex")
+    Amex.setBalance(getAmexBalance(driver))
     exportAmexTransactions(driver.webDriver)
     claimAmexRewards(driver)
-    myBook = openGnuCashBook('Finance', False, False)
-    reviewTrans = importGnuTransaction('Amex', r'C:\Users\dmagn\Downloads\activity.csv', myBook, driver.webDriver, directory)
-    amexGnu = getGnuCashBalance(myBook, 'Amex')
-    locateAndUpdateSpreadsheetForAmex(driver.webDriver, amex)
-    if reviewTrans:
+    reviewTrans = importGnuTransaction(Amex.name, r'C:\Users\dmagn\Downloads\activity.csv', myBook, driver.webDriver)
+    Amex.setReviewTransactions(reviewTrans)
+    Amex.updateGnuBalance(myBook)
+    Amex.locateAndUpdateSpreadsheet(driver.webDriver)
+    if Amex.reviewTransactions:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
-    showMessage("Balances + Review", f'Amex Balance: {amex} \n' f'GnuCash Amex Balance: {amexGnu} \n \n' f'Review transactions:\n{reviewTrans}')
+    showMessage("Balances + Review", f'Amex Balance: {Amex.balance} \n' f'GnuCash Amex Balance: {Amex.gnuBalance} \n \n' f'Review transactions:\n{Amex.reviewTransactions}')
     driver.close()
 
 if __name__ == '__main__':

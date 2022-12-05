@@ -12,12 +12,15 @@ if __name__ == '__main__' or __name__ == "Sofi":
     from Functions.GnuCashFunctions import openGnuCashBook, importUniqueTransactionsToGnuCash
     from Functions.TransactionFunctions import modifyTransactionDescription
     from Classes.WebDriver import Driver
+    from Classes.Asset import USD
+
 else:
     from .Functions.GeneralFunctions import (closeExpressVPN, getPassword,
                                             getStartAndEndOfDateRange,
                                             setDirectory, showMessage)
     from .Functions.GnuCashFunctions import openGnuCashBook, importUniqueTransactionsToGnuCash
     from .Functions.TransactionFunctions import modifyTransactionDescription
+    from .Classes.Asset import USD
 
 def locateSofiWindow(driver):
     found = driver.findWindowByUrl("sofi.com")
@@ -81,7 +84,10 @@ def getSofiBalanceAndOrientPage(driver, account):
 def setSofiTransactionElementRoot(table, row, column, div):
     return "/html/body/div/main/div[3]/div[" + div + "]/table[" + str(table) + "]/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/span"
 
-def getTransactionsFromSofiWebsite(driver, dateRange, sofiActivity, today, tableStart, div):
+def getTransactionsFromSofiWebsite(driver, dateRange, today, tableStart, div):
+    directory = setDirectory()
+    sofiActivity = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\sofi.csv"
+    open(sofiActivity, 'w', newline='').truncate()
     year = today.year
     table = tableStart
     row = 1
@@ -89,7 +95,6 @@ def getTransactionsFromSofiWebsite(driver, dateRange, sofiActivity, today, table
     elementRoot = setSofiTransactionElementRoot(table, row, column, div)
     insideDateRange = True
     previousMonth = False
-    
     while insideDateRange:
         try:
             # capture Date in 'Mon Day' format and add year
@@ -116,34 +121,30 @@ def getTransactionsFromSofiWebsite(driver, dateRange, sofiActivity, today, table
                 previousMonth = True
             else:
                 insideDateRange = False
+    return sofiActivity
 
 def runSofiAccount(driver, dateRange, today, account):
-    directory = setDirectory()
     balanceAndPageOrientation = getSofiBalanceAndOrientPage(driver, account)
-    sofiActivity = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\sofi.csv"
-    gnuSofiActivity = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\gnu_sofi.csv"
-    open(sofiActivity, 'w', newline='').truncate()
-    open(gnuSofiActivity, 'w', newline='').truncate()
-    getTransactionsFromSofiWebsite(driver.webDriver, dateRange, sofiActivity, today, balanceAndPageOrientation[1], balanceAndPageOrientation[2])
-    myBook = openGnuCashBook('Finance', False, False)
-    reviewTrans = importUniqueTransactionsToGnuCash('Sofi ' + account, sofiActivity, gnuSofiActivity, myBook, driver.webDriver, directory, dateRange, 0)
+    sofiActivity = getTransactionsFromSofiWebsite(driver.webDriver, dateRange, today, balanceAndPageOrientation[1], balanceAndPageOrientation[2])
+    reviewTrans = importUniqueTransactionsToGnuCash('Sofi ' + account, sofiActivity, driver.webDriver, dateRange, 0)
     return [balanceAndPageOrientation[0], reviewTrans]
 
 def runSofi(driver):
-    locateSofiWindow(driver)
     today = datetime.today()
     dateRange = getStartAndEndOfDateRange(today, today.month, today.year, 7)
-    checking = runSofiAccount(driver, dateRange, today, "Checking")
-    savings = runSofiAccount(driver, dateRange, today, "Savings")
-    # switch back to checking page
-    driver.webDriver.get("https://www.sofi.com/my/money/account/#/1000028154579/account-detail")
-    return [checking, savings]
+    locateSofiWindow(driver)
+    Checking = USD("Checking")
+    Savings = USD("Savings")
+    for account in [Checking, Savings]:
+        balanceAndTrans = runSofiAccount(driver, dateRange, today, account.name)
+        account.setBalance(balanceAndTrans[0])
+        account.setReviewTransactions(balanceAndTrans[1])
+    driver.webDriver.get("https://www.sofi.com/my/money/account/#/1000028154579/account-detail") # switch back to checking page
+    return [Checking, Savings]
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
     response = runSofi(driver)
-    print('checking balance: ' + response[0][0])
-    print('transactions to review: ' + response[0][1])
-    print('savings balance: ' + response[1][0])
-    print('transactions to review: ' + response[1][1])
+    for accounts in response:
+        accounts.getData()
     sofiLogout(driver)

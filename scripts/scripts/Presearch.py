@@ -105,7 +105,7 @@ def getPresearchBalance(driver):
     return balance
 
 def presearchRewardsRedemptionAndBalanceUpdates(driver):
-    driver.implicitly_wait(5)
+    driver.webDriver.implicitly_wait(5)
     Presearch = Crypto("Presearch")
     claimPresearchRewards(driver)
     preBalance = getPresearchBalance(driver)

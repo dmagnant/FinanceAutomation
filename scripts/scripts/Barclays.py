@@ -11,10 +11,12 @@ if __name__ == '__main__' or __name__ == "Barclays":
     from Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from Functions.SpreadsheetFunctions import updateSpreadsheet
     from Classes.WebDriver import Driver
+    from Classes.Asset import USD
 else:
     from .Functions.GeneralFunctions import (getPassword, getUsername, setDirectory, showMessage)
     from .Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet
+    from .Classes.Asset import USD
 
 def locateBarclaysWindow(driver):
     found = driver.findWindowByUrl("barclaycardus.com")
@@ -103,7 +105,6 @@ def exportBarclaysTransactions(driver, today):
     time.sleep(2)
     return r"C:\Users\dmagn\Downloads\CreditCard_" + yearFrom + monthFrom + "11_" + yearTo + monthTo + "10.csv"
 
-
 def claimBarclaysRewards(driver):
     locateBarclaysWindow(driver)      
     # # REDEEM REWARDS
@@ -126,35 +127,24 @@ def claimBarclaysRewards(driver):
     # click on Redeem Now
     driver.webDriver.find_element(By.XPATH, "/html/body/section[2]/div[4]/div[2]/cashback/div/div[2]/div/ui-view/redeem/div/review/div/div/div/div/div[2]/form/div[3]/div/div[1]/button").click()
 
-def locateAndUpdateSpreadsheetForBarclays(driver, barclays, today):
-    directory = setDirectory()
-    # switch worksheets if running in December (to next year's worksheet)
-    month = today.month
-    year = today.year
-    if month == 12:
-        year = year + 1
-    barclaysNeg = float(barclays) * -1
-    updateSpreadsheet(directory, 'Checking Balance', year, 'Barclays', month, barclaysNeg, 'Barclays CC')
-    updateSpreadsheet(directory, 'Checking Balance', year, 'Barclays', month, barclaysNeg, 'Barclays CC', True)
-    # Display Checking Balance spreadsheet
-    driver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1684fQ-gW5A0uOf7s45p9tC4GiEE5s5_fjO5E7dgVI1s/edit#gid=1688093622');")
-
 def runBarclays(driver):
     directory = setDirectory()
-    locateBarclaysWindow(driver)
-    barclays = getBarclaysBalance(driver)
-    rewardsBalance = float(driver.find_element(By.XPATH, "//*[@id='rewardsTile']/div[2]/div/div[2]/div[1]/div").text.strip('$'))
     today = datetime.today()
+    myBook = openGnuCashBook('Finance', False, False)
+    Barclays = USD("Barclays")
+    locateBarclaysWindow(driver)
+    Barclays.setBalance(getBarclaysBalance(driver))
+    rewardsBalance = float(driver.find_element(By.XPATH, "//*[@id='rewardsTile']/div[2]/div/div[2]/div[1]/div").text.strip('$'))
     transactionsCSV = exportBarclaysTransactions(driver.webDriver, today)
     if rewardsBalance > 50:
         claimBarclaysRewards(driver, rewardsBalance)
-    myBook = openGnuCashBook('Finance', False, False)
-    reviewTrans = importGnuTransaction('Barclays', transactionsCSV, myBook, driver.webDriver, directory, 5)
-    barclaysGnu = getGnuCashBalance(myBook, 'Barclays')
-    locateAndUpdateSpreadsheetForBarclays(driver.webDriver, barclays, today)
-    if reviewTrans:
+    reviewTrans = importGnuTransaction(Barclays.name, transactionsCSV, myBook, driver.webDriver, 5)
+    Barclays.setReviewTransactions(reviewTrans)
+    Barclays.updateGnuBalance(myBook)
+    Barclays.locateAndUpdateSpreadsheet(driver.webDriver)
+    if Barclays.reviewTransactions:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
-    showMessage("Balances + Review", f'Barclays balance: {barclays} \n' f'GnuCash Barclays balance: {barclaysGnu} \n \n' f'Review transactions:\n{reviewTrans}')
+    showMessage("Balances + Review", f'Barclays balance: {Barclays.balance} \n' f'GnuCash Barclays balance: {Barclays.gnuBalance} \n \n' f'Review transactions:\n{Barclays.reviewTransactions}')
     driver.close()
 
 if __name__ == '__main__':

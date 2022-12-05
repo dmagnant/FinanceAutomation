@@ -3,7 +3,7 @@ import time
 from datetime import datetime
 from decimal import Decimal
 
-from .GeneralFunctions import closeExpressVPN, getPassword, getUsername, showMessage
+from .GeneralFunctions import closeExpressVPN, getPassword, getUsername, showMessage, setDirectory
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
@@ -253,7 +253,8 @@ def formatTransactionVariables(account, row):
         reviewTransPath = row[0] + ", " + row[1] + ", " + row[2] + "\n"        
     return [postDate, description, amount, skipTransaction, fromAccount, reviewTransPath]
 
-def getEnergyBillAmounts(driver, directory, amount, energyBillNum):
+def getEnergyBillAmounts(driver, amount, energyBillNum):
+    directory = setDirectory()
     if energyBillNum == 1:
         closeExpressVPN()
         driver.execute_script("window.open('https://login.arcadia.com/email');")

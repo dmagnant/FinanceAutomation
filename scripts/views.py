@@ -55,8 +55,7 @@ def ally(request):
         driver = Driver("Chrome")
         if "main" in request.POST:
             response = runAlly(driver)
-            print('balance: ' + str(response[0]))
-            print('transactions to review: ' + str(response[1]))
+            response.getData()
         elif "login" in request.POST:
             locateAllyWindow(driver)
         elif "balance" in request.POST:
@@ -280,7 +279,7 @@ def myConstant(request):
             currency = body.get("type")
             response = runMyConstant(driver, currency) if "main" in request.POST else getMyConstantBalances(driver, currency)
             if currency == "USD":
-                print('myconstant balance: ' + str(response))
+                response.getData()
             elif currency == "Crypto":
                 for coin in response:
                     coin.getData()
@@ -330,8 +329,9 @@ def sofi(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
-            sofiBalanceAndTransactions = runSofi(driver)
-            print(sofiBalanceAndTransactions)
+            response = runSofi(driver)
+            for accounts in response:
+                accounts.getData()
         elif "login" in request.POST:
             locateSofiWindow(driver)
         elif "checkingBalance" in request.POST:

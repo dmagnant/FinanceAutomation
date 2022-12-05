@@ -9,10 +9,12 @@ if __name__ == '__main__' or __name__ == "Chase":
     from Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from Functions.SpreadsheetFunctions import updateSpreadsheet
     from Classes.WebDriver import Driver
+    from Classes.Asset import USD
 else:
     from .Functions.GeneralFunctions import (setDirectory, showMessage)
     from .Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet
+    from .Classes.Asset import USD
 
 def locateChaseWindow(driver):
     found = driver.findWindowByUrl("chase.com/web/auth")
@@ -77,34 +79,23 @@ def claimChaseRewards(driver):
         pyautogui.press('tab')
         pyautogui.press('tab')
         pyautogui.press('enter')                
-        
-def locateAndUpdateSpreadsheetForChase(driver, chase, today):
-    directory = setDirectory()
-    # switch worksheets if running in December (to next year's worksheet)
-    month = today.month
-    year = today.year
-    if month == 12:
-        year = year + 1
-    chaseNeg = float(chase) * -1
-    updateSpreadsheet(directory, 'Checking Balance', year, 'Chase', month, chaseNeg, 'Chase CC')
-    updateSpreadsheet(directory, 'Checking Balance', year, 'Chase', month, chaseNeg, 'Chase CC', True)
-    # Display Checking Balance spreadsheet
-    driver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1684fQ-gW5A0uOf7s45p9tC4GiEE5s5_fjO5E7dgVI1s/edit#gid=1688093622');")
 
 def runChase(driver):
     directory = setDirectory()
-    locateChaseWindow(driver)
-    chase = getChaseBalance(driver)
     today = datetime.today()
+    myBook = openGnuCashBook('Finance', False, False)
+    Chase = USD("Chase")
+    locateChaseWindow(driver)
+    Chase.setBalance(getChaseBalance(driver))
     transactionsCSV = exportChaseTransactions(driver.webDriver, today)
     claimChaseRewards(driver)
-    myBook = openGnuCashBook('Finance', False, False)
-    reviewTrans = importGnuTransaction('Chase', transactionsCSV, myBook, driver.webDriver, directory)
-    chaseGnu = getGnuCashBalance(myBook, 'Chase')
-    locateAndUpdateSpreadsheetForChase(driver.webDriver, chase, today)
-    if reviewTrans:
+    reviewTrans = importGnuTransaction(Chase.name, transactionsCSV, myBook, driver.webDriver)
+    Chase.setReviewTransactions(reviewTrans)
+    Chase.updateGnuBalance(myBook)
+    Chase.locateAndUpdateSpreadsheet(driver.webDriver)
+    if Chase.reviewTransactions:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
-    showMessage("Balances + Review", f'Chase Balance: {chase} \n' f'GnuCash Chase Balance: {chaseGnu} \n \n' f'Review transactions:\n{reviewTrans}')
+    showMessage("Balances + Review", f'Chase Balance: {Chase.balance} \n' f'GnuCash Chase Balance: {Chase.gnuBalance} \n \n' f'Review transactions:\n{Chase.reviewTransactions}')
     driver.close()
 
 if __name__ == '__main__':

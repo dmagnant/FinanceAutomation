@@ -16,10 +16,9 @@ from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Cointiply":
     from Functions.GeneralFunctions import getPassword, getUsername, setDirectory, showMessage
-    from Functions.WebDriverFunctions import openWebDriver    
+    from Classes.WebDriver import Driver
 else:
     from .Functions.GeneralFunctions import getPassword, getUsername, setDirectory, showMessage
-    from .Functions.WebDriverFunctions import openWebDriver
     
 def cointiplyLogin(directory, driver):
     driver.get("https://cointiply.com/login")
@@ -261,6 +260,5 @@ def runCointiply(directory, driver, faucetRun=True):
 
 if __name__ == '__main__':
     directory = setDirectory()
-    driver = openWebDriver("Chrome")
-    driver.implicitly_wait(2)
+    driver = Driver("Chrome")
     runCointiply(directory, driver, True)

@@ -11,25 +11,25 @@ else:
 def locateTellWutWindow(driver):
     found = driver.findWindowByUrl("tellwut.com")
     if not found:
-        tellwutLogin(driver.webDriver)
+        tellwutLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def tellwutLogin(driver):
-    driver.execute_script("window.open('https://www.tellwut.com/signin');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.webDriver.execute_script("window.open('https://www.tellwut.com/signin');")
+    driver.webDriver.switch_to.window(driver.webDriver.window_handles[len(driver.webDriver.window_handles)-1])
     try:
         getTellWutBalance(driver)
     except NoSuchElementException:
         print('not already logged in or balance element not found')
         # click Sign In
         try:
-            driver.find_element(By.XPATH, "/html/body/div[1]/main/div[2]/div[2]/div[1]/form/div[4]/div/button").click()
+            driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/main/div[2]/div[2]/div[1]/form/div[4]/div/button").click()
         except NoSuchElementException:
             showMessage('Captcha or Sign in button not found', "complete captcha, then click OK. If fails, confirm element for sign in")
-            driver.find_element(By.XPATH, "/html/body/div[1]/main/div[2]/div[2]/div[1]/form/div[6]/div/button").click()
-    driver.get("https://www.tellwut.com/")
+            driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/main/div[2]/div[2]/div[1]/form/div[6]/div/button").click()
+    driver.webDriver.get("https://www.tellwut.com/")
 
     
 def getTellWutBalance(driver):

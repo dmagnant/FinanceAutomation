@@ -12,10 +12,12 @@ if __name__ == '__main__' or __name__ == "BoA":
     from Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from Functions.SpreadsheetFunctions import updateSpreadsheet
     from Classes.WebDriver import Driver
+    from Classes.Asset import USD    
 else:
     from .Functions.GeneralFunctions import (getPassword, getUsername, setDirectory, showMessage)
     from .Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet
+    from .Classes.Asset import USD
 
 def locateBoAWindowAndOpenAccount(driver, account):
     found = driver.findWindowByUrl("secure.bankofamerica.com")
@@ -86,7 +88,6 @@ def exportBoATransactions(driver, account, today):
     driver.execute_script("window.scrollTo(0, 300)")
     # click Download Transactions
     driver.find_element(By.XPATH, "/html/body/div[1]/div/div[4]/div[1]/div/div[5]/div[2]/div[2]/div/div[3]/div/div[4]/div[2]/a/span").click()
-
     year = today.year
     stmtMonth = today.strftime("%B")
     stmtYear = str(year)
@@ -165,40 +166,23 @@ def claimBoARewards(driver, account):
             # click Complete redemption
             driver.find_element(By.XPATH,"/html/body/div[2]/div[2]/div[1]/div[1]/div[4]/input[1]").click()
 
-def locateAndUpdateSpreadsheetForBoA(driver, BoA, account, today):
-    directory = setDirectory()
-    BoA = 0.00 if float(BoA) < 0 else float(BoA) * -1
-    month = today.month
-    year = today.year
-    # switch worksheets if running in December (to next year's worksheet)
-    if month == 12:
-        year = year + 1
-
-    if account == "Personal":
-        updateSpreadsheet(directory, 'Checking Balance', year, 'BoA', month, BoA, 'BoA CC')
-        updateSpreadsheet(directory, 'Checking Balance', year, 'BoA', month, BoA, 'BoA CC', True)
-        driver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1684fQ-gW5A0uOf7s45p9tC4GiEE5s5_fjO5E7dgVI1s/edit#gid=1688093622');")
-    else:
-        updateSpreadsheet(directory, 'Home', str(year) + ' Balance', 'BoA-joint', month, BoA, 'BoA CC')
-        updateSpreadsheet(directory, 'Home', str(year) + ' Balance', 'BoA-joint', month, BoA, 'BoA CC', True)
-        # Display Home spreadsheet
-        driver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1oP3U7y8qywvXG9U_zYXgjFfqHrCyPtUDl4zPDftFCdM/edit#gid=317262693');")
-
 def runBoA(driver, account):
     directory = setDirectory()
-    locateBoAWindowAndOpenAccount(driver, account)
-    BoA = getBoABalance(driver, account)
     today = datetime.today()
-    transactionsCSV = exportBoATransactions(driver.webDriver, account, today)
-    claimBoARewards(driver, account)
     myBook = openGnuCashBook('Finance', False, False) if account == "Personal" else openGnuCashBook('Home', False, False)
     importAccount = 'BoA' if account == "Personal" else 'BoA-joint'
-    reviewTrans = importGnuTransaction(importAccount, transactionsCSV, myBook, driver.webDriver, directory)
-    BoAGnu = getGnuCashBalance(myBook, importAccount)
-    locateAndUpdateSpreadsheetForBoA(driver, BoA, account, today)
-    if reviewTrans:
+    BoA = USD(importAccount)
+    locateBoAWindowAndOpenAccount(driver, account)
+    BoA.setBalance(getBoABalance(driver, account))
+    transactionsCSV = exportBoATransactions(driver.webDriver, account, today)
+    claimBoARewards(driver, account)
+    reviewTrans = importGnuTransaction(importAccount, transactionsCSV, myBook, driver.webDriver)
+    BoA.setReviewTransactions(reviewTrans)
+    BoA.updateGnuBalance(myBook)
+    BoA.locateAndUpdateSpreadsheet(driver.webDriver)
+    if BoA.reviewTransactions:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash") if account == "Personal" else os.startfile(directory + r"\Stuff\Home\Finances\Home.gnucash")
-    showMessage("Balances + Review", f'BoA Balance: {BoA} \n' f'GnuCash BoA Balance: {BoAGnu} \n \n' f'Review transactions:\n{reviewTrans}')
+    showMessage("Balances + Review", f'BoA Balance: {BoA.balance} \n' f'GnuCash BoA Balance: {BoA.gnuBalance} \n \n' f'Review transactions:\n{BoA.reviewTransactions}')
     driver.close()
     # startExpressVPN()
 

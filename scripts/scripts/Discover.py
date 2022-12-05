@@ -12,10 +12,12 @@ if __name__ == '__main__' or __name__ == "Discover":
     from Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from Functions.SpreadsheetFunctions import updateSpreadsheet
     from Classes.WebDriver import Driver
+    from Classes.Asset import USD
 else:
     from .Functions.GeneralFunctions import (getPassword, setDirectory, showMessage)
     from .Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet
+    from .Classes.Asset import USD
 
 def locateDiscoverWindow(driver):
     found = driver.findWindowByUrl("discover.com")
@@ -80,33 +82,22 @@ def claimDiscoverRewards(driver):
     except (NoSuchElementException, ElementClickInterceptedException):
         exception = "caught"
 
-def locateAndUpdateSpreadsheetForDiscover(driver, discover, today):
-    directory = setDirectory()    
-    # switch worksheets if running in December (to next year's worksheet)
-    month = today.month
-    year = today.year
-    if month == 12:
-        year = year + 1
-    discoverNeg = float(discover.strip('$')) * -1
-    updateSpreadsheet(directory, 'Checking Balance', year, 'Discover', month, discoverNeg, 'Discover CC')
-    updateSpreadsheet(directory, 'Checking Balance', year, 'Discover', month, discoverNeg, 'Discover CC', True)
-    # Display Checking Balance spreadsheet
-    driver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1684fQ-gW5A0uOf7s45p9tC4GiEE5s5_fjO5E7dgVI1s/edit#gid=1688093622');")
-
 def runDiscover(driver):
-    directory = setDirectory()    
-    locateDiscoverWindow(driver)
-    discover = getDiscoverBalance(driver)
+    directory = setDirectory()
     today = datetime.today()
+    myBook = openGnuCashBook('Finance', False, False)
+    Discover = USD("Discover")
+    locateDiscoverWindow(driver)
+    Discover.setBalance(getDiscoverBalance(driver))
     transactionsCSV = exportDiscoverTransactions(driver.webDriver, today)
     claimDiscoverRewards(driver)
-    myBook = openGnuCashBook('Finance', False, False)
-    reviewTrans = importGnuTransaction('Discover', transactionsCSV, myBook, driver.webDriver, directory)
-    discoverGnu = getGnuCashBalance(myBook, 'Discover')
-    locateAndUpdateSpreadsheetForDiscover(driver.webDriver, discover, today)
-    if reviewTrans:
+    reviewTrans = importGnuTransaction(Discover.name, transactionsCSV, myBook, driver.webDriver)
+    Discover.setReviewTransactions(reviewTrans)
+    Discover.updateGnuBalance(myBook)
+    Discover.locateAndUpdateSpreadsheet(driver.webDriver)
+    if Discover.reviewTransactions:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
-    showMessage("Balances + Review", f'Discover Balance: {discover} \n' f'GnuCash Discover Balance: {discoverGnu} \n \n' f'Review transactions:\n{reviewTrans}')
+    showMessage("Balances + Review", f'Discover Balance: {Discover.balance} \n' f'GnuCash Discover Balance: {Discover.gnuBalance} \n \n' f'Review transactions:\n{Discover.reviewTransactions}')
     driver.close()
 
 if __name__ == '__main__':

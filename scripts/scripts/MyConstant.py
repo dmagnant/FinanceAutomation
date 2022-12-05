@@ -8,10 +8,12 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "MyConstant":
     from Functions.GeneralFunctions import (setDirectory, showMessage, getOTP, getUsername, getPassword)
     from Classes.Asset import Crypto
-    from Classes.WebDriver import Driver    
+    from Classes.WebDriver import Driver
+    from Classes.Asset import USD
 else:
     from .Functions.GeneralFunctions import (setDirectory, showMessage, getOTP, getUsername, getPassword)
     from .Classes.Asset import Crypto
+    from .Classes.Asset import USD
 
 def locateMyConstantWindow(driver):
     found = driver.findWindowByUrl("www.myconstant.com")
@@ -57,20 +59,25 @@ def getCoinBalance(driver, coin):
         time.sleep(6)
         return float(driver.find_element(By.XPATH, "//*[@id='layout']/div[2]/div/div/div/div[2]/div[2]/form/div[2]/div[2]/span/span/span").text)
 
-def getMyConstantBalances(driver, type, coinList=None):
+def getMyConstantBalances(driver, type):
     locateMyConstantWindow(driver)
+    MyConstant = USD("MyConstant")
     if (type == "USD"):
         pyautogui.moveTo(1650, 167)
         pyautogui.moveTo(1670, 167)
         pyautogui.moveTo(1650, 167)
         time.sleep(8)
         # capture and format Bonds balance
-        usdBalance = Decimal(driver.webDriver.find_element(By.ID, "acc_balance").text.strip('$').replace(',',''))
-        return float(round(usdBalance, 2))
+        usdBalance = float(round(Decimal(driver.webDriver.find_element(By.ID, "acc_balance").text.strip('$').replace(',','')), 2))
+        MyConstant.setBalance(usdBalance)
+        return MyConstant
     elif (type == "Crypto"):
         driver.webDriver.get('https://www.myconstant.com/lend-crypto-to-earn-interest')
         pyautogui.moveTo(1700, 145)
         time.sleep(2)
+        Bitcoin = Crypto("Bitcoin")
+        Ethereum = Crypto("Ethereum")
+        coinList = [Bitcoin, Ethereum]
         # get coin balances
         for coin in coinList:
             if coin.name == "Bitcoin":
@@ -81,9 +88,7 @@ def getMyConstantBalances(driver, type, coinList=None):
 
 def runMyConstant(driver, type):
     locateMyConstantWindow(driver)
-    Bitcoin = Crypto("Bitcoin")
-    Ethereum = Crypto("Ethereum")
-    balances = getMyConstantBalances(driver, type, [Bitcoin, Ethereum])
+    balances = getMyConstantBalances(driver, type)
     if (type == "Crypto"):
         for coin in balances:
             account = coin.symbol + "-MyConstant"
@@ -95,7 +100,22 @@ if __name__ == '__main__':
     type = "Crypto"
     response = runMyConstant(driver, type)
     if (type == "USD"):
-        print('myconstant balance: ' + str(response))
+        response.getData()
     elif (type == "Crypto"):
         for coin in response:
             coin.getData()
+
+
+
+if __name__ == '__main__':
+    usdBalance = Decimal("200.01")
+    balance = "200.01"
+    floatBal = float(round(Decimal(balance), 2))
+    floatUsd = float(round(usdBalance , 2))
+    print(floatBal)
+    print(floatUsd)
+    format(floatUsd, ".2f")
+    print(floatUsd)
+
+    # usdBalance = Decimal(driver.webDriver.find_element(By.ID, "acc_balance").text.strip('$').replace(',',''))
+    # return float(round(usdBalance, 2))

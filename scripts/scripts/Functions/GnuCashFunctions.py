@@ -13,7 +13,6 @@ from .TransactionFunctions import (formatTransactionVariables,
                                    getEnergyBillAmounts,
                                    modifyTransactionDescription, setToAccount)
 
-
 def openGnuCashBook(type, readOnly, openIfLocked):
     directory=setDirectory()
     if type == 'Finance':
@@ -105,7 +104,7 @@ def getAccountPath(account):
         case _:
             print(f'account: {account} not found in "getAccountPath" function')
 
-def importGnuTransaction(account, transactionsCSV, myBook, driver, directory, lineStart=1):
+def importGnuTransaction(account, transactionsCSV, myBook, driver, lineStart=1):
     reviewTrans = ''
     rowCount = 0
     lineCount = 0
@@ -128,7 +127,7 @@ def importGnuTransaction(account, transactionsCSV, myBook, driver, directory, li
                 toAccount = setToAccount(account, row)
                 if 'ARCADIA' in description.upper():
                     energyBillNum += 1
-                    amount = getEnergyBillAmounts(driver, directory, transactionVariables[2], energyBillNum)
+                    amount = getEnergyBillAmounts(driver, transactionVariables[2], energyBillNum)
                 elif 'NM PAYCHECK' in description.upper() or "CRYPTO PURCHASE" in description.upper():
                     reviewTrans = reviewTrans + transactionVariables[5]
                 else:
@@ -138,21 +137,28 @@ def importGnuTransaction(account, transactionsCSV, myBook, driver, directory, li
                 writeGnuTransaction(myBook, description, postDate, amount, fromAccount, toAccount)
     return reviewTrans
 
-def importUniqueTransactionsToGnuCash(account, transactionsCSV, gnuCSV, myBook, driver, directory, dateRange, lineStart=1):
+def importUniqueTransactionsToGnuCash(account, transactionsCSV, driver, dateRange, lineStart=1):
+    directory = setDirectory()
     importCSV = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\import.csv"
     open(importCSV, 'w', newline='').truncate()
+    myBook = openGnuCashBook('Finance', False, False)
     if account == 'Ally':
         gnuAccount = "Assets:Ally Checking Account"
+        gnuCSV = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\gnu_ally.csv"
+        myBook = openGnuCashBook('Home', False, False)
     elif account == 'Sofi Checking':
         gnuAccount = "Assets:Liquid Assets:Sofi:Checking"
+        gnuCSV = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\gnu_sofi.csv"
     elif account == 'Sofi Savings':
-        gnuAccount = "Assets:Liquid Assets:Sofi:Savings"        
-    
+        gnuAccount = "Assets:Liquid Assets:Sofi:Savings"
+        gnuCSV = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\gnu_sofi.csv"
+    open(gnuCSV, 'w', newline='').truncate()
     # retrieve transactions from GnuCash for the same date range
     transactions = [tr for tr in myBook.transactions
                     if tr.post_date >= dateRange[0] and tr.post_date <= dateRange[1]
                     for spl in tr.splits
                     if spl.account.fullname == gnuAccount]
+    
     for tr in transactions:
         date = str(tr.post_date.strftime('%Y-%m-%d'))
         description = str(tr.description)
@@ -165,7 +171,7 @@ def importUniqueTransactionsToGnuCash(account, transactionsCSV, gnuCSV, myBook, 
     for row in csv.reader(open(transactionsCSV, 'r'), delimiter=','):
         if row not in csv.reader(open(gnuCSV, 'r'), delimiter=','):
             csv.writer(open(importCSV, 'a', newline='')).writerow(row)
-    reviewTrans = importGnuTransaction(account, importCSV, myBook, driver, directory, lineStart)
+    reviewTrans = importGnuTransaction(account, importCSV, myBook, driver, lineStart)
     return reviewTrans
 
 def writeGnuTransaction(myBook, description, postDate, amount, fromAccount, toAccount=''):

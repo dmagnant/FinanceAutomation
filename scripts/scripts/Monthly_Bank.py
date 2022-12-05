@@ -81,7 +81,7 @@ def runMonthlyBank():
     usdbalances = runUSD(driver, today)
     cryptoBalance = runCrypto(driver, today)
     showMessage("Balances", 
-                f'MyConstant: {usdbalances[0]} \n' 
+                f'MyConstant: {usdbalances[0].balance} \n' 
                 f'Worthy: {usdbalances[1]} \n' 
                 f'Liquid Assets: {usdbalances[2]} \n' 
                 f'401k: {usdbalances[3]} \n'

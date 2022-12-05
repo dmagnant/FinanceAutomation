@@ -18,7 +18,7 @@ else:
 def runDailyMR():
     driver1 = Driver("Edge", False)
     runBing(driver1.webDriver)
-    driver1.quit()
+    driver1.webDriver.quit()
     driver = Driver("Chrome")    
     searchUsingPresearch(driver)
     runTellwut(driver)

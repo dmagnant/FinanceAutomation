@@ -2,11 +2,9 @@ from selenium.webdriver.common.by import By
 import time
 
 if __name__ == '__main__' or __name__ == "Eternl":
-    from Functions.WebDriverFunctions import openWebDriver, findWindowByUrl
     from Classes.Asset import Crypto
     from Classes.WebDriver import Driver
 else:
-    from .Functions.WebDriverFunctions import findWindowByUrl
     from .Classes.Asset import Crypto
 
 def locateEternlWindow(driver):
