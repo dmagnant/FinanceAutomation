@@ -8,14 +8,16 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "BoA":
-    from Functions.GeneralFunctions import (getPassword, getUsername, setDirectory, showMessage)
-    from Functions.GnuCashFunctions import (importGnuTransaction)
+    from Classes.Asset import USD
     from Classes.WebDriver import Driver
-    from Classes.Asset import USD    
+    from Functions.GeneralFunctions import (getPassword, getUsername,
+                                            setDirectory, showMessage)
+    from Functions.GnuCashFunctions import importGnuTransaction    
 else:
-    from .Functions.GeneralFunctions import (getPassword, getUsername, setDirectory, showMessage)
-    from .Functions.GnuCashFunctions import (importGnuTransaction)
     from .Classes.Asset import USD
+    from .Functions.GeneralFunctions import (getPassword, getUsername,
+                                             setDirectory, showMessage)
+    from .Functions.GnuCashFunctions import importGnuTransaction
 
 def locateBoAWindowAndOpenAccount(driver, account):
     found = driver.findWindowByUrl("secure.bankofamerica.com")

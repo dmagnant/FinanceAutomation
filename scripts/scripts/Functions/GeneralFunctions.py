@@ -9,7 +9,8 @@ import pygetwindow
 import pyotp
 from pycoingecko import CoinGeckoAPI
 from pykeepass import PyKeePass
-from selenium.common.exceptions import ElementNotInteractableException, NoSuchElementException
+from selenium.common.exceptions import (ElementNotInteractableException,
+                                        NoSuchElementException)
 from selenium.webdriver.common.by import By
 
 def showMessage(header, body): 

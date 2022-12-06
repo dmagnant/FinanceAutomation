@@ -11,10 +11,10 @@ from selenium.common.exceptions import (ElementClickInterceptedException,
                                         WebDriverException)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-    
+
 if __name__ == '__main__' or __name__ == "Swagbucks":
-    from Functions.GeneralFunctions import showMessage
     from Classes.WebDriver import Driver
+    from Functions.GeneralFunctions import showMessage
 else:
     from .Functions.GeneralFunctions import showMessage
     

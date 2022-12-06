@@ -1,15 +1,15 @@
 if __name__ == '__main__' or __name__ == "Daily_MR":
-    from Classes.WebDriver import Driver
     from AmazonGC import confirmAmazonGCBalance
     from Bing import runBing
+    from Classes.WebDriver import Driver
     from Pinecone import runPinecone
     from Presearch import searchUsingPresearch
     from Swagbucks import runSwagbucks
     from Tellwut import runTellwut
 else:
-    from .Classes.WebDriver import Driver
     from .AmazonGC import confirmAmazonGCBalance
     from .Bing import runBing
+    from .Classes.WebDriver import Driver
     from .Pinecone import runPinecone
     from .Presearch import searchUsingPresearch
     from .Swagbucks import runSwagbucks

@@ -6,12 +6,14 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "MyConstant":
-    from Functions.GeneralFunctions import (setDirectory, showMessage, getOTP, getUsername, getPassword)
-    from Classes.Asset import Crypto, USD
+    from Classes.Asset import USD, Crypto
     from Classes.WebDriver import Driver
+    from Functions.GeneralFunctions import (getOTP, getPassword, getUsername,
+                                            setDirectory, showMessage)
 else:
-    from .Functions.GeneralFunctions import (setDirectory, showMessage, getOTP, getUsername, getPassword)
-    from .Classes.Asset import Crypto, USD
+    from .Classes.Asset import USD, Crypto
+    from .Functions.GeneralFunctions import (getOTP, getPassword, getUsername,
+                                             setDirectory, showMessage)
 
 def locateMyConstantWindow(driver):
     found = driver.findWindowByUrl("www.myconstant.com")

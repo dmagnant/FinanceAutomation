@@ -1,11 +1,12 @@
-
 import time
 from datetime import datetime
 from decimal import Decimal
 
-from .GeneralFunctions import closeExpressVPN, getPassword, getUsername, showMessage, setDirectory
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
+
+from .GeneralFunctions import (closeExpressVPN, getPassword, getUsername,
+                               setDirectory, showMessage)
 
 def modifyTransactionDescription(description, amount="0.00"):
     if "INTERNET TRANSFER FROM ONLINE SAVINGS ACCOUNT XXXXXX9703" in description.upper():

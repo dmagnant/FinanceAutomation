@@ -4,8 +4,8 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Paypal":
-    from Functions.GeneralFunctions import getPassword, setDirectory
     from Classes.WebDriver import Driver
+    from Functions.GeneralFunctions import getPassword, setDirectory
 else:
     from .Functions.GeneralFunctions import getPassword, setDirectory
 

@@ -1,10 +1,11 @@
 import time
-from matplotlib import pyplot as plt
 from datetime import datetime
+
 import cv2
 import numpy as np
 import pyautogui
 import pygetwindow
+from matplotlib import pyplot as plt
 from selenium.common.exceptions import (ElementClickInterceptedException,
                                         ElementNotInteractableException,
                                         NoSuchElementException,
@@ -15,10 +16,12 @@ from selenium.webdriver.common.by import By
 # from matplotlib import pyplot as plt
 
 if __name__ == '__main__' or __name__ == "Cointiply":
-    from Functions.GeneralFunctions import getPassword, getUsername, setDirectory, showMessage
     from Classes.WebDriver import Driver
+    from Functions.GeneralFunctions import (getPassword, getUsername,
+                                            setDirectory, showMessage)
 else:
-    from .Functions.GeneralFunctions import getPassword, getUsername, setDirectory, showMessage
+    from .Functions.GeneralFunctions import (getPassword, getUsername,
+                                             setDirectory, showMessage)
     
 def cointiplyLogin(directory, driver):
     driver.get("https://cointiply.com/login")

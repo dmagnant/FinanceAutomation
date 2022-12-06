@@ -1,14 +1,16 @@
 import time
-from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
+
+from selenium.common.exceptions import (NoSuchElementException,
+                                        StaleElementReferenceException)
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Midas":
-    from Functions.GeneralFunctions import (setDirectory, getOTP)
     from Classes.Asset import Crypto
-    from Classes.WebDriver import Driver  
+    from Classes.WebDriver import Driver
+    from Functions.GeneralFunctions import getOTP, setDirectory  
 else:
-    from .Functions.GeneralFunctions import (setDirectory, getOTP)
-    from .Classes.Asset import Crypto    
+    from .Classes.Asset import Crypto
+    from .Functions.GeneralFunctions import getOTP, setDirectory    
 
 def locateMidasWindow(driver):
     found = driver.findWindowByUrl("app.midas.investments")

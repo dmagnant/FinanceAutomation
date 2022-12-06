@@ -6,20 +6,20 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Ally":
+    from Classes.Asset import USD
+    from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import (closeExpressVPN, getPassword,
                                             getStartAndEndOfDateRange,
                                             setDirectory, showMessage)
     from Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash
     from Functions.TransactionFunctions import modifyTransactionDescription
-    from Classes.WebDriver import Driver
-    from Classes.Asset import USD
 else:
+    from .Classes.Asset import USD
     from .Functions.GeneralFunctions import (closeExpressVPN, getPassword,
-                                            getStartAndEndOfDateRange,
-                                            setDirectory, showMessage)
+                                             getStartAndEndOfDateRange,
+                                             setDirectory, showMessage)
     from .Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash
     from .Functions.TransactionFunctions import modifyTransactionDescription
-    from .Classes.Asset import USD
 
 def locateAllyWindow(driver):
     found = driver.findWindowByUrl("secure.ally.com")

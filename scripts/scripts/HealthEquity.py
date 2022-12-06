@@ -7,12 +7,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "HealthEquity":
-    from Functions.GeneralFunctions import showMessage, getStartAndEndOfDateRange
+    from Classes.Asset import USD
     from Classes.WebDriver import Driver
-    from Classes.Asset import USD    
+    from Functions.GeneralFunctions import (getStartAndEndOfDateRange,
+                                            showMessage)    
 else:
-    from .Functions.GeneralFunctions import showMessage, getStartAndEndOfDateRange
-    from .Classes.Asset import USD    
+    from .Classes.Asset import USD
+    from .Functions.GeneralFunctions import (getStartAndEndOfDateRange,
+                                             showMessage)    
     
 def locateHealthEquityWindow(driver):
     found = driver.findWindowByUrl("member.my.healthequity.com")

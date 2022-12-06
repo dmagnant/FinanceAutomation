@@ -8,16 +8,23 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Vanguard":
-    from Functions.GeneralFunctions import (setDirectory, showMessage, getUsername, getPassword, getStartAndEndOfDateRange)
-    from Functions.GnuCashFunctions import (openGnuCashBook, writeGnuTransaction)
-    from Functions.SpreadsheetFunctions import updateSpreadsheet
+    from Classes.Asset import USD
     from Classes.WebDriver import Driver
-    from Classes.Asset import USD    
+    from Functions.GeneralFunctions import (getPassword,
+                                            getStartAndEndOfDateRange,
+                                            getUsername, setDirectory,
+                                            showMessage)
+    from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction
+    from Functions.SpreadsheetFunctions import updateSpreadsheet    
 else:
-    from .Functions.GeneralFunctions import (setDirectory, showMessage, getUsername, getPassword, getStartAndEndOfDateRange)
-    from .Functions.GnuCashFunctions import (openGnuCashBook, writeGnuTransaction)
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet
     from .Classes.Asset import USD
+    from .Functions.GeneralFunctions import (getPassword,
+                                             getStartAndEndOfDateRange,
+                                             getUsername, setDirectory,
+                                             showMessage)
+    from .Functions.GnuCashFunctions import (openGnuCashBook,
+                                             writeGnuTransaction)
+    from .Functions.SpreadsheetFunctions import updateSpreadsheet
     
 def locateVanguardWindow(driver):
     found = driver.findWindowByUrl("ownyourfuture.vanguard.com/main")

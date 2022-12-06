@@ -1,13 +1,13 @@
-from selenium.webdriver.common.by import By
 import time
+from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "AmazonGC":
-    from Functions.GeneralFunctions import showMessage
-    from Classes.WebDriver import Driver
     from Classes.Asset import USD
+    from Classes.WebDriver import Driver
+    from Functions.GeneralFunctions import showMessage
 else:
-    from .Functions.GeneralFunctions import showMessage
     from .Classes.Asset import USD
+    from .Functions.GeneralFunctions import showMessage
 
 def locateAmazonWindow(driver):
         found = driver.findWindowByUrl("www.amazon.com/gc/balance")

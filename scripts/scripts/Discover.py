@@ -8,14 +8,16 @@ from selenium.common.exceptions import (ElementClickInterceptedException,
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Discover":
-    from Functions.GeneralFunctions import (getPassword, setDirectory, showMessage)
-    from Functions.GnuCashFunctions import (importGnuTransaction)
-    from Classes.WebDriver import Driver
     from Classes.Asset import USD
+    from Classes.WebDriver import Driver
+    from Functions.GeneralFunctions import (getPassword, setDirectory,
+                                            showMessage)
+    from Functions.GnuCashFunctions import importGnuTransaction
 else:
-    from .Functions.GeneralFunctions import (getPassword, setDirectory, showMessage)
-    from .Functions.GnuCashFunctions import (importGnuTransaction)
     from .Classes.Asset import USD
+    from .Functions.GeneralFunctions import (getPassword, setDirectory,
+                                             showMessage)
+    from .Functions.GnuCashFunctions import importGnuTransaction
 
 def locateDiscoverWindow(driver):
     found = driver.findWindowByUrl("discover.com")

@@ -1,9 +1,9 @@
 if __name__ == '__main__' or __name__ == "Exodus":
-    from Functions.GeneralFunctions import showMessage
-    from Classes.Asset import Crypto    
+    from Classes.Asset import Crypto
+    from Functions.GeneralFunctions import showMessage    
 else:
-    from .Functions.GeneralFunctions import showMessage
-    from .Classes.Asset import Crypto    
+    from .Classes.Asset import Crypto
+    from .Functions.GeneralFunctions import showMessage    
 
 def runIoPay():
     IoTex = Crypto("IoTex")

@@ -5,12 +5,14 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Worthy":
-    from Functions.GeneralFunctions import setDirectory, showMessage, getUsername, getPassword
+    from Classes.Asset import USD
     from Classes.WebDriver import Driver
-    from Classes.Asset import USD    
+    from Functions.GeneralFunctions import (getPassword, getUsername,
+                                            setDirectory, showMessage)    
 else:
-    from .Functions.GeneralFunctions import setDirectory, showMessage, getUsername, getPassword
     from .Classes.Asset import USD
+    from .Functions.GeneralFunctions import (getPassword, getUsername,
+                                             setDirectory, showMessage)
 
 def locateWorthyWindow(driver):
     found = driver.findWindowByUrl("worthy.capital")

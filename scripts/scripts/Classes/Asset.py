@@ -5,12 +5,17 @@ from piecash import Split, Transaction
 
 if __name__ == "Classes.Asset":
     from Functions.GeneralFunctions import getCryptocurrencyPrice, setDirectory
+    from Functions.GnuCashFunctions import (getAccountPath, getGnuCashBalance,
+                                            openGnuCashBook,
+                                            updateCryptoPriceInGnucash)
     from Functions.SpreadsheetFunctions import updateSpreadsheet
-    from Functions.GnuCashFunctions import updateCryptoPriceInGnucash, openGnuCashBook, getAccountPath, getGnuCashBalance
 else:
-    from scripts.scripts.Functions.GeneralFunctions import getCryptocurrencyPrice, setDirectory
+    from scripts.scripts.Functions.GeneralFunctions import (
+        getCryptocurrencyPrice, setDirectory)
+    from scripts.scripts.Functions.GnuCashFunctions import (
+        getAccountPath, getGnuCashBalance, openGnuCashBook,
+        updateCryptoPriceInGnucash)
     from scripts.scripts.Functions.SpreadsheetFunctions import updateSpreadsheet
-    from scripts.scripts.Functions.GnuCashFunctions import updateCryptoPriceInGnucash, openGnuCashBook, getAccountPath, getGnuCashBalance
 
 def getCryptoSymbolByName(self):
         match self.name.lower():

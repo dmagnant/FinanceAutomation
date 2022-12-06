@@ -5,12 +5,16 @@ from selenium.common.exceptions import (NoSuchElementException,
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Kraken":
-    from Functions.GeneralFunctions import (setDirectory, getCryptocurrencyPrice, getOTP, getUsername, getPassword)
     from Classes.Asset import Crypto
-    from Classes.WebDriver import Driver  
+    from Classes.WebDriver import Driver
+    from Functions.GeneralFunctions import (getCryptocurrencyPrice, getOTP,
+                                            getPassword, getUsername,
+                                            setDirectory)  
 else:
-    from .Functions.GeneralFunctions import (setDirectory, getCryptocurrencyPrice, getOTP, getUsername, getPassword)
     from .Classes.Asset import Crypto
+    from .Functions.GeneralFunctions import (getCryptocurrencyPrice, getOTP,
+                                             getPassword, getUsername,
+                                             setDirectory)
     
 def locateKrakenWindow(driver):
     found = driver.findWindowByUrl("kraken.com")

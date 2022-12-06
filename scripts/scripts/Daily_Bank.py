@@ -2,25 +2,25 @@ import os
 import os.path
 
 if __name__ == '__main__' or __name__ == "Daily_Bank":
-    from Functions.GeneralFunctions import showMessage, setDirectory
+    from Ally import allyLogout, runAlly
+    from Classes.Asset import USD
+    from Classes.WebDriver import Driver
+    from Functions.GeneralFunctions import setDirectory, showMessage
     from Functions.GnuCashFunctions import purgeOldGnucashFiles
     from Functions.SpreadsheetFunctions import updateCryptoPrices
-    from Classes.WebDriver import Driver
-    from Ally import runAlly, allyLogout
     from Paypal import runPaypal
     from Presearch import presearchRewardsRedemptionAndBalanceUpdates
-    from Sofi import runSofi, sofiLogout
-    from Classes.Asset import USD    
+    from Sofi import runSofi, sofiLogout    
 else:
-    from .Functions.GeneralFunctions import showMessage, setDirectory
+    from .Ally import allyLogout, runAlly
+    from .Classes.Asset import USD
     from .Classes.WebDriver import Driver
+    from .Functions.GeneralFunctions import setDirectory, showMessage
     from .Functions.GnuCashFunctions import purgeOldGnucashFiles
     from .Functions.SpreadsheetFunctions import updateCryptoPrices
-    from .Ally import runAlly, allyLogout
     from .Paypal import runPaypal
     from .Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from .Sofi import runSofi, sofiLogout
-    from .Classes.Asset import USD
 
 def runDailyBank():
     directory = setDirectory()

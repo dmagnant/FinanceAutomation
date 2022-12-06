@@ -2,33 +2,36 @@ from datetime import datetime
 from decimal import Decimal
 
 if __name__ == '__main__' or __name__ == "Monthly_Bank":
-    from Functions.GeneralFunctions import showMessage, setDirectory, getStartAndEndOfDateRange
+    from Classes.Asset import USD, Crypto
     from Classes.WebDriver import Driver
-    from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction
-    from Functions.SpreadsheetFunctions import updateSpreadsheet
     from Eternl import runEternl
     from Exodus import runExodus
+    from Functions.GeneralFunctions import (getStartAndEndOfDateRange,
+                                            setDirectory, showMessage)
+    from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction
+    from Functions.SpreadsheetFunctions import updateSpreadsheet
     from HealthEquity import getHealthEquityBalances
     from IoPay import runIoPay
     from Kraken import runKraken
     from MyConstant import runMyConstant
     from Presearch import presearchRewardsRedemptionAndBalanceUpdates
-    from Worthy import getWorthyBalance
-    from Classes.Asset import USD, Crypto 
+    from Worthy import getWorthyBalance 
 else:
-    from .Functions.GeneralFunctions import showMessage, setDirectory, getStartAndEndOfDateRange
+    from .Classes.Asset import USD, Crypto
     from .Classes.WebDriver import Driver
-    from .Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet
     from .Eternl import runEternl
     from .Exodus import runExodus
+    from .Functions.GeneralFunctions import (getStartAndEndOfDateRange,
+                                             setDirectory, showMessage)
+    from .Functions.GnuCashFunctions import (openGnuCashBook,
+                                             writeGnuTransaction)
+    from .Functions.SpreadsheetFunctions import updateSpreadsheet
     from .HealthEquity import getHealthEquityBalances
     from .IoPay import runIoPay
     from .Kraken import runKraken
     from .MyConstant import runMyConstant
     from .Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from .Worthy import getWorthyBalance
-    from .Classes.Asset import USD, Crypto
 
 def monthlyRoundUp(account, myBook, date, HSADividends):
     change = Decimal(account.balance - float(account.gnuBalance))

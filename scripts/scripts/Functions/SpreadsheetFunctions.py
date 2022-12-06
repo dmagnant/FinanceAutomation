@@ -1,6 +1,7 @@
+import time
 
 import gspread
-import time
+
 from .GeneralFunctions import getCryptocurrencyPrice, setDirectory, showMessage
 from .GnuCashFunctions import updateCryptoPriceInGnucash
 

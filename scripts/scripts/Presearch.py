@@ -8,8 +8,8 @@ from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Presearch":
     from Classes.Asset import Crypto
-    from Functions.GeneralFunctions import setDirectory, showMessage
     from Classes.WebDriver import Driver
+    from Functions.GeneralFunctions import setDirectory, showMessage
 else:
     from .Classes.Asset import Crypto
     from .Functions.GeneralFunctions import setDirectory, showMessage

@@ -1,10 +1,13 @@
 import time
+
+from selenium.common.exceptions import (ElementClickInterceptedException,
+                                        ElementNotInteractableException,
+                                        NoSuchElementException)
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException, ElementClickInterceptedException
 
 if __name__ == '__main__' or __name__ == "Tellwut":
-    from Functions.GeneralFunctions import showMessage
     from Classes.WebDriver import Driver
+    from Functions.GeneralFunctions import showMessage
 else:
     from .Functions.GeneralFunctions import showMessage
 
@@ -31,7 +34,6 @@ def tellwutLogin(driver):
             driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/main/div[2]/div[2]/div[1]/form/div[6]/div/button").click()
     driver.webDriver.get("https://www.tellwut.com/")
 
-    
 def getTellWutBalance(driver):
     locateTellWutWindow(driver)
     return driver.webDriver.find_element(By.XPATH, "/html/body/div/header/div/div/div/div[4]/div/div/div[2]/div[1]/div[1]").text
