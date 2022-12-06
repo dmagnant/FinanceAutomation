@@ -9,15 +9,16 @@ from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Vanguard":
     from Functions.GeneralFunctions import (setDirectory, showMessage, getUsername, getPassword, getStartAndEndOfDateRange)
-    from Functions.GnuCashFunctions import (openGnuCashBook, getGnuCashBalance, writeGnuTransaction)
+    from Functions.GnuCashFunctions import (openGnuCashBook, writeGnuTransaction)
     from Functions.SpreadsheetFunctions import updateSpreadsheet
     from Classes.WebDriver import Driver
+    from Classes.Asset import USD    
 else:
     from .Functions.GeneralFunctions import (setDirectory, showMessage, getUsername, getPassword, getStartAndEndOfDateRange)
-    from .Functions.GnuCashFunctions import (openGnuCashBook, getGnuCashBalance, writeGnuTransaction)
+    from .Functions.GnuCashFunctions import (openGnuCashBook, writeGnuTransaction)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet
+    from .Classes.Asset import USD
     
-
 def locateVanguardWindow(driver):
     found = driver.findWindowByUrl("ownyourfuture.vanguard.com/main")
     if not found:
@@ -50,8 +51,7 @@ def vanguardLogin(driver):
     except NoSuchElementException:
         exception = "caught"
 
-
-def getVanguardBalanceAndInterestYTD(driver):
+def getVanguardBalanceAndInterestYTD(driver, account):
     locateVanguardWindow(driver)    
     # navigate to asset details page (click view all assets)
     driver.webDriver.get('https://ownyourfuture.vanguard.com/main/dashboard/assets-details')
@@ -61,53 +61,52 @@ def getVanguardBalanceAndInterestYTD(driver):
     #scroll down
     pyautogui.scroll(-1000)
     # Get Total Account Balance
-    pensionBalance = driver.webDriver.find_element(By.XPATH, "/html/body/div[3]/div/app-personalized-dashboard-root/app-assets-details/app-balance-details/div/div[3]/div[3]/div/app-details-card/div/div/div[1]/div[3]/h4").text.strip('$').replace(',', '')                          
+    pensionBalance = driver.webDriver.find_element(By.XPATH, "/html/body/div[3]/div/app-personalized-dashboard-root/app-assets-details/app-balance-details/div/div[3]/div[3]/div/app-details-card/div/div/div[1]/div[3]/h4").text.strip('$').replace(',', '')
+    account.setBalance(pensionBalance)
     # Get Interest YTD
     interestYTD = driver.webDriver.find_element(By.XPATH, "/html/body/div[3]/div/app-personalized-dashboard-root/app-assets-details/app-balance-details/div/div[3]/div[4]/div/app-details-card/div/div/div[1]/div[3]/h4").text.strip('$').replace(',', '')
-    return [pensionBalance, interestYTD]
+    return interestYTD
 
-
-def importGnuTransactions(myBook, today, balances):
+def importGnuTransactions(myBook, today, account, interestYTD):
     #get current date
     year = today.year
     month = today.month
     lastMonth = getStartAndEndOfDateRange(today, month, year, "month")
     interestAmount = 0
-    pension = getGnuCashBalance(myBook, 'VanguardPension')
-    pensionAcct = "Assets:Non-Liquid Assets:Pension"
+    # pension = getGnuCashBalance(myBook, 'VanguardPension')
+    # pensionAcct = "Assets:Non-Liquid Assets:Pension"
     with myBook as book:
         # # GNUCASH
         # retrieve transactions from GnuCash
         transactions = [tr for tr in book.transactions
                         if str(tr.post_date.strftime('%Y')) == str(lastMonth[0].year)
                         for spl in tr.splits
-                        if spl.account.fullname == pensionAcct
+                        if spl.account.fullname == account.gnuAccount
                         ]
         for tr in transactions:
             date = str(tr.post_date.strftime('%Y'))
             for spl in tr.splits:
                 if spl.account.fullname == "Income:Investments:Interest":
                     interestAmount = interestAmount + abs(spl.value)
-        accountChange = Decimal(balances[0]) - pension
-        interest = Decimal(balances[1]) - interestAmount
+        accountChange = Decimal(account.balance) - account.gnuBalance
+        interest = Decimal(interestYTD) - interestAmount
         employerContribution = accountChange - interest
-        writeGnuTransaction(myBook, "Contribution + Interest", lastMonth[1], [-interest, -employerContribution, accountChange], pensionAcct)   
+        writeGnuTransaction(myBook, "Contribution + Interest", lastMonth[1], [-interest, -employerContribution, accountChange], account.gnuAccount)   
     book.close()
-
     return [interest, employerContribution]
 
 def runVanguard(driver):
     directory = setDirectory()
-    locateVanguardWindow(driver)
-    balanceAndInterestYTD = getVanguardBalanceAndInterestYTD(driver)
-    myBook = openGnuCashBook('Finance', False, False)
     today = datetime.today()
-    values = importGnuTransactions(myBook, today, balanceAndInterestYTD)
-    vanguardGnu = getGnuCashBalance(myBook, 'VanguardPension')
-    updateSpreadsheet(directory, 'Asset Allocation', today.year, 'VanguardPension', today.month, float(balanceAndInterestYTD[0]))
+    myBook = openGnuCashBook('Finance', False, False)
+    VanguardPension = USD("VanguardPension")
+    locateVanguardWindow(driver)
+    interestYTD = getVanguardBalanceAndInterestYTD(driver, VanguardPension)
+    interestAndEmployerContribution = importGnuTransactions(myBook, today, VanguardPension, interestYTD)
+    updateSpreadsheet(directory, 'Asset Allocation', today.year, 'VanguardPension', today.month, float(VanguardPension.balance))
     os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
     driver.webDriver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=2058576150');")
-    showMessage("Balances",f'Pension Balance: {balanceAndInterestYTD[0]} \n'f'GnuCash Pension Balance: {vanguardGnu} \n'f'Interest earned: {values[0]} \n'f'Total monthly contributions: {values[1]} \n')
+    showMessage("Balances",f'Pension Balance: {VanguardPension.balance} \n'f'GnuCash Pension Balance: {VanguardPension.gnuBalance} \n'f'Interest earned: {interestAndEmployerContribution[0]} \n'f'Total monthly contributions: {interestAndEmployerContribution[1]} \n')
 
 if __name__ == '__main__':
     driver = Driver("Chrome")

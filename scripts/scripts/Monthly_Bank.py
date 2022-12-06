@@ -4,7 +4,7 @@ from decimal import Decimal
 if __name__ == '__main__' or __name__ == "Monthly_Bank":
     from Functions.GeneralFunctions import showMessage, setDirectory, getStartAndEndOfDateRange
     from Classes.WebDriver import Driver
-    from Functions.GnuCashFunctions import openGnuCashBook, getGnuCashBalance, writeGnuTransaction
+    from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction
     from Functions.SpreadsheetFunctions import updateSpreadsheet
     from Eternl import runEternl
     from Exodus import runExodus
@@ -14,10 +14,11 @@ if __name__ == '__main__' or __name__ == "Monthly_Bank":
     from MyConstant import runMyConstant
     from Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from Worthy import getWorthyBalance
+    from Classes.Asset import USD, Crypto 
 else:
     from .Functions.GeneralFunctions import showMessage, setDirectory, getStartAndEndOfDateRange
     from .Classes.WebDriver import Driver
-    from .Functions.GnuCashFunctions import openGnuCashBook, getGnuCashBalance, writeGnuTransaction
+    from .Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction
     from .Functions.SpreadsheetFunctions import updateSpreadsheet
     from .Eternl import runEternl
     from .Exodus import runExodus
@@ -26,36 +27,39 @@ else:
     from .Kraken import runKraken
     from .MyConstant import runMyConstant
     from .Presearch import presearchRewardsRedemptionAndBalanceUpdates
-    from .Worthy import getWorthyBalance 
+    from .Worthy import getWorthyBalance
+    from .Classes.Asset import USD, Crypto
+
+def monthlyRoundUp(account, myBook, date, HSADividends):
+    change = Decimal(account.balance - float(account.gnuBalance))
+    round(change, 2)
+    if account.name == "MyConstant" or account.name == "Worthy":
+        writeGnuTransaction(myBook, "Interest", date, -change, "Income:Investments:Interest", account.gnuAccount)
+    elif account.name == "HSA":
+        HEHSAMarketChange = round(Decimal(change - HSADividends), 2)
+        writeGnuTransaction(myBook, "HSA Statement", date, [change, -HSADividends, -HEHSAMarketChange], ["Income:Investments:Dividends", "Income:Investments:Market Change"], "Assets:Non-Liquid Assets:HSA:NM HSA")
 
 def runUSD(driver, today):
     directory = setDirectory()
     year = today.year
     month = today.month
     lastMonth = getStartAndEndOfDateRange(today, today.month, today.year, "month")
-    myConstantBalance = runMyConstant(driver, "USD")
-    worthyBalance = getWorthyBalance(driver)
-    HEBalances = getHealthEquityBalances(driver, lastMonth)
+    myBook = openGnuCashBook('Finance', False, False)
 
-    mybook = openGnuCashBook('Finance', False, False)
-    constantInterest = Decimal(myConstantBalance - float(getGnuCashBalance(mybook, 'MyConstant')))
-    worthyInterest = Decimal(worthyBalance - float(getGnuCashBalance(mybook, 'Worthy')))
-    HEHSAChange = round(Decimal(HEBalances[0] - float(getGnuCashBalance(mybook, 'HSA'))), 2)
-    HEHSAMarketChange = round(Decimal(HEHSAChange - HEBalances[1]), 2)
+    MyConstant = runMyConstant(driver, "USD")
+    Worthy = getWorthyBalance(driver)
+    healthEquityHSADividendsAndVanguard = getHealthEquityBalances(driver, lastMonth)
 
-    writeGnuTransaction(mybook, "Interest", lastMonth[1], -round(constantInterest, 2), "Income:Investments:Interest", "Assets:Liquid Assets:Bonds:My Constant")
-    writeGnuTransaction(mybook, "Interest", lastMonth[1], -round(worthyInterest, 2), "Income:Investments:Interest", "Assets:Liquid Assets:Bonds:Worthy Bonds")
-    writeGnuTransaction(mybook, "HSA Statement", lastMonth[1], [HEHSAChange, -HEBalances[1], -HEHSAMarketChange], ["Income:Investments:Dividends", "Income:Investments:Market Change"], "Assets:Non-Liquid Assets:HSA:NM HSA")
-
-    liquidAssets = getGnuCashBalance(mybook, 'Liquid Assets')
-    bonds = getGnuCashBalance(mybook, 'Bonds')
-
-    updateSpreadsheet(directory, 'Asset Allocation', year, 'Bonds', month, float(bonds), 'Liquid Assets')
-    updateSpreadsheet(directory, 'Asset Allocation', year, 'Liquid Assets', month, float(liquidAssets), 'Liquid Assets')
-    updateSpreadsheet(directory, 'Asset Allocation', year, 'Vanguard401k', month, HEBalances[2], '401k')
+    for account in [MyConstant, Worthy, healthEquityHSADividendsAndVanguard[0]]:
+        monthlyRoundUp(account, myBook, lastMonth[1], healthEquityHSADividendsAndVanguard[1])
+    LiquidAssets = USD("Liquid Assets")
+    Bonds = USD("Bonds")
+    updateSpreadsheet(directory, 'Asset Allocation', year, Bonds.name, month, float(Bonds.gnuBalance), 'Liquid Assets')
+    updateSpreadsheet(directory, 'Asset Allocation', year, LiquidAssets.name, month, float(LiquidAssets.gnuBalance), 'Liquid Assets')
+    updateSpreadsheet(directory, 'Asset Allocation', year, healthEquityHSADividendsAndVanguard[2].name, month, healthEquityHSADividendsAndVanguard[2].balance, '401k')
     driver.webDriver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=2058576150');")
 
-    return [myConstantBalance, worthyBalance, liquidAssets, HEBalances[2], HEBalances[0]]
+    return [MyConstant, Worthy, LiquidAssets, healthEquityHSADividendsAndVanguard[2], healthEquityHSADividendsAndVanguard[0]]
 
 def runCrypto(driver, today):
     directory = setDirectory()
@@ -70,23 +74,22 @@ def runCrypto(driver, today):
     # runMidas(driver)
     runExodus()
     runIoPay()
-    Finance = openGnuCashBook('Finance', True, True)
-    cryptoBalance = round(getGnuCashBalance(Finance, 'Crypto'), 2)
-    updateSpreadsheet(directory, 'Asset Allocation', year, 'Cryptocurrency', month, float(cryptoBalance), 'Cryptocurrency')
-    return cryptoBalance
+    CryptoPortfolio = Crypto('Cryptocurrency')
+    updateSpreadsheet(directory, 'Asset Allocation', year, CryptoPortfolio.name, month, float(round(CryptoPortfolio.gnuBalance, 2)), CryptoPortfolio.name)
+    return CryptoPortfolio
 
 def runMonthlyBank():
     today = datetime.today()
     driver = Driver("Chrome")
     usdbalances = runUSD(driver, today)
-    cryptoBalance = runCrypto(driver, today)
+    cryptoPortfolio = runCrypto(driver, today)
     showMessage("Balances", 
                 f'MyConstant: {usdbalances[0].balance} \n' 
-                f'Worthy: {usdbalances[1]} \n' 
-                f'Liquid Assets: {usdbalances[2]} \n' 
-                f'401k: {usdbalances[3]} \n'
-                f'NM HSA: {usdbalances[4]} \n'
-                f'Crypto Portfolio worth: {cryptoBalance}')
+                f'Worthy: {usdbalances[1].balance} \n' 
+                f'Liquid Assets: {usdbalances[2].balance} \n' 
+                f'401k: {usdbalances[3].balance} \n'
+                f'NM HSA: {usdbalances[4].balance} \n'
+                f'Crypto Portfolio worth: {cryptoPortfolio.gnuBalance}')
 
     while len(driver.webDriver.window_handles) > 1:
         driver.webDriver.switch_to.window(driver.webDriver.window_handles[len(driver.webDriver.window_handles)-1])

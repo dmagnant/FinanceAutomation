@@ -28,18 +28,17 @@ def openGnuCashBook(type, readOnly, openIfLocked):
         myBook = piecash.open_book(book, readonly=readOnly, open_if_lock=openIfLocked)
     return myBook
 
-def getGnuCashBalance(myBook, account):
-    accountpath = getAccountPath(account)
+def getGnuCashBalance(myBook, accountPath):
     with myBook as book:
-        balance = book.accounts(fullname=accountpath).get_balance()
+        balance = book.accounts(fullname=accountPath).get_balance()
     book.close()
     return balance
 
-def getAccountPath(account):
-    match account:
-        case 'ADA':
+def getAccountPath(accountName):
+    match accountName:
+        case 'Cardano':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Cardano"            
-        case 'ALGO':
+        case 'Algorand':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Algorand"
         case 'Ally':
             return "Assets:Ally Checking Account"
@@ -47,11 +46,11 @@ def getAccountPath(account):
             return "Assets:Liquid Assets:Amazon GC"
         case 'Amex':
             return "Liabilities:Credit Cards:Amex BlueCash Everyday"
-        case 'ATOM':
+        case 'Cosmos':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Cosmos"                  
         case 'Barclays':
             return "Liabilities:Credit Cards:BarclayCard CashForward"
-        case 'BTC':
+        case 'Bitcoin':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Bitcoin"                
         case 'BTC-Midas':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Bitcoin:BTC-Midas"
@@ -69,9 +68,9 @@ def getAccountPath(account):
             return "Assets:Non-Liquid Assets:CryptoCurrency"
         case 'Discover':
             return "Liabilities:Credit Cards:Discover It"
-        case 'DOT':
+        case 'Polkadot':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Polkadot"
-        case 'ETH':
+        case 'Ethereum':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum"
         case 'ETH-Kraken':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum:ETH-Kraken"
@@ -83,28 +82,30 @@ def getAccountPath(account):
             return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum2"
         case 'HSA':
             return "Assets:Non-Liquid Assets:HSA:NM HSA"
-        case 'IOTX':
+        case 'IoTex':
             return "Assets:Non-Liquid Assets:CryptoCurrency:IoTex"
         case 'Liquid Assets':
-            return "Assets:Liquid Assets"            
+            return "Assets:Liquid Assets"
+        case 'Loopring':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Loopring"              
         case 'MyConstant':
             return "Assets:Liquid Assets:Bonds:My Constant"
-        case 'PRE':
+        case 'Presearch':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Presearch"
-        case 'Sofi Checking':
+        case 'Checking':
             return "Assets:Liquid Assets:Sofi:Checking"
-        case 'Sofi Savings':
+        case 'Savings':
             return "Assets:Liquid Assets:Sofi:Savings"                
-        case 'TIAA':
-            return "Assets:Liquid Assets:TIAA"
         case 'VanguardPension':
             return "Assets:Non-Liquid Assets:Pension"  
         case 'Worthy':
             return "Assets:Liquid Assets:Bonds:Worthy Bonds"
         case _:
-            print(f'account: {account} not found in "getAccountPath" function')
-
-def importGnuTransaction(account, transactionsCSV, myBook, driver, lineStart=1):
+            print(f'account: {accountName} not found in "getAccountPath" function')
+            
+def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
+    book = 'Home' if (account.name == 'Ally' or account.name == 'BoA-joint') else 'Finance'
+    myBook = openGnuCashBook(book, False, False)
     reviewTrans = ''
     rowCount = 0
     lineCount = 0
@@ -115,7 +116,7 @@ def importGnuTransaction(account, transactionsCSV, myBook, driver, lineStart=1):
         if lineCount < lineStart:
             lineCount += 1
         else:
-            transactionVariables = formatTransactionVariables(account, row)
+            transactionVariables = formatTransactionVariables(account.name, row)
             # Skip transactions between automated accounts to prevent duplicates
             if transactionVariables[3]:
                 continue
@@ -124,7 +125,7 @@ def importGnuTransaction(account, transactionsCSV, myBook, driver, lineStart=1):
                 postDate = transactionVariables[0].date()
                 fromAccount = transactionVariables[4]
                 amount = transactionVariables[2]
-                toAccount = setToAccount(account, row)
+                toAccount = setToAccount(account.name, row)
                 if 'ARCADIA' in description.upper():
                     energyBillNum += 1
                     amount = getEnergyBillAmounts(driver, transactionVariables[2], energyBillNum)
@@ -135,8 +136,9 @@ def importGnuTransaction(account, transactionsCSV, myBook, driver, lineStart=1):
                         
                         reviewTrans = reviewTrans + transactionVariables[5]
                 writeGnuTransaction(myBook, description, postDate, amount, fromAccount, toAccount)
-    return reviewTrans
-
+    account.updateGnuBalance(myBook)
+    account.setReviewTransactions(reviewTrans)
+    
 def importUniqueTransactionsToGnuCash(account, transactionsCSV, driver, dateRange, lineStart=1):
     directory = setDirectory()
     importCSV = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\import.csv"
@@ -158,7 +160,6 @@ def importUniqueTransactionsToGnuCash(account, transactionsCSV, driver, dateRang
                     if tr.post_date >= dateRange[0] and tr.post_date <= dateRange[1]
                     for spl in tr.splits
                     if spl.account.fullname == gnuAccount]
-    
     for tr in transactions:
         date = str(tr.post_date.strftime('%Y-%m-%d'))
         description = str(tr.description)
@@ -167,12 +168,10 @@ def importUniqueTransactionsToGnuCash(account, transactionsCSV, driver, dateRang
             if spl.account.fullname == gnuAccount:
                 row = date, description, str(amount)
                 csv.writer(open(gnuCSV, 'a', newline='')).writerow(row)
-
     for row in csv.reader(open(transactionsCSV, 'r'), delimiter=','):
         if row not in csv.reader(open(gnuCSV, 'r'), delimiter=','):
             csv.writer(open(importCSV, 'a', newline='')).writerow(row)
-    reviewTrans = importGnuTransaction(account, importCSV, myBook, driver, lineStart)
-    return reviewTrans
+    importGnuTransaction(account, importCSV, myBook, driver, lineStart)
 
 def writeGnuTransaction(myBook, description, postDate, amount, fromAccount, toAccount=''):
     with myBook as book:
@@ -224,29 +223,10 @@ def updateCryptoPriceInGnucash(symbol, coinPrice):
     myBook.save()
     myBook.close()
 
-def updateCoinQuantityFromStakingInGnuCash(coinQuantity, coinSymbol):
-    myBook = openGnuCashBook('Finance', False, False)
-    gnuBalance = getGnuCashBalance(myBook, coinSymbol)
-    coinDifference = Decimal(coinQuantity) - Decimal(gnuBalance)
-    if coinDifference > 0:
-        myBook = openGnuCashBook('Finance', False, False)
-        with myBook:
-            split = [Split(value=-0, memo="scripted", account=myBook.accounts(fullname='Income:Investments:Staking')),
-                    Split(value=0, quantity=round(Decimal(coinDifference), 6), memo="scripted", account=myBook.accounts(fullname=getAccountPath(coinSymbol)))]
-            Transaction(post_date=datetime.today().date(), currency=myBook.currencies(mnemonic="USD"), description=coinSymbol + ' staking', splits=split)
-            myBook.save()
-            myBook.flush()
-        myBook.close()
-    elif coinDifference < 0:
-        print(f'given balance of {coinQuantity} {coinSymbol} '
-        f'minus gnuCash balance of {gnuBalance} '
-        f'leaves unexpected coin difference of {coinDifference} '
-        f'is it rounding issue?')
-
-def getDollarsInvestedPerCoin(symbol):
+def getDollarsInvestedPerCoin(name):
     # get dollars invested balance (must be run per coin)
     mybook = openGnuCashBook('Finance', True, True)
-    gnu_account = getAccountPath(symbol)
+    gnu_account = getAccountPath(name)
     total = 0
     # retrieve transactions from GnuCash
     transactions = [tr for tr in mybook.transactions
@@ -257,7 +237,7 @@ def getDollarsInvestedPerCoin(symbol):
             amount = format(spl.value, ".2f")
             if spl.account.fullname == gnu_account:
                 total += abs(float(amount))
-    print(f'total $ invested in {symbol}: ' + str(total))
+    print(f'total $ invested in {name}: ' + str(total))
     return total            
 
 def purgeOldGnucashFiles():

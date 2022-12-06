@@ -9,14 +9,12 @@ from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "BoA":
     from Functions.GeneralFunctions import (getPassword, getUsername, setDirectory, showMessage)
-    from Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
-    from Functions.SpreadsheetFunctions import updateSpreadsheet
+    from Functions.GnuCashFunctions import (importGnuTransaction)
     from Classes.WebDriver import Driver
     from Classes.Asset import USD    
 else:
     from .Functions.GeneralFunctions import (getPassword, getUsername, setDirectory, showMessage)
-    from .Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet
+    from .Functions.GnuCashFunctions import (importGnuTransaction)
     from .Classes.Asset import USD
 
 def locateBoAWindowAndOpenAccount(driver, account):
@@ -169,16 +167,13 @@ def claimBoARewards(driver, account):
 def runBoA(driver, account):
     directory = setDirectory()
     today = datetime.today()
-    myBook = openGnuCashBook('Finance', False, False) if account == "Personal" else openGnuCashBook('Home', False, False)
     importAccount = 'BoA' if account == "Personal" else 'BoA-joint'
     BoA = USD(importAccount)
     locateBoAWindowAndOpenAccount(driver, account)
     BoA.setBalance(getBoABalance(driver, account))
     transactionsCSV = exportBoATransactions(driver.webDriver, account, today)
     claimBoARewards(driver, account)
-    reviewTrans = importGnuTransaction(importAccount, transactionsCSV, myBook, driver.webDriver)
-    BoA.setReviewTransactions(reviewTrans)
-    BoA.updateGnuBalance(myBook)
+    importGnuTransaction(BoA, transactionsCSV, driver.webDriver)
     BoA.locateAndUpdateSpreadsheet(driver.webDriver)
     if BoA.reviewTransactions:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash") if account == "Personal" else os.startfile(directory + r"\Stuff\Home\Finances\Home.gnucash")

@@ -9,14 +9,12 @@ from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Discover":
     from Functions.GeneralFunctions import (getPassword, setDirectory, showMessage)
-    from Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
-    from Functions.SpreadsheetFunctions import updateSpreadsheet
+    from Functions.GnuCashFunctions import (importGnuTransaction)
     from Classes.WebDriver import Driver
     from Classes.Asset import USD
 else:
     from .Functions.GeneralFunctions import (getPassword, setDirectory, showMessage)
-    from .Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet
+    from .Functions.GnuCashFunctions import (importGnuTransaction)
     from .Classes.Asset import USD
 
 def locateDiscoverWindow(driver):
@@ -85,15 +83,12 @@ def claimDiscoverRewards(driver):
 def runDiscover(driver):
     directory = setDirectory()
     today = datetime.today()
-    myBook = openGnuCashBook('Finance', False, False)
     Discover = USD("Discover")
     locateDiscoverWindow(driver)
     Discover.setBalance(getDiscoverBalance(driver))
     transactionsCSV = exportDiscoverTransactions(driver.webDriver, today)
     claimDiscoverRewards(driver)
-    reviewTrans = importGnuTransaction(Discover.name, transactionsCSV, myBook, driver.webDriver)
-    Discover.setReviewTransactions(reviewTrans)
-    Discover.updateGnuBalance(myBook)
+    importGnuTransaction(Discover, transactionsCSV, driver.webDriver)
     Discover.locateAndUpdateSpreadsheet(driver.webDriver)
     if Discover.reviewTransactions:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")

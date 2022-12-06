@@ -7,8 +7,10 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Worthy":
     from Functions.GeneralFunctions import setDirectory, showMessage, getUsername, getPassword
     from Classes.WebDriver import Driver
+    from Classes.Asset import USD    
 else:
     from .Functions.GeneralFunctions import setDirectory, showMessage, getUsername, getPassword
+    from .Classes.Asset import USD
 
 def locateWorthyWindow(driver):
     found = driver.findWindowByUrl("worthy.capital")
@@ -38,6 +40,7 @@ def worthyLogin(driver):
 
 def getWorthyBalance(driver):
     locateWorthyWindow(driver)
+    Worthy = USD("Worthy")
     # Get balance from Worthy I
     worthy1BalanceElement = "//*[@id='q-app']/div/div[1]/main/div/div/div[2]/div/div[2]/div/div/div[3]/div/h4/span[3]"
     driver.webDriver.find_element(By.XPATH, worthy1BalanceElement).click()
@@ -47,8 +50,8 @@ def getWorthyBalance(driver):
     driver.webDriver.find_element(By.XPATH, worthy2BalanceElement).click()
     worthy2Balance = driver.webDriver.find_element(By.XPATH, worthy2BalanceElement).text.strip('$').replace(',','')
     # Combine Worthy balances
-    worthyTotalBalance = float(Decimal(worthy1Balance) + Decimal(worthy2Balance))
-    return worthyTotalBalance
+    Worthy.setBalance(float(Decimal(worthy1Balance) + Decimal(worthy2Balance)))
+    return Worthy
 
 if __name__ == '__main__':
     driver = Driver("Chrome")

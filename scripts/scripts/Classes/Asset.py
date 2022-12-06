@@ -1,113 +1,58 @@
 from datetime import datetime
+from decimal import Decimal
+
+from piecash import Split, Transaction
 
 if __name__ == "Classes.Asset":
     from Functions.GeneralFunctions import getCryptocurrencyPrice, setDirectory
     from Functions.SpreadsheetFunctions import updateSpreadsheet
-    from Functions.GnuCashFunctions import updateCoinQuantityFromStakingInGnuCash, updateCryptoPriceInGnucash, openGnuCashBook
+    from Functions.GnuCashFunctions import updateCryptoPriceInGnucash, openGnuCashBook, getAccountPath, getGnuCashBalance
 else:
     from scripts.scripts.Functions.GeneralFunctions import getCryptocurrencyPrice, setDirectory
     from scripts.scripts.Functions.SpreadsheetFunctions import updateSpreadsheet
-    from scripts.scripts.Functions.GnuCashFunctions import updateCoinQuantityFromStakingInGnuCash, updateCryptoPriceInGnucash, openGnuCashBook
+    from scripts.scripts.Functions.GnuCashFunctions import updateCryptoPriceInGnucash, openGnuCashBook, getAccountPath, getGnuCashBalance
 
-def getCryptoSymbolByName(name):
-    match name.lower():
-        case "algorand":
-            return 'ALGO'
-        case "bitcoin":
-            return 'BTC'
-        case "cardano":
-            return 'ADA'
-        case "cosmos":
-            return 'ATOM'
-        case "ethereum":
-            return 'ETH'
-        case "ethereum2":
-            return 'ETH2'
-        case "iotex":
-            return 'IOTX'
-        case "loopring":
-            return 'LRC'
-        case "polkadot":
-            return 'DOT'
-        case "presearch":
-            return 'PRE'
-        case _:
-            print(f'Cryptocurrency: {name} not found in "getCryptoSymbolByName" function')
-
-def getGnuCashBalance(myBook, account):
-    with myBook as book:
-        balance = book.accounts(fullname=account).get_balance()
-    book.close()
-    return balance
-
-def getAccountPath(account):
-    match account:
-        case 'ADA':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Cardano"            
-        case 'ALGO':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Algorand"
-        case 'Ally':
-            return "Assets:Ally Checking Account"
-        case 'AmazonGC':
-            return "Assets:Liquid Assets:Amazon GC"
-        case 'Amex':
-            return "Liabilities:Credit Cards:Amex BlueCash Everyday"
-        case 'ATOM':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Cosmos"                  
-        case 'Barclays':
-            return "Liabilities:Credit Cards:BarclayCard CashForward"
-        case 'BTC':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Bitcoin"                
-        case 'BTC-Midas':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Bitcoin:BTC-Midas"
-        case 'BTC-MyConstant':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Bitcoin:BTC-MyConstant"                
-        case 'BoA':
-            return "Liabilities:Credit Cards:BankAmericard Cash Rewards"
-        case 'BoA-joint':
-            return "Liabilities:BoA Credit Card"
-        case 'Bonds':
-            return "Assets:Liquid Assets:Bonds"
-        case 'Chase':
-            return "Liabilities:Credit Cards:Chase Freedom"
-        case 'Crypto':
-            return "Assets:Non-Liquid Assets:CryptoCurrency"
-        case 'Discover':
-            return "Liabilities:Credit Cards:Discover It"
-        case 'DOT':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Polkadot"
-        case 'ETH':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum"
-        case 'ETH-Kraken':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum:ETH-Kraken"
-        case 'ETH-Midas':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum:ETH-Midas"
-        case 'ETH-MyConstant':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum:ETH-MyConstant"
-        case 'ETH2':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum2"
-        case 'HSA':
-            return "Assets:Non-Liquid Assets:HSA:NM HSA"
-        case 'IOTX':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:IoTex"
-        case 'Liquid Assets':
-            return "Assets:Liquid Assets"            
-        case 'MyConstant':
-            return "Assets:Liquid Assets:Bonds:My Constant"
-        case 'PRE':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Presearch"
-        case 'Checking':
-            return "Assets:Liquid Assets:Sofi:Checking"
-        case 'Savings':
-            return "Assets:Liquid Assets:Sofi:Savings"                
-        case 'TIAA':
-            return "Assets:Liquid Assets:TIAA"
-        case 'VanguardPension':
-            return "Assets:Non-Liquid Assets:Pension"  
-        case 'Worthy':
-            return "Assets:Liquid Assets:Bonds:Worthy Bonds"
-        case _:
-            print(f'account: {account} not found in "getAccountPath" function')
+def getCryptoSymbolByName(self):
+        match self.name.lower():
+            case "algorand":
+                return 'ALGO'
+            case "bitcoin":
+                return 'BTC'
+            case "cardano":
+                return 'ADA'
+            case "cosmos":
+                return 'ATOM'
+            case "ethereum":
+                return 'ETH'
+            case "ethereum2":
+                return 'ETH2'
+            case "iotex":
+                return 'IOTX'
+            case "loopring":
+                return 'LRC'
+            case "polkadot":
+                return 'DOT'
+            case "presearch":
+                return 'PRE'
+            case _:
+                print(f'Cryptocurrency: {self.name} not found in "getCryptoSymbolByName" function')
+                
+def updateCoinQuantityFromStakingInGnuCash(self):
+        myBook = openGnuCashBook('Finance', False, False)
+        coinDifference = Decimal(self.balance) - Decimal(self.gnuBalance)
+        if coinDifference > 0:
+            with myBook:
+                split = [Split(value=-0, memo="scripted", account=myBook.accounts(fullname='Income:Investments:Staking')),
+                        Split(value=0, quantity=round(Decimal(coinDifference), 6), memo="scripted", account=myBook.accounts(fullname=self.gnuAccount))]
+                Transaction(post_date=datetime.today().date(), currency=myBook.currencies(mnemonic="USD"), description=self.symbol + ' staking', splits=split)
+                myBook.save()
+                myBook.flush()
+            myBook.close()
+        elif coinDifference < 0:
+            print(f'given balance of {self.balance} {self.symbol} '
+            f'minus gnuCash balance of {self.gnuBalance} '
+            f'leaves unexpected coin difference of {coinDifference} '
+            f'is it rounding issue?')                
 
 class Asset(object):
     "this is a class for tracking asset information"
@@ -128,7 +73,7 @@ class Asset(object):
     
     def updateGnuBalance(self, myBook):
         self.gnuBalance = getGnuCashBalance(myBook, self.gnuAccount)
-    
+
 class Crypto(Asset):
     "this is a class for tracking cryptocurrency information"
     def __init__(self, name):
@@ -136,9 +81,10 @@ class Crypto(Asset):
         self.lowerName = name.lower()
         self.balance = None
         self.price = None
-        self.symbol = getCryptoSymbolByName(name)
-        self.gnuAccount = getAccountPath(self.name)        
-    
+        self.symbol = getCryptoSymbolByName()
+        self.gnuAccount = getAccountPath(self.name)
+        self.gnuBalance = getGnuCashBalance(openGnuCashBook('Finance', True, True), self.gnuAccount)
+                
     def getData(self):
         print(  f'name: {self.name} \n'
                 f'symbol: {self.symbol} \n'
@@ -161,8 +107,8 @@ class Crypto(Asset):
         account = self.symbol if account == None else account
         updateSpreadsheet(setDirectory(), 'Asset Allocation', 'Cryptocurrency', account, 1, self.balance, self.symbol)
         updateSpreadsheet(setDirectory(), 'Asset Allocation', 'Cryptocurrency', account, 2, self.price, self.symbol)
-        updateCoinQuantityFromStakingInGnuCash(self.balance, account)
-        updateCryptoPriceInGnucash(self.symbol, format(self.price, ".2f"))        
+        updateCoinQuantityFromStakingInGnuCash()
+        updateCryptoPriceInGnucash(self.symbol, format(self.price, ".2f"))    
 
     def updateBalanceInSpreadSheet(self, account=None):
         account = self.symbol if account == None else account
@@ -179,7 +125,7 @@ class Crypto(Asset):
     def updatePriceInGnuCash(self, account=None):
         account = self.symbol if account == None else account
         updateCryptoPriceInGnucash(self.symbol, format(self.price, ".2f"))
-        
+
 class USD(Asset):
     "this is a class for tracking USD information"
     def __init__(self, name):
@@ -189,11 +135,8 @@ class USD(Asset):
         self.currency = 'USD'
         self.reviewTransactions = None
         self.gnuAccount = getAccountPath(self.name)
-        if name == 'Ally' or name == 'BoA-joint': # or BoA joint
-            myBook = openGnuCashBook('Home', True, True)
-        else:
-            myBook = openGnuCashBook('Finance', False, False)
-        self.gnuBalance = getGnuCashBalance(myBook, self.gnuAccount)
+        book = 'Home' if (self.name == 'Ally' or self.name == 'BoA-joint') else 'Finance'
+        self.gnuBalance = getGnuCashBalance(openGnuCashBook(book, True, True), self.gnuAccount)
     
     def getData(self):
         print(  f'name: {self.name} \n'

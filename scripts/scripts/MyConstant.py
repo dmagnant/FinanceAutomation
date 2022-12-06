@@ -7,13 +7,11 @@ from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "MyConstant":
     from Functions.GeneralFunctions import (setDirectory, showMessage, getOTP, getUsername, getPassword)
-    from Classes.Asset import Crypto
+    from Classes.Asset import Crypto, USD
     from Classes.WebDriver import Driver
-    from Classes.Asset import USD
 else:
     from .Functions.GeneralFunctions import (setDirectory, showMessage, getOTP, getUsername, getPassword)
-    from .Classes.Asset import Crypto
-    from .Classes.Asset import USD
+    from .Classes.Asset import Crypto, USD
 
 def locateMyConstantWindow(driver):
     found = driver.findWindowByUrl("www.myconstant.com")
@@ -104,18 +102,3 @@ if __name__ == '__main__':
     elif (type == "Crypto"):
         for coin in response:
             coin.getData()
-
-
-
-if __name__ == '__main__':
-    usdBalance = Decimal("200.01")
-    balance = "200.01"
-    floatBal = float(round(Decimal(balance), 2))
-    floatUsd = float(round(usdBalance , 2))
-    print(floatBal)
-    print(floatUsd)
-    format(floatUsd, ".2f")
-    print(floatUsd)
-
-    # usdBalance = Decimal(driver.webDriver.find_element(By.ID, "acc_balance").text.strip('$').replace(',',''))
-    # return float(round(usdBalance, 2))

@@ -9,7 +9,7 @@ if __name__ == '__main__' or __name__ == "Ally":
     from Functions.GeneralFunctions import (closeExpressVPN, getPassword,
                                             getStartAndEndOfDateRange,
                                             setDirectory, showMessage)
-    from Functions.GnuCashFunctions import openGnuCashBook, importUniqueTransactionsToGnuCash
+    from Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash
     from Functions.TransactionFunctions import modifyTransactionDescription
     from Classes.WebDriver import Driver
     from Classes.Asset import USD
@@ -17,7 +17,7 @@ else:
     from .Functions.GeneralFunctions import (closeExpressVPN, getPassword,
                                             getStartAndEndOfDateRange,
                                             setDirectory, showMessage)
-    from .Functions.GnuCashFunctions import openGnuCashBook, importUniqueTransactionsToGnuCash
+    from .Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash
     from .Functions.TransactionFunctions import modifyTransactionDescription
     from .Classes.Asset import USD
 
@@ -107,8 +107,7 @@ def runAlly(driver):
     locateAllyWindow(driver)
     Ally.setBalance(getAllyBalance(driver))
     allyActivity = captureAllyTransactions(driver.webDriver, dateRange)
-    reviewTrans = importUniqueTransactionsToGnuCash('Ally', allyActivity, driver.webDriver, dateRange, 0)
-    Ally.setReviewTransactions(reviewTrans)
+    importUniqueTransactionsToGnuCash('Ally', allyActivity, driver.webDriver, dateRange, 0)
     return Ally
     
 if __name__ == '__main__':

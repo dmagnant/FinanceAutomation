@@ -1,20 +1,17 @@
 import os
 import time
-from datetime import datetime
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Amex":
     from Functions.GeneralFunctions import (getPassword, getUsername, setDirectory, showMessage)
-    from Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
-    from Functions.SpreadsheetFunctions import updateSpreadsheet
+    from Functions.GnuCashFunctions import (importGnuTransaction)
     from Classes.WebDriver import Driver
     from Classes.Asset import USD
 else:
     from .Functions.GeneralFunctions import (getPassword, getUsername, setDirectory, showMessage)
-    from .Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet
+    from .Functions.GnuCashFunctions import (importGnuTransaction)
     from .Classes.Asset import USD
 
 def locateAmexWindow(driver):
@@ -76,15 +73,12 @@ def claimAmexRewards(driver):
 
 def runAmex(driver):
     directory = setDirectory()
-    myBook = openGnuCashBook('Finance', False, False)
     locateAmexWindow(driver)
     Amex = USD("Amex")
     Amex.setBalance(getAmexBalance(driver))
     exportAmexTransactions(driver.webDriver)
     claimAmexRewards(driver)
-    reviewTrans = importGnuTransaction(Amex.name, r'C:\Users\dmagn\Downloads\activity.csv', myBook, driver.webDriver)
-    Amex.setReviewTransactions(reviewTrans)
-    Amex.updateGnuBalance(myBook)
+    importGnuTransaction(Amex, r'C:\Users\dmagn\Downloads\activity.csv', driver.webDriver)
     Amex.locateAndUpdateSpreadsheet(driver.webDriver)
     if Amex.reviewTransactions:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")

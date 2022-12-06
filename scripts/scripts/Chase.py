@@ -6,14 +6,12 @@ from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Chase":
     from Functions.GeneralFunctions import (setDirectory, showMessage)
-    from Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
-    from Functions.SpreadsheetFunctions import updateSpreadsheet
+    from Functions.GnuCashFunctions import (importGnuTransaction)
     from Classes.WebDriver import Driver
     from Classes.Asset import USD
 else:
     from .Functions.GeneralFunctions import (setDirectory, showMessage)
-    from .Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet
+    from .Functions.GnuCashFunctions import (importGnuTransaction)
     from .Classes.Asset import USD
 
 def locateChaseWindow(driver):
@@ -83,15 +81,12 @@ def claimChaseRewards(driver):
 def runChase(driver):
     directory = setDirectory()
     today = datetime.today()
-    myBook = openGnuCashBook('Finance', False, False)
     Chase = USD("Chase")
     locateChaseWindow(driver)
     Chase.setBalance(getChaseBalance(driver))
     transactionsCSV = exportChaseTransactions(driver.webDriver, today)
     claimChaseRewards(driver)
-    reviewTrans = importGnuTransaction(Chase.name, transactionsCSV, myBook, driver.webDriver)
-    Chase.setReviewTransactions(reviewTrans)
-    Chase.updateGnuBalance(myBook)
+    importGnuTransaction(Chase, transactionsCSV, driver.webDriver)
     Chase.locateAndUpdateSpreadsheet(driver.webDriver)
     if Chase.reviewTransactions:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")

@@ -8,14 +8,12 @@ from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Barclays":
     from Functions.GeneralFunctions import (getPassword, getUsername, setDirectory, showMessage)
-    from Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
-    from Functions.SpreadsheetFunctions import updateSpreadsheet
+    from Functions.GnuCashFunctions import (importGnuTransaction)
     from Classes.WebDriver import Driver
     from Classes.Asset import USD
 else:
     from .Functions.GeneralFunctions import (getPassword, getUsername, setDirectory, showMessage)
-    from .Functions.GnuCashFunctions import (getGnuCashBalance, importGnuTransaction, openGnuCashBook)
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet
+    from .Functions.GnuCashFunctions import (importGnuTransaction)
     from .Classes.Asset import USD
 
 def locateBarclaysWindow(driver):
@@ -130,7 +128,6 @@ def claimBarclaysRewards(driver):
 def runBarclays(driver):
     directory = setDirectory()
     today = datetime.today()
-    myBook = openGnuCashBook('Finance', False, False)
     Barclays = USD("Barclays")
     locateBarclaysWindow(driver)
     Barclays.setBalance(getBarclaysBalance(driver))
@@ -138,9 +135,7 @@ def runBarclays(driver):
     transactionsCSV = exportBarclaysTransactions(driver.webDriver, today)
     if rewardsBalance > 50:
         claimBarclaysRewards(driver, rewardsBalance)
-    reviewTrans = importGnuTransaction(Barclays.name, transactionsCSV, myBook, driver.webDriver, 5)
-    Barclays.setReviewTransactions(reviewTrans)
-    Barclays.updateGnuBalance(myBook)
+    importGnuTransaction(Barclays, transactionsCSV, driver.webDriver, 5)
     Barclays.locateAndUpdateSpreadsheet(driver.webDriver)
     if Barclays.reviewTransactions:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
