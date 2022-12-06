@@ -92,7 +92,7 @@ def runChase(driver):
     if Chase.reviewTransactions:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
     showMessage("Balances + Review", f'Chase Balance: {Chase.balance} \n' f'GnuCash Chase Balance: {Chase.gnuBalance} \n \n' f'Review transactions:\n{Chase.reviewTransactions}')
-    driver.close()
+    driver.webDriver.close()
 
 if __name__ == '__main__':
     driver = Driver("Chrome")

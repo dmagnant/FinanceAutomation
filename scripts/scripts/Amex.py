@@ -85,7 +85,7 @@ def runAmex(driver):
     if Amex.reviewTransactions:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
     showMessage("Balances + Review", f'Amex Balance: {Amex.balance} \n' f'GnuCash Amex Balance: {Amex.gnuBalance} \n \n' f'Review transactions:\n{Amex.reviewTransactions}')
-    driver.close()
+    driver.webDriver.close()
 
 if __name__ == '__main__':
     driver = Driver("Chrome")

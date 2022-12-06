@@ -86,7 +86,7 @@ class Crypto(Asset):
         self.lowerName = name.lower()
         self.balance = None
         self.price = None
-        self.symbol = getCryptoSymbolByName()
+        self.symbol = getCryptoSymbolByName(self)
         self.gnuAccount = getAccountPath(self.name)
         self.gnuBalance = getGnuCashBalance(openGnuCashBook('Finance', True, True), self.gnuAccount)
                 
@@ -112,7 +112,7 @@ class Crypto(Asset):
         account = self.symbol if account == None else account
         updateSpreadsheet(setDirectory(), 'Asset Allocation', 'Cryptocurrency', account, 1, self.balance, self.symbol)
         updateSpreadsheet(setDirectory(), 'Asset Allocation', 'Cryptocurrency', account, 2, self.price, self.symbol)
-        updateCoinQuantityFromStakingInGnuCash()
+        updateCoinQuantityFromStakingInGnuCash(self)
         updateCryptoPriceInGnucash(self.symbol, format(self.price, ".2f"))    
 
     def updateBalanceInSpreadSheet(self, account=None):
@@ -125,7 +125,7 @@ class Crypto(Asset):
 
     def updateBalanceInGnuCash(self, account=None):
         account = self.symbol if account == None else account
-        updateCoinQuantityFromStakingInGnuCash(self.balance, account)
+        updateCoinQuantityFromStakingInGnuCash(self)
 
     def updatePriceInGnuCash(self, account=None):
         account = self.symbol if account == None else account

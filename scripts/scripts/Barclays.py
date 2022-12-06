@@ -142,7 +142,7 @@ def runBarclays(driver):
     if Barclays.reviewTransactions:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
     showMessage("Balances + Review", f'Barclays balance: {Barclays.balance} \n' f'GnuCash Barclays balance: {Barclays.gnuBalance} \n \n' f'Review transactions:\n{Barclays.reviewTransactions}')
-    driver.close()
+    driver.webDriver.close()
 
 if __name__ == '__main__':
     driver = Driver("Chrome")

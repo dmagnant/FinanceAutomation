@@ -95,7 +95,7 @@ def runDiscover(driver):
     if Discover.reviewTransactions:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
     showMessage("Balances + Review", f'Discover Balance: {Discover.balance} \n' f'GnuCash Discover Balance: {Discover.gnuBalance} \n \n' f'Review transactions:\n{Discover.reviewTransactions}')
-    driver.close()
+    driver.webDriver.close()
 
 if __name__ == '__main__':
     driver = Driver("Chrome")

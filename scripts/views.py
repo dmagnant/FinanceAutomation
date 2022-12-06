@@ -315,7 +315,7 @@ def presearch(request):
         driver = Driver("Chrome")
         directory = setDirectory()
         if "rewards" in request.POST:
-            presearchRewardsRedemptionAndBalanceUpdates(directory, driver)
+            presearchRewardsRedemptionAndBalanceUpdates(driver)
         elif "login" in request.POST:
             locatePresearchWindow(driver)          
         elif "balance" in request.POST:

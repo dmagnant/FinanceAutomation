@@ -180,7 +180,7 @@ def runBoA(driver, account):
     if BoA.reviewTransactions:
         os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash") if account == "Personal" else os.startfile(directory + r"\Stuff\Home\Finances\Home.gnucash")
     showMessage("Balances + Review", f'BoA Balance: {BoA.balance} \n' f'GnuCash BoA Balance: {BoA.gnuBalance} \n \n' f'Review transactions:\n{BoA.reviewTransactions}')
-    driver.close()
+    driver.webDriver.close()
     # startExpressVPN()
 
 if __name__ == '__main__':

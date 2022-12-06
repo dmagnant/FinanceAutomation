@@ -49,6 +49,8 @@ def allyLogin(driver):
         loggedIn = False
     except NoSuchElementException:
         loggedIn = True
+    driver.find_element(By.PARTIAL_LINK_TEXT, "Joint Checking").click()
+    time.sleep(3)
     return loggedIn
 
 def allyLogout(driver):
@@ -60,7 +62,7 @@ def allyLogout(driver):
 
 def getAllyBalance(driver):
     locateAllyWindow(driver)
-    return driver.webDriver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div[2]/div/div[1]/div[2]/div/table/tbody/tr/td[3]/div").text.replace('$', '').replace(',', '')
+    return driver.webDriver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div[1]/div/section[1]/div/div[1]/div/div[2]/div[1]/span[2]/span/div").text.replace('$', '').replace(',', '')
 
 def setAllyTransactionElementRoot(row, column):
     return "/html/body/div/div[1]/main/div/div/div/div[1]/section/div[2]/div/table/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/div/"
@@ -69,9 +71,6 @@ def captureAllyTransactions(driver, dateRange):
     directory = setDirectory()
     allyActivity = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\ally.csv"
     open(allyActivity, 'w', newline='').truncate()
-     # click Joint Checking link
-    driver.find_element(By.PARTIAL_LINK_TEXT, "Joint Checking").click()
-    time.sleep(3)
     row = 1
     column = 1
     element = setAllyTransactionElementRoot(row, column)
@@ -107,7 +106,7 @@ def runAlly(driver):
     locateAllyWindow(driver)
     Ally.setBalance(getAllyBalance(driver))
     allyActivity = captureAllyTransactions(driver.webDriver, dateRange)
-    importUniqueTransactionsToGnuCash('Ally', allyActivity, driver.webDriver, dateRange, 0)
+    importUniqueTransactionsToGnuCash(Ally, allyActivity, driver.webDriver, dateRange, 0)
     return Ally
     
 if __name__ == '__main__':

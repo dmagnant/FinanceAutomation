@@ -92,9 +92,9 @@ def getAccountPath(accountName):
             return "Assets:Liquid Assets:Bonds:My Constant"
         case 'Presearch':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Presearch"
-        case 'Checking':
+        case 'Sofi Checking':
             return "Assets:Liquid Assets:Sofi:Checking"
-        case 'Savings':
+        case 'Sofi Savings':
             return "Assets:Liquid Assets:Sofi:Savings"                
         case 'VanguardPension':
             return "Assets:Non-Liquid Assets:Pension"  
@@ -144,14 +144,14 @@ def importUniqueTransactionsToGnuCash(account, transactionsCSV, driver, dateRang
     importCSV = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\import.csv"
     open(importCSV, 'w', newline='').truncate()
     myBook = openGnuCashBook('Finance', False, False)
-    if account == 'Ally':
+    if account.name == 'Ally':
         gnuAccount = "Assets:Ally Checking Account"
         gnuCSV = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\gnu_ally.csv"
         myBook = openGnuCashBook('Home', False, False)
-    elif account == 'Sofi Checking':
+    elif account.name == 'Sofi Checking':
         gnuAccount = "Assets:Liquid Assets:Sofi:Checking"
         gnuCSV = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\gnu_sofi.csv"
-    elif account == 'Sofi Savings':
+    elif account.name == 'Sofi Savings':
         gnuAccount = "Assets:Liquid Assets:Sofi:Savings"
         gnuCSV = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\gnu_sofi.csv"
     open(gnuCSV, 'w', newline='').truncate()
@@ -171,7 +171,7 @@ def importUniqueTransactionsToGnuCash(account, transactionsCSV, driver, dateRang
     for row in csv.reader(open(transactionsCSV, 'r'), delimiter=','):
         if row not in csv.reader(open(gnuCSV, 'r'), delimiter=','):
             csv.writer(open(importCSV, 'a', newline='')).writerow(row)
-    importGnuTransaction(account, importCSV, myBook, driver, lineStart)
+    importGnuTransaction(account, importCSV, driver, lineStart)
 
 def writeGnuTransaction(myBook, description, postDate, amount, fromAccount, toAccount=''):
     with myBook as book:
