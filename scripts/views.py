@@ -350,7 +350,7 @@ def swagbucks(request):
         elif "login" in request.POST:
             locateSwagBucksWindow(driver)
         elif "alu" in request.POST:
-            runAlusRevenge(driver, True)
+            runAlusRevenge(driver.webDriver, True)
         elif "content" in request.POST:
             swagBuckscontentDiscovery(driver.webDriver)
         elif "search" in request.POST:

@@ -57,7 +57,6 @@ def runAlusRevenge(driver, run_Alu):
         #Play Alus Revenge
         driver.get('https://www.swagbucks.com/games/play/319/alu-s-revenge-2?tid=113')
         time.sleep(2)
-
         # move window to primary monitor
         Alu = pygetwindow.getWindowsWithTitle("Alu's Revenge 2 - Free Online Games | Swagbucks - Google Chrome")[0]
         Alu.moveTo(10, 10)
@@ -67,6 +66,10 @@ def runAlusRevenge(driver, run_Alu):
         # click Play for Free
         driver.find_element(By.ID, "gamesItemBtn").click()
         time.sleep(3)
+        driver.find_element(By.XPATH,"/html/body").send_keys(Keys.DOWN)
+        driver.find_element(By.XPATH,"/html/body").send_keys(Keys.DOWN)
+        driver.find_element(By.XPATH,"/html/body").send_keys(Keys.DOWN)
+        driver.find_element(By.XPATH,"/html/body").send_keys(Keys.UP)
         redeemed = 0
         while redeemed < 2:
             game_over_text = ""
