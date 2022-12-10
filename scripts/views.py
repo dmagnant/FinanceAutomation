@@ -313,7 +313,6 @@ def pinecone(request):
 def presearch(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
-        directory = setDirectory()
         if "rewards" in request.POST:
             presearchRewardsRedemptionAndBalanceUpdates(driver)
         elif "login" in request.POST:
@@ -322,7 +321,7 @@ def presearch(request):
             balance = getPresearchBalance(driver)
             print(balance[0])
         elif "search" in request.POST:
-            searchUsingPresearch(driver)       
+            searchUsingPresearch(driver)
     return render(request,"scripts/presearch.html")
 
 def sofi(request):

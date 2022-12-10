@@ -9,10 +9,10 @@ from selenium.webdriver.common.keys import Keys
 if __name__ == '__main__' or __name__ == "Presearch":
     from Classes.Asset import Crypto
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import setDirectory, showMessage
+    from Functions.GeneralFunctions import showMessage
 else:
     from .Classes.Asset import Crypto
-    from .Functions.GeneralFunctions import setDirectory, showMessage
+    from .Functions.GeneralFunctions import showMessage
 
 def locatePresearchWindow(driver):
     found = driver.findWindowByUrl("presearch.com")
@@ -115,7 +115,6 @@ def presearchRewardsRedemptionAndBalanceUpdates(driver):
     return [Presearch]
     
 if __name__ == '__main__':
-    directory = setDirectory()
     driver = Driver("Chrome")
     locatePresearchWindow(driver)
     searchUsingPresearch(driver)

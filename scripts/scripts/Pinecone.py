@@ -16,6 +16,7 @@ def locatePineconeWindow(driver):
 def pineConeLogin(driver):
     driver.execute_script("window.open('https://members.pineconeresearch.com/#/Login');")
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    time.sleep(1)
     # click login
     driver.find_element(By.XPATH, "//*[@id='mainContainer']/div/div/div[1]/div/form/button").click()
     time.sleep(6)
@@ -54,5 +55,5 @@ def runPinecone(driver):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    runPinecone(driver)
-    
+    # runPinecone(driver)
+    locatePineconeWindow(driver)

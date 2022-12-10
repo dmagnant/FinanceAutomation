@@ -120,7 +120,7 @@ def dailyPoll(driver):
         # click on first answer
         driver.find_element(By.CSS_SELECTOR, "td.pollCheckbox").click()
         # click Vote & Earn
-        driver.find_element(By.XPATH, "/html/body/div[1]/div[3]/div[2]/div[1]/div/div[2]/div[2]/div[1]/div[5]/div[2]/div[2]/div[1]/div[1]").click()
+        driver.find_element(By.ID, "btnVote").click()
     except NoSuchElementException:
         exception = "already answered"
     driver.close()
@@ -173,6 +173,13 @@ def toDoList(driver):
                 driver.switch_to.window(main)
         list_item_num += 1
 
+def openAndCloseInboxItem(driver):
+    driver.find_element(By.XPATH, "/html/body/div[1]/div[3]/div[1]/div[1]/main/div[5]/div[1]/div[1]/div/a").click()
+    time.sleep(2)
+    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.close()
+    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+
 def swagbucksInbox(driver):
     driver.get("https://www.swagbucks.com/g/inbox")
     while True:
@@ -181,12 +188,12 @@ def swagbucksInbox(driver):
             driver.find_element(By.XPATH, contentPath).click()
             description = driver.find_element(By.XPATH, "/html/body/div[1]/div[3]/div[1]/div[1]/main/h1").text
             if "Earn Every" in description:
-                # click continue
-                driver.find_element(By.XPATH, "/html/body/div[1]/div[3]/div[1]/div[1]/main/div[5]/div[1]/div[1]/div/a").click()
-                time.sleep(2)
-                driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-                driver.close()
-                driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+                openAndCloseInboxItem(driver)
+            elif "Discover Daily Interests" in description:
+                num = 0
+                while num < 4:
+                    openAndCloseInboxItem(driver)
+                    num += 1
             # click delete
             driver.find_element(By.XPATH, "/html/body/div[1]/div[3]/div[1]/div[1]/main/div[3]/div[2]/div[2]").click()
             time.sleep(1)
@@ -285,4 +292,5 @@ def runSwagbucks(driver, run_Alu):
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    runSwagbucks(driver, True)
+    # runSwagbucks(driver, True)
+    swagbucksInbox(driver.webDriver)
