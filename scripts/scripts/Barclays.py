@@ -1,7 +1,7 @@
 import os
 import time
 from datetime import datetime
-from typing import KeysView
+from selenium.webdriver.common.keys import Keys
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
@@ -70,7 +70,7 @@ def barclaysLogin(driver):
 
 def getBarclaysBalance(driver):
     locateBarclaysWindow(driver)     
-    return driver.webDriver.find_element(By.XPATH, "/html/body/section[2]/div[4]/div[2]/div[1]/section[1]/div/div/div[2]/div/div[2]/div[1]/div").text.strip('-').strip('$')
+    return driver.webDriver.find_element(By.XPATH, "//*[@id='accountTile']/div[2]/div/div[2]/div[1]/div").text.strip('-').strip('$')
 
 def exportBarclaysTransactions(driver, today):
     # # EXPORT TRANSACTIONS
@@ -106,26 +106,20 @@ def exportBarclaysTransactions(driver, today):
     return r"C:\Users\dmagn\Downloads\CreditCard_" + yearFrom + monthFrom + "11_" + yearTo + monthTo + "10.csv"
 
 def claimBarclaysRewards(driver):
-    locateBarclaysWindow(driver)      
-    # # REDEEM REWARDS
-    # click on Rewards & Benefits
-    driver.webDriver.find_element(By.XPATH, "/html/body/section[2]/div[1]/nav/div/ul/li[4]/a").click()
-    # click on Redeem my cash rewards
-    driver.webDriver.find_element(By.XPATH, "//*[@id='rewards-benefits-container']/div[1]/ul/li[3]/a").click()
-    # click on Direct Deposit or Statement Credit
-    driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/div[1]/div/div/div[2]/ul/li[1]/div/a").click()
-    # click on Continue
-    driver.webDriver.find_element(By.ID, "redeem-continue").click()
-    # Click "select an option" (for method of rewards)
-    driver.webDriver.find_element(By.XPATH, "//*[@id='mor_dropDown0']").click()
-    driver.webDriver.find_element(By.XPATH, "//*[@id='mor_dropDown0']").send_keys(KeysView.DOWN)
-    driver.webDriver.find_element(By.XPATH, "//*[@id='mor_dropDown0']").send_keys(KeysView.ENTER)
+    locateBarclaysWindow(driver)
+    driver = driver.webDriver
+    driver.get("https://www.barclaycardus.com/servicing/cashBack?__fsk=212242283#!/redeem")
+    # click continue
+    driver.find_element(By.ID,"redeem-continue").click()
+    # click method of rewards
+    driver.find_element(By.ID, "mor_dropDown0").click()
+    driver.find_element(By.ID, "mor_dropDown0").send_keys(Keys.DOWN)
+    driver.find_element(By.ID, "mor_dropDown0").send_keys(Keys.ENTER)
     time.sleep(1)
-    # Click Continue
-    driver.webDriver.find_element(By.XPATH, "//*[@id='achModal-continue']").click()
+    driver.find_element(By.ID, "achModal-continue").click()
     time.sleep(1)
-    # click on Redeem Now
-    driver.webDriver.find_element(By.XPATH, "/html/body/section[2]/div[4]/div[2]/cashback/div/div[2]/div/ui-view/redeem/div/review/div/div/div/div/div[2]/form/div[3]/div/div[1]/button").click()
+    # click Redeem now
+    driver.find_element(By.ID, "redeem-continue").click()
 
 def runBarclays(driver):
     directory = setDirectory()
@@ -133,10 +127,10 @@ def runBarclays(driver):
     Barclays = USD("Barclays")
     locateBarclaysWindow(driver)
     Barclays.setBalance(getBarclaysBalance(driver))
-    rewardsBalance = float(driver.find_element(By.XPATH, "//*[@id='rewardsTile']/div[2]/div/div[2]/div[1]/div").text.strip('$'))
+    rewardsBalance = float(driver.webDriver.find_element(By.XPATH, "//*[@id='rewardsTile']/div[2]/div/div[2]/div[1]/div").text.strip('$'))
     transactionsCSV = exportBarclaysTransactions(driver.webDriver, today)
-    if rewardsBalance > 50:
-        claimBarclaysRewards(driver, rewardsBalance)
+    if rewardsBalance >= float(50):
+        claimBarclaysRewards(driver)
     importGnuTransaction(Barclays, transactionsCSV, driver.webDriver, 5)
     Barclays.locateAndUpdateSpreadsheet(driver.webDriver)
     if Barclays.reviewTransactions:

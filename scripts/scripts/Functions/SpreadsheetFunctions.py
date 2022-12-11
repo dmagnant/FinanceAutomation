@@ -46,7 +46,7 @@ def getCell(account, month):
             case 'Chase':
                 return ['F8', 'S8', 'C43', 'K43', 'S43', 'C78', 'K78', 'S78', 'C113', 'K113', 'S113', 'C8']            
             case 'Barclays':
-                return ['K10', 'S10', 'C45', 'K45', 'S45', 'C80', 'K80', 'S80', 'C115', 'K115', 'S115', 'C10']
+                return ['K9', 'S9', 'C44', 'K44', 'S44', 'C79', 'K79', 'S79', 'C114', 'K114', 'S114', 'C9']
             #Joint
             case 'BoA-joint':
                 return ['K16', 'S16', 'C52', 'K52', 'S52', 'C88', 'K88', 'S88', 'C124', 'K124', 'S124', 'C16']

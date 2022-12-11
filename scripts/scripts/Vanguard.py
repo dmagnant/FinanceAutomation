@@ -110,6 +110,7 @@ def runVanguard(driver):
     locateVanguardWindow(driver)
     interestYTD = getVanguardBalanceAndInterestYTD(driver, VanguardPension)
     interestAndEmployerContribution = importGnuTransactions(myBook, today, VanguardPension, interestYTD)
+    VanguardPension.updateGnuBalance(myBook)
     updateSpreadsheet(directory, 'Asset Allocation', today.year, 'VanguardPension', today.month, float(VanguardPension.balance))
     os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
     driver.webDriver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=2058576150');")
