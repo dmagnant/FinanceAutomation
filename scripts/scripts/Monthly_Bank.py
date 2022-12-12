@@ -8,7 +8,7 @@ if __name__ == '__main__' or __name__ == "Monthly_Bank":
     from Exodus import runExodus
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                             setDirectory, showMessage)
-    from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction
+    from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction, consolidatePastTransactions
     from Functions.SpreadsheetFunctions import updateSpreadsheet
     from HealthEquity import getHealthEquityBalances
     from IoPay import runIoPay
@@ -24,7 +24,7 @@ else:
     from .Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                              setDirectory, showMessage)
     from .Functions.GnuCashFunctions import (openGnuCashBook,
-                                             writeGnuTransaction)
+                                             writeGnuTransaction, consolidatePastTransactions)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet
     from .HealthEquity import getHealthEquityBalances
     from .IoPay import runIoPay

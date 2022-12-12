@@ -252,3 +252,34 @@ def purgeOldGnucashFiles():
             fileModifiedDate = datetime.fromtimestamp(os.path.getmtime(filePath)).date()
             if fileModifiedDate < dateRange[0]:
                 os.remove(filePath)
+
+def consolidatePastTransactions(myBook, fromAccount, toAccount, description):
+    def consolidateLoop(allTransactions, date, toAccount, fromAccount, myBook, description):
+        today = datetime.today()
+        while today.year - date.year > 1:
+            transInYear = []
+            for trans in allTransactions:
+                if trans.post_date.year == date.year:
+                    transInYear.append(trans)
+            if len(transInYear) > 1:
+                total = 0
+                for tr in transInYear:
+                    for spl in tr.splits:
+                        if spl.account.fullname == toAccount:
+                            total += spl.value
+                    myBook.delete(tr)
+                split = [Split(value=total, memo="scripted", account=myBook.accounts(fullname=toAccount)),
+                         Split(value=-total, memo="scripted", account=myBook.accounts(fullname=fromAccount))]
+                Transaction(post_date=date, currency=myBook.currencies(mnemonic="USD"), description=description, splits=split)
+                myBook.save()
+                myBook.flush()
+            date = date.replace(year=date.year+1)
+    transactions = []
+    for transaction in myBook.transactions:
+        account1 = transaction.splits[0].account.fullname
+        account2 = transaction.splits[1].account.fullname
+        if (account1 == toAccount or account1 == fromAccount) and (account2 == toAccount or account2 == fromAccount):
+            transactions.append(transaction)
+    startDate = transactions[0].post_date.replace(month=12, day=31)
+    consolidateLoop(transactions, startDate, toAccount, fromAccount, myBook, description)
+    myBook.close()

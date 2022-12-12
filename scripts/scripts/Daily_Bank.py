@@ -25,7 +25,9 @@ else:
 def runDailyBank():
     directory = setDirectory()
     driver = Driver("Chrome")
+    Crypto = USD("Crypto")
     sofi = runSofi(driver)
+    ally = runAlly(driver)
     presearchRewardsRedemptionAndBalanceUpdates(driver)
     runPaypal(driver)
     driver.webDriver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1684fQ-gW5A0uOf7s45p9tC4GiEE5s5_fjO5E7dgVI1s/edit#gid=382679207');")
@@ -33,8 +35,6 @@ def runDailyBank():
     driver.webDriver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=623829469');")
     driver.webDriver.switch_to.window(driver.webDriver.window_handles[len(driver.webDriver.window_handles)-1])
     updateCryptoPrices(driver)
-    Crypto = USD("Crypto")
-    ally = runAlly(driver)
     driver.webDriver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1oP3U7y8qywvXG9U_zYXgjFfqHrCyPtUDl4zPDftFCdM/edit#gid=317262693');")
     driver.webDriver.switch_to.window(driver.webDriver.window_handles[len(driver.webDriver.window_handles)-1])
     if sofi[0].reviewTransactions or sofi[1].reviewTransactions:

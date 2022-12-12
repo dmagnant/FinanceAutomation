@@ -1,4 +1,4 @@
-if __name__ == '__main__' or __name__ == "Exodus":
+if __name__ == '__main__' or __name__ == "IoPay":
     from Classes.Asset import Crypto
     from Functions.GeneralFunctions import showMessage    
 else:

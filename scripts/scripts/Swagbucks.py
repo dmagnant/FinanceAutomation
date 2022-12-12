@@ -29,7 +29,11 @@ def locateSwagBucksWindow(driver):
 def swagBucksLogin(driver):
     driver.execute_script("window.open('https://www.swagbucks.com/');")
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-    
+    try:
+        driver.find_element(By.ID, "lightboxExit").click()
+    except (ElementNotInteractableException, NoSuchElementException):
+        exception = "caught"
+        
 def swagBuckscontentDiscovery(driver):
     driver.execute_script("window.open('https://www.swagbucks.com/discover/explore');")
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
@@ -225,15 +229,15 @@ def swagbucksSearch(driver):
             time.sleep(1)
             try:
                 driver.find_element(By.ID, "sbLogoLink").click()
-            # light-box pop-up in the way
+            # pop-up in the way
             except ElementClickInterceptedException:
-                try: 
-                    driver.find_element(By.ID, "lightboxExit").click()
+                try:
+                    # click Yay for me
+                    driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/section/section/aside/button[2]")
                 except NoSuchElementException:
                     try: 
-                        showMessage('Daily goal celebration test', '"YAY FOR ME" button should be clicked after clicking OK on this message')
-                        driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/section/section/aside/button[2]")
-                    except ElementNotInteractableException:
+                        driver.find_element(By.ID, "lightboxExit").click()
+                    except NoSuchElementException:
                         exception = "caught"
                 driver.find_element(By.ID, "sbLogoLink").click()
             time.sleep(1)
@@ -275,10 +279,6 @@ def runSwagbucks(driver, run_Alu):
     # closeExpressVPN()
     driver.webDriver.implicitly_wait(2)
     swagBucksLogin(driver.webDriver)
-    try:
-        driver.webDriver.find_element(By.ID, "lightboxExit").click()
-    except (ElementNotInteractableException, NoSuchElementException):
-        exception = "caught"
     runAlusRevenge(driver.webDriver, run_Alu)
     swagBuckscontentDiscovery(driver.webDriver)
     dailyPoll(driver.webDriver)
@@ -292,5 +292,4 @@ def runSwagbucks(driver, run_Alu):
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    # runSwagbucks(driver, True)
-    swagbucksInbox(driver.webDriver)
+    runSwagbucks(driver, True)

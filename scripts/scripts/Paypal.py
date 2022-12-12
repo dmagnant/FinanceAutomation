@@ -24,7 +24,7 @@ def payPalLogin(driver):
     # switch to last window
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
     try:
-        # enter passwordnone
+        # enter password
         driver.find_element(By.ID, "password").send_keys(getPassword(directory, 'Paypal'))
         # click log in
         driver.find_element(By.ID,"btnLogin").click()
@@ -38,6 +38,7 @@ def payPalLogin(driver):
             exception = "no captcha presented"
     except NoSuchElementException:
         exception = "already logged in"
+    driver.get("https://www.paypal.com/myaccount/summary")
         
 def transferMoney(driver):
     driver.get("https://www.paypal.com/myaccount/money/")
