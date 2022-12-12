@@ -12,12 +12,12 @@ if __name__ == '__main__' or __name__ == "BoA":
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import (getPassword, getUsername,
                                             setDirectory, showMessage)
-    from Functions.GnuCashFunctions import importGnuTransaction    
+    from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 else:
     from .Classes.Asset import USD
     from .Functions.GeneralFunctions import (getPassword, getUsername,
                                              setDirectory, showMessage)
-    from .Functions.GnuCashFunctions import importGnuTransaction
+    from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 
 def locateBoAWindowAndOpenAccount(driver, account):
     found = driver.findWindowByUrl("secure.bankofamerica.com")
@@ -167,7 +167,6 @@ def claimBoARewards(driver, account):
             driver.find_element(By.XPATH,"/html/body/div[2]/div[2]/div[1]/div[1]/div[4]/input[1]").click()
 
 def runBoA(driver, account):
-    directory = setDirectory()
     today = datetime.today()
     importAccount = 'BoA' if account == "Personal" else 'BoA-joint'
     BoA = USD(importAccount)
@@ -178,7 +177,7 @@ def runBoA(driver, account):
     importGnuTransaction(BoA, transactionsCSV, driver.webDriver)
     BoA.locateAndUpdateSpreadsheet(driver.webDriver)
     if BoA.reviewTransactions:
-        os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash") if account == "Personal" else os.startfile(directory + r"\Stuff\Home\Finances\Home.gnucash")
+        openGnuCashUI('Finances')
     showMessage("Balances + Review", f'BoA Balance: {BoA.balance} \n' f'GnuCash BoA Balance: {BoA.gnuBalance} \n \n' f'Review transactions:\n{BoA.reviewTransactions}')
     driver.webDriver.close()
     # startExpressVPN()

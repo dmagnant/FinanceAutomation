@@ -1,4 +1,3 @@
-import os
 import time
 from datetime import datetime
 
@@ -8,12 +7,12 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Chase":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import setDirectory, showMessage
-    from Functions.GnuCashFunctions import importGnuTransaction
+    from Functions.GeneralFunctions import showMessage
+    from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 else:
     from .Classes.Asset import USD
-    from .Functions.GeneralFunctions import setDirectory, showMessage
-    from .Functions.GnuCashFunctions import importGnuTransaction
+    from .Functions.GeneralFunctions import showMessage
+    from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 
 def locateChaseWindow(driver):
     found = driver.findWindowByUrl("chase.com/web/auth")
@@ -80,7 +79,6 @@ def claimChaseRewards(driver):
         pyautogui.press('enter')                
 
 def runChase(driver):
-    directory = setDirectory()
     today = datetime.today()
     Chase = USD("Chase")
     locateChaseWindow(driver)
@@ -90,7 +88,7 @@ def runChase(driver):
     importGnuTransaction(Chase, transactionsCSV, driver.webDriver)
     Chase.locateAndUpdateSpreadsheet(driver.webDriver)
     if Chase.reviewTransactions:
-        os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
+        openGnuCashUI('Finances')
     showMessage("Balances + Review", f'Chase Balance: {Chase.balance} \n' f'GnuCash Chase Balance: {Chase.gnuBalance} \n \n' f'Review transactions:\n{Chase.reviewTransactions}')
     driver.webDriver.close()
 

@@ -32,6 +32,7 @@ def sofiLogin(driver):
     directory = setDirectory()
     driver.execute_script("window.open('https://login.sofi.com/u/login?state=hKFo2SBrOGMtTVZSUHZPalVPbEUyZmJyWXhyV3pYMU9lSzhEUKFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIGptNWpvQnRQQlFtSHFJT216N0dfLU1aZFBUbWFqVXl6o2NpZNkgNkxuc0xDc2ZGRUVMbDlTQzBDaWNPdkdlb2JvZXFab2I');")
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    time.sleep(2)
     # click Login
     driver.find_element(By.XPATH, "//*[@id='widget_block']/main/section/div/div/div/form/div[2]/button").click()
     try:

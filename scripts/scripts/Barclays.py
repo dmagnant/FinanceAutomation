@@ -11,12 +11,12 @@ if __name__ == '__main__' or __name__ == "Barclays":
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import (getPassword, getUsername,
                                             setDirectory, showMessage)
-    from Functions.GnuCashFunctions import importGnuTransaction
+    from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 else:
     from .Classes.Asset import USD
     from .Functions.GeneralFunctions import (getPassword, getUsername,
                                              setDirectory, showMessage)
-    from .Functions.GnuCashFunctions import importGnuTransaction
+    from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 
 def locateBarclaysWindow(driver):
     found = driver.findWindowByUrl("barclaycardus.com")
@@ -122,7 +122,6 @@ def claimBarclaysRewards(driver):
     driver.find_element(By.ID, "redeem-continue").click()
 
 def runBarclays(driver):
-    directory = setDirectory()
     today = datetime.today()
     Barclays = USD("Barclays")
     locateBarclaysWindow(driver)
@@ -134,7 +133,7 @@ def runBarclays(driver):
     importGnuTransaction(Barclays, transactionsCSV, driver.webDriver, 5)
     Barclays.locateAndUpdateSpreadsheet(driver.webDriver)
     if Barclays.reviewTransactions:
-        os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
+        openGnuCashUI('Finances')
     showMessage("Balances + Review", f'Barclays balance: {Barclays.balance} \n' f'GnuCash Barclays balance: {Barclays.gnuBalance} \n \n' f'Review transactions:\n{Barclays.reviewTransactions}')
     driver.webDriver.close()
 

@@ -9,12 +9,12 @@ if __name__ == '__main__' or __name__ == "Amex":
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import (getPassword, getUsername,
                                             setDirectory, showMessage)
-    from Functions.GnuCashFunctions import importGnuTransaction
+    from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 else:
     from .Classes.Asset import USD
     from .Functions.GeneralFunctions import (getPassword, getUsername,
                                              setDirectory, showMessage)
-    from .Functions.GnuCashFunctions import importGnuTransaction
+    from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 
 def locateAmexWindow(driver):
     found = driver.findWindowByUrl("global.americanexpress.com")
@@ -74,7 +74,6 @@ def claimAmexRewards(driver):
         driver.webDriver.find_element(By.XPATH, "//*[@id='use-dollars-btn']/span").click()
 
 def runAmex(driver):
-    directory = setDirectory()
     locateAmexWindow(driver)
     Amex = USD("Amex")
     Amex.setBalance(getAmexBalance(driver))
@@ -83,7 +82,7 @@ def runAmex(driver):
     importGnuTransaction(Amex, r'C:\Users\dmagn\Downloads\activity.csv', driver.webDriver)
     Amex.locateAndUpdateSpreadsheet(driver.webDriver)
     if Amex.reviewTransactions:
-        os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
+        openGnuCashUI('Finances')
     showMessage("Balances + Review", f'Amex Balance: {Amex.balance} \n' f'GnuCash Amex Balance: {Amex.gnuBalance} \n \n' f'Review transactions:\n{Amex.reviewTransactions}')
     driver.webDriver.close()
 

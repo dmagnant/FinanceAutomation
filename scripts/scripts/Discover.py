@@ -1,4 +1,3 @@
-import os
 import time
 from datetime import datetime
 
@@ -12,12 +11,12 @@ if __name__ == '__main__' or __name__ == "Discover":
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import (getPassword, setDirectory,
                                             showMessage)
-    from Functions.GnuCashFunctions import importGnuTransaction
+    from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 else:
     from .Classes.Asset import USD
     from .Functions.GeneralFunctions import (getPassword, setDirectory,
                                              showMessage)
-    from .Functions.GnuCashFunctions import importGnuTransaction
+    from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 
 def locateDiscoverWindow(driver):
     found = driver.findWindowByUrl("discover.com")
@@ -83,7 +82,6 @@ def claimDiscoverRewards(driver):
         exception = "caught"
 
 def runDiscover(driver):
-    directory = setDirectory()
     today = datetime.today()
     Discover = USD("Discover")
     locateDiscoverWindow(driver)
@@ -93,7 +91,7 @@ def runDiscover(driver):
     importGnuTransaction(Discover, transactionsCSV, driver.webDriver)
     Discover.locateAndUpdateSpreadsheet(driver.webDriver)
     if Discover.reviewTransactions:
-        os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
+        openGnuCashUI('Finances')
     showMessage("Balances + Review", f'Discover Balance: {Discover.balance} \n' f'GnuCash Discover Balance: {Discover.gnuBalance} \n \n' f'Review transactions:\n{Discover.reviewTransactions}')
     driver.webDriver.close()
 

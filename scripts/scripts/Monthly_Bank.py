@@ -8,8 +8,8 @@ if __name__ == '__main__' or __name__ == "Monthly_Bank":
     from Exodus import runExodus
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                             setDirectory, showMessage)
-    from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction, consolidatePastTransactions
-    from Functions.SpreadsheetFunctions import updateSpreadsheet
+    from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction
+    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
     from HealthEquity import getHealthEquityBalances
     from IoPay import runIoPay
     from Kraken import runKraken
@@ -24,8 +24,8 @@ else:
     from .Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                              setDirectory, showMessage)
     from .Functions.GnuCashFunctions import (openGnuCashBook,
-                                             writeGnuTransaction, consolidatePastTransactions)
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet
+                                             writeGnuTransaction)
+    from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
     from .HealthEquity import getHealthEquityBalances
     from .IoPay import runIoPay
     from .Kraken import runKraken
@@ -48,28 +48,24 @@ def runUSD(driver, today):
     month = today.month
     lastMonth = getStartAndEndOfDateRange(today, today.month, today.year, "month")
     myBook = openGnuCashBook('Finance', False, False)
-
     MyConstant = runMyConstant(driver, "USD")
     Worthy = getWorthyBalance(driver)
     healthEquityHSADividendsAndVanguard = getHealthEquityBalances(driver, lastMonth)
-
     for account in [MyConstant, Worthy, healthEquityHSADividendsAndVanguard[0]]:
         monthlyRoundUp(account, myBook, lastMonth[1], healthEquityHSADividendsAndVanguard[1])
     LiquidAssets = USD("Liquid Assets")
     Bonds = USD("Bonds")
+    openSpreadsheet(driver.webDriver, 'Asset Allocation', '2022')
     updateSpreadsheet(directory, 'Asset Allocation', year, Bonds.name, month, float(Bonds.gnuBalance), 'Liquid Assets')
     updateSpreadsheet(directory, 'Asset Allocation', year, LiquidAssets.name, month, float(LiquidAssets.gnuBalance), 'Liquid Assets')
     updateSpreadsheet(directory, 'Asset Allocation', year, healthEquityHSADividendsAndVanguard[2].name, month, healthEquityHSADividendsAndVanguard[2].balance, '401k')
-    driver.webDriver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=2058576150');")
-
     return [MyConstant, Worthy, LiquidAssets, healthEquityHSADividendsAndVanguard[2], healthEquityHSADividendsAndVanguard[0]]
 
 def runCrypto(driver, today):
     directory = setDirectory()
     year = today.year
     month = today.month
-    driver.webDriver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=623829469');")
-    driver.webDriver.switch_to.window(driver.webDriver.window_handles[len(driver.webDriver.window_handles)-1])
+    openSpreadsheet(driver.webDriver, 'Asset Allocation', 'Cryptocurrency')
     # runMyConstant(driver, "Crypto")
     runEternl(driver)
     runKraken(driver)

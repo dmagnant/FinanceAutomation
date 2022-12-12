@@ -1,5 +1,4 @@
 from datetime import datetime
-
 import gspread
 
 if __name__ == '__main__' or __name__ == "UpdateGoals":
@@ -7,11 +6,14 @@ if __name__ == '__main__' or __name__ == "UpdateGoals":
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                             setDirectory, showMessage)
     from Functions.GnuCashFunctions import openGnuCashBook
+    from Functions.SpreadsheetFunctions import openSpreadsheet
 else:
     from .Classes.WebDriver import Driver
     from .Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                              setDirectory, showMessage)
-    from .Functions.GnuCashFunctions import openGnuCashBook  
+    from .Functions.GnuCashFunctions import openGnuCashBook
+    from .Functions.SpreadsheetFunctions import openSpreadsheet
+
 
 def getTransactionTotal(dateRange, gnuAccount, mybook):
     total = 0
@@ -169,10 +171,9 @@ def runUpdateGoals(accounts, timeframe):
     directory = setDirectory()
     driver = Driver("Chrome")
     if accounts == "Personal":
-        driver.webDriver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=1813404638');")
+        openSpreadsheet(driver.webDriver, 'Asset Allocation', 'Goals')
     elif accounts == "Joint":
-        driver.webDriver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1oP3U7y8qywvXG9U_zYXgjFfqHrCyPtUDl4zPDftFCdM/edit#gid=1436385671');")
-    driver.webDriver.switch_to.window(driver.webDriver.window_handles[len(driver.webDriver.window_handles)-1])
+        openSpreadsheet(driver.webDriver, 'Home', '2022 Balance')
     today = datetime.today()
     dateRange = getStartAndEndOfDateRange(today, today.month, today.year, timeframe)
     mybook = openGnuCashBook('Finance', True, True) if accounts == 'Personal' else openGnuCashBook('Home', False, False)

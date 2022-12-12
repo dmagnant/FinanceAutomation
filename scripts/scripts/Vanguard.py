@@ -1,4 +1,3 @@
-import os
 import time
 from datetime import datetime
 from decimal import Decimal
@@ -14,8 +13,8 @@ if __name__ == '__main__' or __name__ == "Vanguard":
                                             getStartAndEndOfDateRange,
                                             getUsername, setDirectory,
                                             showMessage)
-    from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction
-    from Functions.SpreadsheetFunctions import updateSpreadsheet    
+    from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction, openGnuCashUI
+    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
 else:
     from .Classes.Asset import USD
     from .Functions.GeneralFunctions import (getPassword,
@@ -23,8 +22,8 @@ else:
                                              getUsername, setDirectory,
                                              showMessage)
     from .Functions.GnuCashFunctions import (openGnuCashBook,
-                                             writeGnuTransaction)
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet
+                                             writeGnuTransaction, openGnuCashUI)
+    from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
     
 def locateVanguardWindow(driver):
     found = driver.findWindowByUrl("ownyourfuture.vanguard.com/main")
@@ -111,9 +110,9 @@ def runVanguard(driver):
     interestYTD = getVanguardBalanceAndInterestYTD(driver, VanguardPension)
     interestAndEmployerContribution = importGnuTransactions(myBook, today, VanguardPension, interestYTD)
     VanguardPension.updateGnuBalance(myBook)
+    openSpreadsheet(driver.webDriver, 'Asset Allocation', '2022')
     updateSpreadsheet(directory, 'Asset Allocation', today.year, 'VanguardPension', today.month, float(VanguardPension.balance))
-    os.startfile(directory + r"\Finances\Personal Finances\Finance.gnucash")
-    driver.webDriver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=2058576150');")
+    openGnuCashUI('Finances')
     showMessage("Balances",f'Pension Balance: {VanguardPension.balance} \n'f'GnuCash Pension Balance: {VanguardPension.gnuBalance} \n'f'Interest earned: {interestAndEmployerContribution[0]} \n'f'Total monthly contributions: {interestAndEmployerContribution[1]} \n')
 
 if __name__ == '__main__':

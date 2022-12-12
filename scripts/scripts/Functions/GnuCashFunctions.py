@@ -643,3 +643,13 @@ def modifyTransactionDescription(description, amount="0.00"):
     elif "CASH REWARDS STATEMENT CREDIT" in description.upper():
         description = "BoA CC Rewards"
     return description
+
+def openGnuCashUI(book):
+    directory = setDirectory()
+    if book == 'Finances':
+        path = r"\Finances\Personal Finances\Finance.gnucash"
+    elif book == 'Home':
+        path = r"\Stuff\Home\Finances\Home.gnucash"
+    elif book == 'Test':
+        path = r"\Finances\Personal Finances\test.gnucash"
+    os.startfile(directory + path)
