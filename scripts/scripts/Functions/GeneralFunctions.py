@@ -20,17 +20,6 @@ def showMessage(header, body):
 def setDirectory():
     return os.environ.get('StorageDirectory')    
 
-def checkIfProcessRunning(processName):
-    # Iterate over the all the running process
-    for proc in psutil.process_iter():
-        try:
-            # Check if process name contains the given name string.
-            if processName.lower() in proc.name().lower():
-                return True
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-            pass
-    return False;
-
 def startExpressVPN():
     os.startfile(r'C:\Program Files (x86)\ExpressVPN\expressvpn-ui\ExpressVPN.exe')
     time.sleep(5)
@@ -38,6 +27,16 @@ def startExpressVPN():
     EVPN.close()  # stays open in system tray
     
 def closeExpressVPN():
+    def checkIfProcessRunning(processName):
+        # Iterate over the all the running process
+        for proc in psutil.process_iter():
+            try:
+                # Check if process name contains the given name string.
+                if processName.lower() in proc.name().lower():
+                    return True
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
+        return False
     if checkIfProcessRunning('ExpressVPN.exe'):
         os.startfile(r'C:\Program Files (x86)\ExpressVPN\expressvpn-ui\ExpressVPN.exe')
         time.sleep(3)

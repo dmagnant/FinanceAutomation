@@ -11,15 +11,13 @@ if __name__ == '__main__' or __name__ == "Ally":
     from Functions.GeneralFunctions import (closeExpressVPN, getPassword,
                                             getStartAndEndOfDateRange,
                                             setDirectory, showMessage)
-    from Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash
-    from Functions.TransactionFunctions import modifyTransactionDescription
+    from Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription
 else:
     from .Classes.Asset import USD
     from .Functions.GeneralFunctions import (closeExpressVPN, getPassword,
                                              getStartAndEndOfDateRange,
                                              setDirectory, showMessage)
-    from .Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash
-    from .Functions.TransactionFunctions import modifyTransactionDescription
+    from .Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription
 
 def locateAllyWindow(driver):
     found = driver.findWindowByUrl("secure.ally.com")
