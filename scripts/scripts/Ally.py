@@ -1,6 +1,8 @@
 import csv
 import time
 from datetime import datetime
+from decimal import Decimal
+import re
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
@@ -62,10 +64,10 @@ def getAllyBalance(driver):
     locateAllyWindow(driver)
     return driver.webDriver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div[1]/div/section[1]/div/div[1]/div/div[2]/div[1]/span[2]/span/div").text.replace('$', '').replace(',', '')
 
-def setAllyTransactionElementRoot(row, column):
-    return "/html/body/div/div[1]/main/div/div/div/div[1]/section/div[2]/div/table/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/div/"
-
 def captureAllyTransactions(driver, dateRange):
+    def setAllyTransactionElementRoot(row, column):
+        return "/html/body/div/div[1]/main/div/div/div/div[1]/section/div[2]/div/table/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/div/"
+    
     directory = setDirectory()
     allyActivity = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\ally.csv"
     open(allyActivity, 'w', newline='').truncate()
@@ -78,7 +80,6 @@ def captureAllyTransactions(driver, dateRange):
         try:
             date = datetime.strptime(driver.find_element(By.XPATH, element + "span").text, '%b %d, %Y').date()
             if date < dateRange[0] or date > dateRange[1]:
-            # if str(modDate) not in dateRange:
                 insideDateRange = False
             else:
                 column += 1
@@ -86,14 +87,17 @@ def captureAllyTransactions(driver, dateRange):
                 description = driver.find_element(By.XPATH, element + "div/button/span").text
                 column += 1
                 element = setAllyTransactionElementRoot(row, column)
-                amount = driver.find_element(By.XPATH, element + "span").text.replace('$','').replace(',','')
+                amount = driver.find_element(By.XPATH, element + "span").text.replace('$', '').replace(',', '')
+                # method to remove '-' from string since the above wasn't working
+                if not amount[0].isnumeric():
+                    amount = -Decimal(amount.replace(amount[0], ''))
                 description = modifyTransactionDescription(description)
                 transaction = str(date), description, amount
-                csv.writer(open(allyActivity, 'a', newline='')).writerow(transaction)
+                csv.writer(open(allyActivity, 'a', newline='', encoding="utf-8")).writerow(transaction)
                 row += 1
                 column = 1
                 element = setAllyTransactionElementRoot(row, column)
-        except (NoSuchElementException, ValueError):
+        except (NoSuchElementException):
             insideDateRange = False
     return allyActivity
 

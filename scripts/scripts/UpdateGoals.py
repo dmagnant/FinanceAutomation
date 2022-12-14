@@ -159,7 +159,7 @@ def getCell(account, month, accounts='Personal'):
             return 'M' + row
 
 def updateSpreadsheet(directory, account, month, value, accounts='Personal'):
-    jsonCreds = directory + r"\Projects\Coding\Python\BankingAutomation\Resources\creds.json"
+    jsonCreds = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
     sheetTitle = 'Asset Allocation' if accounts == 'Personal' else 'Home'
     sheet = gspread.service_account(filename=jsonCreds).open(sheetTitle)
     worksheetTitle = 'Goals' if accounts == 'Personal' else 'Finances'

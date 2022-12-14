@@ -558,7 +558,7 @@ def purgeOldGnucashFiles():
 def consolidatePastTransactions(myBook, fromAccount, toAccount, description):
     def loopPerYear(allTransactions, date, toAccount, fromAccount, myBook, description):
         today = datetime.today()
-        while today.year - date.year > 1:
+        while today.year - date.year >= 1:
             transInYear = []
             for trans in allTransactions:
                 if trans.post_date.year == date.year:
@@ -634,10 +634,10 @@ def modifyTransactionDescription(description, amount="0.00"):
         description = "Discover CC Rewards"        
     elif "DISCOVER" in description.upper():
         description = "Discover CC"
-    elif "BARCLAYCARD US" in description.upper():
-        description = "Barclays CC"
-    elif "BARCLAYCARD US ACH REWARD" in description.upper():
+    elif "BARCLAYCARD US" in description.upper() and float(amount) > 0:
         description = "Barclays CC Rewards"
+    elif "BARCLAYCARD US" in description.upper() and float(amount) < 0:
+        description = "Barclays CC"        
     elif "BK OF AMER VISA" in description.upper():
         description = "BoA CC"
     elif "CASH REWARDS STATEMENT CREDIT" in description.upper():
@@ -653,3 +653,43 @@ def openGnuCashUI(book):
     elif book == 'Test':
         path = r"\Finances\Personal Finances\test.gnucash"
     os.startfile(directory + path)
+
+def consolidatePastTransactionsWithSplits(myBook):
+    def loopPerYear(allTransactions, date, myBook):
+        today = datetime.today()
+        while today.year - date.year >= 1:
+            transInYear = []
+            for trans in allTransactions:
+                if trans.post_date.year == date.year:
+                    transInYear.append(trans)
+            if len(transInYear) > 1:
+                sofi = 0
+                rewards = 0
+                grocery = 0
+                for tr in transInYear:
+                    for spl in tr.splits:                        
+                        if spl.account.fullname == 'Assets:Liquid Assets:Sofi':
+                            sofi += spl.value
+                        elif spl.account.fullname == 'Income:Credit Card Rewards':
+                            rewards += spl.value
+                        elif spl.account.fullname == 'Expenses:Groceries':
+                            grocery += spl.value                            
+                    myBook.delete(tr)
+                split = [Split(value=sofi, memo="scripted", account=myBook.accounts(fullname='Assets:Liquid Assets:Sofi')),
+                         Split(value=rewards, memo="scripted", account=myBook.accounts(fullname='Income:Credit Card Rewards')),
+                         Split(value=grocery, memo="scripted", account=myBook.accounts(fullname='Expenses:Groceries'))
+                         ]
+                Transaction(post_date=date, currency=myBook.currencies(mnemonic="USD"), description=str(date.year) + ' Checking Groceries', splits=split)
+                myBook.save()
+                myBook.flush()
+            date = date.replace(year=date.year+1)
+    transactions = []
+    for transaction in myBook.transactions:
+        if transaction.post_date.year == 2021:
+            for spl in transaction.splits:
+                if spl.account.fullname == 'Expenses:Groceries':
+                    if transaction.description == "2021 grocery":
+                        transactions.append(transaction)
+    startDate = transactions[0].post_date.replace(month=12, day=31)
+    loopPerYear(transactions, startDate, myBook)
+    myBook.close()
