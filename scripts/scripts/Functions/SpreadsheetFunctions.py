@@ -38,30 +38,26 @@ def updateSpreadsheet(directory, sheetTitle, tabTitle, account, month, value, sy
                 ## Cryptocurrency Spreadsheet
                 case 'ALGO':
                     return ['H2', 'J2']
-                case 'BTC-Midas':
-                    return ['H3', 'J3']
-                case 'BTC-MyConstant':
-                    return ['H4', 'J4']            
+                case 'BTC':
+                    return ['H3', 'J3']         
                 case 'ADA':
-                    return ['H5', 'J5']            
+                    return ['H4', 'J4']            
                 case 'ATOM':
+                    return ['H5', 'J5']            
+                case 'ETH-Ledger':
                     return ['H6', 'J6']
-                case 'ETH-Midas':
+                case 'ETH-Kraken':                
                     return ['H7', 'J7']
-                case 'ETH-MyConstant':
-                    return ['H8', 'J8']            
-                case 'ETH-Kraken':
+                case 'ETH2':                          
+                    return ['H8', 'J8']
+                case 'IOTX':                
                     return ['H9', 'J9']
-                case 'ETH2':
+                case 'LRC':                
                     return ['H10', 'J10']
-                case 'IOTX':
+                case 'DOT':                
                     return ['H11', 'J11']
-                case 'LRC':
-                    return ['H12', 'J12'] 
-                case 'DOT':
-                    return ['H13', 'J13']          
-                case 'PRE':
-                    return ['H14', 'J14']
+                case 'PRE':                
+                    return ['H12', 'J12']
 
         cell = (getCellArray(account))[month - 1]
         return cell

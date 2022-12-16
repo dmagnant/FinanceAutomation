@@ -32,8 +32,9 @@ else:
 # book.close()
 
 # # get total investment (dollars) # # 
-# mybook = openGnuCashBook(directory, 'Finance', True, True)
+# mybook = openGnuCashBook('Test', True, True)
 # account = "Assets:Non-Liquid Assets:CryptoCurrency:Cardano"
+
 def sumDollarInvestment(mybook, gnu_account):
     sum = 0
     # retrieve transactions from GnuCash

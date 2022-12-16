@@ -39,7 +39,7 @@ def swagBuckscontentDiscovery(driver):
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
     num = 1
     while (num <= 20):
-        contentPath = "/html/body/div[1]/div[3]/div[1]/div[1]/main/div[2]/div[1]/section[" + str(num) + "]"
+        contentPath = "/html/body/div[2]/div[3]/div[1]/div[1]/main/div[2]/div[1]/section[" + str(num) + "]"
         description = driver.find_element(By.XPATH, contentPath + "/p/span/span[3]").text
         if "1 sb" in description.lower():
             driver.find_element(By.XPATH, contentPath).click()
@@ -145,22 +145,22 @@ def toDoList(driver):
     while list_item_num <= 8:
         try:
             # look for Daily Bonus header 
-            driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/header/nav/div[3]/div/div/div/div[1]/h4")
+            driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/header/nav/div[3]/div/div/div/div[1]/h4")
         except NoSuchElementException:
             try:
                 # if not visible, click to show To Do List
-                driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/header/nav/div[3]/button").click()
+                driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/header/nav/div[3]/button").click()
             except (NoSuchElementException, ElementClickInterceptedException):
                 exception = "caught"
         time.sleep(1)
         # get title of List Item
-        list_item = driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/header/nav/div[3]/div/div/div/div[2]/div/section[1]/div/ul/li[" + str(list_item_num) + "]/a")
+        list_item = driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/header/nav/div[3]/div/div/div/div[2]/div/section[1]/div/ul/li[" + str(list_item_num) + "]/a")
         if list_item.text == "Add A Magic Receipts Offer":
             list_item.click()
             time.sleep(2)
             while button_not_clicked:
                 try:
-                    driver.find_element(By.XPATH, "/html/body/div[1]/div[3]/div[3]/div[1]/main/div/div[2]/div[2]/div[2]/div/div/a[" + str(button_num) +"]/div[2]/button[1]").click()
+                    driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/div[3]/div[1]/main/div/div[2]/div[2]/div[2]/div/div/a[" + str(button_num) +"]/div[2]/button[1]").click()
                     button_not_clicked = False
                 except ElementNotInteractableException:
                     button_num += 1
@@ -256,7 +256,7 @@ def swagbucksSearch(driver):
 
 def getSwagBucksBalance(driver):
     locateSwagBucksWindow(driver)
-    return driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[1]/header/nav/section[2]/div[1]/p/var").text.replace('SB', '').replace(',', '')
+    return driver.webDriver.find_element(By.XPATH, "/html/body/div[2]/div[1]/header/nav/section[2]/div[1]/p/var").text.replace('SB', '').replace(',', '')
 
 def claimSwagBucksRewards(driver):
     locateSwagBucksWindow(driver)

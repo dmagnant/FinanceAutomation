@@ -54,6 +54,6 @@ def runDailyBank():
 
 if __name__ == '__main__':
     runDailyBank()
-    # driver = Driver("Chrome")    
-    # updateCryptoPrices(driver.webDriver)
+    # driver = Driver("Chrome")
+    # updateCryptoPrices(driver)
     

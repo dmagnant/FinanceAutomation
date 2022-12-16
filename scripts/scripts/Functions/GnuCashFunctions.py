@@ -52,11 +52,7 @@ def getAccountPath(accountName):
         case 'Barclays':
             return "Liabilities:Credit Cards:BarclayCard CashForward"
         case 'Bitcoin':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Bitcoin"                
-        case 'BTC-Midas':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Bitcoin:BTC-Midas"
-        case 'BTC-MyConstant':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Bitcoin:BTC-MyConstant"                
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Bitcoin"                               
         case 'BoA':
             return "Liabilities:Credit Cards:BankAmericard Cash Rewards"
         case 'BoA-joint':
@@ -75,10 +71,8 @@ def getAccountPath(accountName):
             return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum"
         case 'ETH-Kraken':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum:ETH-Kraken"
-        case 'ETH-Midas':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum:ETH-Midas"
-        case 'ETH-MyConstant':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum:ETH-MyConstant"
+        case 'ETH-Ledger':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum:ETH-Ledger"
         case 'ETH2':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum2"
         case 'HSA':
@@ -496,8 +490,8 @@ def writeGnuTransaction(myBook, description, postDate, amount, fromAccount, toAc
                     Split(value=amount[3], account=myBook.accounts(fullname="Expenses:Utilities:Gas")),
                     Split(value=amount[4], account=myBook.accounts(fullname=fromAccount))]
         elif "NM Paycheck" in description:
-            split = [Split(value=round(Decimal(2160.53), 2), memo="scripted",account=myBook.accounts(fullname=fromAccount)),
-                    Split(value=round(Decimal(274.67), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:401k")),
+            split = [Split(value=round(Decimal(2023.20), 2), memo="scripted",account=myBook.accounts(fullname=fromAccount)),
+                    Split(value=round(Decimal(412.00), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:401k")),
                     Split(value=round(Decimal(5.49), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Dental")),
                     Split(value=round(Decimal(34.10), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Health")),
                     Split(value=round(Decimal(2.67), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Vision")),
@@ -554,39 +548,49 @@ def purgeOldGnucashFiles():
             fileModifiedDate = datetime.fromtimestamp(os.path.getmtime(filePath)).date()
             if fileModifiedDate < dateRange[0]:
                 os.remove(filePath)
-
-def consolidatePastTransactions(myBook, fromAccount, toAccount, description):
-    def loopPerYear(allTransactions, date, toAccount, fromAccount, myBook, description):
-        today = datetime.today()
-        while today.year - date.year >= 1:
-            transInYear = []
-            for trans in allTransactions:
-                if trans.post_date.year == date.year:
-                    transInYear.append(trans)
-            if len(transInYear) > 1:
-                total = 0
-                for tr in transInYear:
-                    for spl in tr.splits:
-                        if spl.account.fullname == toAccount:
-                            total += spl.value
-                    myBook.delete(tr)
-                split = [Split(value=total, memo="scripted", account=myBook.accounts(fullname=toAccount)),
-                         Split(value=-total, memo="scripted", account=myBook.accounts(fullname=fromAccount))]
-                Transaction(post_date=date, currency=myBook.currencies(mnemonic="USD"), description=description, splits=split)
-                myBook.save()
-                myBook.flush()
-            date = date.replace(year=date.year+1)
-            
-    transactions = []
-    for transaction in myBook.transactions:
-        account1 = transaction.splits[0].account.fullname
-        account2 = transaction.splits[1].account.fullname
-        if (account1 == toAccount or account1 == fromAccount) and (account2 == toAccount or account2 == fromAccount):
-            transactions.append(transaction)
-    startDate = transactions[0].post_date.replace(month=12, day=31)
-    loopPerYear(transactions, startDate, toAccount, fromAccount, myBook, description)
-    myBook.close()
     
+def consolidatePastYearsTransactions(myBook):
+    today = datetime.today().date()
+    transDate = today.replace(month=12, day=31)
+    year = 2007
+    while year < today.year:
+        transDate = transDate.replace(year=year)
+        transactions = []
+        accounts = []
+        totalValues = []
+        totalQuantities = []
+        split = []
+        for transaction in myBook.transactions:
+            if transaction.post_date.year == transDate.year:
+                transactions.append(transaction)
+                for spl in transaction.splits:
+                    splitAccount = spl.account.fullname
+                    if splitAccount not in accounts:
+                        accounts.append(splitAccount)
+                        totalValues.append(0)
+                        totalQuantities.append(0)
+                    i = accounts.index(splitAccount)
+                    totalValues[i] += spl.value
+                    if "Staking" in splitAccount or "CryptoCurrency" in splitAccount:
+                        totalQuantities[i] += spl.quantity
+                myBook.delete(transaction)
+        for account in accounts:
+            i = accounts.index(account)
+            if "Staking" in account or "CryptoCurrency" in account:
+                split.append(Split(value=totalValues[i], quantity=totalQuantities[i], memo="", account=myBook.accounts(fullname=account)))
+            else:
+                split.append(Split(value=totalValues[i], memo="", account=myBook.accounts(fullname=account)))
+        Transaction(post_date=transDate, currency=myBook.currencies(mnemonic="USD"), description=str(transDate.year) + ' Totals', splits=split)
+        year += 1
+        
+    for transaction in myBook.transactions:
+        for spl in transaction.splits:
+            if spl.value == 0 and spl.quantity == 0:
+                myBook.delete(spl)
+    myBook.save()
+    myBook.flush()
+    myBook.close()
+
 def modifyTransactionDescription(description, amount="0.00"):
     if "INTERNET TRANSFER FROM ONLINE SAVINGS ACCOUNT XXXXXX9703" in description.upper():
         description = "Tessa Deposit"
@@ -653,43 +657,3 @@ def openGnuCashUI(book):
     elif book == 'Test':
         path = r"\Finances\Personal Finances\test.gnucash"
     os.startfile(directory + path)
-
-def consolidatePastTransactionsWithSplits(myBook):
-    def loopPerYear(allTransactions, date, myBook):
-        today = datetime.today()
-        while today.year - date.year >= 1:
-            transInYear = []
-            for trans in allTransactions:
-                if trans.post_date.year == date.year:
-                    transInYear.append(trans)
-            if len(transInYear) > 1:
-                sofi = 0
-                rewards = 0
-                grocery = 0
-                for tr in transInYear:
-                    for spl in tr.splits:                        
-                        if spl.account.fullname == 'Assets:Liquid Assets:Sofi':
-                            sofi += spl.value
-                        elif spl.account.fullname == 'Income:Credit Card Rewards':
-                            rewards += spl.value
-                        elif spl.account.fullname == 'Expenses:Groceries':
-                            grocery += spl.value                            
-                    myBook.delete(tr)
-                split = [Split(value=sofi, memo="scripted", account=myBook.accounts(fullname='Assets:Liquid Assets:Sofi')),
-                         Split(value=rewards, memo="scripted", account=myBook.accounts(fullname='Income:Credit Card Rewards')),
-                         Split(value=grocery, memo="scripted", account=myBook.accounts(fullname='Expenses:Groceries'))
-                         ]
-                Transaction(post_date=date, currency=myBook.currencies(mnemonic="USD"), description=str(date.year) + ' Checking Groceries', splits=split)
-                myBook.save()
-                myBook.flush()
-            date = date.replace(year=date.year+1)
-    transactions = []
-    for transaction in myBook.transactions:
-        if transaction.post_date.year == 2021:
-            for spl in transaction.splits:
-                if spl.account.fullname == 'Expenses:Groceries':
-                    if transaction.description == "2021 grocery":
-                        transactions.append(transaction)
-    startDate = transactions[0].post_date.replace(month=12, day=31)
-    loopPerYear(transactions, startDate, myBook)
-    myBook.close()

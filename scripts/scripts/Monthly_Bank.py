@@ -8,7 +8,7 @@ if __name__ == '__main__' or __name__ == "Monthly_Bank":
     from Exodus import runExodus
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                             setDirectory, showMessage)
-    from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction, consolidatePastTransactionsWithSplits, consolidatePastTransactions
+    from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction
     from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
     from HealthEquity import getHealthEquityBalances
     from IoPay import runIoPay
@@ -24,7 +24,7 @@ else:
     from .Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                              setDirectory, showMessage)
     from .Functions.GnuCashFunctions import (openGnuCashBook,
-                                             writeGnuTransaction, consolidatePastTransactionsWithSplits, consolidatePastTransactions)
+                                             writeGnuTransaction)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
     from .HealthEquity import getHealthEquityBalances
     from .IoPay import runIoPay
@@ -95,12 +95,4 @@ def runMonthlyBank():
         driver.webDriver.close()
 
 if __name__ == '__main__':
-    # runMonthlyBank()
-
-    myBook = openGnuCashBook('Finance', False, False)
-    fromAccount = 'Liabilities:Credit Cards:Discover It'
-    toAccount = 'Expenses:School'
-    description = 'School Totals'
-    consolidatePastTransactions(myBook, fromAccount, toAccount, description)
-    # consolidatePastTransactionsWithSplits(myBook)
-    
+    runMonthlyBank()
