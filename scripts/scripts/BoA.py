@@ -177,7 +177,7 @@ def runBoA(driver, account):
     importGnuTransaction(BoA, transactionsCSV, driver.webDriver)
     BoA.locateAndUpdateSpreadsheet(driver.webDriver)
     if BoA.reviewTransactions:
-        openGnuCashUI('Finances')
+        openGnuCashUI('Finances') if account == "Personal" else openGnuCashUI('Home')
     showMessage("Balances + Review", f'BoA Balance: {BoA.balance} \n' f'GnuCash BoA Balance: {BoA.gnuBalance} \n \n' f'Review transactions:\n{BoA.reviewTransactions}')
     driver.webDriver.close()
     # startExpressVPN()

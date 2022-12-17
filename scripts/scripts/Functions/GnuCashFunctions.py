@@ -98,99 +98,161 @@ def getAccountPath(accountName):
         case _:
             print(f'account: {accountName} not found in "getAccountPath" function')
 
+def modifyTransactionDescription(description, amount="0.00"):
+    if "INTERNET TRANSFER FROM ONLINE SAVINGS ACCOUNT XXXXXX9703" in description.upper():
+        description = "Tessa Deposit"
+    elif "INTEREST EARNED" in description.upper():
+        description = "Interest earned"
+    elif "SOFI REWARDS REDEMPTION" in description.upper():
+        description = "Interest earned"
+    elif "JONATHON MAGNANT" in description.upper():
+        description = "Jonny payment"
+    elif "SAVINGS - 3467" in description.upper():
+        description = "Savings Transfer"
+    elif "ALLY BANK TRANSFER" in description.upper():
+        description = "Dan Deposit"
+    elif "ALLY BANK" in description.upper():
+        description = "Ally Transfer"
+    elif "M1 FINANCE" in description.upper():
+        description = "IRA Transfer"
+    elif "CITY OF MILWAUKE B2P*MILWWA" in description.upper():
+        description = "Water Bill"
+    elif "DOVENMUEHLE MTG MORTG PYMT" in description.upper():
+        description = "Mortgage Payment"
+    elif "NORTHWESTERN MUT" in description.upper():
+        description = "NM Paycheck"
+    elif "PAYPAL" in description.upper() and "10.00" in amount:
+        description = "Swagbucks"  
+    elif "PAYPAL" in description.upper():
+        description = "Paypal"
+    elif "NIELSEN" in description.upper() and "3.00" in amount:
+        description = "Pinecone Research"
+    elif "VENMO" in description.upper():
+        description = "Venmo"
+    elif "ALLIANT CU" in description.upper():
+        description = "Alliant Transfer"        
+    elif "AMEX EPAYMENT" in description.upper():
+        description = "Amex CC"
+    elif "SPECTRUM" in description.upper():
+        description = "Internet Bill"
+        print('step 1: changed from spectrum to internet bill')
+    elif "COINBASE" in description.upper():
+        description = "Crypto purchase"
+    elif "CHASE CREDIT CRD" in description.upper() and float(amount) > 0:
+        description = "Chase CC Rewards"
+    elif "CHASE CREDIT CRD" in description.upper() and float(amount) < 0:
+        description = "Chase CC"
+    elif "DISCOVER CASH AWARD" in description.upper():
+        description = "Discover CC Rewards"        
+    elif "DISCOVER" in description.upper():
+        description = "Discover CC"
+    elif "BARCLAYCARD US" in description.upper() and float(amount) > 0:
+        description = "Barclays CC Rewards"
+    elif "BARCLAYCARD US" in description.upper() and float(amount) < 0:
+        description = "Barclays CC"        
+    elif "BK OF AMER VISA" in description.upper():
+        description = "BoA CC"
+    elif "CASH REWARDS STATEMENT CREDIT" in description.upper():
+        description = "BoA CC Rewards"
+    return description
+
 def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
-    def setToAccount(account, row):
+    def setToAccount(account, description):
         toAccount = ''
-        rowNum = 2 if account in ['BoA', 'BoA-joint', 'Chase', 'Discover'] else 1
-        if "BoA CC" in row[rowNum]:
-            if "Rewards" in row[rowNum]:
+        if "BoA CC" in description:
+            if "Rewards" in description:
                 toAccount = "Income:Credit Card Rewards"  
             else: 
                 if account == 'Ally':
                     toAccount = "Liabilities:BoA Credit Card"
                 elif "Sofi" in account:
                     toAccount = "Liabilities:Credit Cards:BankAmericard Cash Rewards"        
-        elif "ARCADIA" in row[rowNum]:
+        elif "ARCADIA" in description:
             toAccount = ""
-        elif "Interest earned" in row[rowNum]:
+        elif "Interest earned" in description:
             toAccount = "Income:Investments:Interest"
-        elif "Savings Transfer" in row[rowNum]:
+        elif "Savings Transfer" in description:
             toAccount = "Assets:Liquid Assets:Sofi:Savings"        
-        elif "Tessa Deposit" in row[rowNum]:
+        elif "Tessa Deposit" in description:
             toAccount = "Tessa's Contributions"
-        elif "Jonny payment" in row[rowNum]:
+        elif "Jonny payment" in description:
             toAccount = "Liabilities:Loans:Personal Loan"
-        elif "MyConstant transfer" in row[rowNum]:
+        elif "MyConstant transfer" in description:
             toAccount = "Assets:Liquid Assets:My Constant"
-        elif "Water Bill" in row[rowNum]:
+        elif "Water Bill" in description:
             toAccount = "Expenses:Utilities:Water"
-        elif "Dan Deposit" in row[rowNum]:
+        elif "Dan Deposit" in description:
             toAccount = "Dan's Contributions"
-        elif "Mortgage Payment" in row[rowNum]:
+        elif "Mortgage Payment" in description:
             toAccount = "Liabilities:Mortgage Loan"
-        elif "Swagbucks" in row[rowNum]:
+        elif "Swagbucks" in description:
             toAccount = "Income:Market Research"
-        elif "NM Paycheck" in row[rowNum]:
+        elif "NM Paycheck" in description:
             toAccount = "Income:Salary"
-        elif "GOOGLE FI" in row[rowNum].upper() or "GOOGLE *FI" in row[rowNum].upper():
+        elif "GOOGLE FI" in description.upper() or "GOOGLE *FI" in description.upper():
             toAccount = "Expenses:Utilities:Phone"
-        elif "Alliant Transfer" in row[rowNum]:
-            toAccount = "Assets:Liquid Assets:Promos:Alliant"        
-        elif "CRYPTO PURCHASE" in row[rowNum].upper():
+        elif "Alliant Transfer" in description:
+            toAccount = "Assets:Liquid Assets:Promos:Alliant"
+        elif "KAINTH" in description:
+            toAccount = "Expenses:Groceries"                
+        elif "CRYPTO PURCHASE" in description.upper():
             toAccount = "Assets:Non-Liquid Assets:CryptoCurrency"
-        elif "Pinecone Research" in row[rowNum]:
+        elif "Pinecone Research" in description:
             toAccount = "Income:Market Research"
-        elif "Internet Bill" in row[rowNum]:
+        elif "Internet Bill" in description:
             toAccount = "Expenses:Utilities:Internet"
-        elif "IRA Transfer" in row[rowNum]:
+            print('step 2: set account to internet')
+        elif "TRAVEL CREDIT" in description:
+            toAccount = "Income:Credit Card Rewards"
+        elif "IRA Transfer" in description:
             toAccount = "Assets:Non-Liquid Assets:Roth IRA"
-        elif "Lending Club" in row[rowNum]:
+        elif "Lending Club" in description:
             toAccount = "Income:Investments:Interest"
-        elif "CASH REWARDS STATEMENT CREDIT" in row[rowNum]:
+        elif "CASH REWARDS STATEMENT CREDIT" in description:
             toAccount = "Income:Credit Card Rewards"        
-        elif "Chase CC Rewards" in row[rowNum]:
+        elif "Chase CC Rewards" in description:
             toAccount = "Income:Credit Card Rewards"
-        elif "Chase CC" in row[rowNum]:
+        elif "Chase CC" in description:
             toAccount = "Liabilities:Credit Cards:Chase Freedom"
-        elif "Discover CC Rewards" in row[rowNum]:
+        elif "Discover CC Rewards" in description:
             toAccount = "Income:Credit Card Rewards"        
-        elif "Discover CC" in row[rowNum]:
+        elif "Discover CC" in description:
             toAccount = "Liabilities:Credit Cards:Discover It"
-        elif "Amex CC" in row[rowNum]:
+        elif "Amex CC" in description:
             toAccount = "Liabilities:Credit Cards:Amex BlueCash Everyday"
-        elif "Barclays CC Rewards" in row[rowNum]:
+        elif "Barclays CC Rewards" in description:
             toAccount = "Income:Credit Card Rewards"
-        elif "Barclays CC" in row[rowNum]:
+        elif "Barclays CC" in description:
             toAccount = "Liabilities:Credit Cards:BarclayCard CashForward"
-        elif "Ally Transfer" in row[rowNum]:
+        elif "Ally Transfer" in description:
             toAccount = "Expenses:Joint Expenses"    
-        elif "BP#" in row[rowNum]:
+        elif "BP#" in description:
             toAccount = "Expenses:Transportation:Gas (Vehicle)"
-        elif "CAT DOCTOR" in row[rowNum]:
+        elif "CAT DOCTOR" in description:
             toAccount = "Expenses:Medical:Vet"
-        elif "PARKING" in row[rowNum] or "SPOTHERO" in row[rowNum].upper():
+        elif "PARKING" in description or "SPOTHERO" in description.upper():
             toAccount = "Expenses:Transportation:Parking"
-        elif "PROGRESSIVE" in row[rowNum]:
+        elif "PROGRESSIVE" in description:
             toAccount = "Expenses:Transportation:Car Insurance"
-        elif "CHARTER SERVICES" in row[rowNum].upper():
+        elif "CHARTER SERVICES" in description.upper():
                 toAccount = "Expenses:Utilities:Internet"     
-        elif "UBER" in row[rowNum].upper() and "EATS" in row[rowNum].upper():
+        elif "UBER" in description.upper() and "EATS" in description.upper():
             toAccount = "Expenses:Bars & Restaurants"
-        elif "UBER" in row[rowNum].upper():
+        elif "UBER" in description.upper():
             toAccount = "Expenses:Travel:Ride Services" if account in ['BoA-joint', 'Ally'] else "Expenses:Transportation:Ride Services"
-        elif "TECH WAY AUTO SERV" in row[rowNum].upper():
+        elif "TECH WAY AUTO SERV" in description.upper():
             toAccount = "Expenses:Transportation:Car Maintenance"
-        elif "INTEREST PAID" in row[rowNum].upper():
+        elif "INTEREST PAID" in description.upper():
             toAccount = "Income:Interest" if account in ['BoA-joint', 'Ally'] else "Income:Investments:Interest"
         if not toAccount:
             for i in ['HOMEDEPOT.COM', 'HOME DEPOT']:
-                if i in row[rowNum].upper():
+                if i in description.upper():
                     if account in ['BoA-joint', 'Ally']:
                         toAccount = "Expenses:Home Depot"
         
         if not toAccount:
             for i in ['AMAZON', 'AMZN']:
-                if i in row[rowNum].upper():
+                if i in description.upper():
                     toAccount = "Expenses:Amazon"
 
         if not toAccount:
@@ -199,7 +261,7 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
                     toAccount = "Expenses:Groceries"
             if not toAccount:
                 for i in ['PICK N SAVE', 'KETTLE RANGE', 'WHOLE FOODS', 'WHOLEFDS', 'TARGET']:
-                    if i in row[rowNum].upper():
+                    if i in description.upper():
                         toAccount = "Expenses:Groceries"
 
         if not toAccount:
@@ -208,7 +270,7 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
                     toAccount = "Expenses:Bars & Restaurants"
             if not toAccount:
                 for i in ['MCDONALD', 'GRUBHUB', 'JIMMY JOHN', 'COLECTIVO', 'INSOMNIA', 'EATSTREET', "KOPP'S CUSTARD", 'MAHARAJA', 'STARBUCKS', "PIETRO'S PIZZA", 'SPROCKET CAFE']:
-                    if i in row[rowNum].upper():
+                    if i in description.upper():
                         toAccount = "Expenses:Bars & Restaurants"
         
         if not toAccount:
@@ -284,7 +346,8 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
                 skipTransaction = True
             amount = Decimal(row[2])
             fromAccount = "Assets:Liquid Assets:Sofi:Savings"
-            reviewTransPath = row[0] + ", " + row[1] + ", " + row[2] + "\n"        
+            reviewTransPath = row[0] + ", " + row[1] + ", " + row[2] + "\n"
+        description = modifyTransactionDescription(description)
         return [postDate, description, amount, skipTransaction, fromAccount, reviewTransPath]
     def getEnergyBillAmounts(driver, amount, energyBillNum):
         directory = setDirectory()
@@ -417,11 +480,11 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
             if transactionVariables[3]:
                 continue
             else:
-                description = modifyTransactionDescription(transactionVariables[1])
+                description = transactionVariables[1]
                 postDate = transactionVariables[0].date()
                 fromAccount = transactionVariables[4]
                 amount = transactionVariables[2]
-                toAccount = setToAccount(account.name, row)
+                toAccount = setToAccount(account.name, description)
                 if 'ARCADIA' in description.upper():
                     energyBillNum += 1
                     amount = getEnergyBillAmounts(driver, transactionVariables[2], energyBillNum)
@@ -429,7 +492,6 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
                     reviewTrans = reviewTrans + transactionVariables[5]
                 else:
                     if toAccount == "Expenses:Other":
-                        
                         reviewTrans = reviewTrans + transactionVariables[5]
                 writeGnuTransaction(myBook, description, postDate, amount, fromAccount, toAccount)
     account.updateGnuBalance(myBook)
@@ -591,63 +653,6 @@ def consolidatePastYearsTransactions(myBook):
     myBook.flush()
     myBook.close()
 
-def modifyTransactionDescription(description, amount="0.00"):
-    if "INTERNET TRANSFER FROM ONLINE SAVINGS ACCOUNT XXXXXX9703" in description.upper():
-        description = "Tessa Deposit"
-    elif "INTEREST EARNED" in description.upper():
-        description = "Interest earned"
-    elif "SOFI REWARDS REDEMPTION" in description.upper():
-        description = "Interest earned"
-    elif "JONATHON MAGNANT" in description.upper():
-        description = "Jonny payment"
-    elif "SAVINGS - 3467" in description.upper():
-        description = "Savings Transfer"
-    elif "ALLY BANK TRANSFER" in description.upper():
-        description = "Dan Deposit"
-    elif "ALLY BANK" in description.upper():
-        description = "Ally Transfer"
-    elif "M1 FINANCE" in description.upper():
-        description = "IRA Transfer"
-    elif "CITY OF MILWAUKE B2P*MILWWA" in description.upper():
-        description = "Water Bill"
-    elif "DOVENMUEHLE MTG MORTG PYMT" in description.upper():
-        description = "Mortgage Payment"
-    elif "NORTHWESTERN MUT" in description.upper():
-        description = "NM Paycheck"
-    elif "PAYPAL" in description.upper() and "10.00" in amount:
-        description = "Swagbucks"  
-    elif "PAYPAL" in description.upper():
-        description = "Paypal"
-    elif "NIELSEN" in description.upper() and "3.00" in amount:
-        description = "Pinecone Research"
-    elif "VENMO" in description.upper():
-        description = "Venmo"
-    elif "ALLIANT CU" in description.upper():
-        description = "Alliant Transfer"        
-    elif "AMEX EPAYMENT" in description.upper():
-        description = "Amex CC"
-    elif "SPECTRUM" in description.upper():
-        description = "Internet Bill"
-    elif "COINBASE" in description.upper():
-        description = "Crypto purchase"
-    elif "CHASE CREDIT CRD" in description.upper() and float(amount) > 0:
-        description = "Chase CC Rewards"
-    elif "CHASE CREDIT CRD" in description.upper() and float(amount) < 0:
-        description = "Chase CC"
-    elif "DISCOVER CASH AWARD" in description.upper():
-        description = "Discover CC Rewards"        
-    elif "DISCOVER" in description.upper():
-        description = "Discover CC"
-    elif "BARCLAYCARD US" in description.upper() and float(amount) > 0:
-        description = "Barclays CC Rewards"
-    elif "BARCLAYCARD US" in description.upper() and float(amount) < 0:
-        description = "Barclays CC"        
-    elif "BK OF AMER VISA" in description.upper():
-        description = "BoA CC"
-    elif "CASH REWARDS STATEMENT CREDIT" in description.upper():
-        description = "BoA CC Rewards"
-    return description
-
 def openGnuCashUI(book):
     directory = setDirectory()
     if book == 'Finances':
@@ -657,3 +662,72 @@ def openGnuCashUI(book):
     elif book == 'Test':
         path = r"\Finances\Personal Finances\test.gnucash"
     os.startfile(directory + path)
+
+def getTotalOfAutomatedMRAccounts(myBook):
+    mrtotal = 0
+    swagbucks = 0
+    tellwut = 0
+    bing = 0
+    schlesinger = 0
+    pinecone = 0
+    paidviewpoint = 0
+    knowledgePanel = 0
+    paypal = 0
+    appen = 0
+    reckner = 0
+    check = 0
+    promo = 0
+    antidote = 0
+    amazonGC = 0
+    for transaction in myBook.transactions:
+        if transaction.post_date.year == 2022:
+            for spl in transaction.splits:
+                if spl.account.fullname == 'Income:Market Research':
+                    mrtotal += spl.value
+                    if 'swagbucks' in transaction.description.lower():
+                        swagbucks += spl.value
+                    elif 'tellwut' in transaction.description.lower():
+                        tellwut += spl.value
+                    elif 'bing' in transaction.description.lower():
+                        bing += spl.value
+                    elif 'schlesinger' in transaction.description.lower():
+                        schlesinger += spl.value
+                    elif 'pinecone' in transaction.description.lower():
+                        pinecone += spl.value
+                    elif 'paidviewpoint' in transaction.description.lower():
+                        paidviewpoint += spl.value
+                    elif 'knowledgepanel' in transaction.description.lower():
+                        knowledgePanel += spl.value
+                    elif 'paypal' in transaction.description.lower():
+                        paypal += spl.value
+                    elif 'reckner' in transaction.description.lower():
+                        reckner += spl.value
+                    elif 'mobile check deposit' in transaction.description.lower():
+                        check += spl.value
+                    elif 'bank promo' in transaction.description.lower():
+                        promo += spl.value
+                    elif 'antidote' in transaction.description.lower():
+                        antidote += spl.value
+                    elif 'appen' in transaction.description.lower() or 'mystery shopping' in transaction.description.lower():
+                        appen += spl.value
+                if spl.account.fullname == 'Assets:Liquid Assets:Amazon GC':
+                    if spl.value > 0:
+                        amazonGC += spl.value
+    print('promo: ' + str(promo))
+    print('schlesinger: ' + str(schlesinger))
+    print('appen: ' + str(appen))
+    print('check: ' + str(check))
+    print('swagbucks: ' + str(swagbucks))
+    print('paypal: ' + str(paypal))    
+    print('knowledgePanel: ' + str(knowledgePanel))
+    print('paidviewpoint: ' + str(paidviewpoint))
+    print('antidote: ' + str(antidote))    
+    print('reckner: ' + str(reckner))
+    print('bing: ' + str(bing))
+    print('tellwut: ' + str(tellwut))
+    print('pinecone: ' + str(pinecone))
+    accountedTotal = swagbucks + tellwut + bing + schlesinger + pinecone + paidviewpoint + knowledgePanel + paypal + appen + reckner + check + promo + antidote
+    print('total accounted for: ' + str(accountedTotal))
+    print('MR total: ' + str(mrtotal))
+    print('unaccounted for: ' + str(mrtotal - accountedTotal))
+    print('paid in amazonGC: ' + str(amazonGC))

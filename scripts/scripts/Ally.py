@@ -33,25 +33,26 @@ def allyLogin(driver):
     directory = setDirectory()
     # closeExpressVPN()
     driver.implicitly_wait(10)
-    driver.execute_script("window.open('https://ally.com/');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-    time.sleep(1)
-    # click Login
-    driver.find_element(By.ID,"login").click()
-    # enter Password (username already filled in)
-    driver.find_element(By.ID,"allysf-login-v2-password-367761b575af35f6ccb5b53e96b2fa2d").send_keys(getPassword(directory, 'Ally Bank'))
-    # click Login
-    driver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button").click()
-    time.sleep(5)
-    # check if error message is seen
-    try:
-        driver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div/div/div/b")
-        loggedIn = False
-    except NoSuchElementException:
-        loggedIn = True
+    loggedIn = False
+    while not loggedIn:
+        driver.execute_script("window.open('https://ally.com/');")
+        driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+        time.sleep(1)
+        # click Login
+        driver.find_element(By.ID,"login").click()
+        # enter Password (username already filled in)
+        driver.find_element(By.ID,"allysf-login-v2-password-367761b575af35f6ccb5b53e96b2fa2d").send_keys(getPassword(directory, 'Ally Bank'))
+        # click Login
+        driver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button").click()
+        time.sleep(5)
+        # check if login button is still seen
+        try:
+            driver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div/div[1]/form/div[3]/button/span")
+            loggedIn = False
+        except NoSuchElementException:
+            loggedIn = True
     driver.find_element(By.PARTIAL_LINK_TEXT, "Joint Checking").click()
     time.sleep(3)
-    return loggedIn
 
 def allyLogout(driver):
     locateAllyWindow(driver)

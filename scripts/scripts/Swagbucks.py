@@ -18,6 +18,18 @@ if __name__ == '__main__' or __name__ == "Swagbucks":
 else:
     from .Functions.GeneralFunctions import showMessage
     
+def closePopUps(driver):
+    driver.implicitly_wait(2)
+    try:
+        # click Yay for me
+        driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/section/section/aside/button[2]").click()
+    except NoSuchElementException:
+        try:
+            # Exit Generic Pop-up Box
+            driver.find_element(By.ID, "lightboxExit").click()
+        except NoSuchElementException:
+            exception = "caught"
+
 def locateSwagBucksWindow(driver):
     found = driver.findWindowByUrl("swagbucks.com")
     if not found:
@@ -38,6 +50,7 @@ def swagBuckscontentDiscovery(driver):
     driver.execute_script("window.open('https://www.swagbucks.com/discover/explore');")
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
     num = 1
+    closePopUps(driver)
     while (num <= 20):
         contentPath = "/html/body/div[2]/div[3]/div[1]/div[1]/main/div[2]/div[1]/section[" + str(num) + "]"
         description = driver.find_element(By.XPATH, contentPath + "/p/span/span[3]").text
@@ -142,6 +155,7 @@ def toDoList(driver):
     list_item_num = 1
     button_num = 1
     button_not_clicked = True
+    closePopUps(driver)
     while list_item_num <= 8:
         try:
             # look for Daily Bonus header 
@@ -177,20 +191,21 @@ def toDoList(driver):
                 driver.switch_to.window(main)
         list_item_num += 1
 
-def openAndCloseInboxItem(driver):
-    driver.find_element(By.XPATH, "/html/body/div[1]/div[3]/div[1]/div[1]/main/div[5]/div[1]/div[1]/div/a").click()
-    time.sleep(2)
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-    driver.close()
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-
 def swagbucksInbox(driver):
+    def openAndCloseInboxItem(driver):
+        driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/div[1]/div[1]/main/div[5]/div[1]/div[1]/div/a").click()
+        time.sleep(2)
+        driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+        driver.close()
+        driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    
     driver.get("https://www.swagbucks.com/g/inbox")
     while True:
+        closePopUps(driver)
         try: 
-            contentPath = "/html/body/div[1]/div[3]/div[1]/div[1]/main/div/div[2]/div/div[3]/div[1]/a/div[2]/span"
+            contentPath = "/html/body/div[2]/div[3]/div[1]/div[1]/main/div/div[2]/div/div[3]/div[1]/a/div[2]/span"
             driver.find_element(By.XPATH, contentPath).click()
-            description = driver.find_element(By.XPATH, "/html/body/div[1]/div[3]/div[1]/div[1]/main/h1").text
+            description = driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/div[1]/div[1]/main/h1").text
             if "Earn Every" in description:
                 openAndCloseInboxItem(driver)
             elif "Discover Daily Interests" in description:
@@ -199,7 +214,7 @@ def swagbucksInbox(driver):
                     openAndCloseInboxItem(driver)
                     num += 1
             # click delete
-            driver.find_element(By.XPATH, "/html/body/div[1]/div[3]/div[1]/div[1]/main/div[3]/div[2]/div[2]").click()
+            driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/div[1]/div[1]/main/div[3]/div[2]/div[2]").click()
             time.sleep(1)
             alert = driver.switch_to.alert
             alert.accept()
@@ -231,14 +246,7 @@ def swagbucksSearch(driver):
                 driver.find_element(By.ID, "sbLogoLink").click()
             # pop-up in the way
             except ElementClickInterceptedException:
-                try:
-                    # click Yay for me
-                    driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/section/section/aside/button[2]")
-                except NoSuchElementException:
-                    try: 
-                        driver.find_element(By.ID, "lightboxExit").click()
-                    except NoSuchElementException:
-                        exception = "caught"
+                closePopUps(driver)
                 driver.find_element(By.ID, "sbLogoLink").click()
             time.sleep(1)
             searches += 1

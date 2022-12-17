@@ -3,7 +3,7 @@ if __name__ == '__main__' or __name__ == "Daily_Bank":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import showMessage
-    from Functions.GnuCashFunctions import purgeOldGnucashFiles, openGnuCashUI
+    from Functions.GnuCashFunctions import purgeOldGnucashFiles, openGnuCashUI, openGnuCashBook
     from Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet
     from Paypal import runPaypal
     from Presearch import presearchRewardsRedemptionAndBalanceUpdates
@@ -13,7 +13,7 @@ else:
     from .Classes.Asset import USD
     from .Classes.WebDriver import Driver
     from .Functions.GeneralFunctions import showMessage
-    from .Functions.GnuCashFunctions import purgeOldGnucashFiles, openGnuCashUI
+    from .Functions.GnuCashFunctions import purgeOldGnucashFiles, openGnuCashUI, openGnuCashBook
     from .Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet
     from .Paypal import runPaypal
     from .Presearch import presearchRewardsRedemptionAndBalanceUpdates
@@ -29,6 +29,7 @@ def runDailyBank():
     openSpreadsheet(driver.webDriver, 'Checking Balance', '2022')
     openSpreadsheet(driver.webDriver, 'Asset Allocation', 'Cryptocurrency')
     updateCryptoPrices(driver)
+    Crypto.updateGnuBalance(openGnuCashBook('Finance', True, True))
     openSpreadsheet(driver.webDriver, 'Home', '2022 Balance')
     if sofi[0].reviewTransactions or sofi[1].reviewTransactions:
         openGnuCashUI('Finances')
