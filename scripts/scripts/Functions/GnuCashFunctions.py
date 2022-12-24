@@ -201,13 +201,10 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
             toAccount = "Income:Market Research"
         elif "Internet Bill" in description:
             toAccount = "Expenses:Utilities:Internet"
-            print('step 2: set account to internet')
         elif "TRAVEL CREDIT" in description:
             toAccount = "Income:Credit Card Rewards"
         elif "IRA Transfer" in description:
             toAccount = "Assets:Non-Liquid Assets:Roth IRA"
-        elif "Lending Club" in description:
-            toAccount = "Income:Investments:Interest"
         elif "CASH REWARDS STATEMENT CREDIT" in description:
             toAccount = "Income:Credit Card Rewards"        
         elif "Chase CC Rewards" in description:
@@ -535,7 +532,7 @@ def writeGnuTransaction(myBook, description, postDate, amount, fromAccount, toAc
     with myBook as book:
         if "Contribution + Interest" in description:
             split = [Split(value=amount[0], memo="scripted", account=myBook.accounts(fullname="Income:Investments:Interest")),
-                    Split(value=amount[1], memo="scripted",account=myBook.accounts(fullname="Income:Employer Pension Contributions")),
+                    Split(value=amount[1], memo="scripted",account=myBook.accounts(fullname="Income:Employer Contributions:Pension Contributions")),
                     Split(value=amount[2], memo="scripted",account=myBook.accounts(fullname=fromAccount))]
         elif "HSA Statement" in description:
             if amount[1]:
@@ -664,7 +661,7 @@ def openGnuCashUI(book):
     os.startfile(directory + path)
 
 def getTotalOfAutomatedMRAccounts(myBook):
-    mrtotal = 0
+    mrTotal = 0
     swagbucks = 0
     tellwut = 0
     bing = 0
@@ -683,51 +680,52 @@ def getTotalOfAutomatedMRAccounts(myBook):
         if transaction.post_date.year == 2022:
             for spl in transaction.splits:
                 if spl.account.fullname == 'Income:Market Research':
-                    mrtotal += spl.value
+                    mrTotal += -spl.value
                     if 'swagbucks' in transaction.description.lower():
-                        swagbucks += spl.value
+                        swagbucks += -spl.value
                     elif 'tellwut' in transaction.description.lower():
-                        tellwut += spl.value
+                        tellwut += -spl.value
                     elif 'bing' in transaction.description.lower():
-                        bing += spl.value
+                        bing += -spl.value
                     elif 'schlesinger' in transaction.description.lower():
-                        schlesinger += spl.value
+                        schlesinger += -spl.value
                     elif 'pinecone' in transaction.description.lower():
-                        pinecone += spl.value
+                        pinecone += -spl.value
                     elif 'paidviewpoint' in transaction.description.lower():
-                        paidviewpoint += spl.value
+                        paidviewpoint += -spl.value
                     elif 'knowledgepanel' in transaction.description.lower():
-                        knowledgePanel += spl.value
+                        knowledgePanel += -spl.value
                     elif 'paypal' in transaction.description.lower():
-                        paypal += spl.value
+                        paypal += -spl.value
                     elif 'reckner' in transaction.description.lower():
-                        reckner += spl.value
+                        reckner += -spl.value
                     elif 'mobile check deposit' in transaction.description.lower():
-                        check += spl.value
+                        check += -spl.value
                     elif 'bank promo' in transaction.description.lower():
-                        promo += spl.value
+                        promo += -spl.value
                     elif 'antidote' in transaction.description.lower():
-                        antidote += spl.value
+                        antidote += -spl.value
                     elif 'appen' in transaction.description.lower() or 'mystery shopping' in transaction.description.lower():
-                        appen += spl.value
+                        appen += -spl.value
                 if spl.account.fullname == 'Assets:Liquid Assets:Amazon GC':
                     if spl.value > 0:
                         amazonGC += spl.value
-    print('promo: ' + str(promo))
-    print('schlesinger: ' + str(schlesinger))
-    print('appen: ' + str(appen))
-    print('check: ' + str(check))
-    print('swagbucks: ' + str(swagbucks))
-    print('paypal: ' + str(paypal))    
-    print('knowledgePanel: ' + str(knowledgePanel))
-    print('paidviewpoint: ' + str(paidviewpoint))
-    print('antidote: ' + str(antidote))    
-    print('reckner: ' + str(reckner))
-    print('bing: ' + str(bing))
-    print('tellwut: ' + str(tellwut))
-    print('pinecone: ' + str(pinecone))
+                        
     accountedTotal = swagbucks + tellwut + bing + schlesinger + pinecone + paidviewpoint + knowledgePanel + paypal + appen + reckner + check + promo + antidote
-    print('total accounted for: ' + str(accountedTotal))
-    print('MR total: ' + str(mrtotal))
-    print('unaccounted for: ' + str(mrtotal - accountedTotal))
+
+    print('     schlesinger: ' + str(schlesinger))                        
+    print('           promo: ' + str(promo))
+    print('           appen: ' + str(appen))
+    print('           misc.: ' + str(mrTotal - accountedTotal))
+    print('       swagbucks: ' + str(swagbucks))
+    print('   paidviewpoint: ' + str(paidviewpoint))    
+    print('  knowledgePanel: ' + str(knowledgePanel))
+    print('        antidote: ' + str(antidote))    
+    print('         reckner: ' + str(reckner))
+    print('            bing: ' + str(bing))
+    print('         tellwut: ' + str(tellwut))
+    print('        pinecone: ' + str(pinecone))
+    print('           check: ' + str(check))
+    print('          paypal: ' + str(paypal))    
+    print('        MR total: ' + str(mrTotal))
     print('paid in amazonGC: ' + str(amazonGC))

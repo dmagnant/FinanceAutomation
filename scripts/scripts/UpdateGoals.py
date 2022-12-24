@@ -50,7 +50,7 @@ def compileGnuTransactions(account, mybook, dateRange):
             case 'Amazon':
                 return 'Expenses:Amazon'
             case 'Bank Fees':
-                return 'Expenses:Bank Fees'            
+                return 'Expenses:Bank Fees'     
             case 'Bars & Restaurants':
                 return 'Expenses:Bars & Restaurants'
             case 'CC Rewards':
@@ -72,7 +72,7 @@ def compileGnuTransactions(account, mybook, dateRange):
             case 'Home Furnishings':
                 return 'Expenses:Home Furnishings'
             case 'HSA Contributions':
-                return 'Income:Employer HSA Contributions'
+                return 'Income:Employer Contributions:HSA Contributions'
             case 'Income Taxes':
                 return 'Expenses:Income Taxes'                      
             case 'Interest':
@@ -88,11 +88,11 @@ def compileGnuTransactions(account, mybook, dateRange):
             case 'Market Research':
                 return 'Income:Market Research'
             case 'Medical':
-                return 'Expenses:Medical'            
+                return 'Expenses:Medical'
             case 'Other':
                 return 'Expenses:Other'
             case 'Pension Contributions':
-                return 'Income:Employer Pension Contributions'               
+                return 'Income:Employer Contributions:Pension Contributions'               
             case 'Pet':
                 return 'Expenses:Pet'
             case 'Salary':
@@ -104,7 +104,7 @@ def compileGnuTransactions(account, mybook, dateRange):
             case 'Travel':
                 return 'Expenses:Travel'
             case 'Ultimate':
-                return 'Expenses:Ultimate'              
+                return 'Expenses:Other:Ultimate'              
             case 'Utilities':
                 return 'Expenses:Utilities'
     gnuAccount = matchAccount()

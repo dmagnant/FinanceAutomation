@@ -17,12 +17,15 @@ if __name__ == '__main__' or __name__ == "Swagbucks":
     from Functions.GeneralFunctions import showMessage
 else:
     from .Functions.GeneralFunctions import showMessage
+
+def getSwagbucksBasePath():
+    return '/html/body/div[1]/div[' 
     
 def closePopUps(driver):
     driver.implicitly_wait(2)
     try:
         # click Yay for me
-        driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/section/section/aside/button[2]").click()
+        driver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/section/section/aside/button[2]").click()
     except NoSuchElementException:
         try:
             # Exit Generic Pop-up Box
@@ -52,7 +55,7 @@ def swagBuckscontentDiscovery(driver):
     num = 1
     closePopUps(driver)
     while (num <= 20):
-        contentPath = "/html/body/div[2]/div[3]/div[1]/div[1]/main/div[2]/div[1]/section[" + str(num) + "]"
+        contentPath = getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div[2]/div[1]/section[" + str(num) + "]"
         description = driver.find_element(By.XPATH, contentPath + "/p/span/span[3]").text
         if "1 sb" in description.lower():
             driver.find_element(By.XPATH, contentPath).click()
@@ -159,22 +162,22 @@ def toDoList(driver):
     while list_item_num <= 8:
         try:
             # look for Daily Bonus header 
-            driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/header/nav/div[3]/div/div/div/div[1]/h4")
+            driver.find_element(By.XPATH, getSwagbucksBasePath() + "1]/header/nav/div[3]/div/div/div/div[1]/h4")
         except NoSuchElementException:
             try:
                 # if not visible, click to show To Do List
-                driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/header/nav/div[3]/button").click()
+                driver.find_element(By.XPATH, getSwagbucksBasePath() + "1]/header/nav/div[3]/button").click()
             except (NoSuchElementException, ElementClickInterceptedException):
                 exception = "caught"
         time.sleep(1)
         # get title of List Item
-        list_item = driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/header/nav/div[3]/div/div/div/div[2]/div/section[1]/div/ul/li[" + str(list_item_num) + "]/a")
+        list_item = driver.find_element(By.XPATH, getSwagbucksBasePath() + "1]/header/nav/div[3]/div/div/div/div[2]/div/section[1]/div/ul/li[" + str(list_item_num) + "]/a")
         if list_item.text == "Add A Magic Receipts Offer":
             list_item.click()
             time.sleep(2)
             while button_not_clicked:
                 try:
-                    driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/div[3]/div[1]/main/div/div[2]/div[2]/div[2]/div/div/a[" + str(button_num) +"]/div[2]/button[1]").click()
+                    driver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/div[3]/div[1]/main/div/div[2]/div[2]/div[2]/div/div/a[" + str(button_num) +"]/div[2]/button[1]").click()
                     button_not_clicked = False
                 except ElementNotInteractableException:
                     button_num += 1
@@ -193,7 +196,7 @@ def toDoList(driver):
 
 def swagbucksInbox(driver):
     def openAndCloseInboxItem(driver):
-        driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/div[1]/div[1]/main/div[5]/div[1]/div[1]/div/a").click()
+        driver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div[5]/div[1]/div[1]/div/a").click()
         time.sleep(2)
         driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
         driver.close()
@@ -203,9 +206,9 @@ def swagbucksInbox(driver):
     while True:
         closePopUps(driver)
         try: 
-            contentPath = "/html/body/div[2]/div[3]/div[1]/div[1]/main/div/div[2]/div/div[3]/div[1]/a/div[2]/span"
+            contentPath = getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div/div[2]/div/div[3]/div[1]/a/div[2]/span"
             driver.find_element(By.XPATH, contentPath).click()
-            description = driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/div[1]/div[1]/main/h1").text
+            description = driver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/div[1]/div[1]/main/h1").text
             if "Earn Every" in description:
                 openAndCloseInboxItem(driver)
             elif "Discover Daily Interests" in description:
@@ -214,7 +217,7 @@ def swagbucksInbox(driver):
                     openAndCloseInboxItem(driver)
                     num += 1
             # click delete
-            driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/div[1]/div[1]/main/div[3]/div[2]/div[2]").click()
+            driver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div[3]/div[2]/div[2]").click()
             time.sleep(1)
             alert = driver.switch_to.alert
             alert.accept()
@@ -264,7 +267,7 @@ def swagbucksSearch(driver):
 
 def getSwagBucksBalance(driver):
     locateSwagBucksWindow(driver)
-    return driver.webDriver.find_element(By.XPATH, "/html/body/div[2]/div[1]/header/nav/section[2]/div[1]/p/var").text.replace('SB', '').replace(',', '')
+    return driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "1]/header/nav/section[2]/div[1]/p/var").text.replace('SB', '').replace(',', '')
 
 def claimSwagBucksRewards(driver):
     locateSwagBucksWindow(driver)
@@ -300,4 +303,7 @@ def runSwagbucks(driver, run_Alu):
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    runSwagbucks(driver, True)
+    # runSwagbucks(driver, True)
+    swagbucksInbox(driver.webDriver)
+    # openTabs(driver.webDriver)
+    # toDoList(driver.webDriver)
