@@ -18,7 +18,7 @@ def updateSpreadsheet(directory, sheetTitle, tabTitle, account, month, value, sy
                     return ['B8', 'I8', 'P8', 'B30', 'I30', 'P30', 'B52', 'I52', 'P52', 'B74', 'I74', 'P74']
                 case 'VanguardPension':
                     return ['B10', 'I10', 'P10', 'B32', 'I32', 'P32', 'B54', 'I54', 'P54', 'B76', 'I76', 'P76']
-                case 'Cryptocurrency':
+                case 'Crypto':
                     return ['B12', 'I12', 'P12', 'B34', 'I34', 'P34', 'B56', 'I56', 'P56', 'B78', 'I78', 'P78']
                 ## Checking Balance Spreadsheet(s)
                 #Personal
@@ -58,7 +58,8 @@ def updateSpreadsheet(directory, sheetTitle, tabTitle, account, month, value, sy
                     return ['H11', 'J11']
                 case 'PRE':                
                     return ['H12', 'J12']
-
+                case _:
+                    print(f'account: {account} not found in "updateSpreadsheet" function')
         cell = (getCellArray(account))[month - 1]
         return cell
     def getSheetKey(sheetTitle, tabTitle, worksheet, cellToUpdate):

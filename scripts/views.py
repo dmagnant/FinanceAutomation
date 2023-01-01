@@ -20,6 +20,7 @@ from scripts.scripts.Exodus import *
 from scripts.scripts.HealthEquity import *
 from scripts.scripts.IoPay import *
 from scripts.scripts.Kraken import *
+from scripts.scripts.Ledger import *
 from scripts.scripts.Midas import *
 from scripts.scripts.Monthly_Bank import *
 from scripts.scripts.MyConstant import *
@@ -239,6 +240,15 @@ def kraken(request):
             locateKrakenWindow(driver)
     return render(request,"scripts/kraken.html")
 
+def ledger(request):
+    if request.method == 'POST':
+        driver = Driver("Chrome")
+        if "main" in request.POST:
+            response = runLedger(driver)
+            for coin in response:
+                coin.getData()
+    return render(request,"scripts/ledger.html")
+
 def midas(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
@@ -266,7 +276,7 @@ def monthlyBank(request):
                 f'NM HSA: {usdbalances[4]} \n')
             elif currency == "Crypto":
                 cryptoBalance = runCrypto(driver, today)
-                print('Crypto Balance: ' + str(cryptoBalance))
+                print('Crypto Balance: ' + str(cryptoBalance.gnuBalance))
             elif currency == "Both":
                 runMonthlyBank()
     return render(request,"scripts/monthlyBank.html")

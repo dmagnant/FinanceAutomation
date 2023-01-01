@@ -1,7 +1,9 @@
 import time
+import pyautogui
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Paypal":
     from Classes.WebDriver import Driver
@@ -21,7 +23,6 @@ def payPalLogin(driver):
     directory = setDirectory()
     driver.execute_script("window.open('https://www.paypal.com/us/signin');")
     time.sleep(3)
-    # switch to last window
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
     try:
         # enter password
@@ -31,10 +32,10 @@ def payPalLogin(driver):
         time.sleep(2)
         # handle captcha
         try:
-            driver.find_element(By.XPATH,"//*[@id='recaptcha-anchor']/div[1]").click()
-            time.sleep(3)
-            print('clicked')
-        except (NoSuchElementException, AttributeError):
+            driver.find_element(By.XPATH,"//*[@id='content']/h1")
+            pyautogui.moveTo(825,400)
+            pyautogui.leftClick(825,400)
+        except (NoSuchElementException):
             exception = "no captcha presented"
     except NoSuchElementException:
         exception = "already logged in"

@@ -35,7 +35,9 @@ def getGnuCashBalance(myBook, accountPath):
     book.close()
     return balance
 
-def getAccountPath(accountName):
+def getAccountPath(accountName, type=None):
+    if accountName == 'Ethereum' and type == 'Ledger':
+         accountName = 'ETH-Ledger'
     match accountName:
         case 'Cardano':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Cardano"            
@@ -73,7 +75,7 @@ def getAccountPath(accountName):
             return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum:ETH-Kraken"
         case 'ETH-Ledger':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum:ETH-Ledger"
-        case 'ETH2':
+        case 'Ethereum2':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum2"
         case 'HSA':
             return "Assets:Non-Liquid Assets:HSA:NM HSA"
@@ -90,7 +92,9 @@ def getAccountPath(accountName):
         case 'Sofi Checking':
             return "Assets:Liquid Assets:Sofi:Checking"
         case 'Sofi Savings':
-            return "Assets:Liquid Assets:Sofi:Savings"                
+            return "Assets:Liquid Assets:Sofi:Savings"
+        case 'Vanguard401k':
+            return "Assets:Non-Liquid Assets:401k"                         
         case 'VanguardPension':
             return "Assets:Non-Liquid Assets:Pension"  
         case 'Worthy':

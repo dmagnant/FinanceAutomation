@@ -1,11 +1,13 @@
 from datetime import datetime
 from decimal import Decimal
+import pygetwindow
 
 if __name__ == '__main__' or __name__ == "Monthly_Bank":
     from Classes.Asset import USD, Crypto
     from Classes.WebDriver import Driver
     from Eternl import runEternl
     from Exodus import runExodus
+    from Ledger import runLedger
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                             setDirectory, showMessage)
     from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction, getTotalOfAutomatedMRAccounts
@@ -21,6 +23,7 @@ else:
     from .Classes.WebDriver import Driver
     from .Eternl import runEternl
     from .Exodus import runExodus
+    from .Ledger import runLedger
     from .Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                              setDirectory, showMessage)
     from .Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction, getTotalOfAutomatedMRAccounts
@@ -34,7 +37,7 @@ else:
 
 def monthlyRoundUp(account, myBook, date, HSADividends):
     change = Decimal(account.balance - float(account.gnuBalance))
-    round(change, 2)
+    change = round(change, 2)
     if account.name == "MyConstant" or account.name == "Worthy":
         writeGnuTransaction(myBook, "Interest", date, -change, "Income:Investments:Interest", account.gnuAccount)
     elif account.name == "HSA":
@@ -64,17 +67,16 @@ def runCrypto(driver, today):
     directory = setDirectory()
     year = today.year
     month = today.month
+    Crypto = USD("Crypto")
     openSpreadsheet(driver.webDriver, 'Asset Allocation', 'Cryptocurrency')
-    # runMyConstant(driver, "Crypto")
     runEternl(driver)
     runKraken(driver)
     presearchRewardsRedemptionAndBalanceUpdates(driver)
-    # runMidas(driver)
-    runExodus()
-    runIoPay()
-    CryptoPortfolio = Crypto('Cryptocurrency')
-    updateSpreadsheet(directory, 'Asset Allocation', year, CryptoPortfolio.name, month, float(round(CryptoPortfolio.gnuBalance, 2)), CryptoPortfolio.name)
-    return CryptoPortfolio
+    runIoPay(driver)
+    runLedger()
+    Crypto.updateGnuBalance(openGnuCashBook('Finance', True, True))
+    updateSpreadsheet(directory, 'Asset Allocation', year, Crypto.name, month, float(round(Crypto.gnuBalance, 2)), Crypto.name)
+    return Crypto
 
 def runMonthlyBank():
     today = datetime.today()

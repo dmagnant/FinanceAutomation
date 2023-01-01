@@ -54,12 +54,12 @@ def getHealthEquityBalances(driver, lastmonth):
     locateHealthEquityWindow(driver)
     driver = driver.webDriver
     HealthEquity = USD("HSA")
-    Vanguard = USD("Vanguard")
+    Vanguard = USD("Vanguard401k")
     HE_hsa_avail_bal = driver.find_element(By.XPATH, "//*[@id='21895515-020']/div/hqy-hsa-tab/div/div[2]/div/span[1]").text.strip('$').replace(',','')
     HE_hsa_invest_bal = driver.find_element(By.XPATH, "//*[@id='21895515-020']/div/hqy-hsa-tab/div/div[2]/span[2]/span[1]").text.strip('$').replace(',','')
     HealthEquity.setBalance(float(HE_hsa_avail_bal) + float(HE_hsa_invest_bal))
-    vanguard401k = driver.find_element(By.XPATH, "//*[@id='retirementAccounts']/li/a/div/ul/li/span[2]").text.strip('$').replace(',','')
-    Vanguard.setBalance(float(vanguard401k))
+    vanguard401kbalance = driver.find_element(By.XPATH, "//*[@id='retirementAccounts']/li/a/div/ul/li/span[2]").text.strip('$').replace(',','')
+    Vanguard.setBalance(float(vanguard401kbalance))
     # click Manage HSA Investments
     driver.find_element(By.XPATH, "//*[@id='hsaInvestment']/div/div/a").click()
     time.sleep(1)

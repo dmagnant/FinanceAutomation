@@ -54,7 +54,7 @@ def runDailyBank():
     purgeOldGnucashFiles()
 
 if __name__ == '__main__':
-    runDailyBank()
-    # driver = Driver("Chrome")
-    # updateCryptoPrices(driver)
+    # runDailyBank()
+    driver = Driver("Chrome")
+    updateCryptoPrices(driver)
     

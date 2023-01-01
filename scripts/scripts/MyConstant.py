@@ -97,7 +97,7 @@ def runMyConstant(driver, type):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    type = "Crypto"
+    type = "USD"
     response = runMyConstant(driver, type)
     if (type == "USD"):
         response.getData()

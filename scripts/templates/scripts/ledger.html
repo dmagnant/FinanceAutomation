@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Ledger{% endblock %}
+
+{% block content %}
+    <h1>Ledger</h1>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="main">Main</button><br>
+        <button type="submit" name="login">Login</button><br>
+    </form>  
+{% endblock %}

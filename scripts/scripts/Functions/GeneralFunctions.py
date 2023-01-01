@@ -25,9 +25,8 @@ def startExpressVPN():
     time.sleep(5)
     EVPN = pygetwindow.getWindowsWithTitle('ExpressVPN')[0]
     EVPN.close()  # stays open in system tray
-    
-def closeExpressVPN():
-    def checkIfProcessRunning(processName):
+
+def isProcessRunning(processName):
         # Iterate over the all the running process
         for proc in psutil.process_iter():
             try:
@@ -37,7 +36,9 @@ def closeExpressVPN():
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         return False
-    if checkIfProcessRunning('ExpressVPN.exe'):
+ 
+def closeExpressVPN():
+    if isProcessRunning('ExpressVPN.exe'):
         os.startfile(r'C:\Program Files (x86)\ExpressVPN\expressvpn-ui\ExpressVPN.exe')
         time.sleep(3)
         EVPN = pygetwindow.getWindowsWithTitle('ExpressVPN')[0]
@@ -118,10 +119,9 @@ def getStartAndEndOfDateRange(today, month, year, timeSpan):
             startdate = today.replace(month=month - 1, day=1).date()
             enddate = today.replace(month=month - 1, day=31).date()
         if timeSpan == "YTD":
-            startdate = today.replace(month=1, day=1).date()
+            startdate = startdate.replace(month=1, day=1).date()
     return [startdate, enddate]
 
 def getCryptocurrencyPrice(coinList):
-    coinGecko = CoinGeckoAPI()
-    currency = 'usd'
-    return coinGecko.get_price(ids=coinList, vs_currencies=currency)
+    return CoinGeckoAPI().get_price(ids=coinList, vs_currencies='usd')
+     

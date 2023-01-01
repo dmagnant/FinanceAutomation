@@ -29,6 +29,8 @@ def getCryptoSymbolByName(self):
                 return 'ATOM'
             case "ethereum":
                 return 'ETH'
+            case 'eth-ledger':
+                return 'ETH'
             case "ethereum2":
                 return 'ETH2'
             case "iotex":
@@ -72,6 +74,9 @@ class Asset(object):
     
     def getGnuAccount(self):
         return self.gnuAccount
+
+    def setGnuAccount(self, account):
+        self.gnuAccount = getAccountPath(account)
     
     def getGnuBalance(self):
         return self.gnuBalance
@@ -81,13 +86,14 @@ class Asset(object):
 
 class Crypto(Asset):
     "this is a class for tracking cryptocurrency information"
-    def __init__(self, name):
+    def __init__(self, name, account=None):
         self.name = name
         self.lowerName = name.lower()
         self.balance = None
         self.price = None
+        self.account = account
         self.symbol = getCryptoSymbolByName(self)
-        self.gnuAccount = getAccountPath(self.name)
+        self.gnuAccount = getAccountPath(self.name, self.account)
         self.gnuBalance = getGnuCashBalance(openGnuCashBook('Finance', True, True), self.gnuAccount)
                 
     def getData(self):
@@ -113,7 +119,6 @@ class Crypto(Asset):
         updateSpreadsheet(setDirectory(), 'Asset Allocation', 'Cryptocurrency', account, 1, self.balance, self.symbol)
         updateSpreadsheet(setDirectory(), 'Asset Allocation', 'Cryptocurrency', account, 2, self.price, self.symbol)
         updateCoinQuantityFromStakingInGnuCash(self)
-        updateCryptoPriceInGnucash(self.symbol, format(self.price, ".2f"))    
 
     def updateBalanceInSpreadSheet(self, account=None):
         account = self.symbol if account == None else account
