@@ -231,6 +231,8 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
             toAccount = "Expenses:Transportation:Gas (Vehicle)"
         elif "CAT DOCTOR" in description:
             toAccount = "Expenses:Medical:Vet"
+        elif "APPEN" in description:
+            toAccount = "Income:Market Research"
         elif "PARKING" in description or "SPOTHERO" in description.upper():
             toAccount = "Expenses:Transportation:Parking"
         elif "PROGRESSIVE" in description:

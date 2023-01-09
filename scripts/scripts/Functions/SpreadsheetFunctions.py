@@ -143,21 +143,19 @@ def openSpreadsheet(driver, sheet, tab=''):
     url = 'https://docs.google.com/spreadsheets/d/'
     if sheet == 'Checking Balance':
         url += '1684fQ-gW5A0uOf7s45p9tC4GiEE5s5_fjO5E7dgVI1s/'
-        if tab == '2022':
-            url += 'edit#gid=382679207'
+        if tab == '2023':
+            url += 'edit#gid=1300163920'
     elif sheet == 'Asset Allocation':
         url += '1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/'
-        if tab == '2022':
-            url += 'edit#gid=2058576150'
+        if tab == '2023':
+            url += 'edit#gid=1449745658'
         elif tab == 'Goals':
             url += 'edit#gid=1813404638'            
         elif tab == 'Cryptocurrency':
             url += 'edit#gid=623829469'
     elif sheet == 'Home':
         url += '1oP3U7y8qywvXG9U_zYXgjFfqHrCyPtUDl4zPDftFCdM/'
-        if tab == '2022 Balance':
-            url += 'edit#gid=317262693'
-        elif tab == '2023 Balance':
+        if tab == '2023 Balance':
             url += 'edit#gid=14744444'            
         elif tab == 'Finances':
             url += 'edit#gid=1436385671'

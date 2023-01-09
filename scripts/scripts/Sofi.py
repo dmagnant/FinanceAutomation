@@ -97,10 +97,12 @@ def getTransactionsFromSofiWebsite(driver, dateRange, today, tableStart, div):
     previousMonth = False
     while insideDateRange:
         try:
-            # capture Date in 'Mon Day' format and add year
-            # sofiDate = datetime.strptime(driver.find_element(By.XPATH, elementRoot).text, '%b %d').date().replace(year=year)
-            # capture Date in 'M/D/YY' format
-            sofiDate = datetime.strptime(driver.find_element(By.XPATH, elementRoot).text, "%m/%d/%y").date()
+            try:
+                # capture Date in 'Mon Day' format and add year
+                sofiDate = datetime.strptime(driver.find_element(By.XPATH, elementRoot).text, '%b %d').date().replace(year=year)
+            except ValueError:
+                # capture Date in 'M/D/YY' format
+                sofiDate = datetime.strptime(driver.find_element(By.XPATH, elementRoot).text, "%m/%d/%y").date()
             if sofiDate < dateRange[0] or sofiDate > dateRange[1]:
                 insideDateRange = False
             else:

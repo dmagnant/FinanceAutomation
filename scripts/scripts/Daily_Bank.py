@@ -26,11 +26,11 @@ def runDailyBank():
     ally = runAlly(driver)
     presearchRewardsRedemptionAndBalanceUpdates(driver)
     runPaypal(driver)
-    openSpreadsheet(driver.webDriver, 'Checking Balance', '2022')
+    openSpreadsheet(driver.webDriver, 'Checking Balance', '2023')
     openSpreadsheet(driver.webDriver, 'Asset Allocation', 'Cryptocurrency')
     updateCryptoPrices(driver)
     Crypto.updateGnuBalance(openGnuCashBook('Finance', True, True))
-    openSpreadsheet(driver.webDriver, 'Home', '2022 Balance')
+    openSpreadsheet(driver.webDriver, 'Home', '2023 Balance')
     if sofi[0].reviewTransactions or sofi[1].reviewTransactions:
         openGnuCashUI('Finances')
     if ally.reviewTransactions:
