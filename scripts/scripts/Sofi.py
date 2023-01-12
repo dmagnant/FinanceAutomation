@@ -130,8 +130,7 @@ def getTransactionsFromSofiWebsite(driver, dateRange, today, tableStart, div):
 def runSofiAccount(driver, dateRange, today, account):
     tableAndDiv = getSofiBalanceAndOrientPage(driver, account)
     sofiActivity = getTransactionsFromSofiWebsite(driver.webDriver, dateRange, today, tableAndDiv[0], tableAndDiv[1])
-    reviewTrans = importUniqueTransactionsToGnuCash(account, sofiActivity, driver.webDriver, dateRange, 0)
-    account.setReviewTransactions(reviewTrans)
+    importUniqueTransactionsToGnuCash(account, sofiActivity, driver.webDriver, dateRange, 0)
 
 def runSofi(driver):
     today = datetime.today()

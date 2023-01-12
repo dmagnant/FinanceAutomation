@@ -2,7 +2,6 @@ import csv
 import time
 from datetime import datetime
 from decimal import Decimal
-import re
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By

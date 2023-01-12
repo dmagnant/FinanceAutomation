@@ -16,6 +16,9 @@ else:
                                              setDirectory, showMessage)
     from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 
+def getAmexBasePath():
+    return '/html/body/div[1]/div[2]/div[3]/div/div/div/div/div[2]/div/div[2]/div/div/' 
+
 def locateAmexWindow(driver):
     found = driver.findWindowByUrl("global.americanexpress.com")
     if not found:
@@ -44,6 +47,7 @@ def getAmexBalance(driver):
     return driver.webDriver.find_element(By.XPATH, "//*[@id='axp-balance-payment']/div[1]/div[1]/div/div[1]/div/div/span[1]/div").text.replace('$', '')
 
 def exportAmexTransactions(driver):
+    # click view transactions
     driver.find_element(By.XPATH, "//*[@id='axp-balance-payment']/div[2]/div[2]/div/div[1]/div[1]/div/a").click()
     try: 
         # click on View Activity (for previous billing period)
@@ -52,16 +56,16 @@ def exportAmexTransactions(driver):
         exception = "caught"
     # click on Download
     time.sleep(5)
-    driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/div/div[2]/div/div/div[4]/div/div[3]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div/div/table/thead/div/tr[1]/td[2]/div/div[2]/div/button").click()
+    driver.find_element(By.XPATH, getAmexBasePath() + "table/thead/div/tr[1]/td[2]/div/div[2]/button/button").click()
     # click on CSV option
-    driver.find_element(By.XPATH, "/html/body/div[1]/div[4]/div/div/div/div/div/div[2]/div/div[1]/div/fieldset/div[2]/label").click()
+    driver.find_element(By.XPATH, getAmexBasePath() + "div[2]/div/div/div/div/div/div[1]/div/div/div[1]/div/fieldset/div[2]/label").click()
     # delete old csv file, if present
     try:
         os.remove(r"C:\Users\dmagn\Downloads\activity.csv")
     except FileNotFoundError:
         exception = "caught"
     # click on Download
-    driver.find_element(By.XPATH, "/html/body/div[1]/div[4]/div/div/div/div/div/div[3]/a").click()
+    driver.find_element(By.XPATH, getAmexBasePath() + "div[2]/div/div/div/div/div/div[2]/div/a").click()
     time.sleep(3)
 
 def claimAmexRewards(driver):
