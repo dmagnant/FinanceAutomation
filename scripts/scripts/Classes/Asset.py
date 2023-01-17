@@ -8,14 +8,14 @@ if __name__ == "Classes.Asset":
     from Functions.GnuCashFunctions import (getAccountPath, getGnuCashBalance,
                                             openGnuCashBook,
                                             updateCryptoPriceInGnucash)
-    from Functions.SpreadsheetFunctions import updateSpreadsheet
+    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
 else:
     from scripts.scripts.Functions.GeneralFunctions import (
         getCryptocurrencyPrice, setDirectory)
     from scripts.scripts.Functions.GnuCashFunctions import (
         getAccountPath, getGnuCashBalance, openGnuCashBook,
         updateCryptoPriceInGnucash)
-    from scripts.scripts.Functions.SpreadsheetFunctions import updateSpreadsheet
+    from scripts.scripts.Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
 
 def getCryptoSymbolByName(self):
         match self.name.lower():
@@ -171,12 +171,11 @@ class USD(Asset):
         if month == 12:
             year = year + 1
         if self.name == 'BoA-joint':
+            openSpreadsheet(driver, 'Home', '2023 Balance')
             updateSpreadsheet(directory, 'Home', str(year) + ' Balance', self.name, month, balance, 'BoA CC')
             updateSpreadsheet(directory, 'Home', str(year) + ' Balance', self.name, month, balance, 'BoA CC', True)
-            # Display Home spreadsheet
-            driver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1oP3U7y8qywvXG9U_zYXgjFfqHrCyPtUDl4zPDftFCdM/edit#gid=317262693');")
         else:
+            openSpreadsheet(driver, 'Checking Balance', '2023')
             updateSpreadsheet(directory, 'Checking Balance', year, self.name, month, balance, self.name + " CC")
             updateSpreadsheet(directory, 'Checking Balance', year, self.name, month, balance, self.name + " CC", True)
-            # Display Checking Balance spreadsheet
-            driver.execute_script("window.open('https://docs.google.com/spreadsheets/d/1684fQ-gW5A0uOf7s45p9tC4GiEE5s5_fjO5E7dgVI1s/edit#gid=1688093622');")
+            

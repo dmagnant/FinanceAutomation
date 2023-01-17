@@ -369,12 +369,14 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
                 except NoSuchElementException:
                     exception = "sign in page loaded already"
                 try:
-                    # Login
-                    driver.find_element(By.XPATH, "/html/body/div[1]/main/div[1]/div/form/div[1]/div[1]/input").send_keys(getUsername(directory, 'Arcadia Power'))
+                    # enter email
+                    driver.find_element(By.XPATH, "/html/body/div[1]/main/div[1]/div[2]/form/div[1]/div[1]/div/input").send_keys(getUsername(directory, 'Arcadia Power'))
                     time.sleep(1)
-                    driver.find_element(By.XPATH, "/html/body/div[1]/main/div[1]/div/form/div[1]/div[2]/input").send_keys(getPassword(directory, 'Arcadia Power'))
+                    # enter password
+                    driver.find_element(By.XPATH, "/html/body/div[1]/main/div[1]/div[2]/form/div[1]/div[2]/div/input").send_keys(getPassword(directory, 'Arcadia Power'))
                     time.sleep(1)
-                    driver.find_element(By.XPATH, "/html/body/div[1]/main/div[1]/div/form/div[2]/button").click()
+                    # click sign in
+                    driver.find_element(By.XPATH, "/html/body/div[1]/main/div[1]/div[2]/form/div[2]/button").click()
                     time.sleep(1)
                     # Get Billing page
                     driver.get("https://home.arcadia.com/dashboard/2072648/billing")
@@ -555,16 +557,16 @@ def writeGnuTransaction(myBook, description, postDate, amount, fromAccount, toAc
                     Split(value=amount[3], account=myBook.accounts(fullname="Expenses:Utilities:Gas")),
                     Split(value=amount[4], account=myBook.accounts(fullname=fromAccount))]
         elif "NM Paycheck" in description:
-            split = [Split(value=round(Decimal(2023.20), 2), memo="scripted",account=myBook.accounts(fullname=fromAccount)),
+            split = [Split(value=round(Decimal(2037.85), 2), memo="scripted",account=myBook.accounts(fullname=fromAccount)),
                     Split(value=round(Decimal(412.00), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:401k")),
                     Split(value=round(Decimal(5.49), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Dental")),
-                    Split(value=round(Decimal(34.10), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Health")),
-                    Split(value=round(Decimal(2.67), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Vision")),
-                    Split(value=round(Decimal(202.39), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Social Security")),
-                    Split(value=round(Decimal(47.33), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Medicare")),
-                    Split(value=round(Decimal(415.83), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Federal Tax")),
-                    Split(value=round(Decimal(159.07), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:State Tax")),
-                    Split(value=round(Decimal(131.25), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:HSA:NM HSA")),
+                    Split(value=round(Decimal(35.47), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Health")),
+                    Split(value=round(Decimal(2.93), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Vision")),
+                    Split(value=round(Decimal(201.78), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Social Security")),
+                    Split(value=round(Decimal(47.19), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Medicare")),
+                    Split(value=round(Decimal(392.49), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Federal Tax")),
+                    Split(value=round(Decimal(158.55), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:State Tax")),
+                    Split(value=round(Decimal(139.58), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:HSA:NM HSA")),
                     Split(value=-round(Decimal(3433.33), 2), memo="scripted",account=myBook.accounts(fullname=toAccount))]
         else:
             split = [Split(value=-amount, memo="scripted", account=myBook.accounts(fullname=toAccount)),
