@@ -14,7 +14,6 @@ else:
     from .Functions.GnuCashFunctions import openGnuCashBook
     from .Functions.SpreadsheetFunctions import openSpreadsheet
 
-
 def getTransactionTotal(dateRange, gnuAccount, mybook):
     total = 0
     # retrieve transactions from GnuCash
@@ -210,6 +209,6 @@ def runUpdateGoals(accounts, timeframe):
     getTotalForEachAccount(expenseAccounts, mybook, dateRange, timeframe, directory, dateRange[1].month, accounts)
 
 if __name__ == '__main__':
-    accounts = 'Personal' # Personal or Joint
+    accounts = 'Joint' # Personal or Joint
     timeframe = "Month" # Month or YTD
     runUpdateGoals(accounts, timeframe)

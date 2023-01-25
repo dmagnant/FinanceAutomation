@@ -48,6 +48,8 @@ def allyLogin(driver):
         try:
             driver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div/div[1]/form/div[3]/button/span")
             loggedIn = False
+            driver.close()
+            driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
         except NoSuchElementException:
             loggedIn = True
     driver.find_element(By.PARTIAL_LINK_TEXT, "Joint Checking").click()

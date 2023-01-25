@@ -17,9 +17,8 @@ def updateCoin(coin):
 def runLedger():
     if not (isProcessRunning('Ledger Live.exe')):
         os.startfile(r'C:\Program Files\Ledger Live\Ledger Live.exe')
-    account = "Ledger"
     Bitcoin = Crypto("Bitcoin")
-    Ethereum = Crypto("Ethereum", account)
+    Ethereum = Crypto("Ethereum", "Ledger")
     Cosmos = Crypto("Cosmos")
     Polkadot = Crypto("Polkadot")
     Algorand = Crypto("Algorand")

@@ -24,22 +24,27 @@ def payPalLogin(driver):
     driver.execute_script("window.open('https://www.paypal.com/us/signin');")
     time.sleep(3)
     driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-    try:
-        # enter password
-        driver.find_element(By.ID, "password").send_keys(getPassword(directory, 'Paypal'))
-        # click log in
-        driver.find_element(By.ID,"btnLogin").click()
-        time.sleep(2)
-        # handle captcha
+    while True:
         try:
-            driver.find_element(By.XPATH,"//*[@id='content']/h1")
-            pyautogui.moveTo(825,400)
-            pyautogui.leftClick(825,400)
-        except (NoSuchElementException):
-            exception = "no captcha presented"
-    except NoSuchElementException:
-        exception = "already logged in"
-    driver.get("https://www.paypal.com/myaccount/summary")
+            # enter password
+            driver.find_element(By.ID, "password").send_keys(getPassword(directory, 'Paypal'))
+            # click log in
+            driver.find_element(By.ID,"btnLogin").click()
+            time.sleep(2)
+            # handle captcha
+            try:
+                driver.find_element(By.XPATH,"//*[@id='content']/h1")
+                pyautogui.moveTo(825,400)
+                pyautogui.leftClick(825,400)
+            except (NoSuchElementException):
+                exception = "no captcha presented"
+        except NoSuchElementException:
+            exception = "already logged in"
+        driver.get("https://www.paypal.com/myaccount/summary")
+        try:
+            driver.find_element(By.ID, "password")
+        except NoSuchElementException:
+            break
         
 def transferMoney(driver):
     driver.get("https://www.paypal.com/myaccount/money/")
@@ -55,7 +60,7 @@ def transferMoney(driver):
         bank = driver.find_element(By.XPATH,"//*[@id='mainModal']/div/div/div/form/div/div/div/div[1]/span/span[2]/span[1]").text
         if "savings" in bank.lower():
             driver.find_element(By.XPATH,"//*[@id='mainModal']/div/div/div/form/div/div/div/button").click()
-    
+        
 def runPaypal(driver):
     locatePayPalWindow(driver)
     transferMoney(driver.webDriver)

@@ -25,8 +25,10 @@ from scripts.scripts.Midas import *
 from scripts.scripts.Monthly_Bank import *
 from scripts.scripts.MyConstant import *
 from scripts.scripts.Paypal import *
+from scripts.scripts.Paidviewpoint import *
 from scripts.scripts.Pinecone import *
 from scripts.scripts.Presearch import *
+from scripts.scripts.PSCoupons import *
 from scripts.scripts.Sofi import *
 from scripts.scripts.Swagbucks import *
 from scripts.scripts.Tellwut import *
@@ -297,6 +299,19 @@ def myConstant(request):
             locateMyConstantWindow(driver)
     return render(request,"scripts/myconstant.html")
 
+def paidviewpoint(request):
+    if request.method == 'POST':
+        driver = Driver("Chrome")
+        if "survey" in request.POST:
+            completePaidviewpointSurveys(driver)
+        elif "login" in request.POST:
+            paidviewpointLogin(driver)        
+        elif "balance" in request.POST:
+            getPaidviewpointBalance(driver)
+        elif "rewards" in request.POST:
+            redeemPaidviewpointRewards(driver)
+    return render(request,"scripts/paidviewpoint.html")
+
 def paypal(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
@@ -323,7 +338,7 @@ def pinecone(request):
 def presearch(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "rewards" in request.POST:
+        if "main" in request.POST:
             presearchRewardsRedemptionAndBalanceUpdates(driver)
         elif "login" in request.POST:
             locatePresearchWindow(driver)          
@@ -333,6 +348,15 @@ def presearch(request):
         elif "search" in request.POST:
             searchUsingPresearch(driver)
     return render(request,"scripts/presearch.html")
+
+def psCoupons(request):
+    if request.method == 'POST':
+        driver = Driver("Chrome")
+        if "main" in request.POST:
+            runPSCoupon(driver)
+        elif "login" in request.POST:
+            locatePSCouponWindow(driver)          
+    return render(request,"scripts/pscoupons.html")
 
 def sofi(request):
     if request.method == 'POST':
@@ -361,7 +385,7 @@ def swagbucks(request):
         elif "alu" in request.POST:
             runAlusRevenge(driver.webDriver, True)
         elif "content" in request.POST:
-            swagBuckscontentDiscovery(driver.webDriver)
+            swagBuckscontentDiscovery(driver)
         elif "search" in request.POST:
             swagbucksSearch(driver)
         elif "balance" in request.POST:
@@ -369,6 +393,8 @@ def swagbucks(request):
             print(balance)
         elif "rewards" in request.POST:
             claimSwagBucksRewards(driver)
+        elif "inbox" in request.POST:
+            swagbucksInbox(driver.webDriver)            
     return render(request,"scripts/swagbucks.html")
 
 def tellwut(request):

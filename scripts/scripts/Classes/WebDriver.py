@@ -102,3 +102,20 @@ class Driver:
                 if url in self.webDriver.current_url:
                     return self.webDriver.current_window_handle
         return False
+
+    def closeWindowsExcept(self, urls):
+        keptWindows = 0
+        while len(self.webDriver.window_handles) > len[urls]:
+            numOfWindows = len(self.webDriver.window_handles)
+            self.webDriver.switch_to.window(self.webDriver.window_handles[numOfWindows-1-keptWindows])
+            for url in urls:
+                if url in self.webDriver.current_url:
+                    keptWindows += 1
+                else:
+                    self.webDriver.close()
+        self.webDriver.switch_to.window(self.webDriver.window_handles[0])
+        
+    def openNewWindow(self, url):
+        url = "'" + url + "'"
+        self.webDriver.execute_script("window.open(" + url + ");")
+        self.webDriver.switch_to.window(self.webDriver.window_handles[len(self.webDriver.window_handles)-1])

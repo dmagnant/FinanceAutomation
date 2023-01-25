@@ -38,9 +38,15 @@ def getGnuCashBalance(myBook, accountPath):
 def getAccountPath(accountName, type=None):
     if accountName == 'Ethereum' and type == 'Ledger':
          accountName = 'ETH-Ledger'
+    if accountName == 'Cardano' and type == 'Eternl':
+        accountName = 'ADA-Eternl'
     match accountName:
         case 'Cardano':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Cardano"            
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Cardano"
+        case 'ADA-Eternl':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Cardano:ADA-Eternl"    
+        case 'ADA-Nami':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Cardano:ADA-Nami"    
         case 'Algorand':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Algorand"
         case 'Ally':

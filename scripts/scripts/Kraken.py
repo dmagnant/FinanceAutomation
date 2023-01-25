@@ -40,7 +40,7 @@ def krakenLogin(driver):
         time.sleep(1)
         driver.find_element(By.ID, 'tfa').send_keys(token)
         driver.find_element(By.XPATH, "/html/body/div/div[2]/div[2]/form/div[1]/div/div/div[2]/button/div/div/div").click()
-    except (NoSuchElementException, StaleElementReferenceException):
+    except (NoSuchElementException or StaleElementReferenceException):
         exception = 'already logged in'
     time.sleep(2)
 

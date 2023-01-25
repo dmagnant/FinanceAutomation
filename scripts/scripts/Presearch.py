@@ -13,6 +13,9 @@ if __name__ == '__main__' or __name__ == "Presearch":
 else:
     from .Classes.Asset import Crypto
     from .Functions.GeneralFunctions import showMessage
+    
+def getPresearchBasePath():
+    return '/html/body/div[2]/div[2]/div[5]/div[' 
 
 def locatePresearchWindow(driver):
     found = driver.findWindowByUrl("presearch.com")
@@ -45,22 +48,22 @@ def claimPresearchRewards(driver):
     driver = driver.webDriver
     driver.get("https://nodes.presearch.org/dashboard")   
     try:
-        availToStake = float(driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
+        availToStake = float(driver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
     except NoSuchElementException:
         showMessage('Presearch fail', 'Check Presearch. May need to login or check element. Click OK once logged in to continue')
         driver.get("https://nodes.presearch.org/dashboard")
-        availToStake = float(driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
+        availToStake = float(driver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
     # claim rewards
-    unclaimed = driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div[3]/div[2]/div[3]/div[2]/div/div/div[1]/h2').text.strip(' PRE')
+    unclaimed = driver.find_element(By.XPATH, getPresearchBasePath() + '2]/div[3]/div[2]/div/div/div[1]/h2').text.strip(' PRE')
     if float(unclaimed) > 0:
         # click Claim
-        driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div[3]/div[2]/div[3]/div[2]/div/div/div[2]/div/a').click()
+        driver.find_element(By.XPATH, getPresearchBasePath() + '2]/div[3]/div[2]/div/div/div[2]/div/a').click()
         # click Claim Reward
         driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div/div/div/div[2]/div/form/div/button').click()
         time.sleep(4)
         driver.refresh()
         time.sleep(1)
-        availToStake = float(driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
+        availToStake = float(driver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
     
     # stake available PRE to highest rated node
     time.sleep(2)
@@ -69,11 +72,11 @@ def claimPresearchRewards(driver):
         num = 1
         node_found = False
         while not node_found:
-            name = driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div[3]/div[6]/div/table/tbody/tr[' + str(num) + ']/td[1]').text
+            name = driver.find_element(By.XPATH, getPresearchBasePath() + '6]/div/table/tbody/tr[' + str(num) + ']/td[1]').text
             if name.lower() == 'aws':
                 stakeAmount = availToStake
                 # click Stake button
-                driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div[3]/div[6]/div/table/tbody/tr[' + str(num) + ']/td[12]/a[1]').click()
+                driver.find_element(By.XPATH, getPresearchBasePath() + '6]/div/table/tbody/tr[' + str(num) + ']/td[12]/a[1]').click()
                 while stakeAmount > 0:
                     driver.find_element(By.ID, 'stake_amount').send_keys(Keys.ARROW_UP)
                     stakeAmount -= 1
@@ -100,7 +103,7 @@ def getPresearchBalance(driver):
         driver.switch_to.window(found)
         time.sleep(1)
     searchRewards = float(driver.find_element(By.XPATH, '/html/body/div[1]/header/div[2]/div[2]/div/div[1]/div/div[1]/div/span[1]').text.strip(' PRE'))
-    stakedTokens = float(driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[1]/div/h2').text.strip(' PRE').replace(',', ''))
+    stakedTokens = float(driver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[1]/div/h2').text.strip(' PRE').replace(',', ''))
     balance = searchRewards + stakedTokens
     return balance
 
