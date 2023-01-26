@@ -13,14 +13,13 @@ else:
 def locateIoPayWindow(driver):
     found = driver.findWindowByUrl("stake.iotex.io")
     if not found:
-        IoPayLogin(driver.webDriver)
+        IoPayLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def IoPayLogin(driver):
-    driver.execute_script("window.open('https://stake.iotex.io/');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.openNewWindow('https://stake.iotex.io/')
     time.sleep(1)
 
 def runIoPay(driver):

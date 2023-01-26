@@ -186,11 +186,11 @@ def eternl(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
-            response = runEternl(driver.webDriver)
+            response = runEternl(driver)
             for coin in response:
                 coin.getData()
         elif "balance" in request.POST:
-            response = getEternlBalance(driver.webDriver)
+            response = getEternlBalance(driver)
             print(response)
         elif "login" in request.POST:
             locateEternlWindow(driver)
@@ -394,7 +394,7 @@ def swagbucks(request):
         elif "rewards" in request.POST:
             claimSwagBucksRewards(driver)
         elif "inbox" in request.POST:
-            swagbucksInbox(driver.webDriver)            
+            swagbucksInbox(driver)            
     return render(request,"scripts/swagbucks.html")
 
 def tellwut(request):

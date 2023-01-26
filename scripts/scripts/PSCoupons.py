@@ -21,14 +21,13 @@ else:
 def locatePSCouponWindow(driver):
     found = driver.findWindowByUrl("picknsave.com/savings/cl/coupons/")
     if not found:
-        psCouponLogin(driver.webDriver)
+        psCouponLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def psCouponLogin(driver):
-    driver.execute_script("window.open('https://www.picknsave.com/savings/cl/coupons/');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.openNewWindow('https://www.picknsave.com/savings/cl/coupons/')
     
 def setPSCouponFilters(driver):
     # In-Store

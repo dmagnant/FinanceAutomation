@@ -8,17 +8,16 @@ if __name__ == '__main__' or __name__ == "Pinecone":
 def locatePineconeWindow(driver):
     found = driver.findWindowByUrl("members.pineconeresearch.com")
     if not found:
-        pineConeLogin(driver.webDriver)
+        pineConeLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)    
     
 def pineConeLogin(driver):
-    driver.execute_script("window.open('https://members.pineconeresearch.com/#/Login');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.openNewWindow('https://members.pineconeresearch.com/#/Login')
     time.sleep(2)
     # click login
-    driver.find_element(By.XPATH, "//*[@id='mainContainer']/div/div/div[1]/div/form/button").click()
+    driver.webDriver.find_element(By.XPATH, "//*[@id='mainContainer']/div/div/div[1]/div/form/button").click()
     time.sleep(4)
 
 def getPineConeBalance(driver):

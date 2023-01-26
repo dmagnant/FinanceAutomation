@@ -15,15 +15,14 @@ else:
 def locateMidasWindow(driver):
     found = driver.findWindowByUrl("app.midas.investments")
     if not found:
-        midasLogin(driver.webDriver)
+        midasLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def midasLogin(driver):
-    driver.execute_script("window.open('https://app.midas.investments/?login=true&&');")
-    # switch to last window
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.openNewWindow('https://app.midas.investments/?login=true&&')
+    driver = driver.webDriver
     try: 
         # click Google
         driver.find_element(By.XPATH, "/html/body/div[1]/div[3]/div[1]/div[2]/div/div/button[1]").click()

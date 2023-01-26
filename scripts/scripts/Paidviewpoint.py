@@ -11,8 +11,6 @@ if __name__ == '__main__' or __name__ == "Paidviewpoint":
 else:
     from .Functions.GeneralFunctions import showMessage
 
-
-
 def locatePaidviewpointWindow(driver):
     found = driver.findWindowByUrl("paidviewpoint.com")
     if not found:

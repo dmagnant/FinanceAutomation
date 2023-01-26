@@ -97,12 +97,10 @@ def updateCryptoPrices(driver):
     print('updating coin prices')
     url = "https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=623829469"
     found = driver.findWindowByUrl(url)
-    driver = driver.webDriver
     if not found:
-        driver.execute_script("window.open('" + url + "');")
-        driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+        driver.openNewWindow(url)
     else:
-        driver.switch_to.window(found)
+        driver.webDriver.switch_to.window(found)
         time.sleep(1)
     coinNames = []
     coinSymbols = []
@@ -159,6 +157,4 @@ def openSpreadsheet(driver, sheet, tab=''):
             url += 'edit#gid=14744444'            
         elif tab == 'Finances':
             url += 'edit#gid=1436385671'
-    driver.execute_script("window.open('');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-    driver.get(url)
+    driver.openNewWindow(url)

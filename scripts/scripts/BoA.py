@@ -22,15 +22,15 @@ else:
 def locateBoAWindowAndOpenAccount(driver, account):
     found = driver.findWindowByUrl("secure.bankofamerica.com")
     if not found:
-        boALogin(driver.webDriver, account)
+        boALogin(driver, account)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
         
 def boALogin(driver, account):
     directory = setDirectory()
-    driver.execute_script("window.open('https://www.bankofamerica.com/');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])   
+    driver.openNewWindow('https://www.bankofamerica.com/')
+    driver = driver.webDriver
     # login
     driver.find_element(By.ID, "onlineId1").send_keys(getUsername(directory, 'BoA CC'))
     driver.find_element(By.ID, "passcode1").send_keys(getPassword(directory, 'BoA CC'))
@@ -175,7 +175,7 @@ def runBoA(driver, account):
     transactionsCSV = exportBoATransactions(driver.webDriver, account, today)
     claimBoARewards(driver, account)
     importGnuTransaction(BoA, transactionsCSV, driver.webDriver)
-    BoA.locateAndUpdateSpreadsheet(driver.webDriver)
+    BoA.locateAndUpdateSpreadsheet(driver)
     if BoA.reviewTransactions:
         openGnuCashUI('Finances') if account == "Personal" else openGnuCashUI('Home')
     showMessage("Balances + Review", f'BoA Balance: {BoA.balance} \n' f'GnuCash BoA Balance: {BoA.gnuBalance} \n \n' f'Review transactions:\n{BoA.reviewTransactions}')

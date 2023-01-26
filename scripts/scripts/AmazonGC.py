@@ -12,8 +12,7 @@ else:
 def locateAmazonWindow(driver):
         found = driver.findWindowByUrl("www.amazon.com/gc/balance")
         if not found:
-            driver.webDriver.execute_script("window.open('https://www.amazon.com/gc/balance');")
-            driver.webDriver.switch_to.window(driver.webDriver.window_handles[len(driver.webDriver.window_handles)-1])
+            driver.openNewWindow('https://www.amazon.com/gc/balance')
         else:
             driver.webDriver.switch_to.window(found)
             time.sleep(1)

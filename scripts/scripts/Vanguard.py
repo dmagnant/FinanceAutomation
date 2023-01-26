@@ -28,15 +28,15 @@ else:
 def locateVanguardWindow(driver):
     found = driver.findWindowByUrl("ownyourfuture.vanguard.com/main")
     if not found:
-        vanguardLogin(driver.webDriver)
+        vanguardLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def vanguardLogin(driver):
     directory = setDirectory()
-    driver.execute_script("window.open('https://ownyourfuture.vanguard.com/login#/');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.openNewWindow('https://ownyourfuture.vanguard.com/login#/')
+    driver = driver.webDriver
     # Enter username
     driver.find_element(By.ID, "username").send_keys(getUsername(directory, 'Vanguard'))
     time.sleep(1)
@@ -110,7 +110,7 @@ def runVanguard(driver):
     interestYTD = getVanguardBalanceAndInterestYTD(driver, VanguardPension)
     interestAndEmployerContribution = importGnuTransactions(myBook, today, VanguardPension, interestYTD)
     VanguardPension.updateGnuBalance(myBook)
-    openSpreadsheet(driver.webDriver, 'Asset Allocation', '2022')
+    openSpreadsheet(driver, 'Asset Allocation', '2022')
     updateSpreadsheet(directory, 'Asset Allocation', today.year, 'VanguardPension', today.month, float(VanguardPension.balance))
     openGnuCashUI('Finances')
     showMessage("Balances",f'Pension Balance: {VanguardPension.balance} \n'f'GnuCash Pension Balance: {VanguardPension.gnuBalance} \n'f'Interest earned: {interestAndEmployerContribution[0]} \n'f'Total monthly contributions: {interestAndEmployerContribution[1]} \n')

@@ -14,16 +14,16 @@ else:
 def locatePayPalWindow(driver):
     found = driver.findWindowByUrl("paypal.com/myaccount")
     if not found:
-        payPalLogin(driver.webDriver)
+        payPalLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def payPalLogin(driver):
     directory = setDirectory()
-    driver.execute_script("window.open('https://www.paypal.com/us/signin');")
+    driver.openNewWindow('https://www.paypal.com/us/signin')
+    driver = driver.webDriver
     time.sleep(3)
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
     while True:
         try:
             # enter password

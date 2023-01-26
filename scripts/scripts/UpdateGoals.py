@@ -170,9 +170,9 @@ def runUpdateGoals(accounts, timeframe):
     directory = setDirectory()
     driver = Driver("Chrome")
     if accounts == "Personal":
-        openSpreadsheet(driver.webDriver, 'Asset Allocation', 'Goals')
+        openSpreadsheet(driver, 'Asset Allocation', 'Goals')
     elif accounts == "Joint":
-        openSpreadsheet(driver.webDriver, 'Home', 'Finances')
+        openSpreadsheet(driver, 'Home', 'Finances')
     today = datetime.today()
     dateRange = getStartAndEndOfDateRange(today, today.month, today.year, timeframe)
     mybook = openGnuCashBook('Finance', True, True) if accounts == 'Personal' else openGnuCashBook('Home', False, False)

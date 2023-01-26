@@ -22,22 +22,21 @@ def getAmexBasePath():
 def locateAmexWindow(driver):
     found = driver.findWindowByUrl("global.americanexpress.com")
     if not found:
-        amexLogin(driver.webDriver)
+        amexLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1) 
         
 def amexLogin(driver):
     directory = setDirectory()
-    driver.execute_script("window.open('https://www.americanexpress.com/');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-    driver.find_element(By.XPATH, "/html/body/div[1]/div/div/header/div[2]/div[1]/div[3]/div/div[5]/ul/li[3]/span/a[1]").click()
-    driver.find_element(By.ID, "eliloUserID").send_keys(getUsername(directory, 'Amex'))
-    driver.find_element(By.ID, "eliloPassword").send_keys(getPassword(directory, 'Amex'))
-    driver.find_element(By.ID, "loginSubmit").click()
+    driver.openNewWindow('https://www.americanexpress.com/')
+    driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div/div/header/div[2]/div[1]/div[3]/div/div[5]/ul/li[3]/span/a[1]").click()
+    driver.webDriver.find_element(By.ID, "eliloUserID").send_keys(getUsername(directory, 'Amex'))
+    driver.webDriver.find_element(By.ID, "eliloPassword").send_keys(getPassword(directory, 'Amex'))
+    driver.webDriver.find_element(By.ID, "loginSubmit").click()
     # handle pop-up
     try:
-        driver.find_element(By.XPATH, "/html/body/div[1]/div[5]/div/div/div/div/div/div[2]/div/div/div/div/div[1]/div/a/span/span").click()
+        driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[5]/div/div/div/div/div/div[2]/div/div/div/div/div[1]/div/a/span/span").click()
     except NoSuchElementException:
         exception = "caught"
     time.sleep(1)
@@ -84,7 +83,7 @@ def runAmex(driver):
     exportAmexTransactions(driver.webDriver)
     claimAmexRewards(driver)
     importGnuTransaction(Amex, r'C:\Users\dmagn\Downloads\activity.csv', driver.webDriver)
-    Amex.locateAndUpdateSpreadsheet(driver.webDriver)
+    Amex.locateAndUpdateSpreadsheet(driver)
     if Amex.reviewTransactions:
         openGnuCashUI('Finances')
     showMessage("Balances + Review", f'Amex Balance: {Amex.balance} \n' f'GnuCash Amex Balance: {Amex.gnuBalance} \n \n' f'Review transactions:\n{Amex.reviewTransactions}')

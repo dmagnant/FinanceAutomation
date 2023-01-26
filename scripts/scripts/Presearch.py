@@ -20,14 +20,13 @@ def getPresearchBasePath():
 def locatePresearchWindow(driver):
     found = driver.findWindowByUrl("presearch.com")
     if not found:
-        presearchLogin(driver.webDriver)
+        presearchLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)    
 
 def presearchLogin(driver):
-    driver.execute_script("window.open('https://presearch.com/');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.openNewWindow('https://presearch.com/')
 
 def searchUsingPresearch(driver):
     locatePresearchWindow(driver)
@@ -95,15 +94,13 @@ def claimPresearchRewards(driver):
 
 def getPresearchBalance(driver):
     found = driver.findWindowByUrl("presearch.com/dashboard")
-    driver = driver.webDriver
     if not found:
-        driver.execute_script("window.open('https://nodes.presearch.org/dashboard');")
-        driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+        driver.openNewWindow('https://nodes.presearch.org/dashboard')
     else:
-        driver.switch_to.window(found)
+        driver.webDriver.switch_to.window(found)
         time.sleep(1)
-    searchRewards = float(driver.find_element(By.XPATH, '/html/body/div[1]/header/div[2]/div[2]/div/div[1]/div/div[1]/div/span[1]').text.strip(' PRE'))
-    stakedTokens = float(driver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[1]/div/h2').text.strip(' PRE').replace(',', ''))
+    searchRewards = float(driver.webDriver.find_element(By.XPATH, '/html/body/div[1]/header/div[2]/div[2]/div/div[1]/div/div[1]/div/span[1]').text.strip(' PRE'))
+    stakedTokens = float(driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[1]/div/h2').text.strip(' PRE').replace(',', ''))
     balance = searchRewards + stakedTokens
     return balance
 

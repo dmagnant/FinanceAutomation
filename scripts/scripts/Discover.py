@@ -21,21 +21,20 @@ else:
 def locateDiscoverWindow(driver):
     found = driver.findWindowByUrl("discover.com")
     if not found:
-        discoverLogin(driver.webDriver)
+        discoverLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def discoverLogin(driver):
-    directory = setDirectory()    
-    driver.execute_script("window.open('https://portal.discover.com/customersvcs/universalLogin/ac_main');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])    
+    directory = setDirectory()
+    driver.openNewWindow('https://portal.discover.com/customersvcs/universalLogin/ac_main') 
     # login
     # username already entered
     # driver.find_element(By.ID, 'userid-content').send_keys(getUsername(directory, 'Discover'))
-    driver.find_element(By.ID, 'password-content').send_keys(getPassword(directory, 'Discover'))
+    driver.webDriver.find_element(By.ID, 'password-content').send_keys(getPassword(directory, 'Discover'))
     time.sleep(1)
-    driver.find_element(By.XPATH, '/html/body/div[1]/main/div/div[1]/div/form/input[8]').click()
+    driver.webDriver.find_element(By.XPATH, '/html/body/div[1]/main/div/div[1]/div/form/input[8]').click()
 
     #handle pop-up
     try:
@@ -89,7 +88,7 @@ def runDiscover(driver):
     transactionsCSV = exportDiscoverTransactions(driver.webDriver, today)
     claimDiscoverRewards(driver)
     importGnuTransaction(Discover, transactionsCSV, driver.webDriver)
-    Discover.locateAndUpdateSpreadsheet(driver.webDriver)
+    Discover.locateAndUpdateSpreadsheet(driver)
     if Discover.reviewTransactions:
         openGnuCashUI('Finances')
     showMessage("Balances + Review", f'Discover Balance: {Discover.balance} \n' f'GnuCash Discover Balance: {Discover.gnuBalance} \n \n' f'Review transactions:\n{Discover.reviewTransactions}')

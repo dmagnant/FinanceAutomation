@@ -36,16 +36,15 @@ def closePopUps(driver):
 def locateSwagBucksWindow(driver):
     found = driver.findWindowByUrl("swagbucks.com")
     if not found:
-        swagBucksLogin(driver.webDriver)
+        swagBucksLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def swagBucksLogin(driver):
-    driver.execute_script("window.open('https://www.swagbucks.com/');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.openNewWindow('https://www.swagbucks.com/')
     try:
-        driver.find_element(By.ID, "lightboxExit").click()
+        driver.webDrfind_element(By.ID, "lightboxExit").click()
     except (ElementNotInteractableException, NoSuchElementException):
         exception = "caught"
         
@@ -141,10 +140,7 @@ def runAlusRevenge(driver, run_Alu):
                 num += 1
 
 def dailyPoll(driver):
-    driver.execute_script("window.open('https://www.swagbucks.com/polls');")
-    time.sleep(1)
-    # switch to last window
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.openNewWindow('https://www.swagbucks.com/polls')
     time.sleep(1)
     try:
         # click on first answer
@@ -154,13 +150,6 @@ def dailyPoll(driver):
     except NoSuchElementException:
         exception = "already answered"
     driver.close()
-
-def openTabs(driver):
-    #Inbox
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-    driver.execute_script("window.open('https://www.swagbucks.com/g/inbox');")
-    # switch to last window
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
 
 def toDoList(driver):
     # To Do List
@@ -206,20 +195,19 @@ def toDoList(driver):
 
 def swagbucksInbox(driver):
     def openAndCloseInboxItem(driver):
-        
         driver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div[5]/div[1]/div[1]/div/a").click()
         time.sleep(2)
         driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
         driver.close()
         driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-    driver.execute_script("window.open('https://www.swagbucks.com/g/inbox');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    
+    driver.openNewWindow('https://www.swagbucks.com/g/inbox')
     while True:
-        closePopUps(driver)
+        closePopUps(driver.webDriver)
         try: 
             contentPath = getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div/div[2]/div/div[3]/div[1]/a/div[2]/span"
-            driver.find_element(By.XPATH, contentPath).click()
-            description = driver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/div[1]/div[1]/main/h1").text
+            driver.webDriver.find_element(By.XPATH, contentPath).click()
+            description = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/div[1]/div[1]/main/h1").text
             if "Earn Every" in description:
                 openAndCloseInboxItem(driver)
             elif "Discover Daily Interests" in description:
@@ -228,7 +216,7 @@ def swagbucksInbox(driver):
                     openAndCloseInboxItem(driver)
                     num += 1
             # click delete
-            driver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div[3]/div[2]/div[2]").click()
+            driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div[3]/div[2]/div[2]").click()
             time.sleep(1)
             alert = driver.switch_to.alert
             alert.accept()
@@ -300,12 +288,11 @@ def claimSwagBucksRewards(driver):
 def runSwagbucks(driver, run_Alu):
     # closeExpressVPN()
     driver.webDriver.implicitly_wait(2)
-    swagBucksLogin(driver.webDriver)
+    locateSwagBucksWindow(driver)
     runAlusRevenge(driver.webDriver, run_Alu)
-    dailyPoll(driver.webDriver)
-    openTabs(driver.webDriver)
+    dailyPoll(driver)
+    swagbucksInbox(driver)
     toDoList(driver.webDriver)
-    swagbucksInbox(driver.webDriver)
     swagBuckscontentDiscovery(driver)
     balance = getSwagBucksBalance(driver)
     if int(balance) > 1000:

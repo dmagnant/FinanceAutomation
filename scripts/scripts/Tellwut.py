@@ -20,8 +20,7 @@ def locateTellWutWindow(driver):
         time.sleep(1)
 
 def tellwutLogin(driver):
-    driver.webDriver.execute_script("window.open('https://www.tellwut.com/signin');")
-    driver.webDriver.switch_to.window(driver.webDriver.window_handles[len(driver.webDriver.window_handles)-1])
+    driver.openNewWindow('https://www.tellwut.com/signin')
     try:
         getTellWutBalance(driver)
     except NoSuchElementException:

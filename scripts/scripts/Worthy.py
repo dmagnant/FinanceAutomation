@@ -23,8 +23,8 @@ def locateWorthyWindow(driver):
 
 def worthyLogin(driver):
     directory = setDirectory()
-    driver.execute_script("window.open('https://worthy.capital/start');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.openNewWindow('https://worthy.capital/start')
+    driver = driver.webDriver
     time.sleep(1)
     try:
         # click Login button

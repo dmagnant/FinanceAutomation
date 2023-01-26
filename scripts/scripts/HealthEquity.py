@@ -19,15 +19,14 @@ else:
 def locateHealthEquityWindow(driver):
     found = driver.findWindowByUrl("member.my.healthequity.com")
     if not found:
-        healthEquitylogin(driver.webDriver)
+        healthEquitylogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def healthEquitylogin(driver):
-    driver.execute_script("window.open('https://member.my.healthequity.com/hsa/21895515-010');")
-    # switch to last window
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.openNewWindow('https://member.my.healthequity.com/hsa/21895515-010')
+    driver = driver.webDriver
     # Login
     # click Login
     try:

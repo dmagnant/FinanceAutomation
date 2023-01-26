@@ -19,16 +19,15 @@ else:
 def locateKrakenWindow(driver):
     found = driver.findWindowByUrl("kraken.com")
     if not found:
-        krakenLogin(driver.webDriver)
+        krakenLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def krakenLogin(driver):
     directory = setDirectory()
-    driver.execute_script("window.open('https://www.kraken.com/sign-in');")
-    # switch to last window
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.openNewWindow('https://www.kraken.com/sign-in')
+    driver = driver.webDriver
     time.sleep(2)
     try:
         driver.find_element(By.ID, 'username').send_keys(getUsername(directory, 'Kraken'))

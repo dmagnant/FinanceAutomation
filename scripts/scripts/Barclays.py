@@ -21,15 +21,15 @@ else:
 def locateBarclaysWindow(driver):
     found = driver.findWindowByUrl("barclaycardus.com")
     if not found:
-        barclaysLogin(driver.webDriver)
+        barclaysLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)     
 
 def barclaysLogin(driver):
     directory = setDirectory()
-    driver.execute_script("window.open('https://www.barclaycardus.com/servicing/home?secureLogin=');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])    
+    driver.openNewWindow('https://www.barclaycardus.com/servicing/home?secureLogin=')
+    driver = driver.webDriver 
     # Login
     driver.find_element(By.ID, "username").send_keys(getUsername(directory, 'Barclay Card'))
     time.sleep(2)
@@ -131,7 +131,7 @@ def runBarclays(driver):
     if rewardsBalance >= float(50):
         claimBarclaysRewards(driver)
     importGnuTransaction(Barclays, transactionsCSV, driver.webDriver, 5)
-    Barclays.locateAndUpdateSpreadsheet(driver.webDriver)
+    Barclays.locateAndUpdateSpreadsheet(driver)
     if Barclays.reviewTransactions:
         openGnuCashUI('Finances')
     showMessage("Balances + Review", f'Barclays balance: {Barclays.balance} \n' f'GnuCash Barclays balance: {Barclays.gnuBalance} \n \n' f'Review transactions:\n{Barclays.reviewTransactions}')

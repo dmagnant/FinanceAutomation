@@ -23,7 +23,7 @@ else:
 def locateAllyWindow(driver):
     found = driver.findWindowByUrl("secure.ally.com")
     if not found:
-        allyLogin(driver.webDriver)
+        allyLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
@@ -31,28 +31,27 @@ def locateAllyWindow(driver):
 def allyLogin(driver):
     directory = setDirectory()
     # closeExpressVPN()
-    driver.implicitly_wait(10)
+    driver.webDriver.implicitly_wait(10)
     loggedIn = False
     while not loggedIn:
-        driver.execute_script("window.open('https://ally.com/');")
-        driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+        driver.openNewWindow('https://ally.com/')
         time.sleep(1)
         # click Login
-        driver.find_element(By.ID,"login").click()
+        driver.webDriver.find_element(By.ID,"login").click()
         # enter Password (username already filled in)
-        driver.find_element(By.ID,"allysf-login-v2-password-367761b575af35f6ccb5b53e96b2fa2d").send_keys(getPassword(directory, 'Ally Bank'))
+        driver.webDriver.find_element(By.ID,"allysf-login-v2-password-367761b575af35f6ccb5b53e96b2fa2d").send_keys(getPassword(directory, 'Ally Bank'))
         # click Login
-        driver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button").click()
+        driver.webDriver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button").click()
         time.sleep(5)
         # check if login button is still seen
         try:
-            driver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div/div[1]/form/div[3]/button/span")
+            driver.webDriver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div/div[1]/form/div[3]/button/span")
             loggedIn = False
-            driver.close()
-            driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+            driver.webDriver.close()
+            driver.getLastWindow()
         except NoSuchElementException:
             loggedIn = True
-    driver.find_element(By.PARTIAL_LINK_TEXT, "Joint Checking").click()
+    driver.webDriver.find_element(By.PARTIAL_LINK_TEXT, "Joint Checking").click()
     time.sleep(3)
 
 def allyLogout(driver):

@@ -18,16 +18,15 @@ else:
 def locateMyConstantWindow(driver):
     found = driver.findWindowByUrl("www.myconstant.com")
     if not found:
-        myConstantLogin(driver.webDriver)
+        myConstantLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def myConstantLogin(driver):
     directory = setDirectory()
-    driver.execute_script("window.open('https://www.myconstant.com/log-in');")
-    # switch to last window
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.openNewWindow('https://www.myconstant.com/log-in')
+    driver = driver.webDriver
     #login
     try:
         driver.find_element(By.ID, "lg_username").send_keys(getUsername(directory, 'My Constant'))

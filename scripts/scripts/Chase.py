@@ -17,15 +17,14 @@ else:
 def locateChaseWindow(driver):
     found = driver.findWindowByUrl("chase.com/web/auth")
     if not found:
-        chaseLogin(driver.webDriver)
+        chaseLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def chaseLogin(driver):
     driver.implicitly_wait(5)
-    driver.execute_script("window.open('https://secure07a.chase.com/web/auth/dashboard#/dashboard/overviewAccounts/overview/index');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.openNewWindow('https://secure07a.chase.com/web/auth/dashboard#/dashboard/overviewAccounts/overview/index')
     time.sleep(15)
     pyautogui.press('tab')
     pyautogui.press('tab')
@@ -86,7 +85,7 @@ def runChase(driver):
     transactionsCSV = exportChaseTransactions(driver.webDriver, today)
     claimChaseRewards(driver)
     importGnuTransaction(Chase, transactionsCSV, driver.webDriver)
-    Chase.locateAndUpdateSpreadsheet(driver.webDriver)
+    Chase.locateAndUpdateSpreadsheet(driver)
     if Chase.reviewTransactions:
         openGnuCashUI('Finances')
     showMessage("Balances + Review", f'Chase Balance: {Chase.balance} \n' f'GnuCash Chase Balance: {Chase.gnuBalance} \n \n' f'Review transactions:\n{Chase.reviewTransactions}')

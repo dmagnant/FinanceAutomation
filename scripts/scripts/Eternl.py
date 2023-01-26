@@ -11,16 +11,15 @@ else:
 def locateEternlWindow(driver):
     found = driver.findWindowByUrl("eternl.io/app/mainnet")
     if not found:
-        eternlLogin(driver.webDriver)
+        eternlLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
 
 def eternlLogin(driver):
-    driver.execute_script("window.open('https://eternl.io/app/mainnet/wallet/xpub1wxalshqc32m-ml/summary');")
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.openNewWindow('https://eternl.io/app/mainnet/wallet/xpub1wxalshqc32m-ml/summary')
     time.sleep(1)
-    driver.implicitly_wait(10)
+    driver.webDriver.implicitly_wait(10)
     
 def getEternlBalance(driver):
     locateEternlWindow(driver)

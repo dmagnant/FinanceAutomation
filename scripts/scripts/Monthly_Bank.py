@@ -57,7 +57,7 @@ def runUSD(driver, today):
         monthlyRoundUp(account, myBook, lastMonth[1], healthEquityHSADividendsAndVanguard[1])
     LiquidAssets = USD("Liquid Assets")
     Bonds = USD("Bonds")
-    openSpreadsheet(driver.webDriver, 'Asset Allocation', '2022')
+    openSpreadsheet(driver, 'Asset Allocation', '2022')
     updateSpreadsheet(directory, 'Asset Allocation', year, Bonds.name, month, float(Bonds.gnuBalance), 'Liquid Assets')
     updateSpreadsheet(directory, 'Asset Allocation', year, LiquidAssets.name, month, float(LiquidAssets.gnuBalance), 'Liquid Assets')
     updateSpreadsheet(directory, 'Asset Allocation', year, healthEquityHSADividendsAndVanguard[2].name, month, healthEquityHSADividendsAndVanguard[2].balance, '401k')
@@ -68,7 +68,7 @@ def runCrypto(driver, today):
     year = today.year
     month = today.month
     Crypto = USD("Crypto")
-    openSpreadsheet(driver.webDriver, 'Asset Allocation', 'Cryptocurrency')
+    openSpreadsheet(driver, 'Asset Allocation', 'Cryptocurrency')
     runEternl(driver)
     runKraken(driver)
     presearchRewardsRedemptionAndBalanceUpdates(driver)

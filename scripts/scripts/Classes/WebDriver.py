@@ -119,3 +119,9 @@ class Driver:
         url = "'" + url + "'"
         self.webDriver.execute_script("window.open(" + url + ");")
         self.webDriver.switch_to.window(self.webDriver.window_handles[len(self.webDriver.window_handles)-1])
+        
+    def getLastWindow(self):
+        self.webDriver.switch_to.window(self.webDriver.window_handles[len(self.webDriver.window_handles)-1])
+
+        
+    
