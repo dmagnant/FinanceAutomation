@@ -44,7 +44,7 @@ def locateSwagBucksWindow(driver):
 def swagBucksLogin(driver):
     driver.openNewWindow('https://www.swagbucks.com/')
     try:
-        driver.webDrfind_element(By.ID, "lightboxExit").click()
+        driver.webDriver.find_element(By.ID, "lightboxExit").click()
     except (ElementNotInteractableException, NoSuchElementException):
         exception = "caught"
         
@@ -144,12 +144,13 @@ def dailyPoll(driver):
     time.sleep(1)
     try:
         # click on first answer
-        driver.find_element(By.CSS_SELECTOR, "td.pollCheckbox").click()
+        driver.webDriver.find_element(By.CSS_SELECTOR, "td.pollCheckbox").click()
         # click Vote & Earn
-        driver.find_element(By.ID, "btnVote").click()
+        driver.webDriver.find_element(By.ID, "btnVote").click()
     except NoSuchElementException:
         exception = "already answered"
-    driver.close()
+    driver.webDriver.close()
+    driver.getLastWindow()
 
 def toDoList(driver):
     # To Do List
@@ -209,16 +210,16 @@ def swagbucksInbox(driver):
             driver.webDriver.find_element(By.XPATH, contentPath).click()
             description = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/div[1]/div[1]/main/h1").text
             if "Earn Every" in description:
-                openAndCloseInboxItem(driver)
+                openAndCloseInboxItem(driver.webDriver)
             elif "Discover Daily Interests" in description:
                 num = 0
                 while num < 4:
-                    openAndCloseInboxItem(driver)
+                    openAndCloseInboxItem(driver.webDriver)
                     num += 1
             # click delete
             driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div[3]/div[2]/div[2]").click()
             time.sleep(1)
-            alert = driver.switch_to.alert
+            alert = driver.webDriver.switch_to.alert
             alert.accept()
         except NoSuchElementException:
             exception = "no element found in inbox"
@@ -301,7 +302,9 @@ def runSwagbucks(driver, run_Alu):
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    runSwagbucks(driver, False)
+    # runSwagbucks(driver, False)
     # swagbucksInbox(driver.webDriver)
     # openTabs(driver.webDriver)
     # toDoList(driver.webDriver)
+    
+    driver.closeWindowsExcept(['http://localhost:8000/', 'smarterconsumer'])

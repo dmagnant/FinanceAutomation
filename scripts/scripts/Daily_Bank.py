@@ -48,9 +48,7 @@ def runDailyBank():
         f'Review transactions (Ally):\n {ally.reviewTransactions}')
     sofiLogout(driver)
     allyLogout(driver)
-    while len(driver.webDriver.window_handles) > 1:
-        driver.webDriver.switch_to.window(driver.webDriver.window_handles[len(driver.webDriver.window_handles)-1])
-        driver.webDriver.close()
+    driver.closeWindowsExcept(['http://localhost:8000/', 'swagbucks.com'])
     purgeOldGnucashFiles()
 
 if __name__ == '__main__':

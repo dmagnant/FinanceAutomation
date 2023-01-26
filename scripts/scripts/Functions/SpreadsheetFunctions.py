@@ -39,25 +39,27 @@ def updateSpreadsheet(directory, sheetTitle, tabTitle, account, month, value, sy
                 case 'ALGO':
                     return ['H2', 'J2']
                 case 'BTC':
-                    return ['H3', 'J3']         
-                case 'ADA':
-                    return ['H4', 'J4']            
+                    return ['H3', 'J3']
+                case 'ADA-Eternl':
+                    return ['H4', 'J4']
+                case 'ADA-Nami':
+                    return ['H5', 'J5']
                 case 'ATOM':
-                    return ['H5', 'J5']            
-                case 'ETH-Ledger':
                     return ['H6', 'J6']
-                case 'ETH-Kraken':                
+                case 'ETH-Ledger':
                     return ['H7', 'J7']
-                case 'ETH2':                          
+                case 'ETH-Kraken':                
                     return ['H8', 'J8']
-                case 'IOTX':                
+                case 'ETH2':
                     return ['H9', 'J9']
-                case 'LRC':                
+                case 'IOTX':
                     return ['H10', 'J10']
-                case 'DOT':                
+                case 'LRC':
                     return ['H11', 'J11']
-                case 'PRE':                
+                case 'DOT':
                     return ['H12', 'J12']
+                case 'PRE':
+                    return ['H13', 'J13']
                 case _:
                     print(f'account: {account} not found in "updateSpreadsheet" function')
         cell = (getCellArray(account))[month - 1]
