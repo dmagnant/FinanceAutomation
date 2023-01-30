@@ -1,3 +1,6 @@
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
+
 if __name__ == '__main__' or __name__ == "Daily_Bank":
     from Ally import allyLogout, runAlly
     from Classes.Asset import USD
@@ -35,6 +38,12 @@ def runDailyBank():
         openGnuCashUI('Finances')
     if ally.reviewTransactions:
         openGnuCashUI('Home')
+    driver.openNewWindow('https://finance.yahoo.com/quote/GME/')
+    try:
+        driver.webDriver.find_element(By.XPATH,"//*[@id='myLightboxContainer']/section/button[1]/svg").click()
+    except NoSuchElementException:
+        exception = 'pop-up window not there'
+    GMEprice = driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/div/div/div[1]/div/div[2]/div/div/div[6]/div/div/div/div[3]/div[1]/div/fin-streamer[1]").text
     showMessage("Balances + Review", 
         f'Sofi Checking: {sofi[0].balance} \n'
         f'  Gnu Balance: {sofi[0].gnuBalance} \n \n'
@@ -43,16 +52,16 @@ def runDailyBank():
         f'Ally Checking: {ally.balance} \n'
         f'  Gnu Balance: {ally.gnuBalance} \n \n'
         f'Crypto Balance: {round(Crypto.gnuBalance, 2)} \n \n'
+        f'GME Price: {GMEprice} \n \n'
         f'Review transactions (Sofi Checking):\n {sofi[0].reviewTransactions} \n'
         f'Review transactions (Sofi Savings):\n {sofi[1].reviewTransactions} \n'
         f'Review transactions (Ally):\n {ally.reviewTransactions}')
     sofiLogout(driver)
     allyLogout(driver)
-    driver.closeWindowsExcept(['http://localhost:8000/', 'swagbucks.com'])
+    driver.closeWindowsExcept([':8000/', 'swagbucks.com'])
     purgeOldGnucashFiles()
 
 if __name__ == '__main__':
     # runDailyBank()
     driver = Driver("Chrome")
     updateCryptoPrices(driver)
-    

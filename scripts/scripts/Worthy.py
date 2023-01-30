@@ -17,7 +17,7 @@ else:
 def locateWorthyWindow(driver):
     found = driver.findWindowByUrl("worthy.capital")
     if not found:
-        worthyLogin(driver.webDriver)
+        worthyLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
 

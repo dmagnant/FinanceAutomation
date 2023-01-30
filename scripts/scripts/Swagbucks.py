@@ -55,7 +55,7 @@ def swagBuckscontentDiscovery(driver):
     driver.webDriver.find_element(By.XPATH,"//*[@id='sbShopSort']/option[4]").click()
     cardNum = 1
     closePopUps(driver.webDriver)
-    while (cardNum <= 20):
+    while True:
         try:
             contentPath = getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div[2]/div[1]/section[" + str(cardNum) + "]"
             earnings = driver.webDriver.find_element(By.XPATH, contentPath + "/p/span/span[3]").text
@@ -72,13 +72,15 @@ def swagBuckscontentDiscovery(driver):
                     clickAmt += 1
                     if "discover daily interests" != description.lower():
                         break
-            cardNum += 1
+                cardNum += 1
+            elif int(earnings.replace(" sb", '')) > 4:
+                break
         except NoSuchElementException:
             if cardNum == 1:
                 showMessage('failed to find content discovery', 'check script for correct element')
             else:
-                exception = "no more content to discover (easily)"
-    driver.closeWindowsExcept(['http://localhost:8000/'])
+                break
+    driver.closeWindowsExcept([':8000/'])
 
 def runAlusRevenge(driver, run_Alu):
     if run_Alu:
@@ -307,4 +309,3 @@ if __name__ == '__main__':
     # openTabs(driver.webDriver)
     # toDoList(driver.webDriver)
     
-    driver.closeWindowsExcept(['http://localhost:8000/', 'smarterconsumer'])
