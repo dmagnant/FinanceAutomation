@@ -142,6 +142,7 @@ def matchQuestionAnswer(driver, question):
             # driver.find_element(By.XPATH,getAnswerPath(16)).click()
             # driver.find_element(By.XPATH,getAnswerPath(22)).click()
             showMessage('update script using specific answer', 'question: ' + question)
+            
         case 'Which of the following Social Networks do you have an account with?':
             # driver.find_element(By.XPATH,getAnswerPath(2)).click()
             # driver.find_element(By.XPATH,getAnswerPath(3)).click()
