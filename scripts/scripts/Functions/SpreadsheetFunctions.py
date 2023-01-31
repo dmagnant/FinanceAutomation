@@ -5,7 +5,7 @@ import gspread
 from .GeneralFunctions import getCryptocurrencyPrice, setDirectory, showMessage
 from .GnuCashFunctions import updateCryptoPriceInGnucash
 
-def updateSpreadsheet(directory, sheetTitle, tabTitle, account, month, value, symbol="$", modified=False):
+def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", modified=False):
     def getCell(account, month):
         def getCellArray(account):
             match account:
@@ -80,7 +80,7 @@ def updateSpreadsheet(directory, sheetTitle, tabTitle, account, month, value, sy
         worksheetKey = worksheet.acell(keyColumn + cellToUpdate[1:]).value
         return worksheetKey
     
-    jsonCreds = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
+    jsonCreds = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
     sheet = gspread.service_account(filename=jsonCreds).open(sheetTitle)
     worksheet = sheet.worksheet(str(tabTitle))
     cell = getCell(account, month)
@@ -107,8 +107,7 @@ def updateCryptoPrices(driver):
     coinNames = []
     coinSymbols = []
     # capture coin names and symbols from spreadsheet into arrays
-    directory = setDirectory()
-    jsonCreds = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
+    jsonCreds = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
     sheet = gspread.service_account(filename=jsonCreds).open('Asset Allocation')
     worksheet = sheet.worksheet(str('Cryptocurrency'))
     nameColumn = 'A'

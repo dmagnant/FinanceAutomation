@@ -4,14 +4,14 @@ from decimal import Decimal
 from piecash import Split, Transaction
 
 if __name__ == "Classes.Asset":
-    from Functions.GeneralFunctions import getCryptocurrencyPrice, setDirectory
+    from Functions.GeneralFunctions import getCryptocurrencyPrice
     from Functions.GnuCashFunctions import (getAccountPath, getGnuCashBalance,
                                             openGnuCashBook,
                                             updateCryptoPriceInGnucash)
     from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
 else:
     from scripts.scripts.Functions.GeneralFunctions import (
-        getCryptocurrencyPrice, setDirectory)
+        getCryptocurrencyPrice)
     from scripts.scripts.Functions.GnuCashFunctions import (
         getAccountPath, getGnuCashBalance, openGnuCashBook,
         updateCryptoPriceInGnucash)
@@ -116,17 +116,17 @@ class Crypto(Asset):
     
     def updateSpreadsheetAndGnuCash(self, account=None):
         account = self.symbol if account == None else account
-        updateSpreadsheet(setDirectory(), 'Asset Allocation', 'Cryptocurrency', account, 1, self.balance, self.symbol)
-        updateSpreadsheet(setDirectory(), 'Asset Allocation', 'Cryptocurrency', account, 2, self.price, self.symbol)
+        updateSpreadsheet('Asset Allocation', 'Cryptocurrency', account, 1, self.balance, self.symbol)
+        updateSpreadsheet('Asset Allocation', 'Cryptocurrency', account, 2, self.price, self.symbol)
         updateCoinQuantityFromStakingInGnuCash(self)
 
     def updateBalanceInSpreadSheet(self, account=None):
         account = self.symbol if account == None else account
-        updateSpreadsheet(setDirectory(), 'Asset Allocation', 'Cryptocurrency', account, 1, self.balance, self.symbol)
+        updateSpreadsheet('Asset Allocation', 'Cryptocurrency', account, 1, self.balance, self.symbol)
 
     def updatePriceInSpreadSheet(self, account=None):
         account = self.symbol if account == None else account
-        updateSpreadsheet(setDirectory(), 'Asset Allocation', 'Cryptocurrency', account, 2, self.price, self.symbol)
+        updateSpreadsheet('Asset Allocation', 'Cryptocurrency', account, 2, self.price, self.symbol)
 
     def updateBalanceInGnuCash(self, account=None):
         account = self.symbol if account == None else account
@@ -163,7 +163,6 @@ class USD(Asset):
     
     def locateAndUpdateSpreadsheet(self, driver):
         balance = 0.00 if float(self.balance) < 0 else float(self.balance) * -1
-        directory = setDirectory()
         today = datetime.today()
         month = today.month
         year = today.year
@@ -172,10 +171,10 @@ class USD(Asset):
             year = year + 1
         if self.name == 'BoA-joint':
             openSpreadsheet(driver, 'Home', '2023 Balance')
-            updateSpreadsheet(directory, 'Home', str(year) + ' Balance', self.name, month, balance, 'BoA CC')
-            updateSpreadsheet(directory, 'Home', str(year) + ' Balance', self.name, month, balance, 'BoA CC', True)
+            updateSpreadsheet('Home', str(year) + ' Balance', self.name, month, balance, 'BoA CC')
+            updateSpreadsheet('Home', str(year) + ' Balance', self.name, month, balance, 'BoA CC', True)
         else:
             openSpreadsheet(driver, 'Checking Balance', '2023')
-            updateSpreadsheet(directory, 'Checking Balance', year, self.name, month, balance, self.name + " CC")
-            updateSpreadsheet(directory, 'Checking Balance', year, self.name, month, balance, self.name + " CC", True)
+            updateSpreadsheet('Checking Balance', year, self.name, month, balance, self.name + " CC")
+            updateSpreadsheet('Checking Balance', year, self.name, month, balance, self.name + " CC", True)
             

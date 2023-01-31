@@ -9,13 +9,11 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Barclays":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import (getPassword, getUsername,
-                                            setDirectory, showMessage)
+    from Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
     from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 else:
     from .Classes.Asset import USD
-    from .Functions.GeneralFunctions import (getPassword, getUsername,
-                                             setDirectory, showMessage)
+    from .Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
     from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 
 def locateBarclaysWindow(driver):
@@ -27,13 +25,12 @@ def locateBarclaysWindow(driver):
         time.sleep(1)     
 
 def barclaysLogin(driver):
-    directory = setDirectory()
     driver.openNewWindow('https://www.barclaycardus.com/servicing/home?secureLogin=')
     driver = driver.webDriver 
     # Login
-    driver.find_element(By.ID, "username").send_keys(getUsername(directory, 'Barclay Card'))
+    driver.find_element(By.ID, "username").send_keys(getUsername('Barclay Card'))
     time.sleep(2)
-    driver.find_element(By.ID, "password").send_keys(getPassword(directory, 'Barclay Card'))
+    driver.find_element(By.ID, "password").send_keys(getPassword('Barclay Card'))
     time.sleep(2)
     driver.find_element(By.ID, "loginButton").click()
     # handle security questions

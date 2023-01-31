@@ -34,11 +34,11 @@ def getTransactionTotal(dateRange, gnuAccount, mybook):
                 total += float(amount)
     return total
 
-def getTotalForEachAccount(accountList, mybook, dateRange, timeframe, directory, month, accounts="Personal"):
+def getTotalForEachAccount(accountList, mybook, dateRange, timeframe, month, accounts="Personal"):
     for i in accountList:
         totalTransactions = compileGnuTransactions(i, mybook, dateRange)
         if timeframe == "Month":
-            updateSpreadsheet(directory, i, month, totalTransactions, accounts)
+            updateSpreadsheet(i, month, totalTransactions, accounts)
         else:
             print(i)
             print(totalTransactions)
@@ -157,8 +157,8 @@ def getCell(account, month, accounts='Personal'):
         case 'Utilities':
             return 'M' + row
 
-def updateSpreadsheet(directory, account, month, value, accounts='Personal'):
-    jsonCreds = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
+def updateSpreadsheet(account, month, value, accounts='Personal'):
+    jsonCreds = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
     sheetTitle = 'Asset Allocation' if accounts == 'Personal' else 'Home'
     sheet = gspread.service_account(filename=jsonCreds).open(sheetTitle)
     worksheetTitle = 'Goals' if accounts == 'Personal' else 'Finances'
@@ -167,7 +167,6 @@ def updateSpreadsheet(directory, account, month, value, accounts='Personal'):
     worksheet.update(cell, value)
 
 def runUpdateGoals(accounts, timeframe):
-    directory = setDirectory()
     driver = Driver("Chrome")
     if accounts == "Personal":
         openSpreadsheet(driver, 'Asset Allocation', 'Goals')
@@ -205,8 +204,8 @@ def runUpdateGoals(accounts, timeframe):
     expenseAccounts.extend(expenseQuarterlyAccounts)
     expenseAccounts.sort()
     
-    getTotalForEachAccount(incomeAccounts, mybook, dateRange, timeframe, directory, dateRange[1].month, accounts)
-    getTotalForEachAccount(expenseAccounts, mybook, dateRange, timeframe, directory, dateRange[1].month, accounts)
+    getTotalForEachAccount(incomeAccounts, mybook, dateRange, timeframe, dateRange[1].month, accounts)
+    getTotalForEachAccount(expenseAccounts, mybook, dateRange, timeframe, dateRange[1].month, accounts)
 
 if __name__ == '__main__':
     accounts = 'Joint' # Personal or Joint

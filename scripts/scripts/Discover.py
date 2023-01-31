@@ -9,13 +9,11 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Discover":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import (getPassword, setDirectory,
-                                            showMessage)
+    from Functions.GeneralFunctions import (getPassword, showMessage)
     from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 else:
     from .Classes.Asset import USD
-    from .Functions.GeneralFunctions import (getPassword, setDirectory,
-                                             showMessage)
+    from .Functions.GeneralFunctions import (getPassword, showMessage)
     from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 
 def locateDiscoverWindow(driver):
@@ -27,12 +25,11 @@ def locateDiscoverWindow(driver):
         time.sleep(1)
 
 def discoverLogin(driver):
-    directory = setDirectory()
     driver.openNewWindow('https://portal.discover.com/customersvcs/universalLogin/ac_main') 
     # login
     # username already entered
-    # driver.find_element(By.ID, 'userid-content').send_keys(getUsername(directory, 'Discover'))
-    driver.webDriver.find_element(By.ID, 'password-content').send_keys(getPassword(directory, 'Discover'))
+    # driver.find_element(By.ID, 'userid-content').send_keys(getUsername('Discover'))
+    driver.webDriver.find_element(By.ID, 'password-content').send_keys(getPassword('Discover'))
     time.sleep(1)
     driver.webDriver.find_element(By.XPATH, '/html/body/div[1]/main/div/div[1]/div/form/input[8]').click()
 

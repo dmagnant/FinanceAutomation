@@ -10,13 +10,11 @@ from selenium.webdriver.common.keys import Keys
 if __name__ == '__main__' or __name__ == "BoA":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import (getPassword, getUsername,
-                                            setDirectory, showMessage)
+    from Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
     from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 else:
     from .Classes.Asset import USD
-    from .Functions.GeneralFunctions import (getPassword, getUsername,
-                                             setDirectory, showMessage)
+    from .Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
     from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 
 def locateBoAWindowAndOpenAccount(driver, account):
@@ -28,12 +26,11 @@ def locateBoAWindowAndOpenAccount(driver, account):
         time.sleep(1)
         
 def boALogin(driver, account):
-    directory = setDirectory()
     driver.openNewWindow('https://www.bankofamerica.com/')
     driver = driver.webDriver
     # login
-    driver.find_element(By.ID, "onlineId1").send_keys(getUsername(directory, 'BoA CC'))
-    driver.find_element(By.ID, "passcode1").send_keys(getPassword(directory, 'BoA CC'))
+    driver.find_element(By.ID, "onlineId1").send_keys(getUsername('BoA CC'))
+    driver.find_element(By.ID, "passcode1").send_keys(getPassword('BoA CC'))
     driver.find_element(By.XPATH, "//*[@id='signIn']").click()
     # handle ID verification
     try:

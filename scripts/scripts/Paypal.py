@@ -7,9 +7,9 @@ from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Paypal":
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import getPassword, setDirectory
+    from Functions.GeneralFunctions import getPassword
 else:
-    from .Functions.GeneralFunctions import getPassword, setDirectory
+    from .Functions.GeneralFunctions import getPassword
 
 def locatePayPalWindow(driver):
     found = driver.findWindowByUrl("paypal.com/myaccount")
@@ -20,14 +20,13 @@ def locatePayPalWindow(driver):
         time.sleep(1)
 
 def payPalLogin(driver):
-    directory = setDirectory()
     driver.openNewWindow('https://www.paypal.com/us/signin')
     driver = driver.webDriver
     time.sleep(3)
     while True:
         try:
             # enter password
-            driver.find_element(By.ID, "password").send_keys(getPassword(directory, 'Paypal'))
+            driver.find_element(By.ID, "password").send_keys(getPassword('Paypal'))
             # click log in
             driver.find_element(By.ID,"btnLogin").click()
             time.sleep(2)

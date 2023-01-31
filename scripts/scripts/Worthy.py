@@ -7,12 +7,10 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Worthy":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import (getPassword, getUsername,
-                                            setDirectory, showMessage)    
+    from Functions.GeneralFunctions import (getPassword, getUsername, showMessage)    
 else:
     from .Classes.Asset import USD
-    from .Functions.GeneralFunctions import (getPassword, getUsername,
-                                             setDirectory, showMessage)
+    from .Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
 
 def locateWorthyWindow(driver):
     found = driver.findWindowByUrl("worthy.capital")
@@ -22,7 +20,6 @@ def locateWorthyWindow(driver):
         driver.webDriver.switch_to.window(found)
 
 def worthyLogin(driver):
-    directory = setDirectory()
     driver.openNewWindow('https://worthy.capital/start')
     driver = driver.webDriver
     time.sleep(1)
@@ -34,8 +31,8 @@ def worthyLogin(driver):
         try:
             driver.find_element(By.XPATH, "//*[@id='auth0-lock-error-msg-email']/div")
             # enter credentials
-            driver.find_element(By.ID, "1-email").send_keys(getUsername(directory, 'Worthy'))
-            driver.find_element(By.XPATH, "//*[@id='auth0-lock-container-1']/div/div[2]/form/div/div/div/div/div[2]/div[2]/span/div/div/div/div/div/div/div/div/div[2]/div/div[2]/div/div/input").send_keys(getPassword(directory, 'Worthy'))
+            driver.find_element(By.ID, "1-email").send_keys(getUsername('Worthy'))
+            driver.find_element(By.XPATH, "//*[@id='auth0-lock-container-1']/div/div[2]/form/div/div/div/div/div[2]/div[2]/span/div/div/div/div/div/div/div/div/div[2]/div/div[2]/div/div/input").send_keys(getPassword('Worthy'))
             # click Login button (again)
             driver.find_element(By.XPATH, "//*[@id='auth0-lock-container-1']/div/div[2]/form/div/div/div/button").click()
         except NoSuchElementException:

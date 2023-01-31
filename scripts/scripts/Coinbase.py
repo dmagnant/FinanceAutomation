@@ -4,10 +4,8 @@ from decimal import Decimal
 from piecash import Split, Transaction
 
 if __name__ == '__main__' or __name__ == "Coinbase":
-    from Functions.GeneralFunctions import setDirectory
     from Functions.GnuCashFunctions import openGnuCashBook
 else:
-    from .Functions.GeneralFunctions import setDirectory
     from .Functions.GnuCashFunctions import openGnuCashBook
 
 # directory = setDirectory()
@@ -52,7 +50,7 @@ def sumDollarInvestment(mybook, gnu_account):
 
 # print(sumDollarInvestment(mybook, account))
 
-def getTotalCryptoInvestmentInDollars(directory=setDirectory()):
+def getTotalCryptoInvestmentInDollars():
     mybook = openGnuCashBook('Finance', True, True)
     account = "Assets:Non-Liquid Assets:CryptoCurrency"
     total = 0

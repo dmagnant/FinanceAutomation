@@ -17,6 +17,7 @@ from scripts.scripts.Daily_MR import *
 from scripts.scripts.Discover import *
 from scripts.scripts.Eternl import *
 from scripts.scripts.Exodus import *
+from scripts.scripts.Fidelity import *
 from scripts.scripts.HealthEquity import *
 from scripts.scripts.IoPay import *
 from scripts.scripts.Kraken import *
@@ -205,6 +206,18 @@ def exodus(request):
                 coin.getData()
     return render(request,"scripts/exodus.html")
 
+def fidelity(request):
+    if request.method == 'POST':
+        driver = Driver("Chrome")
+        if "main" in request.POST:
+            response = runFidelity(driver)
+            response.getData()        
+        elif "balance" in request.POST:
+            print(getFidelityBalance(driver))
+        elif "login" in request.POST:
+            locateFidelityWindow(driver)
+    return render(request,"scripts/fidelity.html")
+    
 def healthEquity(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
@@ -347,6 +360,8 @@ def presearch(request):
             print(balance[0])
         elif "search" in request.POST:
             searchUsingPresearch(driver)
+        elif "rewards" in request.POST:
+            presearchRewardsRedemptionAndBalanceUpdates(driver)
     return render(request,"scripts/presearch.html")
 
 def psCoupons(request):

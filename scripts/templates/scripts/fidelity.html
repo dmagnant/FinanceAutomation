@@ -1,15 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Presearch{% endblock %}
+{% block title %}Fidelity{% endblock %}
 
 {% block content %}
-    <h1>Presearch</h1>
+    <h1>Fidelity</h1>
     <form method="post">
         {% csrf_token %}
         <button type="submit" name="main">Main</button><br>
         <button type="submit" name="login">Login</button><br>
         <button type="submit" name="balance">Balance</button><br>
-        <button type="submit" name="search">Search</button>
-        <button type="submit" name="rewards">Rewards</button>
     </form>
 {% endblock %}

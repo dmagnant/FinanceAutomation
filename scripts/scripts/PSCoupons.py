@@ -1,22 +1,12 @@
-import csv
 import time
-import pyautogui
-from datetime import datetime
-from decimal import Decimal
 
-from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "PSCoupons":
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import (closeExpressVPN, getPassword,
-                                            getStartAndEndOfDateRange,
-                                            setDirectory, showMessage)
-    from Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription
+    from Functions.GeneralFunctions import (getPassword, showMessage)
 else:
-    from .Functions.GeneralFunctions import (closeExpressVPN, getPassword,
-                                             getStartAndEndOfDateRange,
-                                             setDirectory, showMessage)
-    from .Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription
+    from .Functions.GeneralFunctions import (getPassword, showMessage)
 
 def locatePSCouponWindow(driver):
     found = driver.findWindowByUrl("picknsave.com/savings/cl/coupons/")

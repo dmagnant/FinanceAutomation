@@ -7,10 +7,10 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Midas":
     from Classes.Asset import Crypto
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import getOTP, setDirectory  
+    from Functions.GeneralFunctions import getOTP  
 else:
     from .Classes.Asset import Crypto
-    from .Functions.GeneralFunctions import getOTP, setDirectory    
+    from .Functions.GeneralFunctions import getOTP    
 
 def locateMidasWindow(driver):
     found = driver.findWindowByUrl("app.midas.investments")
@@ -54,7 +54,6 @@ def runMidas(driver):
     return coinList
 
 if __name__ == '__main__':
-    directory = setDirectory()
     driver = Driver("Chrome")
     response = runMidas(driver)
     for coin in response:

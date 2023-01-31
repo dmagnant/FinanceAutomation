@@ -11,16 +11,14 @@ if __name__ == '__main__' or __name__ == "Vanguard":
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import (getPassword,
                                             getStartAndEndOfDateRange,
-                                            getUsername, setDirectory,
-                                            showMessage)
+                                            getUsername, showMessage)
     from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction, openGnuCashUI
     from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
 else:
     from .Classes.Asset import USD
     from .Functions.GeneralFunctions import (getPassword,
                                              getStartAndEndOfDateRange,
-                                             getUsername, setDirectory,
-                                             showMessage)
+                                             getUsername, showMessage)
     from .Functions.GnuCashFunctions import (openGnuCashBook,
                                              writeGnuTransaction, openGnuCashUI)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
@@ -34,14 +32,13 @@ def locateVanguardWindow(driver):
         time.sleep(1)
 
 def vanguardLogin(driver):
-    directory = setDirectory()
     driver.openNewWindow('https://ownyourfuture.vanguard.com/login#/')
     driver = driver.webDriver
     # Enter username
-    driver.find_element(By.ID, "username").send_keys(getUsername(directory, 'Vanguard'))
+    driver.find_element(By.ID, "username").send_keys(getUsername('Vanguard'))
     time.sleep(1)
     # Enter password
-    driver.find_element(By.ID, "pword").send_keys(getPassword(directory, 'Vanguard'))
+    driver.find_element(By.ID, "pword").send_keys(getPassword('Vanguard'))
     time.sleep(1)
     # click Log in
     driver.find_element(By.XPATH, "//*[@id='vui-button-1']/button/div").click()
@@ -102,7 +99,6 @@ def importGnuTransactions(myBook, today, account, interestYTD):
     return [interest, employerContribution]
 
 def runVanguard(driver):
-    directory = setDirectory()
     today = datetime.today()
     myBook = openGnuCashBook('Finance', False, False)
     VanguardPension = USD("VanguardPension")
@@ -111,7 +107,7 @@ def runVanguard(driver):
     interestAndEmployerContribution = importGnuTransactions(myBook, today, VanguardPension, interestYTD)
     VanguardPension.updateGnuBalance(myBook)
     openSpreadsheet(driver, 'Asset Allocation', '2022')
-    updateSpreadsheet(directory, 'Asset Allocation', today.year, 'VanguardPension', today.month, float(VanguardPension.balance))
+    updateSpreadsheet('Asset Allocation', today.year, 'VanguardPension', today.month, float(VanguardPension.balance))
     openGnuCashUI('Finances')
     showMessage("Balances",f'Pension Balance: {VanguardPension.balance} \n'f'GnuCash Pension Balance: {VanguardPension.gnuBalance} \n'f'Interest earned: {interestAndEmployerContribution[0]} \n'f'Total monthly contributions: {interestAndEmployerContribution[1]} \n')
 

@@ -23,14 +23,14 @@ else:
     from .Functions.GeneralFunctions import (getPassword, getUsername,
                                              setDirectory, showMessage)
     
-def cointiplyLogin(directory, driver):
+def cointiplyLogin(driver):
     driver.get("https://cointiply.com/login")
     #Login
     try:
         # enter email
-        driver.find_element(By.XPATH, "//html/body/div/div[2]/section/div[1]/div/div[2]/div/div[3]/form/div[1]/input").send_keys(getUsername(directory, 'Cointiply'))
+        driver.find_element(By.XPATH, "//html/body/div/div[2]/section/div[1]/div/div[2]/div/div[3]/form/div[1]/input").send_keys(getUsername('Cointiply'))
         # enter password
-        driver.find_element(By.XPATH, "/html/body/div/div[2]/section/div[1]/div/div[2]/div/div[3]/form/div[2]/input").send_keys(getPassword(directory, 'Cointiply'))
+        driver.find_element(By.XPATH, "/html/body/div/div[2]/section/div[1]/div/div[2]/div/div[3]/form/div[2]/input").send_keys(getPassword('Cointiply'))
         showMessage("CAPTCHA", 'Verify captcha, then click OK')
         #click LOGIN
         driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/section/div[1]/div/div[2]/div/div[3]/form/div[5]/button").click()
@@ -57,7 +57,7 @@ def runFaucet(driver, runFaucet):
         except (NoSuchElementException, WebDriverException):
             exception = "gotta wait"
 
-def watchVideos(directory, driver):
+def watchVideos(driver):
     #link from Cointiply
     # link = "https://api.lootably.com/api/offerwall/redirect/offer/101-999?placementID=ckzg5jprk003u011d0wlt2vn9&rawPublisherUserID=2193072"
     #direct link
@@ -67,15 +67,16 @@ def watchVideos(directory, driver):
     # #click login
     # driver.find_element(By.XPATH, "/html/body/div[4]/div/div/div[2]/div/div[2]/a[1]/button").click()
     #enter email
-    driver.find_element(By.XPATH, "//*[@id='__next']/div/div[2]/div[2]/div/div/div[2]/div[1]/input").send_keys(getUsername(directory, 'Loot TV'))
+    driver.find_element(By.XPATH, "//*[@id='__next']/div/div[2]/div[2]/div/div/div[2]/div[1]/input").send_keys(getUsername('Loot TV'))
     #enter password
-    driver.find_element(By.XPATH, "//*[@id='__next']/div/div[2]/div[2]/div/div/div[2]/div[2]/input").send_keys(getPassword(directory, 'Loot TV'))
+    driver.find_element(By.XPATH, "//*[@id='__next']/div/div[2]/div[2]/div/div/div[2]/div[2]/input").send_keys(getPassword('Loot TV'))
     # click sign in
     driver.find_element(By.XPATH, "//*[@id='__next']/div/div[2]/div[2]/div/div/div[3]/button").click()
     # click to watch video
     driver.find_element(By.XPATH, "//*[@id='__next']/div/div[2]/div[2]/div/div/div/div[3]/div/div[1]/div[2]/div[2]/div[1]/p").click()
 
-def ptcAds(directory, driver):
+def ptcAds(driver):
+    directory = setDirectory()
     view_length = ""
     selection = ""
     still_ads = True
@@ -255,13 +256,12 @@ def calculateNextRun(minsLeftForFaucet):
         minsLeftForFaucet -= datetime.now().time().minute
     time.sleep(minsLeftForFaucet * 60)
 
-def runCointiply(directory, driver, faucetRun=True):
-    cointiplyLogin(directory, driver)    
+def runCointiply(driver, faucetRun=True):
+    cointiplyLogin(driver)    
     runFaucet(driver, faucetRun)
-    ptcAds(directory, driver)
+    ptcAds(driver)
     return nextRun(driver)
 
 if __name__ == '__main__':
-    directory = setDirectory()
     driver = Driver("Chrome")
-    runCointiply(directory, driver, True)
+    runCointiply(driver, True)

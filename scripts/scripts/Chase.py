@@ -23,7 +23,7 @@ def locateChaseWindow(driver):
         time.sleep(1)
 
 def chaseLogin(driver):
-    driver.implicitly_wait(5)
+    driver.webDriver.implicitly_wait(5)
     driver.openNewWindow('https://secure07a.chase.com/web/auth/dashboard#/dashboard/overviewAccounts/overview/index')
     time.sleep(15)
     pyautogui.press('tab')

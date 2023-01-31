@@ -8,13 +8,11 @@ if __name__ == '__main__' or __name__ == "Kraken":
     from Classes.Asset import Crypto
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import (getCryptocurrencyPrice, getOTP,
-                                            getPassword, getUsername,
-                                            setDirectory)  
+                                            getPassword, getUsername)  
 else:
     from .Classes.Asset import Crypto
     from .Functions.GeneralFunctions import (getCryptocurrencyPrice, getOTP,
-                                             getPassword, getUsername,
-                                             setDirectory)
+                                             getPassword, getUsername)
     
 def locateKrakenWindow(driver):
     found = driver.findWindowByUrl("kraken.com")
@@ -25,14 +23,13 @@ def locateKrakenWindow(driver):
         time.sleep(1)
 
 def krakenLogin(driver):
-    directory = setDirectory()
     driver.openNewWindow('https://www.kraken.com/sign-in')
     driver = driver.webDriver
     time.sleep(2)
     try:
-        driver.find_element(By.ID, 'username').send_keys(getUsername(directory, 'Kraken'))
+        driver.find_element(By.ID, 'username').send_keys(getUsername('Kraken'))
         time.sleep(1)
-        driver.find_element(By.ID, 'password').send_keys(getPassword(directory, 'Kraken'))
+        driver.find_element(By.ID, 'password').send_keys(getPassword('Kraken'))
         time.sleep(1)
         driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/form/div/div[3]/button/div/div/div").click()   
         token = getOTP('kraken_otp')

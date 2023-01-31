@@ -29,7 +29,6 @@ def locateSofiWindow(driver):
         time.sleep(1) 
 
 def sofiLogin(driver):
-    directory = setDirectory()
     driver.openNewWindow('https://login.sofi.com/u/login?state=hKFo2SBrOGMtTVZSUHZPalVPbEUyZmJyWXhyV3pYMU9lSzhEUKFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIGptNWpvQnRQQlFtSHFJT216N0dfLU1aZFBUbWFqVXl6o2NpZNkgNkxuc0xDc2ZGRUVMbDlTQzBDaWNPdkdlb2JvZXFab2I')
     driver = driver.webDriver
     time.sleep(2)
@@ -42,10 +41,10 @@ def sofiLogin(driver):
         # look for email is required error (suggesting that auto-fill didn't occur)
         driver.find_element(By.ID,"error-3")
         # username
-        driver.find_element(By.ID, "username").send_keys(getUsername(directory, 'Sofi'))
+        driver.find_element(By.ID, "username").send_keys(getUsername('Sofi'))
         time.sleep(1)
         # # password
-        driver.find_element(By.ID, "password").send_keys(getPassword(directory, 'Sofi'))
+        driver.find_element(By.ID, "password").send_keys(getPassword('Sofi'))
         time.sleep(1)
         # click LOG IN
         driver.find_element(By.XPATH, "//*[@id='widget_block']/main/section/div/div/div/form/div[2]/button").click()
@@ -85,8 +84,7 @@ def setSofiTransactionElementRoot(table, row, column, div):
     return "/html/body/div/main/div[3]/div[" + div + "]/table[" + str(table) + "]/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/span"
 
 def getTransactionsFromSofiWebsite(driver, dateRange, today, tableStart, div):
-    directory = setDirectory()
-    sofiActivity = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\sofi.csv"
+    sofiActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\sofi.csv"
     open(sofiActivity, 'w', newline='').truncate()
     year = today.year
     table = tableStart

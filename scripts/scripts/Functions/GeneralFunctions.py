@@ -50,20 +50,20 @@ def closeExpressVPN():
         pyautogui.leftClick(40, 280)
         time.sleep(4)
 
-def getUsername(directory, name):
-    keepass_file = directory + r"\Other\KeePass.kdbx"
+def getUsername(name):
+    keepass_file = setDirectory() + r"\Other\KeePass.kdbx"
     KeePass = PyKeePass(keepass_file, password=os.environ.get('KeePass'))
     return KeePass.find_entries(title=name, first=True).username
 
-def getPassword(directory, name):
-    keepass_file = directory + r"\Other\KeePass.kdbx"
+def getPassword(name):
+    keepass_file = setDirectory() + r"\Other\KeePass.kdbx"
     KeePass = PyKeePass(keepass_file, password=os.environ.get('KeePass'))
     return KeePass.find_entries(title=name, first=True).password
 
 def getOTP(account):
     return pyotp.TOTP(os.environ.get(account)).now()
 
-def loginPiHole(directory, driver):
+def loginPiHole(driver):
     driver.implicitly_wait(2)
     driver.get("http://192.168.1.144/admin/")
     driver.maximize_window()
@@ -71,18 +71,18 @@ def loginPiHole(directory, driver):
         #click Login
         driver.find_element(By.XPATH, "/html/body/div[2]/aside/section/ul/li[3]/a").click()
         # Enter Password
-        driver.find_element(By.ID, "loginpw").send_keys(getPassword(directory, 'Pi hole'))
+        driver.find_element(By.ID, "loginpw").send_keys(getPassword('Pi hole'))
         #click Login again
         driver.find_element(By.XPATH, "//*[@id='loginform']/div[2]/div/button").click()
         time.sleep(1)
     except NoSuchElementException:
         exception = "already logged in"
 
-def disablePiHole(directory, driver):
+def disablePiHole(driver):
     driver.maximize_window()
     pihole_window = driver.window_handles[0]
     driver.switch_to.window(pihole_window)
-    loginPiHole(directory, driver)
+    loginPiHole(driver)
     try:
         driver.find_element(By.XPATH, "//*[@id='pihole-disable']/a/span[2]").click()
         # Click Indefinitely
@@ -90,10 +90,10 @@ def disablePiHole(directory, driver):
     except ElementNotInteractableException:
         exception = "already disabled"
 
-def enablePiHole(directory, driver):
+def enablePiHole(driver):
     pihole_window = driver.window_handles[0]
     driver.switch_to.window(pihole_window)
-    loginPiHole(directory, driver)
+    loginPiHole(driver)
     try:
         driver.find_element(By.ID, "enableLabel").click()
     except NoSuchElementException:

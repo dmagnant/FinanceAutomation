@@ -7,13 +7,11 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Amex":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import (getPassword, getUsername,
-                                            setDirectory, showMessage)
+    from Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
     from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 else:
     from .Classes.Asset import USD
-    from .Functions.GeneralFunctions import (getPassword, getUsername,
-                                             setDirectory, showMessage)
+    from .Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
     from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 
 def getAmexBasePath():
@@ -28,11 +26,10 @@ def locateAmexWindow(driver):
         time.sleep(1) 
         
 def amexLogin(driver):
-    directory = setDirectory()
     driver.openNewWindow('https://www.americanexpress.com/')
     driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div/div/header/div[2]/div[1]/div[3]/div/div[5]/ul/li[3]/span/a[1]").click()
-    driver.webDriver.find_element(By.ID, "eliloUserID").send_keys(getUsername(directory, 'Amex'))
-    driver.webDriver.find_element(By.ID, "eliloPassword").send_keys(getPassword(directory, 'Amex'))
+    driver.webDriver.find_element(By.ID, "eliloUserID").send_keys(getUsername('Amex'))
+    driver.webDriver.find_element(By.ID, "eliloPassword").send_keys(getPassword('Amex'))
     driver.webDriver.find_element(By.ID, "loginSubmit").click()
     # handle pop-up
     try:

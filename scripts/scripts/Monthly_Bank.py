@@ -8,8 +8,7 @@ if __name__ == '__main__' or __name__ == "Monthly_Bank":
     from Eternl import runEternl
     from Exodus import runExodus
     from Ledger import runLedger
-    from Functions.GeneralFunctions import (getStartAndEndOfDateRange,
-                                            setDirectory, showMessage)
+    from Functions.GeneralFunctions import (getStartAndEndOfDateRange, showMessage)
     from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction, getTotalOfAutomatedMRAccounts
     from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
     from HealthEquity import getHealthEquityBalances
@@ -24,8 +23,7 @@ else:
     from .Eternl import runEternl
     from .Exodus import runExodus
     from .Ledger import runLedger
-    from .Functions.GeneralFunctions import (getStartAndEndOfDateRange,
-                                             setDirectory, showMessage)
+    from .Functions.GeneralFunctions import (getStartAndEndOfDateRange, showMessage)
     from .Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction, getTotalOfAutomatedMRAccounts
     from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
     from .HealthEquity import getHealthEquityBalances
@@ -45,7 +43,6 @@ def monthlyRoundUp(account, myBook, date, HSADividends):
         writeGnuTransaction(myBook, "HSA Statement", date, [change, -HSADividends, -HEHSAMarketChange], ["Income:Investments:Dividends", "Income:Investments:Market Change"], "Assets:Non-Liquid Assets:HSA:NM HSA")
 
 def runUSD(driver, today):
-    directory = setDirectory()
     year = today.year
     month = today.month
     lastMonth = getStartAndEndOfDateRange(today, today.month, today.year, "month")
@@ -58,13 +55,12 @@ def runUSD(driver, today):
     LiquidAssets = USD("Liquid Assets")
     Bonds = USD("Bonds")
     openSpreadsheet(driver, 'Asset Allocation', '2022')
-    updateSpreadsheet(directory, 'Asset Allocation', year, Bonds.name, month, float(Bonds.gnuBalance), 'Liquid Assets')
-    updateSpreadsheet(directory, 'Asset Allocation', year, LiquidAssets.name, month, float(LiquidAssets.gnuBalance), 'Liquid Assets')
-    updateSpreadsheet(directory, 'Asset Allocation', year, healthEquityHSADividendsAndVanguard[2].name, month, healthEquityHSADividendsAndVanguard[2].balance, '401k')
+    updateSpreadsheet('Asset Allocation', year, Bonds.name, month, float(Bonds.gnuBalance), 'Liquid Assets')
+    updateSpreadsheet('Asset Allocation', year, LiquidAssets.name, month, float(LiquidAssets.gnuBalance), 'Liquid Assets')
+    updateSpreadsheet('Asset Allocation', year, healthEquityHSADividendsAndVanguard[2].name, month, healthEquityHSADividendsAndVanguard[2].balance, '401k')
     return [MyConstant, Worthy, LiquidAssets, healthEquityHSADividendsAndVanguard[2], healthEquityHSADividendsAndVanguard[0]]
 
 def runCrypto(driver, today):
-    directory = setDirectory()
     year = today.year
     month = today.month
     Crypto = USD("Crypto")
@@ -75,7 +71,7 @@ def runCrypto(driver, today):
     runIoPay(driver)
     runLedger()
     Crypto.updateGnuBalance(openGnuCashBook('Finance', True, True))
-    updateSpreadsheet(directory, 'Asset Allocation', year, Crypto.name, month, float(round(Crypto.gnuBalance, 2)), Crypto.name)
+    updateSpreadsheet('Asset Allocation', year, Crypto.name, month, float(round(Crypto.gnuBalance, 2)), Crypto.name)
     return Crypto
 
 def runMonthlyBank():

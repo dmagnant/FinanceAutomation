@@ -20,6 +20,7 @@ urlpatterns = [
     path('discover', views.discover, name="Discover"),
     path('eternl', views.eternl, name="Eternl"),
     path('exodus', views.exodus, name="Exodus"),
+    path('fidelity', views.fidelity, name="Fidelity"),
     path('healthEquity', views.healthEquity , name="HealthEquity"),
     path('ioPay', views.ioPay, name="IoPay"),
     path('kraken', views.kraken, name="Kraken"),

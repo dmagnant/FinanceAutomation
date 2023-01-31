@@ -15,13 +15,13 @@ from .GeneralFunctions import (closeExpressVPN, getPassword,
                                setDirectory, showMessage)
 
 def openGnuCashBook(type, readOnly, openIfLocked):
-    directory=setDirectory()
     if type == 'Finance':
-        book = directory + r"\Finances\Personal Finances\Finance.gnucash"
+        bookPathSuffix = r"\Finances\Personal Finances\Finance.gnucash"
     elif type == 'Home':
-        book = directory + r"\Stuff\Home\Finances\Home.gnucash"
+        bookPathSuffix = r"\Stuff\Home\Finances\Home.gnucash"
     elif type == 'Test':
-        book = directory + r"\Finances\Personal Finances\test.gnucash"
+        bookPathSuffix = r"\Finances\Personal Finances\test.gnucash"
+    book = setDirectory() + bookPathSuffix
     try:
         myBook = piecash.open_book(book, readonly=readOnly, open_if_lock=openIfLocked)
     except GnucashException:
@@ -83,6 +83,8 @@ def getAccountPath(accountName, type=None):
             return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum:ETH-Ledger"
         case 'Ethereum2':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum2"
+        case 'Fidelity':
+            return "Assets:Non-Liquid Assets:IRA:Fidelity"
         case 'HSA':
             return "Assets:Non-Liquid Assets:HSA:NM HSA"
         case 'IoTex':
@@ -359,7 +361,6 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
         description = modifyTransactionDescription(description)
         return [postDate, description, amount, skipTransaction, fromAccount, reviewTransPath]
     def getEnergyBillAmounts(driver, amount, energyBillNum):
-        directory = setDirectory()
         if energyBillNum == 1:
             closeExpressVPN()
             driver.execute_script("window.open('https://login.arcadia.com/email');")
@@ -376,10 +377,10 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
                     exception = "sign in page loaded already"
                 try:
                     # enter email
-                    driver.find_element(By.XPATH, "/html/body/div[1]/main/div[1]/div[2]/form/div[1]/div[1]/div/input").send_keys(getUsername(directory, 'Arcadia Power'))
+                    driver.find_element(By.XPATH, "/html/body/div[1]/main/div[1]/div[2]/form/div[1]/div[1]/div/input").send_keys(getUsername('Arcadia Power'))
                     time.sleep(1)
                     # enter password
-                    driver.find_element(By.XPATH, "/html/body/div[1]/main/div[1]/div[2]/form/div[1]/div[2]/div/input").send_keys(getPassword(directory, 'Arcadia Power'))
+                    driver.find_element(By.XPATH, "/html/body/div[1]/main/div[1]/div[2]/form/div[1]/div[2]/div/input").send_keys(getPassword('Arcadia Power'))
                     time.sleep(1)
                     # click sign in
                     driver.find_element(By.XPATH, "/html/body/div[1]/main/div[1]/div[2]/form/div[2]/button").click()
@@ -440,8 +441,8 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
             driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
             try:
                 ## LOGIN
-                driver.find_element(By.XPATH, "//*[@id='signInName']").send_keys(getUsername(directory, 'WE-Energies (Home)'))
-                driver.find_element(By.XPATH, "//*[@id='password']").send_keys(getPassword(directory, 'WE-Energies (Home)'))
+                driver.find_element(By.XPATH, "//*[@id='signInName']").send_keys(getUsername('WE-Energies (Home)'))
+                driver.find_element(By.XPATH, "//*[@id='password']").send_keys(getPassword('WE-Energies (Home)'))
                 # click Login
                 driver.find_element(By.XPATH, "//*[@id='next']").click()
                 time.sleep(4)
@@ -665,14 +666,13 @@ def consolidatePastYearsTransactions(myBook):
     myBook.close()
 
 def openGnuCashUI(book):
-    directory = setDirectory()
     if book == 'Finances':
         path = r"\Finances\Personal Finances\Finance.gnucash"
     elif book == 'Home':
         path = r"\Stuff\Home\Finances\Home.gnucash"
     elif book == 'Test':
         path = r"\Finances\Personal Finances\test.gnucash"
-    os.startfile(directory + path)
+    os.startfile(setDirectory() + path)
 
 def getTotalOfAutomatedMRAccounts(myBook):
     mrTotal = 0

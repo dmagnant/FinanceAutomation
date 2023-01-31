@@ -8,12 +8,10 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "MyConstant":
     from Classes.Asset import USD, Crypto
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import (getOTP, getPassword, getUsername,
-                                            setDirectory, showMessage)
+    from Functions.GeneralFunctions import (getOTP, getPassword, getUsername, showMessage)
 else:
     from .Classes.Asset import USD, Crypto
-    from .Functions.GeneralFunctions import (getOTP, getPassword, getUsername,
-                                             setDirectory, showMessage)
+    from .Functions.GeneralFunctions import (getOTP, getPassword, getUsername, showMessage)
 
 def locateMyConstantWindow(driver):
     found = driver.findWindowByUrl("www.myconstant.com")
@@ -24,13 +22,12 @@ def locateMyConstantWindow(driver):
         time.sleep(1)
 
 def myConstantLogin(driver):
-    directory = setDirectory()
     driver.openNewWindow('https://www.myconstant.com/log-in')
     driver = driver.webDriver
     #login
     try:
-        driver.find_element(By.ID, "lg_username").send_keys(getUsername(directory, 'My Constant'))
-        driver.find_element(By.ID, "lg_password").send_keys(getPassword(directory, 'My Constant'))
+        driver.find_element(By.ID, "lg_username").send_keys(getUsername('My Constant'))
+        driver.find_element(By.ID, "lg_password").send_keys(getPassword('My Constant'))
         driver.find_element(By.ID, "lg_password").click()
         pyautogui.press('tab')
         pyautogui.press('tab')

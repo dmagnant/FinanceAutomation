@@ -10,14 +10,12 @@ if __name__ == '__main__' or __name__ == "Ally":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import (closeExpressVPN, getPassword,
-                                            getStartAndEndOfDateRange,
-                                            setDirectory, showMessage)
+                                            getStartAndEndOfDateRange, setDirectory, showMessage)
     from Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription
 else:
     from .Classes.Asset import USD
     from .Functions.GeneralFunctions import (closeExpressVPN, getPassword,
-                                             getStartAndEndOfDateRange,
-                                             setDirectory, showMessage)
+                                             getStartAndEndOfDateRange, showMessage, setDirectory)
     from .Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription
 
 def locateAllyWindow(driver):
@@ -29,7 +27,6 @@ def locateAllyWindow(driver):
         time.sleep(1)
 
 def allyLogin(driver):
-    directory = setDirectory()
     # closeExpressVPN()
     driver.webDriver.implicitly_wait(10)
     loggedIn = False
@@ -39,7 +36,7 @@ def allyLogin(driver):
         # click Login
         driver.webDriver.find_element(By.ID,"login").click()
         # enter Password (username already filled in)
-        driver.webDriver.find_element(By.ID,"allysf-login-v2-password-367761b575af35f6ccb5b53e96b2fa2d").send_keys(getPassword(directory, 'Ally Bank'))
+        driver.webDriver.find_element(By.ID,"allysf-login-v2-password-367761b575af35f6ccb5b53e96b2fa2d").send_keys(getPassword('Ally Bank'))
         # click Login
         driver.webDriver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button").click()
         time.sleep(5)
@@ -69,8 +66,7 @@ def captureAllyTransactions(driver, dateRange):
     def setAllyTransactionElementRoot(row, column):
         return "/html/body/div/div[1]/main/div/div/div/div[1]/section/div[2]/div/table/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/div/"
     
-    directory = setDirectory()
-    allyActivity = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\ally.csv"
+    allyActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\ally.csv"
     open(allyActivity, 'w', newline='').truncate()
     row = 1
     column = 1
