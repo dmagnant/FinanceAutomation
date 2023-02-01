@@ -47,7 +47,7 @@ def getCryptoSymbolByName(self):
 def updateCoinQuantityFromStakingInGnuCash(self):
         myBook = openGnuCashBook('Finance', False, False)
         coinDifference = Decimal(self.balance) - Decimal(self.gnuBalance)
-        if coinDifference > 0:
+        if coinDifference > 0.001:
             with myBook:
                 split = [Split(value=-0, memo="scripted", account=myBook.accounts(fullname='Income:Investments:Staking')),
                         Split(value=0, quantity=round(Decimal(coinDifference), 6), memo="scripted", account=myBook.accounts(fullname=self.gnuAccount))]
@@ -93,7 +93,7 @@ class Crypto(Asset):
         self.price = None
         self.account = account
         self.symbol = getCryptoSymbolByName(self)
-        self.gnuAccount = getAccountPath(self.name, self.account)
+        self.gnuAccount = getAccountPath(self)
         self.gnuBalance = getGnuCashBalance(openGnuCashBook('Finance', True, True), self.gnuAccount)
                 
     def getData(self):
@@ -114,8 +114,8 @@ class Crypto(Asset):
     def getSymbol(self):
         return self.symbol
     
-    def updateSpreadsheetAndGnuCash(self, account=None):
-        account = self.symbol if account == None else account
+    def updateSpreadsheetAndGnuCash(self):
+        account = self.symbol if self.account == None else self.account
         updateSpreadsheet('Asset Allocation', 'Cryptocurrency', account, 1, self.balance, self.symbol)
         updateSpreadsheet('Asset Allocation', 'Cryptocurrency', account, 2, self.price, self.symbol)
         updateCoinQuantityFromStakingInGnuCash(self)
@@ -144,7 +144,8 @@ class USD(Asset):
         self.balance = None
         self.currency = 'USD'
         self.reviewTransactions = None
-        self.gnuAccount = getAccountPath(self.name)
+        self.account = None
+        self.gnuAccount = getAccountPath(self)
         book = 'Home' if (self.name == 'Ally' or self.name == 'BoA-joint') else 'Finance'
         self.gnuBalance = getGnuCashBalance(openGnuCashBook(book, True, True), self.gnuAccount)
     

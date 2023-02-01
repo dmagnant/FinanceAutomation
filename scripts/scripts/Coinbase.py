@@ -1,69 +1,73 @@
-from datetime import datetime
-from decimal import Decimal
+import time
 
-from piecash import Split, Transaction
+from selenium.common.exceptions import (NoSuchElementException)
+from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Coinbase":
-    from Functions.GnuCashFunctions import openGnuCashBook
+    from Classes.Asset import Crypto
+    from Classes.WebDriver import Driver
+    from Functions.GeneralFunctions import (getCryptocurrencyPrice, getOTP,
+                                            getPassword, getUsername)  
 else:
-    from .Functions.GnuCashFunctions import openGnuCashBook
+    from .Classes.Asset import Crypto
+    from .Functions.GeneralFunctions import (getCryptocurrencyPrice, getOTP,
+                                             getPassword, getUsername)
+    
+def locateCoinbaseWindow(driver):
+    found = driver.findWindowByUrl("coinbase.com")
+    if not found:
+        coinbaseLogin(driver)
+    else:
+        driver.webDriver.switch_to.window(found)
+        time.sleep(1)
 
-# directory = setDirectory()
+def coinbaseLogin(driver):
+    driver.openNewWindow('https://www.coinbase.com/login')
+    time.sleep(2)
+    driver.webDriver.find_element(By.XPATH,"//*[@id='root']/div/div[1]/div/div/div/div/form/div[4]/ul/li/button").click() # Continue
+    driver.webDriver.find_element(By.ID,"Password").send_keys(getPassword('Coinbase'))
+    driver.webDriver.find_element(By.XPATH,"//*[@id='root']/div/div[1]/div/div/div/div[1]/form/div[6]/button").click() # Continue
+    try:
+        driver.webDriver.find_element(By.XPATH,"PATH_FOR_OTP").send_keys(getOTP('Coinbase'))
+        driver.webDriver.find_element(By.XPATH,"PATH_FOR_TRUST_DEVICE").click()
+    except NoSuchElementException:
+        exception = "OTP not required"
 
-# # write cardano transaction from coinbase
-# mybook = openGnuCashBook('Finance', False, False)
-# from_account = 'Assets:Liquid Assets:M1 Spend'
-# to_account = 'Assets:Non-Liquid Assets:CryptoCurrency:Cardano'
-# fee_account = 'Expenses:Bank Fees:Coinbase Fee'
-# amount = Decimal(50.00)
-# description = 'ADA purchase'
-# today = datetime.today()
-# year = today.year
-# postdate = today.replace(month=1, day=1, year=year)
-# with mybook as book:
-#     split = [Split(value=-amount, memo="scripted", account=mybook.accounts(fullname=from_account)),
-#             Split(value=round(amount-Decimal(1.99), 2), quantity=round(Decimal(35.052832), 6), memo="scripted", account=mybook.accounts(fullname=to_account)),
-#             Split(value=round(Decimal(1.99),2), memo="scripted", account=mybook.accounts(fullname=fee_account))]
-#     Transaction(post_date=postdate.date(), currency=mybook.currencies(mnemonic="USD"), description=description, splits=split)
-#     book.save()
-#     book.flush()
-# book.close()
+def getCoinbaseBalances(driver, coinList):
+    def getBasePath():
+        return "//*[@id='main']/div/div/div/div/main/div[2]/div/div[1]/div/div[2]/section/div[2]/div/div/div/table/tbody/tr["
+    def getNamePath(num):
+        return getBasePath() + str(num) + ']/td[1]/a/div/div/p'
+    def getBalancePath(num):
+        return getBasePath() + str(num) + ']/td[2]/div/span'
 
-# # get total investment (dollars) # # 
-# mybook = openGnuCashBook('Test', True, True)
-# account = "Assets:Non-Liquid Assets:CryptoCurrency:Cardano"
+    locateCoinbaseWindow(driver)
+    driver.webDriver.get('https://www.coinbase.com/assets')
+    driver.webDriver.implicitly_wait(10)
+    time.sleep(5)
+    num = 1
+    coinsFound = 0
+    while coinsFound < len(coinList):
+        name = driver.webDriver.find_element(By.XPATH, getNamePath(num)).text
+        for coin in coinList:
+            if name == coin.name:
+                balance = driver.webDriver.find_element(By.XPATH, getBalancePath(num)).text.replace(' ' + coin.symbol, '').replace(',','')
+                coin.setBalance(float(balance))
+                coin.setPrice(getCryptocurrencyPrice(coin.name.lower())[coin.name.lower()]['usd'])
+                coin.updateBalanceInSpreadSheet()
+                coin.updateBalanceInGnuCash()
+                coinsFound += 1
 
-def sumDollarInvestment(mybook, gnu_account):
-    sum = 0
-    # retrieve transactions from GnuCash
-    transactions = [tr for tr in mybook.transactions
-                    for spl in tr.splits
-                    if spl.account.fullname == gnu_account]
-    for tr in transactions:
-        for spl in tr.splits:
-            amount = format(spl.value, ".2f")
-            if spl.account.fullname == gnu_account:
-                if float(amount) > 0:
-                    sum += float(amount)
-    print(sum)
-    return sum
+def runCoinbase(driver):
+    locateCoinbaseWindow(driver)
+    Loopring = Crypto("Loopring")
+    coinList = [Loopring]
+    getCoinbaseBalances(driver, coinList)
+    return coinList
 
-# print(sumDollarInvestment(mybook, account))
-
-def getTotalCryptoInvestmentInDollars():
-    mybook = openGnuCashBook('Finance', True, True)
-    account = "Assets:Non-Liquid Assets:CryptoCurrency"
-    total = 0
-    for i in mybook.accounts(fullname=account).children:
-        print(i.name)
-        if len(i.children) > 1:
-            for j in i.children:
-                print(j.name)
-                gnu_account = account + ":" + i.name + ":" + j.name
-                total += sumDollarInvestment(mybook, gnu_account)
-        else:
-            gnu_account = account + ":" + i.name
-            total += sumDollarInvestment(mybook, gnu_account)
-    print('total: ', total)
-    return total
-
+if __name__ == '__main__':
+    driver = Driver("Chrome")
+    response = runCoinbase(driver)
+    for coin in response:
+        coin.getData()
+    

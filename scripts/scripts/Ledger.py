@@ -12,13 +12,13 @@ def updateCoin(coin):
     balance = float(input(f"Paste {coin.symbol} balance here: "))
     coin.setBalance(balance)
     coin.setPrice(coin.getPriceFromCoinGecko())
-    coin.updateSpreadsheetAndGnuCash("ETH-Ledger") if coin.name == "Ethereum" else coin.updateSpreadsheetAndGnuCash()
+    coin.updateSpreadsheetAndGnuCash()
     
 def runLedger():
     if not (isProcessRunning('Ledger Live.exe')):
         os.startfile(r'C:\Program Files\Ledger Live\Ledger Live.exe')
     Bitcoin = Crypto("Bitcoin")
-    Ethereum = Crypto("Ethereum", "Ledger")
+    Ethereum = Crypto("Ethereum", "ETH-Ledger")
     Cosmos = Crypto("Cosmos")
     Polkadot = Crypto("Polkadot")
     Algorand = Crypto("Algorand")

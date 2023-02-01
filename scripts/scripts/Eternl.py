@@ -26,7 +26,7 @@ def getEternlBalance(driver):
     return float(driver.webDriver.find_element(By.XPATH, "//*[@id='cc-main-container']/div/div[1]/div/main/div[1]/div/div[1]/div/div[1]/div[2]/div/div/div/div[1]/div").text.strip('(initializing)').replace('\n', '').strip('₳').replace(',', ''))
 
 def runEternl(driver):
-    Cardano = Crypto("Cardano", 'Eternl')
+    Cardano = Crypto("Cardano", 'ADA-Eternl')
     Cardano.setBalance(getEternlBalance(driver))
     Cardano.setPrice(Cardano.getPriceFromCoinGecko())
     Cardano.updateSpreadsheetAndGnuCash()

@@ -6,6 +6,7 @@ if __name__ == '__main__' or __name__ == "Monthly_Bank":
     from Classes.Asset import USD, Crypto
     from Classes.WebDriver import Driver
     from Eternl import runEternl
+    from Coinbase import runCoinbase
     from Exodus import runExodus
     from Ledger import runLedger
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange, showMessage)
@@ -20,6 +21,7 @@ if __name__ == '__main__' or __name__ == "Monthly_Bank":
 else:
     from .Classes.Asset import USD, Crypto
     from .Classes.WebDriver import Driver
+    from .Coinbase import runCoinbase
     from .Eternl import runEternl
     from .Exodus import runExodus
     from .Ledger import runLedger
@@ -70,6 +72,7 @@ def runCrypto(driver, today):
     presearchRewardsRedemptionAndBalanceUpdates(driver)
     runIoPay(driver)
     runLedger()
+    runCoinbase(driver)
     Crypto.updateGnuBalance(openGnuCashBook('Finance', True, True))
     updateSpreadsheet('Asset Allocation', year, Crypto.name, month, float(round(Crypto.gnuBalance, 2)), Crypto.name)
     return Crypto

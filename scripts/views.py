@@ -152,7 +152,11 @@ def coinbase(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
-            main = "method"
+            response = runCoinbase(driver)
+            for coin in response:
+                coin.getData()
+        elif "login" in request.POST:
+            locateCoinbaseWindow(driver)        
     return render(request,"scripts/coinbase.html")
 
 def dailyBank(request):
@@ -257,9 +261,8 @@ def kraken(request):
 
 def ledger(request):
     if request.method == 'POST':
-        driver = Driver("Chrome")
         if "main" in request.POST:
-            response = runLedger(driver)
+            response = runLedger()
             for coin in response:
                 coin.getData()
     return render(request,"scripts/ledger.html")
@@ -284,11 +287,12 @@ def monthlyBank(request):
             today = datetime.today()
             if currency == "USD":
                 usdbalances = runUSD(driver, today)
-                print(f'MyConstant: {usdbalances[0]} \n' 
-                f'Worthy: {usdbalances[1]} \n' 
-                f'Liquid Assets: {usdbalances[2]} \n' 
-                f'401k: {usdbalances[3]} \n'
-                f'NM HSA: {usdbalances[4]} \n')
+                print("Balances", 
+                            f'MyConstant: {usdbalances[0].balance} \n' 
+                            f'Worthy: {usdbalances[1].balance} \n' 
+                            f'Liquid Assets: {usdbalances[2].balance} \n' 
+                            f'401k: {usdbalances[3].balance} \n'
+                            f'NM HSA: {usdbalances[4].balance}')
             elif currency == "Crypto":
                 cryptoBalance = runCrypto(driver, today)
                 print('Crypto Balance: ' + str(cryptoBalance.gnuBalance))

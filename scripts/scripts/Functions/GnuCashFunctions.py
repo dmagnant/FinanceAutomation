@@ -35,11 +35,11 @@ def getGnuCashBalance(myBook, accountPath):
     book.close()
     return balance
 
-def getAccountPath(accountName, type=None):
-    if accountName == 'Ethereum' and type == 'Ledger':
-         accountName = 'ETH-Ledger'
-    if accountName == 'Cardano' and type == 'Eternl':
-        accountName = 'ADA-Eternl'
+def getAccountPath(account):
+    if account.account != None:
+        accountName = account.account
+    else:
+        accountName = account.name
     match accountName:
         case 'Cardano':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Cardano"
@@ -743,3 +743,22 @@ def getTotalOfAutomatedMRAccounts(myBook):
     print('          paypal: ' + str(paypal))    
     print('        MR total: ' + str(mrTotal))
     print('paid in amazonGC: ' + str(amazonGC))
+
+def writeCryptoTransaction():
+    mybook = openGnuCashBook('Finance', False, False)
+    from_account = 'Assets:Liquid Assets:M1 Spend'
+    to_account = 'Assets:Non-Liquid Assets:CryptoCurrency:Cardano'
+    fee_account = 'Expenses:Bank Fees:Coinbase Fee'
+    amount = Decimal(50.00)
+    description = 'ADA purchase'
+    today = datetime.today()
+    year = today.year
+    postdate = today.replace(month=1, day=1, year=year)
+    with mybook as book:
+        split = [Split(value=-amount, memo="scripted", account=mybook.accounts(fullname=from_account)),
+                Split(value=round(amount-Decimal(1.99), 2), quantity=round(Decimal(35.052832), 6), memo="scripted", account=mybook.accounts(fullname=to_account)),
+                Split(value=round(Decimal(1.99),2), memo="scripted", account=mybook.accounts(fullname=fee_account))]
+        Transaction(post_date=postdate.date(), currency=mybook.currencies(mnemonic="USD"), description=description, splits=split)
+        book.save()
+        book.flush()
+    book.close()
