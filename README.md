@@ -12,7 +12,7 @@ I created an application that allows for creation of scripts to login and export
 
 - GnuCash (open-source accounting software)
 - Keepass (password management)
-- Selenium-compatible browser installed
+- Selenium-compatible browser installed (ex. Chrome)
 - Python
 
 ## TO RUN:
