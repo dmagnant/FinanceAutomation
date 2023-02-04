@@ -22,8 +22,6 @@ From there, user can navigate to respective script page and launch desired scrip
 
 ## NOTABLE FEATURES:
 
-NOTABLE FEATURES:
-
 - Selenium-based scripts
 - Django front-end to run scripts/view websites
 - Password management through keepass
