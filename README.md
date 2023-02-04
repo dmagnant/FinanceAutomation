@@ -2,7 +2,7 @@
 
 PROBLEM:
 
-As an individual I would like to track my personal finances, but I do not want to provide my credentials to a 3rd party aggregator like Mint.
+As an individual investor I would like to track my personal finances, but I do not want to provide my credentials to a 3rd party aggregator like Mint.
 
 SOLUTION:
 
