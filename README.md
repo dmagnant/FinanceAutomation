@@ -2,7 +2,7 @@
 
 PROBLEM:
 
-I would like to track my finances, but I don't want to give my credentials to an aggregator like Mint.
+As an individual I would like to track my personal finances, but I do not want to provide my credentials to a 3rd party aggregator like Mint.
 
 SOLUTION:
 
@@ -12,6 +12,7 @@ PREREQUISITES:
 GnuCash (open-source accounting software)
 Keepass (password management)
 Selenium-compatible browser installed
+Python
 
 TO RUN:
 running the Launch.py file will start the Django application locally as well as launch Chrome in remote debugging mode
