@@ -10,18 +10,23 @@ I created an application that allows for creation of scripts to login and export
 
 ## PREREQUISITES:
 
--GnuCash (open-source accounting software)
--Keepass (password management)
--Selenium-compatible browser installed
--Python
+GnuCash (open-source accounting software)
 
-## TO RUN:
+Keepass (password management)
 
-Running the Launch.py file will start the Django application locally as well as launch Chrome in remote debugging mode
+Selenium-compatible browser installed
+
+Python
+
+TO RUN:
+
+running the Launch.py file will start the Django application locally as well as launch Chrome in remote debugging mode
 From there, user can navigate to respective script page and launch desired scripts
 
 ## NOTABLE FEATURES:
 
--Selenium-based scripts
--Django front-end to run scripts/view websites
--Password management through keepass
+NOTABLE FEATURES:
+
+Selenium-based scripts
+Django front-end to run scripts/view websites
+Password management through keepass
