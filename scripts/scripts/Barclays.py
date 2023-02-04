@@ -67,7 +67,7 @@ def barclaysLogin(driver):
 
 def getBarclaysBalance(driver):
     locateBarclaysWindow(driver)     
-    return driver.webDriver.find_element(By.XPATH, "//*[@id='accountTile']/div[2]/div/div[2]/div[1]/div").text.strip('-').strip('$')
+    return driver.webDriver.find_element(By.XPATH, "//*[@id='accountTile']/div[2]/div/div[2]/div[1]/div").text.strip('-').strip('$').replace(',', '')
 
 def exportBarclaysTransactions(driver, today):
     # # EXPORT TRANSACTIONS
@@ -80,27 +80,23 @@ def exportBarclaysTransactions(driver, today):
     year = today.year
     month = today.month
     monthTo = str(month)
+    yrTO = str(year - 2000)
+    yearTo = str(year)
     if month == 1:
         monthFrom = "12"
-        yrTO = str(year - 2000)
-        yearTo = str(year)
         yrFROM = str(year - 2001)
         yearFrom = str(year - 1)
     else:
         monthFrom = str(month - 1)
-        yrTO = str(year - 2000)
-        yearTo = str(year)
         yrFROM = yrTO
         yearFrom = yearTo
-    fromDate = monthFrom + "/11/" + yrFROM
-    toDate = monthTo + "/10/" + yrTO
     # enter date_range
-    driver.find_element(By.ID, "downloadFromDate_input").send_keys(fromDate)
-    driver.find_element(By.ID, "downloadToDate_input").send_keys(toDate)
+    driver.find_element(By.ID, "downloadFromDate_input").send_keys(monthFrom + "/05/" + yrFROM)
+    driver.find_element(By.ID, "downloadToDate_input").send_keys(monthTo + "/04/" + yrTO)
     # click Download
     driver.find_element(By.XPATH, "/html/body/div[3]/div[2]/div/div/div[2]/div/form/div[3]/div/button").click()
     time.sleep(2)
-    return r"C:\Users\dmagn\Downloads\CreditCard_" + yearFrom + monthFrom + "11_" + yearTo + monthTo + "10.csv"
+    return r"C:\Users\dmagn\Downloads\CreditCard_" + yearFrom + monthFrom + "05_" + yearTo + monthTo + "04.csv"
 
 def claimBarclaysRewards(driver):
     locateBarclaysWindow(driver)

@@ -71,10 +71,7 @@ def getVanguardBalanceAndInterestYTD(driver, account):
     return interestYTD
 
 def importGnuTransactions(myBook, today, account, interestYTD):
-    #get current date
-    year = today.year
-    month = today.month
-    lastMonth = getStartAndEndOfDateRange(today, month, year, "month")
+    lastMonth = getStartAndEndOfDateRange(today, "month")
     interestAmount = 0
     # pension = getGnuCashBalance(myBook, 'VanguardPension')
     # pensionAcct = "Assets:Non-Liquid Assets:Pension"
@@ -99,7 +96,7 @@ def importGnuTransactions(myBook, today, account, interestYTD):
     return [interest, employerContribution]
 
 def runVanguard(driver):
-    today = datetime.today()
+    today = datetime.today().date()
     myBook = openGnuCashBook('Finance', False, False)
     VanguardPension = USD("VanguardPension")
     locateVanguardWindow(driver)

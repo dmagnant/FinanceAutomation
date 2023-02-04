@@ -65,9 +65,25 @@ def runCoinbase(driver):
     getCoinbaseBalances(driver, coinList)
     return coinList
 
-if __name__ == '__main__':
-    driver = Driver("Chrome")
-    response = runCoinbase(driver)
-    for coin in response:
-        coin.getData()
+import threading
+
+def testThread(item):
+    while item < 10:
+        print(item)
+        item+=1
+        
+def testThread2(item):
+    print('TEST: ', item)
     
+    
+if __name__ == '__main__':
+    # driver = Driver("Chrome")
+    # response = runCoinbase(driver)
+    # for coin in response:
+    #     coin.getData()
+    
+    x = threading.Thread(target=testThread, args=(1,))
+    y = threading.Thread(target=testThread2, args=('SEXY',))
+    x.start()
+    x.join()
+    y.start()

@@ -49,8 +49,9 @@ def healthEquitylogin(driver):
         exception = "already logged in"
     time.sleep(1)
 
-def getHealthEquityBalances(driver, lastmonth):
+def getHealthEquityBalances(driver):
     locateHealthEquityWindow(driver)
+    lastMonth = getStartAndEndOfDateRange(datetime.today().date(), "month")
     driver = driver.webDriver
     HealthEquity = USD("HSA")
     Vanguard = USD("Vanguard401k")
@@ -73,8 +74,8 @@ def getHealthEquityBalances(driver, lastmonth):
         driver.find_element(By.ID, "endDate").click()
         driver.find_element(By.ID, "endDate").send_keys(Keys.BACKSPACE)  
         num += 1
-    driver.find_element(By.ID, "startDate").send_keys(datetime.strftime(lastmonth[0], '%m/%d/%Y'))
-    driver.find_element(By.ID, "endDate").send_keys(datetime.strftime(lastmonth[1], '%m/%d/%Y'))
+    driver.find_element(By.ID, "startDate").send_keys(datetime.strftime(lastMonth[0], '%m/%d/%Y'))
+    driver.find_element(By.ID, "endDate").send_keys(datetime.strftime(lastMonth[1], '%m/%d/%Y'))
     # click Refresh
     driver.find_element(By.ID, "fundPerformanceRefresh").click()
     time.sleep(1)
@@ -84,11 +85,7 @@ def getHealthEquityBalances(driver, lastmonth):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    today = datetime.today()
-    year = today.year
-    month = today.month
-    lastMonth = getStartAndEndOfDateRange(today, month, year, "month")
-    response = getHealthEquityBalances(driver, lastMonth)
+    response = getHealthEquityBalances(driver)
     print('HSA balance: ' + str(response[0].balance))
     print('401k balance: ' + str(response[2].balance))
     

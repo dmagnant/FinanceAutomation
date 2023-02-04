@@ -226,11 +226,7 @@ def healthEquity(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST or "balance" in request.POST:
-            today = datetime.today()
-            year = today.year
-            month = today.month
-            lastMonth = getStartAndEndOfDateRange(today, month, year, "month")
-            response = getHealthEquityBalances(driver, lastMonth)
+            response = getHealthEquityBalances(driver)
             print('HSA balance: ' + str(response[0]))
             print('401k balance: ' + str(response[2]))
         elif "login" in request.POST:
@@ -320,7 +316,7 @@ def paidviewpoint(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "survey" in request.POST:
-            completePaidviewpointSurveys(driver)
+            completePaidviewpointSurvey(driver)
         elif "login" in request.POST:
             paidviewpointLogin(driver)        
         elif "balance" in request.POST:
@@ -402,7 +398,7 @@ def swagbucks(request):
         elif "login" in request.POST:
             locateSwagBucksWindow(driver)
         elif "alu" in request.POST:
-            runAlusRevenge(driver.webDriver, True)
+            runAlusRevenge(driver.webDriver)
         elif "content" in request.POST:
             swagBuckscontentDiscovery(driver)
         elif "search" in request.POST:

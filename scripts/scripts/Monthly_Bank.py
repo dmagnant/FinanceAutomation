@@ -47,7 +47,7 @@ def monthlyRoundUp(account, myBook, date, HSADividends):
 def runUSD(driver, today):
     year = today.year
     month = today.month
-    lastMonth = getStartAndEndOfDateRange(today, today.month, today.year, "month")
+    lastMonth = getStartAndEndOfDateRange(today, "month")
     myBook = openGnuCashBook('Finance', False, False)
     MyConstant = runMyConstant(driver, "USD")
     Worthy = getWorthyBalance(driver)
@@ -78,7 +78,7 @@ def runCrypto(driver, today):
     return Crypto
 
 def runMonthlyBank():
-    today = datetime.today()
+    today = datetime.today().date()
     driver = Driver("Chrome")
     usdbalances = runUSD(driver, today)
     cryptoPortfolio = runCrypto(driver, today)

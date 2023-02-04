@@ -1,5 +1,6 @@
 import random
 import time
+import threading
 
 import pyautogui
 import pygetwindow
@@ -19,7 +20,7 @@ else:
     from .Functions.GeneralFunctions import showMessage
 
 def getSwagbucksBasePath():
-    return '/html/body/div[1]/div[' 
+    return '/html/body/div[2]/div[' 
     
 def closePopUps(driver):
     driver.implicitly_wait(2)
@@ -82,64 +83,63 @@ def swagBuckscontentDiscovery(driver):
                 break
     driver.closeWindowsExcept([':8000/'])
 
-def runAlusRevenge(driver, run_Alu):
-    if run_Alu:
-        # closeExpressVPN()
-        #Play Alus Revenge
-        driver.get('https://www.swagbucks.com/games/play/319/alu-s-revenge-2?tid=113')
+def runAlusRevenge(driver):
+    # closeExpressVPN()
+    #Play Alus Revenge
+    driver.get('https://www.swagbucks.com/games/play/319/alu-s-revenge-2?tid=113')
+    time.sleep(2)
+    # move window to primary monitor
+    Alu = pygetwindow.getWindowsWithTitle("Alu's Revenge 2 - Free Online Games | Swagbucks - Google Chrome")[0]
+    Alu.moveTo(10, 10)
+    Alu.resizeTo(100, 100)          
+    Alu.maximize()
+    driver.implicitly_wait(20)
+    # click Play for Free
+    driver.find_element(By.ID, "gamesItemBtn").click()
+    time.sleep(3)
+    driver.find_element(By.XPATH,"/html/body").send_keys(Keys.DOWN)
+    driver.find_element(By.XPATH,"/html/body").send_keys(Keys.DOWN)
+    driver.find_element(By.XPATH,"/html/body").send_keys(Keys.DOWN)
+    driver.find_element(By.XPATH,"/html/body").send_keys(Keys.UP)
+    redeemed = 0
+    while redeemed < 2:
+        game_over_text = ""
+        num = 0
+        # click Play Now
+        pyautogui.leftClick(850, 950)
+        pyautogui.leftClick(850, 950)
+        time.sleep(1)
+        # click Play Now (again)
+        pyautogui.leftClick(938, 795)
+        pyautogui.leftClick(938, 795)            
         time.sleep(2)
-        # move window to primary monitor
-        Alu = pygetwindow.getWindowsWithTitle("Alu's Revenge 2 - Free Online Games | Swagbucks - Google Chrome")[0]
-        Alu.moveTo(10, 10)
-        Alu.resizeTo(100, 100)          
-        Alu.maximize()
-        driver.implicitly_wait(20)
-        # click Play for Free
-        driver.find_element(By.ID, "gamesItemBtn").click()
-        time.sleep(3)
-        driver.find_element(By.XPATH,"/html/body").send_keys(Keys.DOWN)
-        driver.find_element(By.XPATH,"/html/body").send_keys(Keys.DOWN)
-        driver.find_element(By.XPATH,"/html/body").send_keys(Keys.DOWN)
-        driver.find_element(By.XPATH,"/html/body").send_keys(Keys.UP)
-        redeemed = 0
-        while redeemed < 2:
-            game_over_text = ""
-            num = 0
-            # click Play Now
-            pyautogui.leftClick(850, 950)
-            pyautogui.leftClick(850, 950)
-            time.sleep(1)
-            # click Play Now (again)
-            pyautogui.leftClick(938, 795)
-            pyautogui.leftClick(938, 795)            
-            time.sleep(2)
-            # click to remove "goal screen" and start game
-            pyautogui.leftClick(872, 890)
-            pyautogui.leftClick(872, 890)            
-            time.sleep(4)
-            # click tiles
-            pyautogui.leftClick(680, 980)
-            pyautogui.leftClick(680, 980)
-            pyautogui.leftClick(750, 980)
-            pyautogui.leftClick(825, 980)
-            pyautogui.leftClick(900, 980)
-            pyautogui.leftClick(975, 980)
-            pyautogui.leftClick(1025, 980)
-            time.sleep(25)
-            while num < 5:
-                # if Game over screen up
-                if driver.find_element(By.ID, "closeEmbedContainer"):
-                    time.sleep(5)
-                    #read response
-                    game_over_text = driver.find_element(By.XPATH, "//*[@id='embedGameOverHdr']/h3").text
-                    if game_over_text != "":
-                        if game_over_text != "No SB this time. Keep trying...":
-                            redeemed += 1
-                        # click Play again
-                        driver.find_element(By.ID, "gamePlayAgainBtn").click()
-                        time.sleep(3)
-                        break
-                num += 1
+        # click to remove "goal screen" and start game
+        pyautogui.leftClick(872, 890)
+        pyautogui.leftClick(872, 890)            
+        time.sleep(4)
+        # click tiles
+        pyautogui.leftClick(680, 980)
+        pyautogui.leftClick(680, 980)
+        pyautogui.leftClick(750, 980)
+        pyautogui.leftClick(825, 980)
+        pyautogui.leftClick(900, 980)
+        pyautogui.leftClick(975, 980)
+        pyautogui.leftClick(1025, 980)
+        time.sleep(25)
+        while num < 5:
+            # if Game over screen up
+            if driver.find_element(By.ID, "closeEmbedContainer"):
+                time.sleep(5)
+                #read response
+                game_over_text = driver.find_element(By.XPATH, "//*[@id='embedGameOverHdr']/h3").text
+                if game_over_text != "":
+                    if game_over_text != "No SB this time. Keep trying...":
+                        redeemed += 1
+                    # click Play again
+                    driver.find_element(By.ID, "gamePlayAgainBtn").click()
+                    time.sleep(3)
+                    break
+            num += 1
 
 def dailyPoll(driver):
     driver.openNewWindow('https://www.swagbucks.com/polls')
@@ -151,8 +151,8 @@ def dailyPoll(driver):
         driver.webDriver.find_element(By.ID, "btnVote").click()
     except NoSuchElementException:
         exception = "already answered"
-    driver.webDriver.close()
-    driver.getLastWindow()
+    # driver.webDriver.close()
+    # driver.getLastWindow()
 
 def toDoList(driver):
     # To Do List
@@ -288,11 +288,12 @@ def claimSwagBucksRewards(driver):
     # click Submit
     driver.find_element(By.ID,"verifyViaSecurityQuestionCta").click()
 
-def runSwagbucks(driver, run_Alu):
+def runSwagbucks(driver, runAlu):
     # closeExpressVPN()
     driver.webDriver.implicitly_wait(2)
     locateSwagBucksWindow(driver)
-    runAlusRevenge(driver.webDriver, run_Alu)
+    if runAlu:
+        runAlusRevenge(driver.webDriver)
     dailyPoll(driver)
     swagbucksInbox(driver)
     toDoList(driver.webDriver)
@@ -309,3 +310,9 @@ if __name__ == '__main__':
     # openTabs(driver.webDriver)
     # toDoList(driver.webDriver)
     
+    x = threading.Thread(target=dailyPoll, args=(driver,))
+    y = threading.Thread(target=swagbucksInbox, args=(driver,))
+    z = threading.Thread(target=toDoList, args=(driver.webDriver,))
+    x.start()
+    y.start()
+    z.start()

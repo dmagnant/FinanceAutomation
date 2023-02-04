@@ -125,8 +125,10 @@ def modifyTransactionDescription(description, amount="0.00"):
         description = "Dan Deposit"
     elif "ALLY BANK" in description.upper():
         description = "Ally Transfer"
+    elif "FID BKG SVC LLC" in description.upper():
+        description = "Fidelity IRA Transfer"
     elif "M1 FINANCE" in description.upper():
-        description = "IRA Transfer"
+        description = "M1 IRA Transfer"
     elif "CITY OF MILWAUKE B2P*MILWWA" in description.upper():
         description = "Water Bill"
     elif "DOVENMUEHLE MTG MORTG PYMT" in description.upper():
@@ -215,8 +217,10 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
             toAccount = "Expenses:Utilities:Internet"
         elif "TRAVEL CREDIT" in description:
             toAccount = "Income:Credit Card Rewards"
-        elif "IRA Transfer" in description:
-            toAccount = "Assets:Non-Liquid Assets:Roth IRA"
+        elif "Fidelity IRA Transfer" in description:
+            toAccount = "Assets:Non-Liquid Assets:IRA:Fidelity"
+        elif "M1 IRA Transfer" in description:
+            toAccount = "Assets:Non-Liquid Assets:IRA:M1 Finance"
         elif "CASH REWARDS STATEMENT CREDIT" in description:
             toAccount = "Income:Credit Card Rewards"        
         elif "Chase CC Rewards" in description:
@@ -612,8 +616,7 @@ def getDollarsInvestedPerCoin(name):
 
 def purgeOldGnucashFiles():
     directory = setDirectory()
-    today = datetime.today()
-    dateRange = getStartAndEndOfDateRange(today, today.month, today.year, 14)
+    dateRange = getStartAndEndOfDateRange(datetime.today().date(), 14)
     directories = [directory + r'\Finances\Personal Finances', directory + r'\Stuff\Home\Finances']
     for d in directories:
         directory = d

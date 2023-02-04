@@ -131,8 +131,8 @@ def runSofiAccount(driver, dateRange, today, account):
     importUniqueTransactionsToGnuCash(account, sofiActivity, driver.webDriver, dateRange, 0)
 
 def runSofi(driver):
-    today = datetime.today()
-    dateRange = getStartAndEndOfDateRange(today, today.month, today.year, 7)
+    today = datetime.today().date()
+    dateRange = getStartAndEndOfDateRange(today, 7)
     locateSofiWindow(driver)
     Checking = USD("Sofi Checking")
     Savings = USD("Sofi Savings")

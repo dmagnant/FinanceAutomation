@@ -99,8 +99,7 @@ def captureAllyTransactions(driver, dateRange):
     return allyActivity
 
 def runAlly(driver):
-    today = datetime.today()
-    dateRange = getStartAndEndOfDateRange(today, today.month, today.year, 7)
+    dateRange = getStartAndEndOfDateRange(datetime.today().date(), 7)
     Ally = USD("Ally")
     locateAllyWindow(driver)
     Ally.setBalance(getAllyBalance(driver))

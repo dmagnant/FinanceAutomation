@@ -101,9 +101,7 @@ def compileGnuTransactions(account, mybook, dateRange):
             case 'Transportation':
                 return 'Expenses:Transportation'              
             case 'Travel':
-                return 'Expenses:Travel'
-            case 'Ultimate':
-                return 'Expenses:Other:Ultimate'              
+                return 'Expenses:Travel'         
             case 'Utilities':
                 return 'Expenses:Utilities'
     gnuAccount = matchAccount()
@@ -117,7 +115,7 @@ def compileGnuTransactions(account, mybook, dateRange):
     return total
 
 def getCell(account, month, accounts='Personal'):
-    rowStart = 48 if accounts == 'Personal' else 25
+    rowStart = 47 if accounts == 'Personal' else 25
     row = str(rowStart + (month - 1))
     match account:
         case 'Amazon':
@@ -172,8 +170,7 @@ def runUpdateGoals(accounts, timeframe):
         openSpreadsheet(driver, 'Asset Allocation', 'Goals')
     elif accounts == "Joint":
         openSpreadsheet(driver, 'Home', 'Finances')
-    today = datetime.today()
-    dateRange = getStartAndEndOfDateRange(today, today.month, today.year, timeframe)
+    dateRange = getStartAndEndOfDateRange(datetime.today().date().replace(month=1, day=1), timeframe)
     mybook = openGnuCashBook('Finance', True, True) if accounts == 'Personal' else openGnuCashBook('Home', False, False)
     
     incomeAccounts = []
@@ -188,7 +185,7 @@ def runUpdateGoals(accounts, timeframe):
         specificExpenseAccounts = ['Joint Expenses']
         if timeframe == 'YTD':
             incomeQuarterlyAccounts = ['HSA Contributions', 'Pension Contributions', 'Market Change', 'Salary']
-            expenseQuarterlyAccounts = ['Bank Fees', 'Clothing/Apparel', 'Income Taxes', 'Medical', 'Loan Interest', 'Loan Principle', 'Transportation', 'Ultimate']
+            expenseQuarterlyAccounts = ['Bank Fees', 'Clothing/Apparel', 'Income Taxes', 'Medical', 'Loan Interest', 'Loan Principle', 'Transportation']
         else:
             commonExpenseAccounts.remove('Groceries')
     elif accounts == 'Joint':
@@ -208,6 +205,6 @@ def runUpdateGoals(accounts, timeframe):
     getTotalForEachAccount(expenseAccounts, mybook, dateRange, timeframe, dateRange[1].month, accounts)
 
 if __name__ == '__main__':
-    accounts = 'Joint' # Personal or Joint
-    timeframe = "Month" # Month or YTD
+    accounts = 'Personal' # Personal or Joint
+    timeframe = "YTD" # Month or YTD
     runUpdateGoals(accounts, timeframe)

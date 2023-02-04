@@ -101,23 +101,25 @@ def enablePiHole(driver):
     except ElementNotInteractableException:
         exception = "already enabled"
 
-def getStartAndEndOfDateRange(today, month, year, timeSpan):
+def getStartAndEndOfDateRange(today, timeSpan):
+    month = today.month
+    year = today.year
     if isinstance(timeSpan, int):
-        enddate = today.date()
+        enddate = today
         startdate = (enddate - timedelta(days=timeSpan))
     else:
         if month == 1:
-            startdate = today.replace(month=12, day=1, year=year - 1).date()
-            enddate = today.replace(month=12, day=31, year=year - 1).date()
+            startdate = today.replace(month=12, day=1, year=year - 1)
+            enddate = today.replace(month=12, day=31, year=year - 1)
         elif month == 3:
-            startdate = today.replace(month=2, day=1).date()
-            enddate = today.replace(month=2, day=28).date()
+            startdate = today.replace(month=2, day=1)
+            enddate = today.replace(month=2, day=28)
         elif month in [5, 7, 10, 12]:
-            startdate = today.replace(month=month - 1, day=1).date()
-            enddate = today.replace(month=month - 1, day=30).date()
+            startdate = today.replace(month=month - 1, day=1)
+            enddate = today.replace(month=month - 1, day=30)
         else:
-            startdate = today.replace(month=month - 1, day=1).date()
-            enddate = today.replace(month=month - 1, day=31).date()
+            startdate = today.replace(month=month - 1, day=1)
+            enddate = today.replace(month=month - 1, day=31)
         if timeSpan == "YTD":
             startdate = startdate.replace(month=1, day=1)
     return [startdate, enddate]
