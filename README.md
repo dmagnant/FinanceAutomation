@@ -11,8 +11,11 @@ I created an application that allows for creation of scripts to login and export
 PREREQUISITES:
 
 GnuCash (open-source accounting software)
+
 Keepass (password management)
+
 Selenium-compatible browser installed
+
 Python
 
 TO RUN:
