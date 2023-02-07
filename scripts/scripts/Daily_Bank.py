@@ -3,32 +3,32 @@ from selenium.common.exceptions import NoSuchElementException
 import threading
 
 if __name__ == '__main__' or __name__ == "Daily_Bank":
-    from Ally import allyLogout, runAlly, locateAllyWindow
+    from Ally import allyLogout, runAlly
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import showMessage
     from Functions.GnuCashFunctions import purgeOldGnucashFiles, openGnuCashUI, openGnuCashBook
     from Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet
-    from Paypal import runPaypal, locatePayPalWindow
+    from Paypal import runPaypal
     from Presearch import presearchRewardsRedemptionAndBalanceUpdates
-    from Sofi import runSofi, sofiLogout, locateSofiWindow    
+    from Sofi import runSofi, sofiLogout    
 else:
-    from .Ally import allyLogout, runAlly, locateAllyWindow
+    from .Ally import allyLogout, runAlly
     from .Classes.Asset import USD
     from .Classes.WebDriver import Driver
     from .Functions.GeneralFunctions import showMessage
     from .Functions.GnuCashFunctions import purgeOldGnucashFiles, openGnuCashUI, openGnuCashBook
     from .Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet
-    from .Paypal import runPaypal, locatePayPalWindow
+    from .Paypal import runPaypal
     from .Presearch import presearchRewardsRedemptionAndBalanceUpdates
-    from .Sofi import runSofi, sofiLogout, locateSofiWindow
+    from .Sofi import runSofi, sofiLogout
 
 def runDailyBank():
     driver = Driver("Chrome")
     Crypto = USD("Crypto")
     sofi = runSofi(driver)
     ally = runAlly(driver)
-    # presearchRewardsRedemptionAndBalanceUpdates(driver)
+    presearchRewardsRedemptionAndBalanceUpdates(driver)
     runPaypal(driver)
     openSpreadsheet(driver, 'Checking Balance', '2023')
     openSpreadsheet(driver, 'Asset Allocation', 'Cryptocurrency')

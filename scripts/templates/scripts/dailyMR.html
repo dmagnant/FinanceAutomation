@@ -8,10 +8,8 @@
         {% csrf_token %}
         <button type="submit" name="main">Main</button>
     </form>
-    <a href="http://127.0.0.1:8000/scripts/bing">Bing</a><br>
-    <a href="http://127.0.0.1:8000/scripts/tellwut">Tellwut</a><br>
-    <a href="http://127.0.0.1:8000/scripts/amazongc">Amazon GC</a><br>
-    <a href="http://127.0.0.1:8000/scripts/pinecone">Pinecone</a><br>
-    <a href="http://127.0.0.1:8000/scripts/presearch">Presearch</a><br>
-    <a href="http://127.0.0.1:8000/scripts/swagbucks">Swagbucks</a><br>
+    <h3>Scripts Included:</h3>
+    {% for script in scripts %}
+    <a href="{% url script %}" target="_blank">{{script}}</a><br>
+    {% endfor %}
 {% endblock %}

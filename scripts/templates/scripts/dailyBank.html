@@ -7,10 +7,10 @@
     <form method="post">
         {% csrf_token %}
         <button type="submit" name="main">Main</button><br>
-        <button type="submit" name="prices">Crypto Price Refresh</button>
+        <button type="submit" name="prices">Crypto Price Refresh</button><br>
     </form>
-    <a href="http://127.0.0.1:8000/scripts/ally">Ally</a><br>
-    <a href="http://127.0.0.1:8000/scripts/paypal">Paypal</a><br>
-    <a href="http://127.0.0.1:8000/scripts/presearch">Presearch</a><br>
-    <a href="http://127.0.0.1:8000/scripts/sofi">Sofi</a><br>
+    <h3>Scripts Included:</h3>
+    {% for script in scripts %}
+    <a href="{% url script %}" target="_blank">{{script}}</a><br>
+    {% endfor %}
 {% endblock %}

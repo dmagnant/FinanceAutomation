@@ -15,13 +15,8 @@
         {% csrf_token %}
         <button type="submit" name="main">Main</button>
     </form>
-    <a href="http://127.0.0.1:8000/scripts/eternl">Eternl</a><br>
-    <a href="http://127.0.0.1:8000/scripts/exodus">Exodus</a><br>
-    <a href="http://127.0.0.1:8000/scripts/healthEquity">Health Equity</a><br>
-    <a href="http://127.0.0.1:8000/scripts/ioPay">IoPay</a><br>
-    <a href="http://127.0.0.1:8000/scripts/kraken">Kraken</a><br>
-    <a href="http://127.0.0.1:8000/scripts/midas">Midas</a><br>
-    <a href="http://127.0.0.1:8000/scripts/myConstant">MyConstant</a><br>
-    <a href="http://127.0.0.1:8000/scripts/presearch">Presearch</a><br>
-    <a href="http://127.0.0.1:8000/scripts/worthy">Worthy</a><br>
+    <h3>Scripts Included:</h3>
+    {% for script in scripts %}
+    <a href="{% url script %}" target="_blank">{{script}}</a><br>
+    {% endfor %}
 {% endblock %}

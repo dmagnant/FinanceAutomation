@@ -4,9 +4,6 @@ from . import views
 
 urlpatterns = [
     path('', views.scripts, name="scripts"),
-    # path('usd', views.usd, name="usd"),
-    # path('crypto', views.crypto, name="crypto"),
-    # path('marketresearch', views.marketResearch, name="marketresearch"),
     path('ally', views.ally, name="Ally"),
     path('amazon', views.amazon, name="AmazonGC"),
     path('amex', views.amex, name="Amex"),
@@ -25,7 +22,6 @@ urlpatterns = [
     path('ioPay', views.ioPay, name="IoPay"),
     path('kraken', views.kraken, name="Kraken"),
     path('ledger', views.ledger, name="Ledger"),
-    path('midas', views.midas, name="Midas"),
     path('monthlyBank', views.monthlyBank , name="Monthly_Bank"),
     path('myConstant', views.myConstant , name="MyConstant"),
     path('paidviewpoint', views.paidviewpoint, name="Paidviewpoint"),

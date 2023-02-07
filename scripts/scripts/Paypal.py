@@ -3,7 +3,6 @@ import pyautogui
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Paypal":
     from Classes.WebDriver import Driver
@@ -14,7 +13,10 @@ else:
 def locatePayPalWindow(driver):
     found = driver.findWindowByUrl("paypal.com/myaccount")
     if not found:
-        payPalLogin(driver)
+        response = payPalLogin(driver)
+        if response:
+            print('response here')
+            return "notLoggedIn"
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
@@ -23,10 +25,11 @@ def payPalLogin(driver):
     driver.openNewWindow('https://www.paypal.com/us/signin')
     driver = driver.webDriver
     time.sleep(3)
-    while True:
+    num = 1
+    while num <3:
         try:
             # enter password
-            driver.find_element(By.ID, "password").send_keys(getPassword('Paypal'))
+            # driver.find_element(By.ID, "password").send_keys(getPassword('Paypal'))
             # click log in
             driver.find_element(By.ID,"btnLogin").click()
             time.sleep(2)
@@ -35,6 +38,7 @@ def payPalLogin(driver):
                 driver.find_element(By.XPATH,"//*[@id='content']/h1")
                 pyautogui.moveTo(825,400)
                 pyautogui.leftClick(825,400)
+                time.sleep(5)
             except (NoSuchElementException):
                 exception = "no captcha presented"
         except NoSuchElementException:
@@ -44,7 +48,8 @@ def payPalLogin(driver):
             driver.find_element(By.ID, "password")
         except NoSuchElementException:
             break
-        
+        num+=1
+
 def transferMoney(driver):
     driver.get("https://www.paypal.com/myaccount/money/")
     time.sleep(2)
@@ -61,8 +66,9 @@ def transferMoney(driver):
             driver.find_element(By.XPATH,"//*[@id='mainModal']/div/div/div/form/div/div/div/button").click()
         
 def runPaypal(driver):
-    locatePayPalWindow(driver)
-    transferMoney(driver.webDriver)
+    response = locatePayPalWindow(driver)
+    if response != "notLoggedIn":
+        transferMoney(driver.webDriver)
     
 if __name__ == '__main__':
     driver = Driver("Chrome")

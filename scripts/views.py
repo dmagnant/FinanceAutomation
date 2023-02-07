@@ -1,6 +1,3 @@
-import os
-import os.path
-
 from django.shortcuts import render
 
 from scripts.scripts.Ally import *
@@ -22,7 +19,6 @@ from scripts.scripts.HealthEquity import *
 from scripts.scripts.IoPay import *
 from scripts.scripts.Kraken import *
 from scripts.scripts.Ledger import *
-from scripts.scripts.Midas import *
 from scripts.scripts.Monthly_Bank import *
 from scripts.scripts.MyConstant import *
 from scripts.scripts.Paypal import *
@@ -39,20 +35,23 @@ from scripts.scripts.Worthy import *
 from scripts.scripts.Classes.WebDriver import Driver
 
 def scripts(request):
-    scripts = os.listdir(r'G:\My Drive\Projects\Coding\Python\FinanceAutomation\scripts\scripts')
-    scripts.sort()
-    try:
-        scripts.remove("Functions")
-        scripts.remove("Cointiply.py")
-        scripts.remove("__pycache__")
-        scripts.remove("Classes")
-    except ValueError:
-        exception = "pycache file not listed"
-    for script in scripts:
-        i = scripts.index(script)
-        script = script.replace('.py','')
-        scripts[i] = script
-    return render(request,"scripts/scripts.html", {'scripts':scripts})
+    deposit = ['Ally', 'Sofi']
+    deposit.sort()
+    cc = ['Amex', 'Barclays', 'BoA', 'Chase', 'Discover']
+    cc.sort()
+    investment = ['Fidelity', 'HealthEquity', 'Vanguard', 'Worthy']
+    investment.sort()
+    crypto = ['Coinbase', 'Eternl', 'Exodus', 'IoPay', 'Kraken', 'Ledger', 'MyConstant', 'Presearch']
+    crypto.sort()
+    mr = ['AmazonGC', 'Bing', 'Paidviewpoint', 'Paypal', 'Pinecone', 'PSCoupons', 'Swagbucks', 'Tellwut']
+    mr.sort()
+    context = {
+        'deposit':deposit,
+        'cc':cc,
+        'investment':investment,
+        'crypto':crypto,
+        'mr':mr}
+    return render(request,"scripts/scripts.html", context)
 
 def ally(request):
     if request.method == 'POST':
@@ -68,12 +67,18 @@ def ally(request):
     return render(request,"scripts/ally.html")
 
 def amazon(request):
-    balance = ""
+    context = dict()
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
-            balance = confirmAmazonGCBalance(driver)
-    return render(request,"scripts/amazon.html", {'balance':balance})
+            response = confirmAmazonGCBalance(driver)
+            bal = response.balance
+            gcbalance = "0.00"
+            context = {
+                'balance': bal,
+                'gcBalance': gcbalance
+            }
+    return render(request,"scripts/amazon.html", context)
 
 def amex(request):
     if request.method == 'POST':
@@ -160,18 +165,22 @@ def coinbase(request):
     return render(request,"scripts/coinbase.html")
 
 def dailyBank(request):
+    scripts = ['Ally', 'Paypal', 'Presearch', 'Sofi']
+    scripts.sort()
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
             runDailyBank()
         elif "prices" in request.POST:
             updateCryptoPrices(driver)
-    return render(request,"scripts/dailyBank.html")
+    return render(request,"scripts/dailyBank.html", {'scripts':scripts})
 
 def dailyMR(request):
+    scripts = ['Bing', 'Tellwut', 'AmazonGC', 'Pinecone', 'Presearch', 'Swagbucks']
+    scripts.sort()
     if "main" in request.POST:
         runDailyMR()
-    return render(request,"scripts/dailyMR.html")
+    return render(request,"scripts/dailyMR.html", {'scripts':scripts})
 
 def discover(request):
     if request.method == 'POST':
@@ -263,18 +272,9 @@ def ledger(request):
                 coin.getData()
     return render(request,"scripts/ledger.html")
 
-def midas(request):
-    if request.method == 'POST':
-        driver = Driver("Chrome")
-        if "main" in request.POST or "balance" in request.POST:
-            response = runMidas(driver) if "main" in request.POST else getMidasBalances(driver)
-            for coin in response:
-                coin.getData()
-        elif "login" in request.POST:
-            locateMidasWindow(driver)
-    return render(request,"scripts/midas.html")
-
 def monthlyBank(request):
+    scripts = ['Eternl', 'Exodus', 'HealthEquity', 'IoPay', 'Kraken', 'Presearch', 'Worthy', 'Coinbase', 'Ledger']
+    scripts.sort()
     if request.method == 'POST':
         driver = Driver("Chrome")
         body = request.POST.copy()
@@ -294,7 +294,7 @@ def monthlyBank(request):
                 print('Crypto Balance: ' + str(cryptoBalance.gnuBalance))
             elif currency == "Both":
                 runMonthlyBank()
-    return render(request,"scripts/monthlyBank.html")
+    return render(request,"scripts/monthlyBank.html", {'scripts':scripts})
 
 def myConstant(request):
     if request.method == 'POST':
@@ -459,11 +459,3 @@ def worthy(request):
             locateWorthyWindow(driver)
     return render(request,"scripts/worthy.html")
 
-def marketResearch(request):
-    return render(request,"scripts/marketresearch.html")
-
-def usd(request):
-    return render(request,"scripts/usd.html")
-
-def crypto(request):
-    return render(request,"scripts/crypto.html",)

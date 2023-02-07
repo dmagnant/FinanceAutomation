@@ -28,5 +28,5 @@ def confirmAmazonGCBalance(driver):
 if __name__ == '__main__':
     driver = Driver("Chrome")
     response = confirmAmazonGCBalance(driver)
-    response.getData()
+    print(response.balance)
 
