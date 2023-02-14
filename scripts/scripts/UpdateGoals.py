@@ -170,7 +170,7 @@ def runUpdateGoals(accounts, timeframe):
         openSpreadsheet(driver, 'Asset Allocation', 'Goals')
     elif accounts == "Joint":
         openSpreadsheet(driver, 'Home', 'Finances')
-    dateRange = getStartAndEndOfDateRange(datetime.today().date().replace(month=1, day=1), timeframe)
+    dateRange = getStartAndEndOfDateRange(datetime.today().date(), timeframe)
     mybook = openGnuCashBook('Finance', True, True) if accounts == 'Personal' else openGnuCashBook('Home', False, False)
     
     incomeAccounts = []

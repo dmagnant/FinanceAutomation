@@ -34,27 +34,26 @@ def sofiLogin(driver):
     time.sleep(2)
     # click Login
     driver.find_element(By.XPATH, "//*[@id='widget_block']/main/section/div/div/div/form/div[2]/button").click()
+    # # click LOG IN
+    # driver.find_element(By.XPATH, "//*[@id='widget_block']/main/section/div/div/div/form/div[2]/button").click()
+    # time.sleep(1)
+    # # look for email is required error (suggesting that auto-fill didn't occur)
+    # driver.find_element(By.ID,"error-3")
+    # # username
+    # driver.find_element(By.ID, "username").send_keys(getUsername('Sofi'))
+    # time.sleep(1)
+    # # # password
+    # driver.find_element(By.ID, "password").send_keys(getPassword('Sofi'))
+    # time.sleep(1)
+    # # click LOG IN
+    # driver.find_element(By.XPATH, "//*[@id='widget_block']/main/section/div/div/div/form/div[2]/button").click()
     try:
-        # click LOG IN
-        driver.find_element(By.XPATH, "//*[@id='widget_block']/main/section/div/div/div/form/div[2]/button").click()
-        time.sleep(1)
-        # look for email is required error (suggesting that auto-fill didn't occur)
-        driver.find_element(By.ID,"error-3")
-        # username
-        driver.find_element(By.ID, "username").send_keys(getUsername('Sofi'))
-        time.sleep(1)
-        # # password
-        driver.find_element(By.ID, "password").send_keys(getPassword('Sofi'))
-        time.sleep(1)
-        # click LOG IN
-        driver.find_element(By.XPATH, "//*[@id='widget_block']/main/section/div/div/div/form/div[2]/button").click()
+        driver.find_element(By.ID,'code')
         showMessage("OTP Verification", "Enter code from phone, then click OK")
-        # remember device
-        driver.find_element(By.XPATH,"//*[@id='mainContent']/div/div/div[2]/form/div[2]/div[1]/label/span").click()
-        # Verify code
+        driver.find_element(By.XPATH,"//*[@id='mainContent']/div/div/div[2]/div[3]/div[1]/label/span").click() # remember device
         driver.find_element(By.ID,"verifyCode").click()
     except NoSuchElementException:
-        exception = "logged in"
+        exception = 'otp not required'
 
 def sofiLogout(driver):
     locateSofiWindow(driver)

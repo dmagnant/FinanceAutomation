@@ -18,7 +18,7 @@ def getAmexBasePath():
     return '/html/body/div[1]/div[2]/div[3]/div/div/div/div/div[2]/div/div[2]/div/div/' 
 
 def locateAmexWindow(driver):
-    found = driver.findWindowByUrl("global.americanexpress.com")
+    found = driver.findWindowByUrl("americanexpress.com")
     if not found:
         amexLogin(driver)
     else:

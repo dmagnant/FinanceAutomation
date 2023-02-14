@@ -51,15 +51,21 @@ def swagBucksLogin(driver):
         
 def swagBuckscontentDiscovery(driver):
     driver.openNewWindow("https://www.swagbucks.com/discover/explore")
-    # filter min to max
-    driver.webDriver.find_element(By.ID,"sbShopSort").click()
-    driver.webDriver.find_element(By.XPATH,"//*[@id='sbShopSort']/option[4]").click()
+    driver.webDriver.find_element(By.ID,"sbShopSort").click()     # filter min to max
+    driver.webDriver.find_element(By.XPATH,"//*[@id='sbShopSort']/option[4]").click() # filter min to max
     cardNum = 1
     closePopUps(driver.webDriver)
     while True:
+        contentPath = getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div[2]/div[1]/section[" + str(cardNum) + "]"
         try:
-            contentPath = getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div[2]/div[1]/section[" + str(cardNum) + "]"
-            earnings = driver.webDriver.find_element(By.XPATH, contentPath + "/p/span/span[3]").text
+            try:
+                earnings = driver.webDriver.find_element(By.XPATH, contentPath + "/p/span/span[3]").text
+            except NoSuchElementException:
+                if cardNum <=2:
+                    cardNum+=1
+                    continue
+                else:
+                    break
             description = driver.webDriver.find_element(By.XPATH, contentPath + "/button").text
             if "1 sb" in earnings.lower() or "discover daily interests" == description.lower():
                 clickAmt = 1
@@ -73,9 +79,9 @@ def swagBuckscontentDiscovery(driver):
                     clickAmt += 1
                     if "discover daily interests" != description.lower():
                         break
-                cardNum += 1
-            elif int(earnings.replace(" sb", '')) > 4:
+            elif int(earnings.lower().replace(" sb", '')) > 4:
                 break
+            cardNum += 1
         except NoSuchElementException:
             if cardNum == 1:
                 showMessage('failed to find content discovery', 'check script for correct element')
@@ -243,7 +249,6 @@ def swagbucksSearch(driver):
             driver.find_element(By.XPATH, "//*[@id='tblAwardBannerAA']/div[2]/div/div[1]/form/input[2]")
             num += 1
             driver.find_element(By.ID, "claimSearchWinButton").click()
-            print("search rewarded")
         # if no reward, continue searching
         except NoSuchElementException:
             time.sleep(1)

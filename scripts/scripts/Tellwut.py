@@ -4,6 +4,7 @@ from selenium.common.exceptions import (ElementClickInterceptedException,
                                         ElementNotInteractableException,
                                         NoSuchElementException)
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Tellwut":
     from Classes.WebDriver import Driver
@@ -20,59 +21,61 @@ def locateTellWutWindow(driver):
         time.sleep(1)
 
 def tellwutLogin(driver):
-    driver.openNewWindow('https://www.tellwut.com/signin')
+    driver.openNewWindow('https://www.tellwut.com/')
     try:
-        getTellWutBalance(driver)
+        driver.webDriver.find_element(By.XPATH,'/html/body/main/header/button[2]').click() # LOGIN button
+        time.sleep(1)
+        driver.webDriver.find_element(By.XPATH,"//*[@id='loginForm']/button").click() # LOGIN button (again)
     except NoSuchElementException:
-        print('not already logged in or balance element not found')
-        # click Sign In
-        try:
-            driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/main/div[2]/div[2]/div[1]/form/div[4]/div/button").click()
-        except NoSuchElementException:
-            showMessage('Captcha or Sign in button not found', "complete captcha, then click OK. If fails, confirm element for sign in")
-            driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/main/div[2]/div[2]/div[1]/form/div[6]/div/button").click()
-    driver.webDriver.get("https://www.tellwut.com/")
-
+        exception = 'already logged in'
+        
 def getTellWutBalance(driver):
     locateTellWutWindow(driver)
-    return driver.webDriver.find_element(By.XPATH, "/html/body/div/header/div/div/div/div[4]/div/div/div[2]/div[1]/div[1]").text
+    return driver.webDriver.find_element(By.XPATH, "/html/body/main/header/a[2]/div/div[2]/span").text
+
+def clickButtons(driver, type):
+    xpath = "//input[@type='" + type + "']"
+    for i in driver.webDriver.find_elements(By.XPATH, xpath): # click all checkboxes
+        try:
+            i.click()
+        except(ElementNotInteractableException):
+            print('not inter')
+            exception = 'notInteractable'
+        except(ElementClickInterceptedException):
+            print('click intercept')
+            if type == 'radio':
+                findSubmitButton(driver)
+                i.click()
+
+def findSubmitButton(driver):
+    return driver.webDriver.find_element(By.ID,'survey_form_submit')
 
 def completeTellWutSurveys(driver):
     locateTellWutWindow(driver)
-    driver = driver.webDriver
-    driver.implicitly_wait(2)
+    driver.webDriver.implicitly_wait(2)
     while True:
-            try:
-                # look for "Start Survey" button
-                driver.find_element(By.XPATH, "/html/body/div/main/div[2]/div[2]/div[1]/form/div[1]/div/button").click()
-            except ElementClickInterceptedException:
-                # click randomize
-                driver.find_element(By.XPATH, "/html/body/div/main/div[2]/div[2]/div[1]/div/h1/a").click()
-                print('randomize clicked')
-            except NoSuchElementException:
-                try:
-                    # look for submit button
-                    driver.find_element(By.XPATH, "//input[@id='survey_form_submit']")
-                    # if no submit button, stop
-                except NoSuchElementException:
-                    break
-            # click on all radio buttons
-            for i in driver.find_elements(By.XPATH, "//input[@type='radio']"):
-                try:
-                    i.click()
-                except (ElementNotInteractableException, ElementClickInterceptedException):
-                    exception = "caught"
-            # click on all checkboxes
-            for i in driver.find_elements(By.XPATH,"//input[@type='checkbox']"):
-                try:
-                    i.click()
-                except (ElementNotInteractableException, ElementClickInterceptedException):
-                    exception = "caught"
-            # Click Submit
-            driver.find_element(By.XPATH, "//input[@id='survey_form_submit']").click()
-            time.sleep(3)
-            driver.get("https://www.tellwut.com")
+        try:
+            driver.webDriver.get('https://www.tellwut.com/most_recent_surveys') # load most recent surveys page
             time.sleep(2)
+            driver.webDriver.find_element(By.XPATH,"//*[@id='surveyList']/div[1]/div[2]/div[1]/a").click() # survey link
+            clickButtons(driver, 'radio')
+            print('radio done')
+            clickButtons(driver, 'checkbox')
+            print('checkbox done')            
+            submitButton = findSubmitButton(driver)
+            try:
+                submitButton.click()
+            except ElementClickInterceptedException:
+                driver.webDriver.find_element(By.XPATH,"//*[@id='main']/section/div/div[2]/div[4]/div[1]") # scroll past to comments section
+                submitButton.click()
+            driver.webDriver.find_element(By.XPATH,"//*[@id='main']/div/div[2]/div[1]/div[1]/nav/ul/li[2]/a").click() # back to home page
+        except NoSuchElementException:
+            try:
+                submitButton = findSubmitButton(driver)
+                showMessage('survey not complete', 'finish survey manually')
+            except NoSuchElementException:
+                print('survey link not found, so done with the list')
+                break
 
 def redeemTellWutRewards(driver):
     locateTellWutWindow(driver)
@@ -91,5 +94,14 @@ def runTellwut(driver):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    runTellwut(driver)
+    # runTellwut(driver)
+    
+    found = driver.findWindowByUrl("tellwut.com/surveys")
+    driver.webDriver.switch_to.window(found)
+    time.sleep(1)
+    type='checkbox'
+    xpath = "//input[@type='" + type + "']"
+    for i in driver.webDriver.find_elements(By.XPATH, xpath):
+        i.click()
+    # driver.webDriver.find_element(By.XPATH,'/html/body/main/section[1]/section/div/div[2]/form/div[3]/div[1]/div/div[1]/div[4]/div[1]/div[1]/input').click()
     
