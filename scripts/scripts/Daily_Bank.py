@@ -6,7 +6,7 @@ if __name__ == '__main__' or __name__ == "Daily_Bank":
     from Ally import allyLogout, runAlly
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import showMessage
+    from Functions.GeneralFunctions import showMessage, getStockPrice
     from Functions.GnuCashFunctions import purgeOldGnucashFiles, openGnuCashUI, openGnuCashBook
     from Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet
     from Paypal import runPaypal
@@ -16,7 +16,7 @@ else:
     from .Ally import allyLogout, runAlly
     from .Classes.Asset import USD
     from .Classes.WebDriver import Driver
-    from .Functions.GeneralFunctions import showMessage
+    from .Functions.GeneralFunctions import showMessage, getStockPrice
     from .Functions.GnuCashFunctions import purgeOldGnucashFiles, openGnuCashUI, openGnuCashBook
     from .Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet
     from .Paypal import runPaypal
@@ -39,12 +39,7 @@ def runDailyBank():
         openGnuCashUI('Finances')
     if ally.reviewTransactions:
         openGnuCashUI('Home')
-    driver.openNewWindow('https://finance.yahoo.com/quote/GME/')
-    try:
-        driver.webDriver.find_element(By.XPATH,"//*[@id='myLightboxContainer']/section/button[1]/svg").click()
-    except NoSuchElementException:
-        exception = 'pop-up window not there'
-    GMEprice = driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/div/div/div[1]/div/div[2]/div/div/div[6]/div/div/div/div[3]/div[1]/div/fin-streamer[1]").text
+    GMEprice = getStockPrice(driver, 'GME')
     showMessage("Balances + Review", 
         f'Sofi Checking: {sofi[0].balance} \n'
         f'  Gnu Balance: {sofi[0].gnuBalance} \n \n'

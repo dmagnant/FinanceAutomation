@@ -39,10 +39,8 @@ def clickButtons(driver, type):
         try:
             i.click()
         except(ElementNotInteractableException):
-            print('not inter')
             exception = 'notInteractable'
         except(ElementClickInterceptedException):
-            print('click intercept')
             if type == 'radio':
                 findSubmitButton(driver)
                 i.click()
@@ -59,9 +57,7 @@ def completeTellWutSurveys(driver):
             time.sleep(2)
             driver.webDriver.find_element(By.XPATH,"//*[@id='surveyList']/div[1]/div[2]/div[1]/a").click() # survey link
             clickButtons(driver, 'radio')
-            print('radio done')
             clickButtons(driver, 'checkbox')
-            print('checkbox done')            
             submitButton = findSubmitButton(driver)
             try:
                 submitButton.click()
@@ -74,7 +70,6 @@ def completeTellWutSurveys(driver):
                 submitButton = findSubmitButton(driver)
                 showMessage('survey not complete', 'finish survey manually')
             except NoSuchElementException:
-                print('survey link not found, so done with the list')
                 break
 
 def redeemTellWutRewards(driver):

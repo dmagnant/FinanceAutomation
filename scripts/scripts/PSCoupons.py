@@ -68,7 +68,7 @@ def runPSCoupon(driver):
 if __name__ == '__main__':
     driver = Driver("Chrome")
     driver.webDriver.implicitly_wait(3)
-    runPSCoupon(driver)
+    setPSCouponFilters(driver)
     
     # locatePSCouponWindow(driver)
     # scrollY = 3800

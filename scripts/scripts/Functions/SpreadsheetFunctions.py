@@ -2,7 +2,7 @@ import time
 
 import gspread
 
-from .GeneralFunctions import getCryptocurrencyPrice, setDirectory, showMessage
+from .GeneralFunctions import getCryptocurrencyPrice, setDirectory, showMessage, getStockPrice
 from .GnuCashFunctions import updateCryptoPriceInGnucash
 
 def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", modified=False):
@@ -97,10 +97,10 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
 
 def updateCryptoPrices(driver):
     print('updating coin prices')
-    url = "https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=623829469"
+    url = "edit#gid=623829469"
     found = driver.findWindowByUrl(url)
     if not found:
-        driver.openNewWindow(url)
+        openSpreadsheet(driver, 'Asset Allocation', 'Cryptocurrency')
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
@@ -109,7 +109,7 @@ def updateCryptoPrices(driver):
     # capture coin names and symbols from spreadsheet into arrays
     jsonCreds = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
     sheet = gspread.service_account(filename=jsonCreds).open('Asset Allocation')
-    worksheet = sheet.worksheet(str('Cryptocurrency'))
+    worksheet = sheet.worksheet('Cryptocurrency')
     nameColumn = 'A'
     symbolColumn = 'B'
     priceColumn = 'J'
@@ -119,7 +119,7 @@ def updateCryptoPrices(driver):
         coinName = worksheet.acell(nameColumn+str(row)).value
         if coinName != None:
             coinName = coinName.lower()
-            coinSymbol = worksheet.acell(symbolColumn+str(row)).value            
+            coinSymbol = worksheet.acell(symbolColumn+str(row)).value
             if coinName == 'eth2':
                 coinName = 'ethereum'
                 coinSymbol = 'ETH'
@@ -138,6 +138,35 @@ def updateCryptoPrices(driver):
         updateCryptoPriceInGnucash(symbol, price)
         worksheet.update((priceColumn + str(i + 2)), float(price))
 
+def updateInvestmentPrices(driver):
+    print('updating investment prices')
+    url = "edit#gid=361024172"
+    spreadsheetWindow = driver.findWindowByUrl(url)
+    if not spreadsheetWindow:
+        openSpreadsheet(driver, 'Asset Allocation', 'Investments')
+        spreadsheetWindow = driver.webDriver.current_window_handle
+    else:
+        driver.webDriver.switch_to.window(spreadsheetWindow)
+        time.sleep(1)
+    row = 18
+    symbolColumn = 'B'
+    priceColumn = 'E'
+    jsonCreds = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
+    sheet = gspread.service_account(filename=jsonCreds).open('Asset Allocation')
+    worksheet = sheet.worksheet('Investments')
+    stillCoins = True
+    while stillCoins:
+        coinSymbol = worksheet.acell(symbolColumn+str(row)).value
+        if coinSymbol != None:
+            price = getStockPrice(driver, coinSymbol)
+            driver.webDriver.close()
+            driver.webDriver.switch_to.window(spreadsheetWindow)
+            time.sleep(1)
+            worksheet.update((priceColumn + str(row)), float(price))
+            row += 1
+        else:
+            stillCoins = False
+
 def openSpreadsheet(driver, sheet, tab=''):
     url = 'https://docs.google.com/spreadsheets/d/'
     if sheet == 'Checking Balance':
@@ -152,6 +181,8 @@ def openSpreadsheet(driver, sheet, tab=''):
             url += 'edit#gid=1813404638'            
         elif tab == 'Cryptocurrency':
             url += 'edit#gid=623829469'
+        elif tab == 'Investments':
+            url += 'edit#gid=361024172'
     elif sheet == 'Home':
         url += '1oP3U7y8qywvXG9U_zYXgjFfqHrCyPtUDl4zPDftFCdM/'
         if tab == '2023 Balance':

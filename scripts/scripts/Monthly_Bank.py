@@ -1,6 +1,5 @@
 from datetime import datetime
 from decimal import Decimal
-import pygetwindow
 
 if __name__ == '__main__' or __name__ == "Monthly_Bank":
     from Classes.Asset import USD, Crypto
@@ -11,7 +10,7 @@ if __name__ == '__main__' or __name__ == "Monthly_Bank":
     from Ledger import runLedger
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange, showMessage)
     from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction, getTotalOfAutomatedMRAccounts
-    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
+    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPrices
     from HealthEquity import getHealthEquityBalances
     from IoPay import runIoPay
     from Kraken import runKraken
@@ -27,7 +26,7 @@ else:
     from .Ledger import runLedger
     from .Functions.GeneralFunctions import (getStartAndEndOfDateRange, showMessage)
     from .Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction, getTotalOfAutomatedMRAccounts
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
+    from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPrices
     from .HealthEquity import getHealthEquityBalances
     from .IoPay import runIoPay
     from .Kraken import runKraken
@@ -97,5 +96,8 @@ def runMonthlyBank():
 if __name__ == '__main__':
     # runMonthlyBank()
     
-    myBook = openGnuCashBook('Finance', True, True)
-    getTotalOfAutomatedMRAccounts(myBook)
+    # myBook = openGnuCashBook('Finance', True, True)
+    # getTotalOfAutomatedMRAccounts(myBook)
+    
+    driver = Driver("Chrome")
+    updateInvestmentPrices(driver)

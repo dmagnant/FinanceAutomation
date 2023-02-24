@@ -127,3 +127,10 @@ def getStartAndEndOfDateRange(today, timeSpan):
 def getCryptocurrencyPrice(coinList):
     return CoinGeckoAPI().get_price(ids=coinList, vs_currencies='usd')
      
+def getStockPrice(driver, symbol):
+    driver.openNewWindow('https://finance.yahoo.com/quote/' + symbol + "/")
+    try:
+        driver.webDriver.find_element(By.XPATH,"//*[@id='myLightboxContainer']/section/button[1]/svg").click()
+    except NoSuchElementException:
+        exception = 'pop-up window not there'
+    return driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/div/div/div[1]/div/div[2]/div/div/div[6]/div/div/div/div[3]/div[1]/div/fin-streamer[1]").text.replace('$', '')

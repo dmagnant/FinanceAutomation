@@ -49,8 +49,10 @@ def allyLogin(driver):
         except NoSuchElementException:
             loggedIn = True
     driver.webDriver.find_element(By.PARTIAL_LINK_TEXT, "Joint Checking").click()
-    time.sleep(3)
-
+    time.sleep(5)
+    driver.webDriver.find_element(By.XPATH,'/html/body/div/div[1]/main/div/div/div/div[1]/div/div/span/div[1]/button[1]/span').click()
+    time.sleep(1)
+    
 def allyLogout(driver):
     locateAllyWindow(driver)
     # Click Profile and Settings
@@ -109,6 +111,11 @@ def runAlly(driver):
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    response = runAlly(driver)
-    response.getData()
-    allyLogout(driver)
+    # response = runAlly(driver)
+    # response.getData()
+    # allyLogout(driver)
+    
+    
+    locateAllyWindow(driver)
+    driver.webDriver.find_element(By.XPATH,'/html/body/div/div[1]/main/div/div/div/div[1]/div/div/span/div[1]/button[1]/span').click()
+    time.sleep(1)
