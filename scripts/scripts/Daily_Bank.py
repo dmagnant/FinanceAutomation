@@ -29,7 +29,7 @@ def runDailyBank():
     sofi = runSofi(driver)
     ally = runAlly(driver)
     presearchRewardsRedemptionAndBalanceUpdates(driver)
-    runPaypal(driver)
+    # runPaypal(driver) # cool off for now, see if it stops the captcha requirement
     openSpreadsheet(driver, 'Checking Balance', '2023')
     openSpreadsheet(driver, 'Asset Allocation', 'Cryptocurrency')
     updateCryptoPrices(driver)
@@ -44,7 +44,7 @@ def runDailyBank():
         f'Sofi Checking: {sofi[0].balance} \n'
         f'  Gnu Balance: {sofi[0].gnuBalance} \n \n'
         f' Sofi Savings: {sofi[1].balance} \n'
-        f' Gnu Balance: {sofi[1].gnuBalance} \n \n'
+        f'  Gnu Balance: {sofi[1].gnuBalance} \n \n'
         f'Ally Checking: {ally.balance} \n'
         f'  Gnu Balance: {ally.gnuBalance} \n \n'
         f'Crypto Balance: {round(Crypto.gnuBalance, 2)} \n \n'

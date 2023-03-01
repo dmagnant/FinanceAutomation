@@ -50,7 +50,7 @@ def runUSD(driver, today):
     myBook = openGnuCashBook('Finance', False, False)
     MyConstant = runMyConstant(driver, "USD")
     Worthy = getWorthyBalance(driver)
-    healthEquityHSADividendsAndVanguard = getHealthEquityBalances(driver, lastMonth)
+    healthEquityHSADividendsAndVanguard = getHealthEquityBalances(driver)
     for account in [MyConstant, Worthy, healthEquityHSADividendsAndVanguard[0]]:
         monthlyRoundUp(account, myBook, lastMonth[1], healthEquityHSADividendsAndVanguard[1])
     LiquidAssets = USD("Liquid Assets")
@@ -59,6 +59,7 @@ def runUSD(driver, today):
     updateSpreadsheet('Asset Allocation', year, Bonds.name, month, float(Bonds.gnuBalance), 'Liquid Assets')
     updateSpreadsheet('Asset Allocation', year, LiquidAssets.name, month, float(LiquidAssets.gnuBalance), 'Liquid Assets')
     updateSpreadsheet('Asset Allocation', year, healthEquityHSADividendsAndVanguard[2].name, month, healthEquityHSADividendsAndVanguard[2].balance, '401k')
+    updateInvestmentPrices(driver)
     return [MyConstant, Worthy, LiquidAssets, healthEquityHSADividendsAndVanguard[2], healthEquityHSADividendsAndVanguard[0]]
 
 def runCrypto(driver, today):
@@ -70,7 +71,7 @@ def runCrypto(driver, today):
     runKraken(driver)
     presearchRewardsRedemptionAndBalanceUpdates(driver)
     runIoPay(driver)
-    runLedger()
+    # runLedger()
     runCoinbase(driver)
     Crypto.updateGnuBalance(openGnuCashBook('Finance', True, True))
     updateSpreadsheet('Asset Allocation', year, Crypto.name, month, float(round(Crypto.gnuBalance, 2)), Crypto.name)

@@ -9,6 +9,13 @@ if __name__ == "Classes.Asset":
                                             openGnuCashBook,
                                             updateCryptoPriceInGnucash)
     from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
+elif __name__ == 'scripts.Classes.Asset':
+    from scripts.Functions.GeneralFunctions import (
+        getCryptocurrencyPrice)
+    from scripts.Functions.GnuCashFunctions import (
+        getAccountPath, getGnuCashBalance, openGnuCashBook,
+        updateCryptoPriceInGnucash)
+    from scripts.Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
 else:
     from scripts.scripts.Functions.GeneralFunctions import (
         getCryptocurrencyPrice)

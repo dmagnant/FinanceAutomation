@@ -51,11 +51,11 @@ def findSubmitButton(driver):
 def completeTellWutSurveys(driver):
     locateTellWutWindow(driver)
     driver.webDriver.implicitly_wait(2)
+    driver.webDriver.get('https://www.tellwut.com/most_recent_surveys') # load most recent surveys page
+    time.sleep(2)
+    driver.webDriver.find_element(By.XPATH,"//*[@id='surveyList']/div[1]/div[2]/div[1]/a").click() # survey link
     while True:
         try:
-            driver.webDriver.get('https://www.tellwut.com/most_recent_surveys') # load most recent surveys page
-            time.sleep(2)
-            driver.webDriver.find_element(By.XPATH,"//*[@id='surveyList']/div[1]/div[2]/div[1]/a").click() # survey link
             clickButtons(driver, 'radio')
             clickButtons(driver, 'checkbox')
             submitButton = findSubmitButton(driver)
@@ -64,7 +64,8 @@ def completeTellWutSurveys(driver):
             except ElementClickInterceptedException:
                 driver.webDriver.find_element(By.XPATH,"//*[@id='main']/section/div/div[2]/div[4]/div[1]") # scroll past to comments section
                 submitButton.click()
-            driver.webDriver.find_element(By.XPATH,"//*[@id='main']/div/div[2]/div[1]/div[1]/nav/ul/li[2]/a").click() # back to home page
+            time.sleep(8)
+            driver.webDriver.find_element(By.XPATH,"//*[@id='next-survey-btn']/a").click() # NEXT POLL
         except NoSuchElementException:
             try:
                 submitButton = findSubmitButton(driver)
@@ -89,14 +90,5 @@ def runTellwut(driver):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    # runTellwut(driver)
-    
-    found = driver.findWindowByUrl("tellwut.com/surveys")
-    driver.webDriver.switch_to.window(found)
-    time.sleep(1)
-    type='checkbox'
-    xpath = "//input[@type='" + type + "']"
-    for i in driver.webDriver.find_elements(By.XPATH, xpath):
-        i.click()
-    # driver.webDriver.find_element(By.XPATH,'/html/body/main/section[1]/section/div/div[2]/form/div[3]/div[1]/div/div[1]/div[4]/div[1]/div[1]/input').click()
+    runTellwut(driver)
     

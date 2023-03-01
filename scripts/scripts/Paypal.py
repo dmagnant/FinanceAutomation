@@ -43,7 +43,6 @@ def payPalLogin(driver):
                 exception = "no captcha presented"
         except NoSuchElementException:
             exception = "already logged in"
-        driver.get("https://www.paypal.com/myaccount/summary")
         try:
             driver.find_element(By.ID, "password")
         except NoSuchElementException:
@@ -51,12 +50,11 @@ def payPalLogin(driver):
         num+=1
 
 def transferMoney(driver):
-    driver.get("https://www.paypal.com/myaccount/money/")
-    time.sleep(2)
-    balance = driver.find_element(By.XPATH,"//*[@id='contents']/main/section/div/div/div[1]/div/p/span").text.replace('$','')
+    balance = driver.find_element(By.XPATH,"//*[@id='cwBalance']/div/div/div[1]").text.replace('$','')
+    print(balance)
     if float(balance) > 0:
         # click transfer money
-        driver.find_element(By.XPATH,"//*[@id='contents']/main/section/div/div/div[2]/a").click()
+        driver.find_element(By.XPATH,"//*[@id='cwBalance']/div/div/a").click()
         time.sleep(2)
         # click transfer to your bank
         driver.find_element(By.XPATH,"//*[@id='mainModal']/div/div/div/div/div/div[1]/ul/li[1]/a/span/p[2]").click()

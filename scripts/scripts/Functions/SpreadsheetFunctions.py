@@ -106,9 +106,7 @@ def updateCryptoPrices(driver):
         time.sleep(1)
     coinNames = []
     coinSymbols = []
-    # capture coin names and symbols from spreadsheet into arrays
-    jsonCreds = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
-    sheet = gspread.service_account(filename=jsonCreds).open('Asset Allocation')
+    sheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Asset Allocation')
     worksheet = sheet.worksheet('Cryptocurrency')
     nameColumn = 'A'
     symbolColumn = 'B'
@@ -147,12 +145,10 @@ def updateInvestmentPrices(driver):
         spreadsheetWindow = driver.webDriver.current_window_handle
     else:
         driver.webDriver.switch_to.window(spreadsheetWindow)
-        time.sleep(1)
     row = 18
     symbolColumn = 'B'
     priceColumn = 'E'
-    jsonCreds = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
-    sheet = gspread.service_account(filename=jsonCreds).open('Asset Allocation')
+    sheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Asset Allocation')
     worksheet = sheet.worksheet('Investments')
     stillCoins = True
     while stillCoins:
@@ -161,7 +157,6 @@ def updateInvestmentPrices(driver):
             price = getStockPrice(driver, coinSymbol)
             driver.webDriver.close()
             driver.webDriver.switch_to.window(spreadsheetWindow)
-            time.sleep(1)
             worksheet.update((priceColumn + str(row)), float(price))
             row += 1
         else:

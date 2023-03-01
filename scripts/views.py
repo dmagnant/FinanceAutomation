@@ -246,8 +246,8 @@ def ioPay(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
-            response = runIoPay()
-            print('balance: ' + str(response))
+            response = runIoPay(driver)
+            response.getData()
     return render(request,"scripts/iopay.html")
 
 def kraken(request):

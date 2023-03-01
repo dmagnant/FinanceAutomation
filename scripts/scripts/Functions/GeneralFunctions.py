@@ -122,7 +122,7 @@ def getStartAndEndOfDateRange(today, timeSpan):
             enddate = today.replace(month=month - 1, day=31)
         if timeSpan == "YTD":
             startdate = startdate.replace(month=1, day=1)
-    return [startdate, enddate]
+    return [startdate.date(), enddate.date()]
 
 def getCryptocurrencyPrice(coinList):
     return CoinGeckoAPI().get_price(ids=coinList, vs_currencies='usd')

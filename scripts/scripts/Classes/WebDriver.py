@@ -12,10 +12,13 @@ from selenium.webdriver.common.by import By
 
 if __name__ == "Classes.WebDriver":
     from Functions.GeneralFunctions import setDirectory
+elif __name__ == 'scripts.Classes.WebDriver':
+    from scripts.Functions.GeneralFunctions import setDirectory
 else:
     from scripts.scripts.Functions.GeneralFunctions import setDirectory
 
 def configureDriverOptions(browser, asUser=True):
+    if asUser:
         if browser == "Edge":
             options = webdriver.EdgeOptions()
             # following options not compatible to Chrome remote debugging window

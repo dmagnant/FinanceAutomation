@@ -2,7 +2,7 @@ import time
 from decimal import Decimal
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
-
+import math
 
 if __name__ == '__main__' or __name__ == "IoPay":
     from Classes.Asset import Crypto
@@ -45,12 +45,12 @@ def runIoPay(driver):
         # click Add Stake
         driver.webDriver.find_element(By.XPATH,'/html/body/div[4]/div/div/button[2]/div[1]').click()
         # enter wallet Balance
-        driver.webDriver.find_element(By.XPATH,'/html/body/div[4]/div[2]/div[4]/div/section/div/div/div[1]/div/div[1]/div/div[1]/input').send_keys(str(round(walletBalance/10)*10))
+        driver.webDriver.find_element(By.XPATH,'/html/body/div[4]/div[2]/div[4]/div/section/div/div/div[1]/div/div[1]/div/div[1]/input').send_keys(str(math.floor(walletBalance)))
         # click OK
         driver.webDriver.find_element(By.XPATH, '/html/body/div[4]/div[2]/div[4]/div/section/footer/button[2]').click()
         showMessage('Approve transaction on Ledger', 'Once complete, click OK')
-        walletBalance = Decimal(driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/section/div[1]/main/div/div[5]/div[2]/div[2]/div[3]/div[3]/div[2]/div[2]/p[2]").text.replace(" IOTX", ""))
-    
+        
+    walletBalance = Decimal(driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/section/div[1]/main/div/div[5]/div[2]/div[2]/div[3]/div[3]/div[2]/div[2]/p[2]").text.replace(" IOTX", ""))
     stakedBalance = Decimal(driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/section/div[1]/main/div/div[5]/div[2]/div[2]/div[3]/div[3]/div[2]/div[3]/p[2]").text.replace(" IOTX", "").replace(',',''))
     iotxBalance = round(float(walletBalance + stakedBalance), 2)
     IoTex.setBalance(iotxBalance)

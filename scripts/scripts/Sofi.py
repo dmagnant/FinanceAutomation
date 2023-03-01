@@ -13,6 +13,12 @@ if __name__ == '__main__' or __name__ == "Sofi":
                                             getUsername, setDirectory,
                                             showMessage)
     from Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription
+elif __name__ == 'scripts.Sofi':
+    from scripts.Classes.Asset import USD
+    from scripts.Functions.GeneralFunctions import (closeExpressVPN, getPassword,
+                                             getStartAndEndOfDateRange,
+                                             setDirectory, showMessage)
+    from scripts.Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription
 else:
     from .Classes.Asset import USD
     from .Functions.GeneralFunctions import (closeExpressVPN, getPassword,
@@ -26,7 +32,8 @@ def locateSofiWindow(driver):
         sofiLogin(driver)
     else:
         driver.webDriver.switch_to.window(found)
-        time.sleep(1) 
+        time.sleep(1)
+    return True
 
 def sofiLogin(driver):
     driver.openNewWindow('https://login.sofi.com/u/login?state=hKFo2SBrOGMtTVZSUHZPalVPbEUyZmJyWXhyV3pYMU9lSzhEUKFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIGptNWpvQnRQQlFtSHFJT216N0dfLU1aZFBUbWFqVXl6o2NpZNkgNkxuc0xDc2ZGRUVMbDlTQzBDaWNPdkdlb2JvZXFab2I')
@@ -34,9 +41,6 @@ def sofiLogin(driver):
     time.sleep(2)
     # click Login
     driver.find_element(By.XPATH, "//*[@id='widget_block']/main/section/div/div/div/form/div[2]/button").click()
-    # # click LOG IN
-    # driver.find_element(By.XPATH, "//*[@id='widget_block']/main/section/div/div/div/form/div[2]/button").click()
-    # time.sleep(1)
     # # look for email is required error (suggesting that auto-fill didn't occur)
     # driver.find_element(By.ID,"error-3")
     # # username

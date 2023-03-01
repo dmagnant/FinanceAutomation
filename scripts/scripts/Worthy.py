@@ -26,6 +26,7 @@ def worthyLogin(driver):
     try:
         # click Login button
         driver.find_element(By.XPATH, "//*[@id='q-app']/div/div[1]/div/div[2]/div/button[2]/span[2]/span").click()
+        time.sleep(1)
         # click Login button (again)
         driver.find_element(By.XPATH, "//*[@id='auth0-lock-container-1']/div/div[2]/form/div/div/div/button").click()
         try:

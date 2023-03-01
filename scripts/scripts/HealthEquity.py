@@ -51,7 +51,7 @@ def healthEquitylogin(driver):
 
 def getHealthEquityBalances(driver):
     locateHealthEquityWindow(driver)
-    lastMonth = getStartAndEndOfDateRange(datetime.today().date(), "month")
+    lastMonth = getStartAndEndOfDateRange(datetime.today(), "month")
     driver = driver.webDriver
     HealthEquity = USD("HSA")
     Vanguard = USD("Vanguard401k")

@@ -12,6 +12,11 @@ if __name__ == '__main__' or __name__ == "Ally":
     from Functions.GeneralFunctions import (closeExpressVPN, getPassword,
                                             getStartAndEndOfDateRange, setDirectory, showMessage)
     from Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription
+elif __name__ == 'scripts.Ally':
+    from scripts.Classes.Asset import USD
+    from scripts.Functions.GeneralFunctions import (closeExpressVPN, getPassword,
+                                             getStartAndEndOfDateRange, showMessage, setDirectory)
+    from scripts.Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription    
 else:
     from .Classes.Asset import USD
     from .Functions.GeneralFunctions import (closeExpressVPN, getPassword,
@@ -25,6 +30,7 @@ def locateAllyWindow(driver):
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
+    return True
 
 def allyLogin(driver):
     # closeExpressVPN()
