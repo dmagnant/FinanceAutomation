@@ -1,6 +1,6 @@
 import os
 import time
-
+from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
@@ -15,8 +15,8 @@ else:
     from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
 
 def getAmexBasePath():
-    return '/html/body/div[1]/div[2]/div[3]/div/div/div/div/div[2]/div/div[2]/div/div/' 
-
+    return '/html/body/div[1]/div[2]/div[3]/div/div/div/div/div[2]/div/div[2]/div/div/'
+            
 def locateAmexWindow(driver):
     found = driver.findWindowByUrl("americanexpress.com")
     if not found:
@@ -54,7 +54,7 @@ def exportAmexTransactions(driver):
     time.sleep(5)
     driver.find_element(By.XPATH, getAmexBasePath() + "table/thead/div/tr[1]/td[2]/div/div[2]/button/button").click()
     # click on CSV option
-    driver.find_element(By.XPATH, getAmexBasePath() + "div[2]/div/div/div/div/div/div[1]/div/div/div[1]/div/fieldset/div[2]/label").click()
+    driver.find_element(By.XPATH, getAmexBasePath() + "div[2]/div/div/div/div/div/div[1]/div/div/div[1]/div/fieldset/div[1]/label").click()
     # delete old csv file, if present
     try:
         os.remove(r"C:\Users\dmagn\Downloads\activity.csv")
@@ -70,22 +70,22 @@ def claimAmexRewards(driver):
     rewardsBalance = driver.webDriver.find_element(By.ID, "globalmrnavpointbalance").text.replace('$', '')
     if float(rewardsBalance) > 0:
         driver.webDriver.find_element(By.ID, "rewardsInput").send_keys(rewardsBalance)
+        driver.webDriver.find_element(By.ID, "rewardsInput").send_keys(Keys.TAB)
         driver.webDriver.find_element(By.XPATH, "//*[@id='continue-btn']/span").click()
         driver.webDriver.find_element(By.XPATH, "//*[@id='use-dollars-btn']/span").click()
 
-def runAmex(driver):
+def runAmex(driver, account):
     locateAmexWindow(driver)
-    Amex = USD("Amex")
-    Amex.setBalance(getAmexBalance(driver))
+    account.setBalance(getAmexBalance(driver))
     exportAmexTransactions(driver.webDriver)
     claimAmexRewards(driver)
-    importGnuTransaction(Amex, r'C:\Users\dmagn\Downloads\activity.csv', driver.webDriver)
-    Amex.locateAndUpdateSpreadsheet(driver)
-    if Amex.reviewTransactions:
+    importGnuTransaction(account, r'C:\Users\dmagn\Downloads\activity.csv', driver.webDriver)
+    account.locateAndUpdateSpreadsheet(driver)
+    if account.reviewTransactions:
         openGnuCashUI('Finances')
-    showMessage("Balances + Review", f'Amex Balance: {Amex.balance} \n' f'GnuCash Amex Balance: {Amex.gnuBalance} \n \n' f'Review transactions:\n{Amex.reviewTransactions}')
-    driver.webDriver.close()
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    runAmex(driver)
+    Amex = USD("Amex")    
+    runAmex(driver, Amex)
+    Amex.getData()

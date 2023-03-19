@@ -35,11 +35,13 @@ def coinbaseLogin(driver):
 
 def getCoinbaseBalances(driver, coinList):
     def getBasePath():
-        return "//*[@id='main']/div/div/div/div/main/div[2]/div/div[1]/div/div[2]/section/div[2]/div/div/div/table/tbody/tr["
+        return "//*[@id='main']/div/div/div/div/div/div/main/div[2]/div/div[1]/div/div[4]/table/tbody/tr["
+    
     def getNamePath(num):
-        return getBasePath() + str(num) + ']/td[1]/a/div/div/p'
+        return getBasePath() + str(num) + ']/td[1]/div/div/div[2]/div/div[1]'
+                    
     def getBalancePath(num):
-        return getBasePath() + str(num) + ']/td[2]/div/span'
+        return getBasePath() + str(num) + ']/td[2]/div/div/div/div/div[2]'
 
     locateCoinbaseWindow(driver)
     driver.webDriver.get('https://www.coinbase.com/assets')
@@ -49,6 +51,7 @@ def getCoinbaseBalances(driver, coinList):
     coinsFound = 0
     while coinsFound < len(coinList):
         name = driver.webDriver.find_element(By.XPATH, getNamePath(num)).text
+        print(name)
         for coin in coinList:
             if name == coin.name:
                 balance = driver.webDriver.find_element(By.XPATH, getBalancePath(num)).text.replace(' ' + coin.symbol, '').replace(',','')
@@ -57,33 +60,14 @@ def getCoinbaseBalances(driver, coinList):
                 coin.updateBalanceInSpreadSheet()
                 coin.updateBalanceInGnuCash()
                 coinsFound += 1
+        num+=1
 
-def runCoinbase(driver):
+def runCoinbase(driver, coinList):
     locateCoinbaseWindow(driver)
-    Loopring = Crypto("Loopring")
-    coinList = [Loopring]
     getCoinbaseBalances(driver, coinList)
-    return coinList
-
-import threading
-
-def testThread(item):
-    while item < 10:
-        print(item)
-        item+=1
-        
-def testThread2(item):
-    print('TEST: ', item)
-    
     
 if __name__ == '__main__':
-    # driver = Driver("Chrome")
-    # response = runCoinbase(driver)
-    # for coin in response:
-    #     coin.getData()
-    
-    x = threading.Thread(target=testThread, args=(1,))
-    y = threading.Thread(target=testThread2, args=('SEXY',))
-    x.start()
-    x.join()
-    y.start()
+    driver = Driver("Chrome")
+    Loopring = Crypto("Loopring")
+    runCoinbase(driver, [Loopring])
+    Loopring.getData()

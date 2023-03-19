@@ -133,20 +133,20 @@ def runSofiAccount(driver, dateRange, today, account):
     sofiActivity = getTransactionsFromSofiWebsite(driver.webDriver, dateRange, today, tableAndDiv[0], tableAndDiv[1])
     importUniqueTransactionsToGnuCash(account, sofiActivity, driver.webDriver, dateRange, 0)
 
-def runSofi(driver):
+def runSofi(driver, accounts):
     today = datetime.today().date()
     dateRange = getStartAndEndOfDateRange(today, 7)
     locateSofiWindow(driver)
-    Checking = USD("Sofi Checking")
-    Savings = USD("Sofi Savings")
-    for account in [Checking, Savings]:
+    for account in accounts:
         runSofiAccount(driver, dateRange, today, account)
     driver.webDriver.get("https://www.sofi.com/my/money/account/#/1000028154579/account-detail") # switch back to checking page
-    return [Checking, Savings]
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    response = runSofi(driver)
-    for accounts in response:
-        accounts.getData()
+    Checking = USD("Sofi Checking")
+    Savings = USD("Sofi Savings")
+    accounts = [Checking, Savings]
+    runSofi(driver, accounts)
+    for account in accounts:
+        account.getData()
     sofiLogout(driver)

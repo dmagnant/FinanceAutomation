@@ -26,6 +26,8 @@ def configureDriverOptions(browser, asUser=True):
             options.add_experimental_option("detach", True)
             profile = {"download.prompt_for_download": False}
             options.add_experimental_option("prefs", profile)
+            # options.add_experimental_option("debuggerAddress","localhost:9223")
+            options.add_argument("--no-sandbox")
             if asUser:
                 options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\Microsoft\Edge\User Data")
         else:        
@@ -106,7 +108,7 @@ class Driver:
                     return self.webDriver.current_window_handle
         return False
 
-    def closeWindowsExcept(self, urls):
+    def closeWindowsExcept(self, urls, displayWindowHandle=''):
         index = 0
         for window in self.webDriver.window_handles:
             found = False
@@ -118,14 +120,17 @@ class Driver:
                 index += 1
             else:
                 self.webDriver.close()
-        self.getLastWindow()
+        if displayWindowHandle:
+            self.webDriver.switch_to.window(displayWindowHandle)
+        else:
+            self.switchToLastWindow()
                 
     def openNewWindow(self, url):
         url = "'" + url + "'"
         self.webDriver.execute_script("window.open(" + url + ");")
-        self.getLastWindow()
+        self.switchToLastWindow()
                 
-    def getLastWindow(self):
+    def switchToLastWindow(self):
         self.webDriver.switch_to.window(self.webDriver.window_handles[len(self.webDriver.window_handles)-1])
 
         

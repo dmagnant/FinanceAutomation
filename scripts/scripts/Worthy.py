@@ -42,18 +42,14 @@ def worthyLogin(driver):
         exception = "already logged in"
     time.sleep(3)
 
-def getWorthyBalance(driver):
+def getWorthyBalance(driver, account):
     locateWorthyWindow(driver)
-    Worthy = USD("Worthy")
-    # Get balance from Worthy I
-    worthy1BalanceElement = "//*[@id='q-app']/div/div[1]/main/div/div/div[2]/div/div[2]/div/div/div[3]/div/h4/span[3]"
-    driver.webDriver.find_element(By.XPATH, worthy1BalanceElement).click()
-    worthy1Balance = driver.webDriver.find_element(By.XPATH, worthy1BalanceElement).text.strip('$').replace(',','')
-    Worthy.setBalance(float(Decimal(worthy1Balance)))
-    return Worthy
+    worthy1Balance = driver.webDriver.find_element(By.XPATH, "//*[@id='q-app']/div/div[1]/main/div/div/div[2]/div/div[2]/div/div/div[3]/div/h4/span[3]").text.strip('$').replace(',','')
+    account.setBalance(float(Decimal(worthy1Balance)))
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    response = getWorthyBalance(driver)
-    response.getData()
+    Worthy = USD("Worthy")    
+    getWorthyBalance(driver, Worthy)
+    Worthy.getData()
     

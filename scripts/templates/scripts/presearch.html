@@ -4,12 +4,22 @@
 
 {% block content %}
     <h1>Presearch</h1>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="main">Main</button><br>
-        <button type="submit" name="login">Login</button><br>
-        <button type="submit" name="balance">Balance</button><br>
-        <button type="submit" name="search">Search</button><br>
-        <button type="submit" name="rewards">Rewards</button>
-    </form>
+    <div style="width: 100%; display: table;">
+        <div style="display: table-row;">
+            <div style="width: 20%; display:table-cell">
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="main">Main</button><br>
+                    <button type="submit" name="login">Login</button><br>
+                    <button type="submit" name="balance">Balance</button><br>
+                    <button type="submit" name="search">Search</button><br>
+                    <button type="submit" name="rewards">Rewards</button>
+                </form>
+            </div>
+            <div style="width: 80%; display:table-cell">
+                <b>&emsp;&emsp;&emsp;&emsp;&ensp;balance: {{account.balance}} PRE</b><br>
+                <b>gnuCash balance: {{account.gnuBalance}} PRE</b><br>
+            </div>
+        </div>
+    </div>    
 {% endblock %}

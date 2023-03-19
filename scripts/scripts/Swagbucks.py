@@ -16,8 +16,11 @@ from selenium.webdriver.common.keys import Keys
 if __name__ == '__main__' or __name__ == "Swagbucks":
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import showMessage
+    from Functions.GnuCashFunctions import openGnuCashBook
 else:
     from .Functions.GeneralFunctions import showMessage
+    from .Functions.GnuCashFunctions import openGnuCashBook
+
 
 def getSwagbucksBasePath():
     return '/html/body/div[2]/div[' 
@@ -197,7 +200,7 @@ def toDoList(driver):
             if window_num_before == window_num_after:
                 driver.get('https://www.swagbucks.com/')
             else:
-                driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+                driver.switchToLastWindow()
                 driver.close
                 driver.switch_to.window(main)
         list_item_num += 1
@@ -206,9 +209,9 @@ def swagbucksInbox(driver):
     def openAndCloseInboxItem(driver):
         driver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div[5]/div[1]/div[1]/div/a").click()
         time.sleep(2)
-        driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+        driver.switchToLastWindow()
         driver.close()
-        driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+        driver.switchToLastWindow()
     
     driver.openNewWindow('https://www.swagbucks.com/g/inbox')
     while True:
@@ -293,7 +296,7 @@ def claimSwagBucksRewards(driver):
     # click Submit
     driver.find_element(By.ID,"verifyViaSecurityQuestionCta").click()
 
-def runSwagbucks(driver, runAlu):
+def runSwagbucks(driver, runAlu, account):
     # closeExpressVPN()
     driver.webDriver.implicitly_wait(2)
     locateSwagBucksWindow(driver)
@@ -303,8 +306,9 @@ def runSwagbucks(driver, runAlu):
     swagbucksInbox(driver)
     toDoList(driver.webDriver)
     swagBuckscontentDiscovery(driver)
-    balance = getSwagBucksBalance(driver)
-    if int(balance) > 1000:
+    account.setBalance(getSwagBucksBalance(driver))
+    account.updateMRBalance(openGnuCashBook('Finance', False, False))
+    if int(account.balance) > 1000:
         claimSwagBucksRewards(driver)
     swagbucksSearch(driver)
     

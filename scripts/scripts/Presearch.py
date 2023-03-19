@@ -104,20 +104,17 @@ def getPresearchBalance(driver):
     balance = searchRewards + stakedTokens
     return balance
 
-def presearchRewardsRedemptionAndBalanceUpdates(driver):
+def presearchRewardsRedemptionAndBalanceUpdates(driver, account):
     driver.webDriver.implicitly_wait(5)
-    Presearch = Crypto("Presearch")
     claimPresearchRewards(driver)
-    preBalance = getPresearchBalance(driver)
-    Presearch.setBalance(preBalance)
-    Presearch.setPrice(Presearch.getPriceFromCoinGecko())
-    Presearch.updateSpreadsheetAndGnuCash()
-    return [Presearch]
+    account.setBalance(getPresearchBalance(driver))
+    account.setPrice(account.getPriceFromCoinGecko())
+    account.updateSpreadsheetAndGnuCash()
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
     locatePresearchWindow(driver)
     searchUsingPresearch(driver)
-    response = presearchRewardsRedemptionAndBalanceUpdates(driver)
-    for coin in response:
-        coin.getData()
+    Presearch = Crypto("Presearch")
+    presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch)
+    Presearch.getData()

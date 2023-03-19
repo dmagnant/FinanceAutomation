@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Monthly{% endblock %}
+{% block content %}
+    <h2>Monthly USD</h2>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="USD">USD</button>
+        <button type="submit" name="prices">price update</button><br><br>
+    </form>
+    <div style="width: 100%; display: table;">
+        <div style="display: table-row;">
+            <div style="width: 25%; display:table-cell">
+                <b><a href="{% url 'Fidelity' %}" target="_blank">Fidelity</a></b><br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="fidelityMain">Main</button>&emsp;
+                    <button type="submit" name="fidelityLogin">Login</button>&emsp;
+                    <button type="submit" name="fidelityBalance">Balance</button>&emsp;
+                </form><br>
+                &emsp;&ensp;&thinsp;balance: <b>${{usdAccounts.Fidelity.balance}}</b><br>
+                gnuBalance: <b>${{usdAccounts.Fidelity.gnuBalance}}</b><br>
+            </div>
+            <div style="width: 25%; display:table-cell">
+                <b><a href="{% url 'HealthEquity' %}" target="_blank">Health Equity</a></b><br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="HEMain">Main</button>&emsp;
+                    <button type="submit" name="HELogin">Login</button>&emsp;
+                    <button type="submit" name="HEBalances">Balances</button>&emsp;
+                </form><br>
+                &emsp;&ensp;&thinsp;balance: <b>${{usdAccounts.HealthEquity.balance}}</b><br>
+                gnuBalance: <b>${{usdAccounts.HealthEquity.gnuBalance}}</b><br>
+                &emsp;Dividends: <b>${{HSA_dividends}}</b><br>
+            </div>
+            <div style="width: 25%; display:table-cell">
+                <b><a href="{% url 'Vanguard' %}" target="_blank">Vanguard</a></b><br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="vanguardLogin">Login</button>&emsp;
+                    <button type="submit" name="vanguardBalances">Balances</button>&emsp;
+                </form><br>
+                Pension Balance: <b>${{usdAccounts.Pension.balance}}</b><br>
+                &emsp;&emsp;&thinsp;gnuBalance: <b>${{usdAccounts.Pension.gnuBalance}}</b><br><br>
+                &emsp;&ensp;401k Balance: <b>${{usdAccounts.V401k.balance}}</b><br>
+                &emsp;&emsp;&thinsp;gnuBalance: <b>${{usdAccounts.V401k.gnuBalance}}</b><br>
+            </div>
+            <div style="width: 25%; display:table-cell">
+                <b><a href="{% url 'Worthy' %}" target="_blank">Worthy</a></b><br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="worthyLogin">Login</button>&emsp;
+                    <button type="submit" name="worthyBalance">Balance</button>&emsp;
+                </form><br>
+                &emsp;&ensp;&thinsp;balance: <b>${{usdAccounts.Worthy.balance}}</b><br>
+                gnuBalance: <b>${{usdAccounts.Worthy.gnuBalance}}</b><br>
+            </div>
+        </div>
+    </div>
+    <h2>Monthly Crypto</h2>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="Crypto">Crypto</button><br><br>
+    </form>
+    <div style="width: 100%; display: table;">
+        <div style="display: table-row;">
+            <div style="width: 16%; display:table-cell">
+                <b><a href="{% url 'Coinbase' %}" target="_blank">Coinbase</a></b><br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="coinbaseMain">Main</button>
+                    <button type="submit" name="coinbaseLogin">Login</button>
+                    <button type="submit" name="coinbaseBalance">Balance</button>
+                </form><br><br>
+                LRC Balance: <b>{{cryptoAccounts.Loopring.balance}}</b> <br>
+                &ensp;&thinsp;gnuBalance: {{cryptoAccounts.Loopring.gnuBalance}} <br>
+            </div>
+            <div style="width: 16%; display:table-cell">
+                <b><a href="{% url 'Eternl' %}" target="_blank">Eternl</a></b><br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="eternlMain">Main</button>
+                    <button type="submit" name="eternlLogin">Login</button>
+                    <button type="submit" name="eternlBalance">Balance</button>
+                </form><br><br>
+                ADA Balance: {{cryptoAccounts.Cardano.balance}}<br>
+                &ensp;&thinsp;gnuBalance: {{cryptoAccounts.Cardano.gnuBalance}}<br>
+            </div>
+            <div style="width: 16%; display:table-cell">
+                <b><a href="{% url 'Exodus' %}" target="_blank">Exodus</a></b><br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="exodusMain">Main</button>
+                </form><br><br>
+                ATOM Balance: <b>{{cryptoAccounts.Cosmos.balance}}</b><br>
+                &emsp;&ensp;gnuBalance: {{cryptoAccounts.Cosmos.gnuBalance}}<br>
+            </div>
+            <div style="width: 16%; display:table-cell">
+                <b><a href="{% url 'IoPay' %}" target="_blank">IoPay</a></b><br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="ioPayMain">Main</button>
+                </form><br><br>
+                IOTX Balance: <b>{{cryptoAccounts.IoTex.balance}}</b><br>
+                &emsp;gnuBalance: {{cryptoAccounts.IoTex.gnuBalance}}<br>
+            </div>
+            <div style="width: 16%; display:table-cell">
+                <b><a href="{% url 'Kraken' %}" target="_blank">Kraken</a></b><br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="krakenMain">Main</button>
+                    <button type="submit" name="krakenLogin">Login</button>
+                    <button type="submit" name="krakenBalance">Balance</button>
+                </form><br><br>
+                ETH2 Balance: {{cryptoAccounts.Ethereum2.balance}}<br>
+                &emsp;&thinsp;gnuBalance: {{cryptoAccounts.Ethereum2.gnuBalance}}<br>
+            </div>
+            <div style="width: 16%; display:table-cell">
+                <b><a href="{% url 'Ledger' %}" target="_blank">Ledger</a></b><br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="ledgerMain">Main</button>
+                </form><br><br>
+                {% for coin in cryptoAccounts.ledgerAccounts %}
+                    {{coin.symbol}} balance: {{coin.balance}} <br>
+                    &emsp;gnuBalance: {{coin.gnuBalance}}<br><br>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

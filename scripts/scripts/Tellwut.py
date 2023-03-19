@@ -8,9 +8,14 @@ from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Tellwut":
     from Classes.WebDriver import Driver
+    from Classes.Asset import Crypto
     from Functions.GeneralFunctions import showMessage
+    from Functions.GnuCashFunctions import openGnuCashBook
 else:
     from .Functions.GeneralFunctions import showMessage
+    from .Functions.GnuCashFunctions import openGnuCashBook   
+    from .Classes.Asset import Crypto
+ 
 
 def locateTellWutWindow(driver):
     found = driver.findWindowByUrl("tellwut.com")
@@ -53,7 +58,11 @@ def completeTellWutSurveys(driver):
     driver.webDriver.implicitly_wait(2)
     driver.webDriver.get('https://www.tellwut.com/most_recent_surveys') # load most recent surveys page
     time.sleep(2)
-    driver.webDriver.find_element(By.XPATH,"//*[@id='surveyList']/div[1]/div[2]/div[1]/a").click() # survey link
+    try:
+        driver.webDriver.find_element(By.XPATH,"//*[@id='surveyList']/div[1]/div[2]/div[1]/a").click() # survey link
+    except NoSuchElementException:
+        exception = "no surveys"
+        return False
     while True:
         try:
             clickButtons(driver, 'radio')
@@ -81,14 +90,16 @@ def redeemTellWutRewards(driver):
     driver.webDriver.find_element(By.ID, "accept-additional").click()
     time.sleep(3)
 
-def runTellwut(driver):
+def runTellwut(driver, account):
     locateTellWutWindow(driver)
     completeTellWutSurveys(driver)
-    balance = getTellWutBalance(driver)
-    if int(balance) >= 4000:
+    account.setBalance(getTellWutBalance(driver))
+    account.updateMRBalance(openGnuCashBook('Finance', False, False))
+    if int(account.balance) >= 4000:
         redeemTellWutRewards(driver)
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    runTellwut(driver)
-    
+    Tellwut = Crypto("Tellwut")
+    runTellwut(driver, Tellwut)
+    Tellwut.getData()

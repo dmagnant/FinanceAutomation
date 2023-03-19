@@ -4,11 +4,43 @@
 
 {% block content %}
     <h1>Sofi</h1>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="main">Main</button><br>
-        <button type="submit" name="login">Login</button><br>
-        <button type="submit" name="checkingBalance">Checking Balance</button><br>
-        <button type="submit" name="savingsBalance">Savings Balance</button><br>
-    </form>
+    <div style="width: 100%; display: table;">
+        <div style="display: table-row;">
+            <div style="width: 20%; display:table-cell">
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="main">Main</button><br>
+                    <button type="submit" name="login">Login</button><br>
+                    <button type="submit" name="balances">Get Balances</button><br>
+                    <button type="submit" name="logout">Logout</button><br>
+                </form>
+            </div>
+            <div style="width: 80%; display:table-cell">
+                Checking Balance: <b>${{Checking.balance}}</b><br>
+                &thinsp;gnuCash Balance: <b>${{Checking.gnuBalance}}</b><br>
+                Review Transactions:<br><br>
+                <div style="width: 50%; display: table;">
+                    {%for tr in Checking.reviewTransactions %}
+                    <div style="display: table-row;">
+                        <div style="width: 20%; display:table-cell">
+                            {{tr}}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div><br><br>
+                &ensp;Savings Balance: <b>${{Savings.balance}}</b><br>
+                &thinsp;gnuCash Balance: <b>${{Savings.gnuBalance}}</b><br>
+                Review Transactions: <br><br>
+                <div style="width: 50%; display: table;">
+                    {%for tr in Savings.reviewTransactions %}
+                    <div style="display: table-row;">
+                        <div style="width: 20%; display:table-cell">
+                            {{tr}}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

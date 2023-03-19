@@ -17,16 +17,15 @@ def locateAmazonWindow(driver):
             driver.webDriver.switch_to.window(found)
             time.sleep(1)
 
-def confirmAmazonGCBalance(driver):
-    AmazonGC = USD("AmazonGC")
+def confirmAmazonGCBalance(driver, account):
     locateAmazonWindow(driver)
-    AmazonGC.setBalance(driver.webDriver.find_element(By.ID, "gc-ui-balance-gc-balance-value").text.strip('$'))    
-    if str(AmazonGC.gnuBalance) != AmazonGC.balance:
-        showMessage("Amazon GC Mismatch", f'Amazon balance: {AmazonGC.balance} \n' f'Gnu Cash balance: {AmazonGC.gnuBalance} \n')
-    return AmazonGC
+    account.setBalance(driver.webDriver.find_element(By.ID, "gc-ui-balance-gc-balance-value").text.strip('$'))    
+    if str(account.gnuBalance) != account.balance:
+        showMessage("Amazon GC Mismatch", f'Amazon balance: {account.balance} \n' f'Gnu Cash balance: {account.gnuBalance} \n')
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    response = confirmAmazonGCBalance(driver)
-    print(response.balance)
+    AmazonGC = USD("AmazonGC")    
+    confirmAmazonGCBalance(driver, AmazonGC)
+    AmazonGC.getData()
 

@@ -114,22 +114,21 @@ def claimBarclaysRewards(driver):
     # click Redeem now
     driver.find_element(By.ID, "redeem-continue").click()
 
-def runBarclays(driver):
+def runBarclays(driver, account):
     today = datetime.today()
-    Barclays = USD("Barclays")
     locateBarclaysWindow(driver)
-    Barclays.setBalance(getBarclaysBalance(driver))
+    account.setBalance(getBarclaysBalance(driver))
     rewardsBalance = float(driver.webDriver.find_element(By.XPATH, "//*[@id='rewardsTile']/div[2]/div/div[2]/div[1]/div").text.strip('$'))
     transactionsCSV = exportBarclaysTransactions(driver.webDriver, today)
     if rewardsBalance >= float(50):
         claimBarclaysRewards(driver)
-    importGnuTransaction(Barclays, transactionsCSV, driver.webDriver, 5)
-    Barclays.locateAndUpdateSpreadsheet(driver)
-    if Barclays.reviewTransactions:
+    importGnuTransaction(account, transactionsCSV, driver.webDriver, 5)
+    account.locateAndUpdateSpreadsheet(driver)
+    if account.reviewTransactions:
         openGnuCashUI('Finances')
-    showMessage("Balances + Review", f'Barclays balance: {Barclays.balance} \n' f'GnuCash Barclays balance: {Barclays.gnuBalance} \n \n' f'Review transactions:\n{Barclays.reviewTransactions}')
-    driver.webDriver.close()
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    runBarclays(driver)
+    Barclays = USD("Barclays")    
+    runBarclays(driver, Barclays)
+    Barclays.getData()

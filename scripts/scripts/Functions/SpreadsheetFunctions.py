@@ -3,7 +3,7 @@ import time
 import gspread
 
 from .GeneralFunctions import getCryptocurrencyPrice, setDirectory, showMessage, getStockPrice
-from .GnuCashFunctions import updateCryptoPriceInGnucash
+from .GnuCashFunctions import updatePriceInGnucash
 
 def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", modified=False):
     def getCell(account, month):
@@ -31,7 +31,7 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
                 case 'Chase':
                     return ['F8', 'S8', 'C43', 'K43', 'S43', 'C78', 'K78', 'S78', 'C113', 'K113', 'S113', 'C8']            
                 case 'Barclays':
-                    return ['K9', 'S9', 'C44', 'K44', 'S44', 'C79', 'K79', 'S79', 'C114', 'K114', 'S114', 'C9']
+                    return ['K4', 'S4', 'C39', 'K39', 'S39', 'C74', 'K74', 'S74', 'C109', 'K109', 'S109', 'C4']
                 #Joint
                 case 'BoA-joint':
                     return ['K16', 'S16', 'C52', 'K52', 'S52', 'C88', 'K88', 'S88', 'C124', 'K124', 'S124', 'C16']
@@ -133,7 +133,7 @@ def updateCryptoPrices(driver):
         i = coinNames.index(coin)
         symbol = coinSymbols[i]
         price = format(coinPrices[coin]["usd"], ".2f")
-        updateCryptoPriceInGnucash(symbol, price)
+        updatePriceInGnucash(symbol, price)
         worksheet.update((priceColumn + str(i + 2)), float(price))
 
 def updateInvestmentPrices(driver):

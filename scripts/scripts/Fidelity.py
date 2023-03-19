@@ -20,24 +20,21 @@ def locateFidelityWindow(driver):
 
 def fidelityLogin(driver):
     driver.openNewWindow('https://digital.fidelity.com/prgw/digital/login/full-page')
-    # enter password
+    time.sleep(1)
     driver.webDriver.find_element(By.ID,'password').send_keys(getPassword('Fidelity'))
-    # click login
-    driver.webDriver.find_element(By.ID,'fs-login-button').click()
+    time.sleep(1)
+    driver.webDriver.find_element(By.ID,'fs-login-button').click() # login
 
 def getFidelityBalance(driver):
     locateFidelityWindow(driver)
-    return driver.webDriver.find_element(By.XPATH,"/html/body/ap143528-portsum-dashboard-root/dashboard-root/div/div[3]/accounts-selector/nav/div[2]/div[2]/div/pvd3-link/s-root/span/a/span/s-slot/s-assigned-wrapper/div/div/div[2]/div/span[2]").text.replace('$','')
+    return driver.webDriver.find_element(By.XPATH,"/html/body/ap143528-portsum-dashboard-root/dashboard-root/div/div[3]/accounts-selector/nav/div[2]/div[2]/div/pvd3-link/s-root/span/a/span/s-slot/s-assigned-wrapper/div/div/div[2]/div/span[2]").text.replace('$','').replace(',','')
 
-def runFidelity(driver):
+def runFidelity(driver, account):
     locateFidelityWindow(driver)
-    Fidelity = USD("Fidelity")
-    Fidelity.setBalance(getFidelityBalance(driver))
-    return Fidelity
+    account.setBalance(getFidelityBalance(driver))
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    response = runFidelity(driver)
-    response.getData()
-
-    
+    Fidelity = USD("Fidelity")
+    runFidelity(driver, Fidelity)
+    Fidelity.getData()

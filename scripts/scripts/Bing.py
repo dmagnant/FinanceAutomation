@@ -6,104 +6,100 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Bing":
+    from Classes.Asset import Crypto
     from Classes.WebDriver import Driver
-
+    from Functions.GnuCashFunctions import openGnuCashBook
+else:
+    from .Classes.Asset import Crypto 
+    from .Classes.WebDriver import Driver
+    from .Functions.GnuCashFunctions import openGnuCashBook
+ 
+def locateBingWindow(driver):
+    found = driver.findWindowByUrl("rewards.bing.com")
+    if not found:
+        bingLogin(driver)
+    else:
+        driver.webDriver.switch_to.window(found)
+        time.sleep(1)
+    return True
+   
 def bingLogin(driver):
-    driver.get('https://rewards.microsoft.com/')
+    driver.openNewWindow('https://rewards.bing.com')
     time.sleep(2)
-    driver.maximize_window()
-    driver.implicitly_wait(1)
+    driver.webDriver.implicitly_wait(1)
     time.sleep(1)
-    # login
     try:
-        # click Sign in
-        driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/main/section/div[1]/div[2]/section/div[1]/a[2]").click()
+        driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[2]/main/section/div[1]/div[2]/section/div[1]/a[2]").click() # sign in
         time.sleep(1)
-        # click Next
-        driver.find_element(By.ID, "idSIButton9").click()
+        driver.webDriver.find_element(By.ID, "idSIButton9").click() # next
         time.sleep(1)
         time.sleep(1)
-        # click Sign in
-        driver.find_element(By.ID, "idSIButton9").click()
+        driver.webDriver.find_element(By.ID, "idSIButton9").click() # sign in
         time.sleep(1)
-        # click to stay signed in
-        driver.find_element(By.XPATH, "/html/body/div/form/div/div/div[2]/div[1]/div/div/div/div/div/div[3]/div/div[2]/div/div[3]/div[2]/div/div/div[2]/input").click()
-        # click sign in link
-        driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/main/section/div[1]/div[2]/section/div[1]/a[2]").click()
+        driver.webDriver.find_element(By.XPATH, "/html/body/div/form/div/div/div[2]/div[1]/div/div/div/div/div/div[3]/div/div[2]/div/div[3]/div[2]/div/div/div[2]/input").click() # stay signed in
+        driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[2]/main/section/div[1]/div[2]/section/div[1]/a[2]").click() # sign in link
     except NoSuchElementException:
         exception = "already logged in"
 
 def bingActivities(driver):
-    # gather "points" links
-    pointsLinks = driver.find_elements(By.CSS_SELECTOR, "div.actionLink.x-hidden-vp1")
-
-    # click on first link
-    pointsLinks[0].click()
+    locateBingWindow(driver)
+    pointsLinks = driver.webDriver.find_elements(By.CSS_SELECTOR, "div.actionLink.x-hidden-vp1")
+    pointsLinks[0].click() # first link
     time.sleep(1)
-    # switch to last window
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.switchToLastWindow()
     time.sleep(1)
     driver.close()
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-
-    # click on Daily Poll
-    pointsLinks[2].click()
+    driver.switchToLastWindow()
+    pointsLinks[2].click() # Daily Poll
     time.sleep(1)
-    # switch to last window
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    driver.switchToLastWindow()
     try:
-        if driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/span/a'):
+        if driver.webDriver.find_element(By.XPATH, '/html/body/div[2]/div[2]/span/a'):
             time.sleep(1)
-            driver.close()
-            driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+            driver.webDriver.close()
+            driver.switchToLastWindow()
             time.sleep(1)
             pointsLinks[2].click()
-            # switch to last window
-            driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+            driver.switchToLastWindow()
     except NoSuchElementException:
         exception = "caught"
     time.sleep(2)
     pyautogui.leftClick(350, 950)
     time.sleep(2)
-    # click multiple choice option
-    pyautogui.leftClick(1225, 925)
-    # click True/False option
-    # click True
-    pyautogui.leftClick(350, 950)
+    pyautogui.leftClick(1225, 925) # multiple choice option
+    pyautogui.leftClick(350, 950) # click True
     time.sleep(1)
-    # click False
-    pyautogui.leftClick(425, 950)
-    driver.close()
-    driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+    pyautogui.leftClick(425, 950) # click False
+    driver.webDriver.close()
+    driver.switchToLastWindow()
 
 def getBingBalance(driver):
-    return driver.find_element(By.XPATH, "//*[@id='balanceToolTipDiv']/p/mee-rewards-counter-animation/span").text.replace(',', '')
+    locateBingWindow(driver)
+    return driver.webDriver.find_element(By.XPATH, "//*[@id='balanceToolTipDiv']/p/mee-rewards-counter-animation/span").text.replace(',', '')
 
 def claimBingRewards(driver):
-    # go to $5 Amazon gift card link
-    driver.get("https://rewards.microsoft.com/redeem/000800000000")
+    locateBingWindow(driver)
+    driver.webDriver.get("https://rewards.microsoft.com/redeem/000800000000")     # go to $5 Amazon gift card link
     time.sleep(3)
-    # click Redeem Reward
-    driver.find_element(By.XPATH, "//*[@id='redeem-pdp_000800000000']/span[1]").click()
+    driver.webDriver.find_element(By.XPATH, "//*[@id='redeem-pdp_000800000000']/span[1]").click() # Redeem Reward
     time.sleep(3)
-    # click Confirm Reward
-    driver.find_element(By.XPATH, "//*[@id='redeem-checkout-review-confirm']/span[1]").click()
+    driver.webDriver.find_element(By.XPATH, "//*[@id='redeem-checkout-review-confirm']/span[1]").click() # Confirm Reward
     try:
-        # enter Phone number
-        driver.find_element(By.ID, "redeem-checkout-challenge-fullnumber").send_keys(os.environ.get('Phone'))
-        # click Send
-        driver.find_element(By.XPATH, "//*[@id='redeem-checkout-challenge-validate']/span").click()
+        driver.webDriver.find_element(By.ID, "redeem-checkout-challenge-fullnumber").send_keys(os.environ.get('Phone'))
+        driver.webDriver.find_element(By.XPATH, "//*[@id='redeem-checkout-challenge-validate']/span").click() # Send
     except NoSuchElementException:
         exception = "caught"
 
-def runBing(driver):
-    bingLogin(driver)
+def runBing(driver, account):
+    locateBingWindow(driver)
     bingActivities(driver)
-    balance = getBingBalance(driver)
-    if int(balance) >= 5250:
+    account.setBalance(getBingBalance(driver))
+    account.updateMRBalance(openGnuCashBook('Finance', False, False))
+    if int(account.balance) >= 5250:
         claimBingRewards(driver)
 
 if __name__ == '__main__':
-    driver = Driver("Edge", False)
-    runBing(driver.webDriver)
-    
+    driver = Driver("Chrome")
+    Bing = Crypto("Bing")
+    runBing(driver, Bing)
+    Bing.getData()

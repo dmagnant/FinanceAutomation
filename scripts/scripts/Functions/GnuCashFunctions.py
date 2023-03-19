@@ -23,16 +23,16 @@ def openGnuCashBook(type, readOnly, openIfLocked):
         bookPathSuffix = r"\Finances\Personal Finances\test.gnucash"
     book = setDirectory() + bookPathSuffix
     try:
-        myBook = piecash.open_book(book, readonly=readOnly, open_if_lock=openIfLocked)
+        myBook = piecash.open_book(book, readonly=readOnly, open_if_lock=openIfLocked, check_same_thread=False)
     except GnucashException:
         showMessage("Gnucash file open", f'Close Gnucash file then click OK \n')
-        myBook = piecash.open_book(book, readonly=readOnly, open_if_lock=openIfLocked)
+        myBook = piecash.open_book(book, readonly=readOnly, open_if_lock=openIfLocked, check_same_thread=False)
     return myBook
 
 def getGnuCashBalance(myBook, accountPath):
-    with myBook as book:
-        balance = book.accounts(fullname=accountPath).get_balance()
-    book.close()
+    balance = myBook.accounts(fullname=accountPath).get_balance()
+    if balance == 0:
+        balance = (str(balance).replace('-', ''))
     return balance
 
 def getAccountPath(account):
@@ -107,6 +107,16 @@ def getAccountPath(account):
             return "Assets:Non-Liquid Assets:Pension"  
         case 'Worthy':
             return "Assets:Liquid Assets:Bonds:Worthy Bonds"
+        case 'Bing':
+            return "Assets:Non-Liquid Assets:MR:Bing"
+        case 'Paidviewpoint':
+            return "Assets:Non-Liquid Assets:MR:Paidviewpoint"        
+        case 'Pinecone':
+            return "Assets:Non-Liquid Assets:MR:Pinecone"
+        case 'Swagbucks':
+            return "Assets:Non-Liquid Assets:MR:Swagbucks"
+        case 'Tellwut':
+            return "Assets:Non-Liquid Assets:MR:Tellwut"
         case _:
             print(f'account: {accountName} not found in "getAccountPath" function')
 
@@ -127,8 +137,6 @@ def modifyTransactionDescription(description, amount="0.00"):
         description = "Ally Transfer"
     elif "FID BKG SVC LLC" in description.upper():
         description = "Fidelity IRA Transfer"
-    elif "M1 FINANCE" in description.upper():
-        description = "M1 IRA Transfer"
     elif "CITY OF MILWAUKE B2P*MILWWA" in description.upper():
         description = "Water Bill"
     elif "DOVENMUEHLE MTG MORTG PYMT" in description.upper():
@@ -208,7 +216,9 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
         elif "Alliant Transfer" in description:
             toAccount = "Assets:Liquid Assets:Promos:Alliant"
         elif "KAINTH" in description:
-            toAccount = "Expenses:Groceries"                
+            toAccount = "Expenses:Groceries"
+        elif "MINI MARKET MILWAUKEE WI" in description:
+            toAccount = "Expenses:Groceries"
         elif "CRYPTO PURCHASE" in description.upper():
             toAccount = "Assets:Non-Liquid Assets:CryptoCurrency"
         elif "Pinecone Research" in description:
@@ -219,8 +229,8 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
             toAccount = "Income:Credit Card Rewards"
         elif "Fidelity IRA Transfer" in description:
             toAccount = "Assets:Non-Liquid Assets:IRA:Fidelity"
-        elif "M1 IRA Transfer" in description:
-            toAccount = "Assets:Non-Liquid Assets:IRA:M1 Finance"
+        elif "MILWAUKEE ELECTRIC TO" in description:
+            toAccount = "Expenses:Home Expenses:Maintenance"
         elif "CASH REWARDS STATEMENT CREDIT" in description:
             toAccount = "Income:Credit Card Rewards"        
         elif "Chase CC Rewards" in description:
@@ -299,7 +309,7 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
             description = row[1]
             amount = Decimal(row[2])
             fromAccount = "Assets:Ally Checking Account"
-            reviewTransPath = row[0] + ", " + row[1] + ", " + row[2] + "\n"
+            reviewTransPath = row[0] + ", " + row[1] + ", " + row[2]
         elif account == 'Amex':
             postDate = datetime.strptime(row[0], '%m/%d/%Y')
             description = row[1]
@@ -307,7 +317,7 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
             if "AUTOPAY PAYMENT" in description.upper():
                 skipTransaction = True
             fromAccount = "Liabilities:Credit Cards:Amex BlueCash Everyday"
-            reviewTransPath = row[0] + ", " + row[1] + ", " + row[2] + "\n"
+            reviewTransPath = row[0] + ", " + row[1] + ", " + row[2]
         elif account == 'Barclays':
             postDate = datetime.strptime(row[0], '%m/%d/%Y')
             description = row[1]
@@ -315,7 +325,7 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
             if "PAYMENT RECEIVED" in description.upper():
                 skipTransaction = True
             fromAccount = "Liabilities:Credit Cards:BarclayCard CashForward"
-            reviewTransPath = row[0] + ", " + row[1] + ", " + row[3] + "\n"
+            reviewTransPath = row[0] + ", " + row[1] + ", " + row[3]
         elif account == 'BoA':
             postDate = datetime.strptime(row[0], '%m/%d/%Y')
             description = row[2]
@@ -323,7 +333,7 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
             if "BA ELECTRONIC PAYMENT" in description.upper():
                 skipTransaction = True
             fromAccount = "Liabilities:Credit Cards:BankAmericard Cash Rewards"
-            reviewTransPath = row[0] + ", " + row[2] + ", " + row[4] + "\n"
+            reviewTransPath = row[0] + ", " + row[2] + ", " + row[4]
         elif account == 'BoA-joint':
             postDate = datetime.strptime(row[0], '%m/%d/%Y')
             description = row[2]
@@ -331,7 +341,7 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
             if "BA ELECTRONIC PAYMENT" in description.upper():
                 skipTransaction = True
             fromAccount = "Liabilities:BoA Credit Card"
-            reviewTransPath = row[0] + ", " + row[2] + ", " + row[4] + "\n"
+            reviewTransPath = row[0] + ", " + row[2] + ", " + row[4]
         elif account == 'Chase':
             postDate = datetime.strptime(row[1], '%m/%d/%Y')
             description = row[2]
@@ -339,7 +349,7 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
             if "AUTOMATIC PAYMENT" in description.upper():
                 skipTransaction = True
             fromAccount = "Liabilities:Credit Cards:Chase Freedom"
-            reviewTransPath = row[1] + ", " + row[2] + ", " + row[5] + "\n"
+            reviewTransPath = row[1] + ", " + row[2] + ", " + row[5]
         elif account == 'Discover':
             postDate = datetime.strptime(row[1], '%m/%d/%Y')
             description = row[2]
@@ -347,13 +357,13 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
             if "DIRECTPAY FULL BALANCE" in description.upper():
                 skipTransaction = True
             fromAccount = "Liabilities:Credit Cards:Discover It"
-            reviewTransPath = row[1] + ", " + row[2] + ", " + row[3] + "\n"
+            reviewTransPath = row[1] + ", " + row[2] + ", " + row[3]
         elif account == 'Sofi Checking':
             postDate = datetime.strptime(row[0], '%Y-%m-%d')
             description = row[1]
             amount = Decimal(row[2])
             fromAccount = "Assets:Liquid Assets:Sofi:Checking"
-            reviewTransPath = row[0] + ", " + row[1] + ", " + row[2] + "\n"
+            reviewTransPath = row[0] + ", " + row[1] + ", " + row[2]
         elif account == 'Sofi Savings':
             postDate = datetime.strptime(row[0], '%Y-%m-%d')
             description = row[1]
@@ -361,7 +371,7 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
                 skipTransaction = True
             amount = Decimal(row[2])
             fromAccount = "Assets:Liquid Assets:Sofi:Savings"
-            reviewTransPath = row[0] + ", " + row[1] + ", " + row[2] + "\n"
+            reviewTransPath = row[0] + ", " + row[1] + ", " + row[2]
         description = modifyTransactionDescription(description)
         return [postDate, description, amount, skipTransaction, fromAccount, reviewTransPath]
     def getEnergyBillAmounts(driver, amount, energyBillNum):
@@ -481,7 +491,6 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
 
     book = 'Home' if (account.name == 'Ally' or account.name == 'BoA-joint') else 'Finance'
     myBook = openGnuCashBook(book, False, False)
-    reviewTrans = ''
     rowCount = 0
     lineCount = 0
     energyBillNum = 0
@@ -504,14 +513,10 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
                 if 'ARCADIA' in description.upper():
                     energyBillNum += 1
                     amount = getEnergyBillAmounts(driver, transactionVariables[2], energyBillNum)
-                elif 'NM PAYCHECK' in description.upper() or "CRYPTO PURCHASE" in description.upper():
-                    reviewTrans = reviewTrans + transactionVariables[5]
-                else:
-                    if toAccount == "Expenses:Other":
-                        reviewTrans = reviewTrans + transactionVariables[5]
+                elif 'NM PAYCHECK' in description.upper() or "CRYPTO PURCHASE" in description.upper() or toAccount == "Expenses:Other":
+                    account.setReviewTransactions(transactionVariables[5])
                 writeGnuTransaction(myBook, description, postDate, amount, fromAccount, toAccount)
     account.updateGnuBalance(myBook)
-    account.setReviewTransactions(reviewTrans)
     
 def importUniqueTransactionsToGnuCash(account, transactionsCSV, driver, dateRange, lineStart=1):
     directory = setDirectory()
@@ -585,9 +590,18 @@ def writeGnuTransaction(myBook, description, postDate, amount, fromAccount, toAc
         Transaction(post_date=postDate, currency=myBook.currencies(mnemonic="USD"), description=description, splits=split)
         book.save()
         book.flush()
-    book.close()
-    
-def updateCryptoPriceInGnucash(symbol, coinPrice):
+        book.close()
+
+def getPriceInGnucash(symbol, date=''):
+    myBook = openGnuCashBook('Finance', True, True)
+    if symbol == "ETH2":
+        symbol = 'ETH'
+    if date:
+        return myBook.prices(commodity=myBook.commodities(mnemonic=symbol), currency=myBook.currencies(mnemonic="USD"), date=date).value  # raise a KeyError if Price does not exist
+    else:
+        return myBook.prices(commodity=myBook.commodities(mnemonic=symbol), currency=myBook.currencies(mnemonic="USD")).value  # raise a KeyError if Price does not exist
+
+def updatePriceInGnucash(symbol, coinPrice):
     myBook = openGnuCashBook('Finance', False, False)
     try: 
         gnuCashPrice = myBook.prices(commodity=myBook.commodities(mnemonic=symbol), currency=myBook.currencies(mnemonic="USD"), date=datetime.today().date())  # raise a KeyError if Price does not exist
@@ -595,6 +609,7 @@ def updateCryptoPriceInGnucash(symbol, coinPrice):
     except KeyError:
         p = Price(myBook.commodities(mnemonic=symbol), myBook.currencies(mnemonic="USD"), datetime.today().date(), coinPrice, "last")
     myBook.save()
+    myBook.flush()
     myBook.close()
 
 def getDollarsInvestedPerCoin(name):
@@ -749,7 +764,7 @@ def getTotalOfAutomatedMRAccounts(myBook):
 
 def writeCryptoTransaction():
     mybook = openGnuCashBook('Finance', False, False)
-    from_account = 'Assets:Liquid Assets:M1 Spend'
+    from_account = 'Assets:Liquid Assets:Sofi:Checking'
     to_account = 'Assets:Non-Liquid Assets:CryptoCurrency:Cardano'
     fee_account = 'Expenses:Bank Fees:Coinbase Fee'
     amount = Decimal(50.00)
@@ -764,4 +779,4 @@ def writeCryptoTransaction():
         Transaction(post_date=postdate.date(), currency=mybook.currencies(mnemonic="USD"), description=description, splits=split)
         book.save()
         book.flush()
-    book.close()
+        book.close()

@@ -77,20 +77,20 @@ def claimDiscoverRewards(driver):
     except (NoSuchElementException, ElementClickInterceptedException):
         exception = "caught"
 
-def runDiscover(driver):
+def runDiscover(driver, account):
     today = datetime.today()
-    Discover = USD("Discover")
     locateDiscoverWindow(driver)
-    Discover.setBalance(getDiscoverBalance(driver))
+    account.setBalance(getDiscoverBalance(driver))
     transactionsCSV = exportDiscoverTransactions(driver.webDriver, today)
     claimDiscoverRewards(driver)
-    importGnuTransaction(Discover, transactionsCSV, driver.webDriver)
-    Discover.locateAndUpdateSpreadsheet(driver)
-    if Discover.reviewTransactions:
+    importGnuTransaction(account, transactionsCSV, driver.webDriver)
+    account.locateAndUpdateSpreadsheet(driver)
+    if account.reviewTransactions:
         openGnuCashUI('Finances')
-    showMessage("Balances + Review", f'Discover Balance: {Discover.balance} \n' f'GnuCash Discover Balance: {Discover.gnuBalance} \n \n' f'Review transactions:\n{Discover.reviewTransactions}')
-    driver.webDriver.close()
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    runDiscover(driver)
+    Discover = USD("Discover")
+    runDiscover(driver, Discover)
+    Discover.getData()
+    

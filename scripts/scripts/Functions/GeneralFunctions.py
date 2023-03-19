@@ -2,6 +2,7 @@ import ctypes
 import os
 import time
 from datetime import timedelta
+import math
 
 import psutil
 import pyautogui
@@ -122,15 +123,20 @@ def getStartAndEndOfDateRange(today, timeSpan):
             enddate = today.replace(month=month - 1, day=31)
         if timeSpan == "YTD":
             startdate = startdate.replace(month=1, day=1)
-    return [startdate.date(), enddate.date()]
+    return [startdate, enddate]
 
 def getCryptocurrencyPrice(coinList):
     return CoinGeckoAPI().get_price(ids=coinList, vs_currencies='usd')
      
 def getStockPrice(driver, symbol):
     driver.openNewWindow('https://finance.yahoo.com/quote/' + symbol + "/")
+    driver.webDriver.implicitly_wait(1)
     try:
         driver.webDriver.find_element(By.XPATH,"//*[@id='myLightboxContainer']/section/button[1]/svg").click()
     except NoSuchElementException:
         exception = 'pop-up window not there'
-    return driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/div/div/div[1]/div/div[2]/div/div/div[6]/div/div/div/div[3]/div[1]/div/fin-streamer[1]").text.replace('$', '')
+    price = float(driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/div/div/div[1]/div/div[2]/div/div/div[6]/div/div/div/div[3]/div[1]/div/fin-streamer[1]").text.replace('$', ''))
+    driver.webDriver.close()
+    driver.getLastWindow()
+    driver.webDriver.implicitly_wait(3)
+    return round(price, 2)

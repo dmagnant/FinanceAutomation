@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Credit Cards{% endblock %}
+{% block content %}
+    <h2>Credit Cards</h2>
+    <div style="width: 100%; display: table;">
+        <div style="display: table-row;">
+            <div style="width: 16%; display:table-cell">
+                <b><a href="{% url 'Amex' %}" target="_blank">Amex</a></b>
+                &emsp;Bill Date: 12th<br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="amexMain">Main</button>
+                    <button type="submit" name="amexLogin">Login</button>
+                    <button type="submit" name="amexBalances">Balance</button>
+                    <button type="submit" name="amexRewards">Rewards</button>
+                </form><br>
+                &emsp;&ensp;&thinsp;balance: <b>${{Amex.balance}}</b><br>
+                gnuBalance: <b>${{Amex.gnuBalance}}</b><br>
+                Review Transactions:<br><br>
+                <div style="width: 50%; display: table;">
+                    {%for tr in Amex.reviewTransactions %}
+                    <div style="display: table-row;">
+                        <div style="width: 20%; display:table-cell">
+                            {{tr}}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div style="width: 16%; display:table-cell">
+                <b><a href="{% url 'Barclays' %}" target="_blank">Barclays</a></b>
+                &emsp;Bill Date: 4th<br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="barclaysMain">Main</button>
+                    <button type="submit" name="barclaysLogin">Login</button>
+                    <button type="submit" name="barclaysBalances">Balance</button>
+                    <button type="submit" name="barclaysRewards">Rewards</button>
+                </form><br>
+                &emsp;&ensp;&thinsp;balance: <b>${{Barclays.balance}}</b><br>
+                gnuBalance: <b>${{Barclays.gnuBalance}}</b><br>
+                Review Transactions:<br><br>
+                <div style="width: 50%; display: table;">
+                    {%for tr in Barclays.reviewTransactions %}
+                    <div style="display: table-row;">
+                        <div style="width: 20%; display:table-cell">
+                            {{tr}}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div style="width: 16%; display:table-cell">
+                <b><a href="{% url 'BoA' %}" target="_blank">BoA Personal</a></b>
+                &emsp;Bill Date: 6th<br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="boaPMain">Main</button>
+                    <button type="submit" name="boaPLogin">Login</button>
+                    <button type="submit" name="boaPBalances">Balance</button>
+                    <button type="submit" name="boaPRewards">Rewards</button>
+                </form><br>
+                &emsp;&ensp;&thinsp;balance: <b>${{BoA_P.balance}}</b><br>
+                gnuBalance: <b>${{BoA_P.gnuBalance}}</b><br>
+                Review Transactions:<br><br>
+                <div style="width: 50%; display: table;">
+                    {%for tr in BoA_P.reviewTransactions %}
+                    <div style="display: table-row;">
+                        <div style="width: 20%; display:table-cell">
+                            {{tr}}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div style="width: 16%; display:table-cell">
+                <b><a href="{% url 'BoA' %}" target="_blank">BoA Joint</a></b>
+                &emsp;Bill Date: 17th<br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="boaJMain">Main</button>
+                    <button type="submit" name="boaJLogin">Login</button>
+                    <button type="submit" name="boaJBalances">Balance</button>
+                    <button type="submit" name="boaJRewards">Rewards</button>
+                </form><br>
+                &emsp;&ensp;&thinsp;balance: <b>${{BoA_J.balance}}</b><br>
+                gnuBalance: <b>${{BoA_J.gnuBalance}}</b><br>
+                Review Transactions:<br><br>
+                <div style="width: 50%; display: table;">
+                    {%for tr in BoA_J.reviewTransactions %}
+                    <div style="display: table-row;">
+                        <div style="width: 20%; display:table-cell">
+                            {{tr}}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div style="width: 16%; display:table-cell">
+                <b><a href="{% url 'Chase' %}" target="_blank">Chase</a></b>
+                &emsp;Bill Date: 9th<br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="chaseMain">Main</button>
+                    <button type="submit" name="chaseLogin">Login</button>
+                    <button type="submit" name="chaseBalances">Balance</button>
+                    <button type="submit" name="chaseRewards">Rewards</button>
+                </form><br>
+                &emsp;&ensp;&thinsp;balance: <b>${{Chase.balance}}</b><br>
+                gnuBalance: <b>${{Chase.gnuBalance}}</b><br>
+                Review Transactions:<br><br>
+                <div style="width: 50%; display: table;">
+                    {%for tr in Chase.reviewTransactions %}
+                    <div style="display: table-row;">
+                        <div style="width: 20%; display:table-cell">
+                            {{tr}}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div style="width: 16%; display:table-cell">
+                <b><a href="{% url 'Discover' %}" target="_blank">Discover</a></b>
+                &emsp;Bill Date: 13th<br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="discoverMain">Main</button>
+                    <button type="submit" name="discoverLogin">Login</button>
+                    <button type="submit" name="discoverBalances">Balance</button>
+                    <button type="submit" name="discoverRewards">Rewards</button>
+                </form><br>
+                &emsp;&ensp;&thinsp;balance: <b>${{Discover.balance}}</b><br>
+                gnuBalance: <b>${{Discover.gnuBalance}}</b><br>
+                Review Transactions:<br><br>
+                <div style="width: 50%; display: table;">
+                    {%for tr in Discover.reviewTransactions %}
+                    <div style="display: table-row;">
+                        <div style="width: 20%; display:table-cell">
+                            {{tr}}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

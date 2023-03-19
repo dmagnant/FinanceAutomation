@@ -4,17 +4,49 @@
 
 {% block content %}
     <h1>Bank of America</h1>
-    <form method="post">
-        <label for="account">Account </label><br>
-        <form method="post" id="account">
-            <input type="radio" id="Personal" name="account" value="Personal" required>
-            <label for="Personal">Personal</label><br>
-            <input type="radio" id="Joint" name="account" value="Joint">
-            <label for="Joint">Joint</label><br>
-        {% csrf_token %}
-        <button type="submit" name="main">Main</button><br>
-        <button type="submit" name="login">Login</button><br>
-        <button type="submit" name="balance">Balance</button><br>
-        <button type="submit" name="rewards">Rewards</button><br>
-    </form>
+    <div style="width: 100%; display: table;">
+        <div style="display: table-row;">
+            <div style="width: 20%; display:table-cell">
+                <form method="post">
+                    <label for="account">Account</label><br>
+                    <form method="post" id="account">
+                        <input type="radio" id="Personal" name="account" value="Personal" required>
+                        <label for="Personal">Personal</label><br>
+                        <input type="radio" id="BoA-joint" name="account" value="Joint">
+                        <label for="Joint">Joint</label><br>
+                    {% csrf_token %}
+                    <button type="submit" name="main">Main</button><br>
+                    <button type="submit" name="login">Login</button><br>
+                    <button type="submit" name="balance">Balance</button><br>
+                    <button type="submit" name="rewards">Rewards</button><br><br>
+                </form>
+            </div>
+            <div style="width: 80%; display:table-cell">
+                Personal Balance: <b>${{Personal.balance}}</b><br>
+                gnuCash Balance: <b>${{Personal.gnuBalance}}</b><br>
+                Review Transactions:<br><br>
+                <div style="width: 50%; display: table;">
+                    {%for tr in Personal.reviewTransactions %}
+                    <div style="display: table-row;">
+                        <div style="width: 20%; display:table-cell">
+                            {{tr}}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div><br><br>
+                &emsp;&emsp;Joint Balance: <b>${{Joint.balance}}</b><br>
+                gnuCash Balance: <b>${{Joint.gnuBalance}}</b><br>
+                Review Transactions: <br><br>
+                <div style="width: 50%; display: table;">
+                    {%for tr in Joint.reviewTransactions %}
+                    <div style="display: table-row;">
+                        <div style="width: 20%; display:table-cell">
+                            {{tr}}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

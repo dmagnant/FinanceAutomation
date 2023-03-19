@@ -4,10 +4,24 @@
 
 {% block content %}
     <h1>Vanguard</h1>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="main">Main</button><br>
-        <button type="submit" name="login">Login</button><br>
-        <button type="submit" name="balance">Balance</button>
-    </form>
+    <div style="width: 100%; display: table;">
+        <div style="display: table-row;">
+            <div style="width: 20%; display:table-cell">
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="main">Main</button><br>
+                    <button type="submit" name="login">Login</button><br>
+                    <button type="submit" name="balance">Balance</button>
+                </form>
+            </div>
+            <div style="width: 80%; display:table-cell">
+                Pension Balance: <b>${{Pension.balance}}</b><br>
+                &emsp;&emsp;&thinsp;gnuBalance: <b>${{Pension.gnuBalance}}</b><br>
+                &emsp;&emsp;&emsp;&emsp;Interest: <b>${{PensionInterest}}</b><br>
+                &emsp;&ensp;Contributions: <b>${{PensionContributions}}</b><br><br>
+                &emsp;&ensp;401k Balance: <b>${{V401k.balance}}</b><br>
+                &emsp;&emsp;&thinsp;gnuBalance: <b>${{V401k.gnuBalance}}</b><br>
+            </div>
+        </div>
+    </div>
 {% endblock %}

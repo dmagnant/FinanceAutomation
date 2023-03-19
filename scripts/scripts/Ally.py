@@ -61,10 +61,8 @@ def allyLogin(driver):
     
 def allyLogout(driver):
     locateAllyWindow(driver)
-    # Click Profile and Settings
-    driver.webDriver.find_element(By.XPATH, "//*[@id='app']/div[1]/header/div[1]/div/nav/div/div[3]/div/button/p").click()
-    # click Log out
-    driver.webDriver.find_element(By.XPATH, "//*[@id='profile-menu-logout']/span").click()
+    driver.webDriver.find_element(By.XPATH, "//*[@id='app']/div[1]/header/div[1]/div/nav/div/div[3]/div/button/p").click() # Profile and Settings
+    driver.webDriver.find_element(By.XPATH, "//*[@id='profile-menu-logout']/span").click() # Log out
 
 def getAllyBalance(driver):
     locateAllyWindow(driver)
@@ -72,7 +70,7 @@ def getAllyBalance(driver):
 
 def captureAllyTransactions(driver, dateRange):
     def setAllyTransactionElementRoot(row, column):
-        return "/html/body/div/div[1]/main/div/div/div/div[1]/section/div[2]/div/table/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/div/"
+        return "/html/body/div/div[1]/main/div/div/div/div[1]/div/div/span/div[3]/section[2]/div[2]/div/table/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/div/"
     
     allyActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\ally.csv"
     open(allyActivity, 'w', newline='').truncate()
@@ -93,7 +91,6 @@ def captureAllyTransactions(driver, dateRange):
                 column += 1
                 element = setAllyTransactionElementRoot(row, column)
                 amount = driver.find_element(By.XPATH, element + "span").text.replace('$', '').replace(',', '')
-                # method to remove '-' from string since the above wasn't working
                 if not amount[0].isnumeric():
                     amount = -Decimal(amount.replace(amount[0], ''))
                 description = modifyTransactionDescription(description)
@@ -106,22 +103,18 @@ def captureAllyTransactions(driver, dateRange):
             insideDateRange = False
     return allyActivity
 
-def runAlly(driver):
+def runAlly(driver, account):
     dateRange = getStartAndEndOfDateRange(datetime.today().date(), 7)
-    Ally = USD("Ally")
     locateAllyWindow(driver)
-    Ally.setBalance(getAllyBalance(driver))
+    account.setBalance(getAllyBalance(driver))
     allyActivity = captureAllyTransactions(driver.webDriver, dateRange)
-    importUniqueTransactionsToGnuCash(Ally, allyActivity, driver.webDriver, dateRange, 0)
-    return Ally
+    importUniqueTransactionsToGnuCash(account, allyActivity, driver.webDriver, dateRange, 0)
+    
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    # response = runAlly(driver)
-    # response.getData()
-    # allyLogout(driver)
+    Ally = USD("Ally")
+    runAlly(driver, Ally)
+    Ally.getData()
+    allyLogout(driver)
     
-    
-    locateAllyWindow(driver)
-    driver.webDriver.find_element(By.XPATH,'/html/body/div/div[1]/main/div/div/div/div[1]/div/div/span/div[1]/button[1]/span').click()
-    time.sleep(1)

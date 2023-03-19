@@ -40,7 +40,7 @@ def krakenLogin(driver):
         exception = 'already logged in'
     time.sleep(2)
 
-def getKrakenBalances(driver):
+def getKrakenBalance(driver):
     locateKrakenWindow(driver)
     driver.webDriver.get('https://www.kraken.com/u/history/ledger')
     eth2Balance = ''
@@ -52,24 +52,18 @@ def getKrakenBalances(driver):
             if not eth2Balance:
                 eth2Balance = float(balance)
         num = 21 if eth2Balance else num + 1
-    return [eth2Balance]
+    return eth2Balance
 
-def runKraken(driver):
+def runKraken(driver, account):
     locateKrakenWindow(driver)
-    Ethereum2 = Crypto("Ethereum2")
-    balances = getKrakenBalances(driver)
-    coinList = [Ethereum2]
-    for coin in coinList:
-        if coin.name == "Ethereum2":
-            Ethereum2.setBalance(balances[0])
-            Ethereum2.setPrice(getCryptocurrencyPrice('ethereum')['ethereum']['usd'])
-            Ethereum2.updateBalanceInSpreadSheet()
-            Ethereum2.updateBalanceInGnuCash()
-    return coinList
+    account.setBalance(getKrakenBalance(driver))
+    account.setPrice(getCryptocurrencyPrice('ethereum')['ethereum']['usd'])
+    account.updateBalanceInSpreadSheet()
+    account.updateBalanceInGnuCash()
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    response = runKraken(driver)
-    for coin in response:
-        coin.getData()
+    Ethereum2 = Crypto("Ethereum2")
+    runKraken(driver, Ethereum2)
+    Ethereum2.getData()
         

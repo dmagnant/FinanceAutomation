@@ -1,8 +1,0 @@
-{% extends "base.html" %}
-{% block title %}Periodic Scripts{% endblock %}
-{% block content %}
-    <h1>Periodic Scripts</h1>
-    {% for script in scripts %}
-    <a href="{% url script %}" target="_blank">{{script}}</a><br>
-    {% endfor %}
-{% endblock %}

@@ -4,10 +4,20 @@
 
 {% block content %}
     <h1>Eternl</h1>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="main">Main</button><br>
-        <button type="submit" name="login">Login</button><br>
-        <button type="submit" name="balance">Balance</button><br>
-    </form>  
+    <div style="width: 100%; display: table;">
+        <div style="display: table-row;">
+            <div style="width: 20%; display:table-cell">
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="main">Main</button><br>
+                    <button type="submit" name="login">Login</button><br>
+                    <button type="submit" name="balance">Balance</button><br>
+                </form>
+            </div>
+            <div style="width: 80%; display:table-cell">
+                &emsp;&emsp;&emsp;&emsp;&ensp;balance: <b>{{account.balance}}</b> ada<br>
+                gnuCash balance: <b>{{account.gnuBalance}}</b> ada<br>
+            </div>
+        </div>
+    </div>
 {% endblock %}

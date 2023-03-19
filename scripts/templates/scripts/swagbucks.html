@@ -4,19 +4,30 @@
 
 {% block content %}
     <h1>Swagbucks</h1>
-    <form method="post">
-        {% csrf_token %}
-        <input type="checkbox" name="Run Alu" checked="yes">Run Alu?</input>
-        <button type="submit" name="main">Main</button>
-    </form>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="login">Login</button><br>
-        <button type="submit" name="alu">Alus Revenge</button><br>
-        <button type="submit" name="content">Content Discovery</button><br>
-        <button type="submit" name="search">Search</button><br>
-        <button type="submit" name="balance">Balance</button><br>
-        <button type="submit" name="rewards">Rewards</button><br>
-        <button type="submit" name="inbox">Inbox</button>
-    </form>
+    <div style="width: 100%; display: table;">
+        <div style="display: table-row;">
+            <div style="width: 20%; display:table-cell">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="checkbox" name="Run Alu" checked="yes">Run Alu?</input>
+                    <button type="submit" name="main">Main</button>
+                </form>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="login">Login</button><br>
+                    <button type="submit" name="alu">Alus Revenge</button><br>
+                    <button type="submit" name="content">Content Discovery</button><br>
+                    <button type="submit" name="search">Search</button><br>
+                    <button type="submit" name="rewards">Rewards</button><br>
+                    <button type="submit" name="inbox">Inbox</button>
+                </form>
+            </div>
+            <div style="width: 80%; display:table-cell">
+                &emsp;&thinsp;Balance: <b>{{Swagbucks.gnuBalance}}</b><br>
+                Redeem at: 1000<br><br>
+            </div>
+        </div>
+    </div>
 {% endblock %}
+
+

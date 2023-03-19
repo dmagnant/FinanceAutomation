@@ -25,15 +25,13 @@ def getEternlBalance(driver):
     locateEternlWindow(driver)
     return float(driver.webDriver.find_element(By.XPATH, "//*[@id='cc-main-container']/div/div[1]/div/main/div[1]/div/div[1]/div/div[1]/div[2]/div/div/div/div[1]/div").text.strip('(initializing)').replace('\n', '').strip('₳').replace(',', ''))
 
-def runEternl(driver):
-    Cardano = Crypto("Cardano", 'ADA-Eternl')
-    Cardano.setBalance(getEternlBalance(driver))
-    Cardano.setPrice(Cardano.getPriceFromCoinGecko())
-    Cardano.updateSpreadsheetAndGnuCash()
-    return [Cardano]
+def runEternl(driver, account):
+    account.setBalance(getEternlBalance(driver))
+    account.setPrice(Cardano.getPriceFromCoinGecko())
+    account.updateSpreadsheetAndGnuCash()
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    response = runEternl(driver)
-    for coin in response:
-        coin.getData()
+    Cardano = Crypto("Cardano", 'ADA-Eternl')    
+    runEternl(driver, Cardano)
+    Cardano.getData()

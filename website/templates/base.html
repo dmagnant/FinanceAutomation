@@ -11,17 +11,21 @@
 <body>
     {% block content %}
     {% endblock %}
-    <br><br><br>
-    <a href="{% url 'scripts' %}" >All Scripts</a><br><br>
-    <b>Periodic Scripts: </b> &emsp;
-    <a href="{% url 'Daily_MR' %}" >Daily MR</a> &emsp;
-    <a href="{% url 'Daily_Bank' %}" >Daily Banking</a> &emsp;
-    <a href="{% url 'Monthly_Bank' %}" >Monthly Banking</a> &emsp;
-    <a href="{% url 'UpdateGoals' %}" >Update Goals</a>
+    <br>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="close windows">Close Windows</button>
+    </form>
+    <br><br>
+    <a href="{% url 'scripts' %}" >All Scripts</a> &emsp;
+    <a href="{% url 'Daily' %}" >Daily</a> &emsp;
+    <a href="{% url 'Monthly' %}" >Monthly</a> &emsp;
+    <a href="{% url 'UpdateGoals' %}" >Update Goals</a> &emsp;
+    <a href="{% url 'creditCards' %}" >Credit Cards</a>
     <br><br>
     <b>Spreadsheets: </b> &emsp;
     <a href="https://docs.google.com/spreadsheets/d/1684fQ-gW5A0uOf7s45p9tC4GiEE5s5_fjO5E7dgVI1s/edit#gid=1300163920" target="_blank">Checking Balance</a> &emsp;
     <a href="https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=1449745658" target="_blank">Asset Allocation</a> &emsp;
-    <a href="https://docs.google.com/spreadsheets/d/1oP3U7y8qywvXG9U_zYXgjFfqHrCyPtUDl4zPDftFCdM/edit#gid=14744444" target="_blank">Joint Expenses</a>
+    <a href="https://docs.google.com/spreadsheets/d/1oP3U7y8qywvXG9U_zYXgjFfqHrCyPtUDl4zPDftFCdM/edit#gid=14744444" target="_blank">Joint Expenses</a><br>
 </body>
 </html>

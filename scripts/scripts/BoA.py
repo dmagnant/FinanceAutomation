@@ -28,20 +28,17 @@ def locateBoAWindowAndOpenAccount(driver, account):
 def boALogin(driver, account):
     driver.openNewWindow('https://www.bankofamerica.com/')
     driver = driver.webDriver
-    # login
     driver.find_element(By.ID, "onlineId1").send_keys(getUsername('BoA CC'))
     driver.find_element(By.ID, "passcode1").send_keys(getPassword('BoA CC'))
     driver.find_element(By.XPATH, "//*[@id='signIn']").click()
-    # handle ID verification
-    try:
+    try:     # handle ID verification
         driver.find_element(By.XPATH, "//*[@id='btnARContinue']/span[1]").click()
         showMessage("Get Verification Code", "Enter code, then click OK")
         driver.find_element(By.XPATH, "//*[@id='yes-recognize']").click()
         driver.find_element(By.XPATH, "//*[@id='continue-auth-number']/span").click()
     except NoSuchElementException:
         exception = "Caught"
-    # handle security questions
-    try:
+    try:     # handle security questions
         question = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/div[2]/label").text
         q1 = "What is the name of a college you applied to but didn't attend?"
         a1 = os.environ.get('CollegeApplied')
@@ -50,8 +47,7 @@ def boALogin(driver, account):
         q3 = "What is the name of your first babysitter?"
         a3 = os.environ.get('FirstBabySitter')
         if driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/div[2]/label"):
-            question = driver.find_element(By.XPATH, 
-                "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/div[2]/label").text
+            question = driver.find_element(By.XPATH,"/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/div[2]/label").text
             if question == q1:
                 driver.find_element(By.NAME, "challengeQuestionAnswer").send_keys(a1)
             elif question == q2:
@@ -62,19 +58,17 @@ def boALogin(driver, account):
             driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/a[1]/span").click()
     except NoSuchElementException:
         exception = "Caught"
-
-    # close mobile app pop-up
-    try:
+    try:     # close mobile app pop-up
         driver.find_element(By.XPATH, "//*[@id='sasi-overlay-module-modalClose']/span[1]").click()
     except NoSuchElementException:
         exception = "Caught"
-    partialLink = 'Customized Cash Rewards Visa Signature - 8549' if account == "Personal" else 'Travel Rewards Visa Signature - 8955'
+    partialLink = 'Travel Rewards Visa Signature - 8955' if 'joint' in account else 'Customized Cash Rewards Visa Signature - 8549'
     driver.find_element(By.PARTIAL_LINK_TEXT, partialLink).click()
     time.sleep(3)
 
 def getBoABalance(driver, account):
     locateBoAWindowAndOpenAccount(driver, account)
-    return driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[3]/div[4]/div[3]/div/div[2]/div[2]/div[2]").text.replace('$','').replace(',','')
+    return driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[3]/div[5]/div[3]/div/div[2]/div[2]/div[2]").text.replace('$','').replace(',','')
 
 def exportBoATransactions(driver, account, today):
     # click Previous transactions
@@ -88,44 +82,14 @@ def exportBoATransactions(driver, account, today):
     year = today.year
     stmtMonth = today.strftime("%B")
     stmtYear = str(year)
-    accountNum = "_8549.csv" if account == "Personal" else "_8955.csv"
+    accountNum = "_8955.csv" if 'joint' in account else "_8549.csv"
     return os.path.join(r"C:\Users\dmagn\Downloads", stmtMonth + stmtYear + accountNum)
 
 def claimBoARewards(driver, account):
     locateBoAWindowAndOpenAccount(driver, account)
     driver = driver.webDriver
     driver.implicitly_wait(10)
-    if account == "Personal":
-        # # REDEEM REWARDS
-        # click on View/Redeem menu
-        driver.find_element(By.XPATH, "/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[3]/a").click()
-        time.sleep(5)
-        #scroll down to view button
-        driver.execute_script("window.scrollTo(0, 300)")
-        time.sleep(3)
-        # wait for Redeem Cash Rewards button to load, click it
-        driver.find_element(By.ID, "rewardsRedeembtn").click()
-        # switch to last window
-        driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-        # close out of pop-up (if present)
-        try:
-            driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div/button").click()
-        except NoSuchElementException:
-            exception = "caught"
-        # if no pop-up, proceed to click on Redemption option
-        driver.find_element(By.ID, "redemption_option").click()
-        # redeem if there is a balance, else skip
-        try:
-            # Choose Visa - statement credit
-            driver.find_element(By.ID, "redemption_option").send_keys("v")
-            driver.find_element(By.ID, "redemption_option").send_keys(Keys.ENTER)
-            # click on Redeem all
-            driver.find_element(By.ID, "redeem-all").click()
-            # click Complete Redemption
-            driver.find_element(By.ID, "complete-otr-confirm").click()
-        except ElementNotInteractableException:
-            exception = "caught"
-    elif account == 'Joint': # may need to address minimum of 2500 points restriction
+    if 'joint' in account: # may need to address minimum of 2500 points restriction
         # click View/Redeem
         driver.find_element(By.XPATH,"/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[2]/a").click()
         # click Redeem Points
@@ -162,24 +126,52 @@ def claimBoARewards(driver, account):
             driver.find_element(By.XPATH,"/html/body/main/div/div[2]/div/div[1]/div/div[2]/table/tbody/tr[7]/td/div/input").click()
             # click Complete redemption
             driver.find_element(By.XPATH,"/html/body/div[2]/div[2]/div[1]/div[1]/div[4]/input[1]").click()
+    else:
+        # # REDEEM REWARDS
+        # click on View/Redeem menu
+        driver.find_element(By.XPATH, "/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[3]/a").click()
+        time.sleep(5)
+        #scroll down to view button
+        driver.execute_script("window.scrollTo(0, 300)")
+        time.sleep(3)
+        # wait for Redeem Cash Rewards button to load, click it
+        driver.find_element(By.ID, "rewardsRedeembtn").click()
+        # switch to last window
+        driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
+        # close out of pop-up (if present)
+        try:
+            driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div/button").click()
+        except NoSuchElementException:
+            exception = "caught"
+        # if no pop-up, proceed to click on Redemption option
+        driver.find_element(By.ID, "redemption_option").click()
+        # redeem if there is a balance, else skip
+        try:
+            # Choose Visa - statement credit
+            driver.find_element(By.ID, "redemption_option").send_keys("v")
+            driver.find_element(By.ID, "redemption_option").send_keys(Keys.ENTER)
+            # click on Redeem all
+            driver.find_element(By.ID, "redeem-all").click()
+            # click Complete Redemption
+            driver.find_element(By.ID, "complete-otr-confirm").click()
+        except ElementNotInteractableException:
+            exception = "caught"
 
 def runBoA(driver, account):
     today = datetime.today()
-    importAccount = 'BoA' if account == "Personal" else 'BoA-joint'
-    BoA = USD(importAccount)
-    locateBoAWindowAndOpenAccount(driver, account)
-    BoA.setBalance(getBoABalance(driver, account))
-    transactionsCSV = exportBoATransactions(driver.webDriver, account, today)
-    claimBoARewards(driver, account)
-    importGnuTransaction(BoA, transactionsCSV, driver.webDriver)
-    BoA.locateAndUpdateSpreadsheet(driver)
-    if BoA.reviewTransactions:
-        openGnuCashUI('Finances') if account == "Personal" else openGnuCashUI('Home')
-    showMessage("Balances + Review", f'BoA Balance: {BoA.balance} \n' f'GnuCash BoA Balance: {BoA.gnuBalance} \n \n' f'Review transactions:\n{BoA.reviewTransactions}')
-    driver.webDriver.close()
+    locateBoAWindowAndOpenAccount(driver, account.name)
+    account.setBalance(getBoABalance(driver, account.name))
+    transactionsCSV = exportBoATransactions(driver.webDriver, account.name, today)
+    claimBoARewards(driver, account.name)
+    importGnuTransaction(account, transactionsCSV, driver.webDriver)
+    account.locateAndUpdateSpreadsheet(driver)
+    if account.reviewTransactions:
+        openGnuCashUI('Home') if 'joint' in account.name else openGnuCashUI('Finances')
     # startExpressVPN()
 
 if __name__ == '__main__':
-    SET_ACCOUNT_VARIABLE = "Personal" # Personal or Joint
+    SET_ACCOUNT_VARIABLE = "Personal" # Personal or BoA-joint
     driver = Driver("Chrome")
-    runBoA(driver, SET_ACCOUNT_VARIABLE)
+    BoA = USD(SET_ACCOUNT_VARIABLE)
+    runBoA(driver, BoA)
+    BoA.getData()

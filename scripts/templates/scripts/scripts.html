@@ -2,40 +2,32 @@
 {% block title %}All Scripts{% endblock %}
 {% block content %}
     <h1>All Scripts</h1>
-
     <div style="width: 100%; display: table;">
         <div style="display: table-row;">
-            <div style="width: 20%; display:table-cell">
-                <b>Deposit Accounts</b><br>
-                {% for script in deposit %}
+            <div style="width: 25%; display:table-cell">
+                <b>Bank Accounts</b><br><br>
+                {% for script in bank %}
                 <a href="{% url script %}" target="_blank">{{script}}</a><br>
                 {% endfor %}
-            </div>
-            <div style="width: 20%; display:table-cell">
-                <b>Investment Accounts</b><br>
-                {% for script in investment %}
-                <a href="{% url script %}" target="_blank">{{script}}</a><br>
-                {% endfor %}
-            </div>            
-            <div style="width: 20%; display:table-cell">
-                <b>Credit Cards</b><br>
+            </div> 
+            <div style="width: 25%; display:table-cell">
+                <b>Credit Cards</b><br><br>
                 {% for script in cc %}
                 <a href="{% url script %}" target="_blank">{{script}}</a><br>
                 {% endfor %}
             </div>
-            <div style="width: 20%; display:table-cell">
-                <b>Crypto Accounts</b><br>
+            <div style="width: 25%; display:table-cell">
+                <b>Crypto Accounts</b><br><br>
                 {% for script in crypto %}
                 <a href="{% url script %}" target="_blank">{{script}}</a><br>
                 {% endfor %}
             </div>
-            <div style="width: 20%; display:table-cell">
-                <b>MR Scripts</b><br>
+            <div style="width: 25%; display:table-cell">
+                <b>MR Scripts</b><br><br>
                 {% for script in mr %}
                 <a href="{% url script %}" target="_blank">{{script}}</a><br>
                 {% endfor %}
             </div>
         </div>
     </div>
-
 {% endblock %}
