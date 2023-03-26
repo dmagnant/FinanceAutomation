@@ -599,7 +599,6 @@ def writeGnuTransaction(myBook, transactionVariables, toAccount=''):
             split = [Split(value=-transactionVariables['amount'], memo="scripted", account=myBook.accounts(fullname=toAccount)),
                     Split(value=transactionVariables['amount'], memo="scripted", account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
         Transaction(post_date=transactionVariables['postDate'], currency=myBook.currencies(mnemonic="USD"), description=transactionVariables['description'], splits=split)
-        print('here')
         book.save()
         book.flush()
         book.close()
