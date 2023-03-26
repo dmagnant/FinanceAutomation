@@ -5,6 +5,7 @@
     <form method="post">
         {% csrf_token %}
         <button type="submit" name="bank">Daily Banking</button>
+        <button type="submit" name="paypal">Paypal</button>
         <button type="submit" name="tearDown">teardown</button><br><br>
     </form>
     <div style="width: 100%; display: table;">
@@ -158,7 +159,7 @@
                 <form method="post">
                     {% csrf_token %}
                     <button type="submit" name="swagbucksLogin">Login</button>
-                    <button type="submit" name="swagbucksContent">Content</button>
+                    <button type="submit" name="swagbucksBalance">Balance</button>
                     <button type="submit" name="swagbucksRewards">Rewards</button><br><br>
                 </form>
                 &emsp;&thinsp;Balance: <b>{{mrAccounts.Swagbucks.gnuBalance}}</b><br>
@@ -166,6 +167,7 @@
                 <form method="post">
                     {% csrf_token %}
                     <button type="submit" name="swagbucksInbox">Inbox</button>
+                    <button type="submit" name="swagbucksContent">Content</button>
                     <button type="submit" name="swabucksSearch">Search</button><br>
                 </form>
             </div>

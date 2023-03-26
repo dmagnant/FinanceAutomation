@@ -67,7 +67,17 @@ def runCoinbase(driver, coinList):
     getCoinbaseBalances(driver, coinList)
     
 if __name__ == '__main__':
-    driver = Driver("Chrome")
-    Loopring = Crypto("Loopring")
-    runCoinbase(driver, [Loopring])
-    Loopring.getData()
+    # driver = Driver("Chrome")
+    # Loopring = Crypto("Loopring")
+    # runCoinbase(driver, [Loopring])
+    # Loopring.getData()
+    color = 'blue'
+    
+    Test = {
+        'test': color
+    }
+    print(Test['test'])
+    
+    Test['test'] = 'red'
+    
+    print(Test['test'])

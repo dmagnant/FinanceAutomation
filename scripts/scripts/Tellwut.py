@@ -79,6 +79,7 @@ def completeTellWutSurveys(driver):
             try:
                 submitButton = findSubmitButton(driver)
                 showMessage('survey not complete', 'finish survey manually')
+                driver.webDriver.find_element(By.XPATH,"//*[@id='next-survey-btn']/a").click() # NEXT POLL
             except NoSuchElementException:
                 break
 

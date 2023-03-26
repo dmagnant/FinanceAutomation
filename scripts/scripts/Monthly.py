@@ -4,6 +4,7 @@ from decimal import Decimal
 if __name__ == '__main__' or __name__ == "Monthly":
     from Classes.Asset import USD, Crypto
     from Classes.WebDriver import Driver
+    from Functions.GnuCashFunctions import getGnuCashBalance, getAccountPath
     from Eternl import runEternl
     from Coinbase import runCoinbase
     from Exodus import runExodus
@@ -11,7 +12,7 @@ if __name__ == '__main__' or __name__ == "Monthly":
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange, showMessage)
     from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction, getTotalOfAutomatedMRAccounts
     from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPrices
-    from HealthEquity import getHealthEquityBalances
+    from HealthEquity import runHealthEquity
     from IoPay import runIoPay
     from Kraken import runKraken
     from MyConstant import runMyConstant
@@ -20,6 +21,7 @@ if __name__ == '__main__' or __name__ == "Monthly":
 else:
     from .Classes.Asset import USD, Crypto
     from .Classes.WebDriver import Driver
+    from .Functions.GnuCashFunctions import getGnuCashBalance, getAccountPath    
     from .Coinbase import runCoinbase
     from .Eternl import runEternl
     from .Exodus import runExodus
@@ -27,7 +29,7 @@ else:
     from .Functions.GeneralFunctions import (getStartAndEndOfDateRange, showMessage)
     from .Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction, getTotalOfAutomatedMRAccounts
     from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPrices
-    from .HealthEquity import getHealthEquityBalances
+    from .HealthEquity import runHealthEquity
     from .IoPay import runIoPay
     from .Kraken import runKraken
     from .MyConstant import runMyConstant
@@ -35,7 +37,6 @@ else:
     from .Worthy import getWorthyBalance
 
 def getMonthlyAccounts(type):
-    accounts = dict()
     if type == 'USD':
         Fidelity = USD("Fidelity")
         HealthEquity = USD("HSA")
@@ -72,10 +73,29 @@ def monthlyRoundUp(account, myBook, date, HSADividends):
     change = Decimal(account.balance - float(account.gnuBalance))
     change = round(change, 2)
     if account.name == "MyConstant" or account.name == "Worthy":
-        writeGnuTransaction(myBook, "Interest", date, -change, "Income:Investments:Interest", account.gnuAccount)
+        transactionVariables = {
+            'postDate': date,
+            'description': "Interest",
+            'amount': -change,
+            'fromAccount': account.gnuAccount,
+        }
+        # writeGnuTransaction(myBook, "Interest", date, -change, "Income:Investments:Interest", account.gnuAccount)
     elif account.name == "HSA":
         HEHSAMarketChange = round(Decimal(change - HSADividends), 2)
-        writeGnuTransaction(myBook, "HSA Statement", date, [change, -HSADividends, -HEHSAMarketChange], ["Income:Investments:Dividends", "Income:Investments:Market Change"], "Assets:Non-Liquid Assets:HSA:NM HSA")
+        amount = {
+            'change': change,
+            'HSADividends': -HSADividends,
+            'HEHSAMarketChange': -HEHSAMarketChange
+        }
+        transactionVariables = {
+            'postDate': date,
+            'description': "HSA Statement",
+            'amount': amount,
+            'fromAccount': "Income:Investments:Market Change",
+        }
+        # writeGnuTransaction(myBook, "HSA Statement", date, [change, -HSADividends, -HEHSAMarketChange], ["Income:Investments:Dividends", "Income:Investments:Market Change"], "Assets:Non-Liquid Assets:HSA:NM HSA")
+    writeGnuTransaction(myBook, transactionVariables, "Assets:Non-Liquid Assets:HSA:NM HSA")
+
 
 def runUSD(driver, today, accounts):
     year = today.year
@@ -83,29 +103,29 @@ def runUSD(driver, today, accounts):
     lastMonth = getStartAndEndOfDateRange(today, "month")
     myBook = openGnuCashBook('Finance', False, False)
     # MyConstant = runMyConstant(driver, "USD")
-    getWorthyBalance(driver, accounts.Worthy)
-    HSA_dividends = getHealthEquityBalances(driver)
-    monthlyRoundUp(accounts.Worthy, myBook, lastMonth[1], HSA_dividends)
-    monthlyRoundUp(accounts.HealthEquity, myBook, lastMonth[1], HSA_dividends)
+    getWorthyBalance(driver, accounts['Worthy'])
+    HSA_dividends = runHealthEquity(driver)
+    monthlyRoundUp(accounts['Worthy'], myBook, lastMonth['endDate'], HSA_dividends)
+    monthlyRoundUp(accounts['HealthEquity'], myBook, lastMonth['endDate'], HSA_dividends)
     LiquidAssets = USD("Liquid Assets")
     Bonds = USD("Bonds")
     openSpreadsheet(driver, 'Asset Allocation', '2022')
     updateSpreadsheet('Asset Allocation', year, Bonds.name, month, float(Bonds.gnuBalance), 'Liquid Assets')
     updateSpreadsheet('Asset Allocation', year, LiquidAssets.name, month, float(LiquidAssets.gnuBalance), 'Liquid Assets')
-    updateSpreadsheet('Asset Allocation', year, accounts.V401k.name, month, accounts.V401k.balance, '401k')
+    updateSpreadsheet('Asset Allocation', year, accounts['V401k'].name, month, accounts['V401k'].balance, '401k')
     updateInvestmentPrices(driver)
 
 def runCrypto(driver, today, accounts):
     year = today.year
     month = today.month
     openSpreadsheet(driver, 'Asset Allocation', 'Cryptocurrency')
-    runEternl(driver, accounts.Cardano)
-    runKraken(driver, accounts.Ethereum2)
-    runIoPay(driver, accounts.IoTex)
-    runLedger(accounts.ledgerAccounts)
-    runCoinbase(driver, accounts.Loopring)
+    runEternl(driver, accounts['Cardano'])
+    runKraken(driver, accounts['Ethereum2'])
+    runIoPay(driver, accounts['IoTex'])
+    runLedger(accounts['ledgerAccounts'])
+    runCoinbase(driver, accounts['Loopring'])
     accounts.CryptoPortfolio.updateGnuBalance(openGnuCashBook('Finance', True, True))
-    updateSpreadsheet('Asset Allocation', year, accounts.CryptoPortfolio.name, month, float(round(accounts.CryptoPortfolio.gnuBalance, 2)), accounts.CryptoPortfolio.name)
+    updateSpreadsheet('Asset Allocation', year, accounts['CryptoPortfolio'].name, month, float(round(accounts['CryptoPortfolio'].gnuBalance, 2)), accounts['CryptoPortfolio'].name)
 
 def runMonthlyBank():
     today = datetime.today().date()
@@ -122,4 +142,16 @@ if __name__ == '__main__':
     # getTotalOfAutomatedMRAccounts(myBook)
     
     driver = Driver("Chrome")
-    updateInvestmentPrices(driver)
+    # Home = USD("Home")
+    # updateInvestmentPrices(driver, Home)
+    HealthEquity = USD("HSA")
+    Vanguard = USD("Vanguard401k")
+    HEaccounts = {
+        'HealthEquity': HealthEquity, 
+        'Vanguard': Vanguard
+    }
+    today = datetime.today().date()
+    myBook = openGnuCashBook('Finance', False, False)
+    lastMonth = getStartAndEndOfDateRange(today, "month")
+    HSA_dividends = runHealthEquity(driver, HEaccounts)
+    monthlyRoundUp(HealthEquity, myBook, lastMonth['endDate'], HSA_dividends)

@@ -3,6 +3,7 @@ import os
 import time
 from datetime import timedelta
 import math
+from decimal import Decimal
 
 import psutil
 import pyautogui
@@ -106,24 +107,27 @@ def getStartAndEndOfDateRange(today, timeSpan):
     month = today.month
     year = today.year
     if isinstance(timeSpan, int):
-        enddate = today
-        startdate = (enddate - timedelta(days=timeSpan))
+        endDate = today
+        startDate = (endDate - timedelta(days=timeSpan))
     else:
         if month == 1:
-            startdate = today.replace(month=12, day=1, year=year - 1)
-            enddate = today.replace(month=12, day=31, year=year - 1)
+            startDate = today.replace(month=12, day=1, year=year - 1)
+            endDate = today.replace(month=12, day=31, year=year - 1)
         elif month == 3:
-            startdate = today.replace(month=2, day=1)
-            enddate = today.replace(month=2, day=28)
+            startDate = today.replace(month=2, day=1)
+            endDate = today.replace(month=2, day=28)
         elif month in [5, 7, 10, 12]:
-            startdate = today.replace(month=month - 1, day=1)
-            enddate = today.replace(month=month - 1, day=30)
+            startDate = today.replace(month=month - 1, day=1)
+            endDate = today.replace(month=month - 1, day=30)
         else:
-            startdate = today.replace(month=month - 1, day=1)
-            enddate = today.replace(month=month - 1, day=31)
+            startDate = today.replace(month=month - 1, day=1)
+            endDate = today.replace(month=month - 1, day=31)
         if timeSpan == "YTD":
-            startdate = startdate.replace(month=1, day=1)
-    return [startdate, enddate]
+            startDate = startDate.replace(month=1, day=1)
+    return {
+        'startDate': startDate,
+        'endDate': endDate
+    }
 
 def getCryptocurrencyPrice(coinList):
     return CoinGeckoAPI().get_price(ids=coinList, vs_currencies='usd')
@@ -137,6 +141,6 @@ def getStockPrice(driver, symbol):
         exception = 'pop-up window not there'
     price = float(driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/div/div/div[1]/div/div[2]/div/div/div[6]/div/div/div/div[3]/div[1]/div/fin-streamer[1]").text.replace('$', ''))
     driver.webDriver.close()
-    driver.getLastWindow()
+    driver.switchToLastWindow()
     driver.webDriver.implicitly_wait(3)
-    return round(price, 2)
+    return round(Decimal(price), 2)

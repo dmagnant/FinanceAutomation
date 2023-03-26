@@ -81,7 +81,11 @@ def getSofiBalanceAndOrientPage(driver, account):
         table += 1
         balance = findBalanceElement(driver.webDriver, table, div)
     account.setBalance(balance)
-    return [table, div]
+    return {
+        'table': table,
+        'div': div
+    }
+    # [table, div]
 
 def setSofiTransactionElementRoot(table, row, column, div):
     return "/html/body/div/main/div[3]/div[" + div + "]/table[" + str(table) + "]/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/span"
@@ -104,7 +108,7 @@ def getTransactionsFromSofiWebsite(driver, dateRange, today, tableStart, div):
             except ValueError:
                 # capture Date in 'M/D/YY' format
                 sofiDate = datetime.strptime(driver.find_element(By.XPATH, elementRoot).text, "%m/%d/%y").date()
-            if sofiDate < dateRange[0] or sofiDate > dateRange[1]:
+            if sofiDate < dateRange['startDate'] or sofiDate > dateRange['endDate']:
                 insideDateRange = False
             else:
                 column += 1
@@ -129,8 +133,8 @@ def getTransactionsFromSofiWebsite(driver, dateRange, today, tableStart, div):
     return sofiActivity
 
 def runSofiAccount(driver, dateRange, today, account):
-    tableAndDiv = getSofiBalanceAndOrientPage(driver, account)
-    sofiActivity = getTransactionsFromSofiWebsite(driver.webDriver, dateRange, today, tableAndDiv[0], tableAndDiv[1])
+    page = getSofiBalanceAndOrientPage(driver, account)
+    sofiActivity = getTransactionsFromSofiWebsite(driver.webDriver, dateRange, today, page['table'], page['div'])
     importUniqueTransactionsToGnuCash(account, sofiActivity, driver.webDriver, dateRange, 0)
 
 def runSofi(driver, accounts):

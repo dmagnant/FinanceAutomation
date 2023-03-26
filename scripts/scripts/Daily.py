@@ -2,7 +2,7 @@ if __name__ == '__main__' or __name__ == "Daily":
     from Ally import allyLogout, runAlly
     from Classes.Asset import USD, Crypto
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import showMessage, getStockPrice
+    from Functions.GeneralFunctions import showMessage, getStockPrice, setDirectory, getCryptocurrencyPrice
     from Functions.GnuCashFunctions import purgeOldGnucashFiles, openGnuCashUI, openGnuCashBook, getPriceInGnucash, updatePriceInGnucash
     from Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet
     from Paypal import runPaypal
@@ -17,7 +17,7 @@ else:
     from .Ally import allyLogout, runAlly
     from .Classes.Asset import USD, Crypto
     from .Classes.WebDriver import Driver
-    from .Functions.GeneralFunctions import showMessage, getStockPrice
+    from .Functions.GeneralFunctions import showMessage, getStockPrice, setDirectory, getCryptocurrencyPrice
     from .Functions.GnuCashFunctions import purgeOldGnucashFiles, openGnuCashUI, openGnuCashBook, getPriceInGnucash, updatePriceInGnucash
     from .Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet
     from .Paypal import runPaypal
@@ -66,7 +66,6 @@ def runDailyBank(accounts):
     runSofi(driver, [accounts['Checking'], accounts['Savings']])
     runAlly(driver, accounts['Ally'])
     presearchRewardsRedemptionAndBalanceUpdates(driver, accounts['Presearch'])
-    runPaypal(driver)
     openSpreadsheet(driver, 'Checking Balance', '2023')
     openSpreadsheet(driver, 'Asset Allocation', 'Cryptocurrency')
     updateCryptoPrices(driver)
@@ -100,6 +99,10 @@ def runDailyMR(accounts):
     # accounts = getDailyAccounts('Bank')
     # GME = runDailyBank(accounts)
     
-# if __name__ == '__main__': # MR
+if __name__ == '__main__': # MR
     # accounts = getDailyAccounts('MR')
     # runDailyMR(accounts)
+    from datetime import datetime, timedelta
+    today = datetime.today().date()
+    GME = getPriceInGnucash('GME', today)
+    print(GME)

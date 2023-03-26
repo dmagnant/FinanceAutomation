@@ -48,7 +48,7 @@ def bingActivities(driver):
     time.sleep(1)
     driver.switchToLastWindow()
     time.sleep(1)
-    driver.close()
+    driver.webDriver.close()
     driver.switchToLastWindow()
     pointsLinks[2].click() # Daily Poll
     time.sleep(1)

@@ -97,7 +97,7 @@ class Asset(object):
         return self.gnuBalance
     
     def updateGnuBalance(self, myBook):
-        self.gnuBalance = (getGnuCashBalance(myBook, self.gnuAccount))
+        self.gnuBalance = round(Decimal(getGnuCashBalance(myBook, self.gnuAccount)), 2)
         
 class Crypto(Asset):
     "this is a class for tracking cryptocurrency information"
@@ -176,7 +176,7 @@ class USD(Asset):
         self.reviewTransactions = []
         self.account = None
         self.gnuAccount = getAccountPath(self)
-        book = 'Home' if (self.name == 'Ally' or self.name == 'BoA-joint') else 'Finance'
+        book = 'Home' if (self.name in ['Ally', 'BoA-joint', 'Home']) else 'Finance'
         balance = getGnuCashBalance(openGnuCashBook(book, True, True), self.gnuAccount)
         self.gnuBalance = round(balance, 2) if float(balance)>0 else 0
     

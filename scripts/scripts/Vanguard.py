@@ -62,7 +62,7 @@ def importGnuTransactions(myBook, today, account, interestYTD):
     interestAmount = 0
     with myBook as book:
         transactions = [tr for tr in book.transactions
-                        if str(tr.post_date.strftime('%Y')) == str(lastMonth[0].year)
+                        if str(tr.post_date.strftime('%Y')) == str(lastMonth['startDate'].year)
                         for spl in tr.splits
                         if spl.account.fullname == account.gnuAccount
                         ]
@@ -74,7 +74,19 @@ def importGnuTransactions(myBook, today, account, interestYTD):
         accountChange = Decimal(account.balance) - account.gnuBalance
         interest = Decimal(interestYTD) - interestAmount
         employerContribution = accountChange - interest
-        writeGnuTransaction(myBook, "Contribution + Interest", lastMonth[1], [-interest, -employerContribution, accountChange], account.gnuAccount)   
+        amount = {
+            'interest': -interest,
+            'employerContribution': -employerContribution,
+            'accountChange': accountChange
+        }
+        transactionVariables = {
+            'postDate': lastMonth['endDate'],
+            'description': "Contribution + Interest",
+            'amount': amount,
+            'fromAccount': account.gnuAccount,
+        }
+        # writeGnuTransaction(myBook, "Contribution + Interest", lastMonth.endDate, [-interest, -employerContribution, accountChange], account.gnuAccount)
+        writeGnuTransaction(myBook, transactionVariables)
     book.close()
     return {
         "interest": interest,

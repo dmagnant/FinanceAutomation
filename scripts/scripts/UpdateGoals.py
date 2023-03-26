@@ -18,7 +18,7 @@ def getTransactionTotal(dateRange, gnuAccount, mybook):
     total = 0
     # retrieve transactions from GnuCash
     transactions = [tr for tr in mybook.transactions
-                    if tr.post_date >= dateRange[0] and tr.post_date <= dateRange[1]
+                    if tr.post_date >= dateRange['startDate'] and tr.post_date <= dateRange['endDate']
                     for spl in tr.splits
                     if spl.account.fullname == gnuAccount]
     for tr in transactions:
@@ -201,8 +201,8 @@ def runUpdateGoals(accounts, timeframe):
     expenseAccounts.extend(expenseQuarterlyAccounts)
     expenseAccounts.sort()
     
-    getTotalForEachAccount(incomeAccounts, mybook, dateRange, timeframe, dateRange[1].month, accounts)
-    getTotalForEachAccount(expenseAccounts, mybook, dateRange, timeframe, dateRange[1].month, accounts)
+    getTotalForEachAccount(incomeAccounts, mybook, dateRange, timeframe, dateRange['endDate'].month, accounts)
+    getTotalForEachAccount(expenseAccounts, mybook, dateRange, timeframe, dateRange['endDate'].month, accounts)
 
 if __name__ == '__main__':
     accounts = 'Personal' # Personal or Joint

@@ -20,9 +20,10 @@ def locateFidelityWindow(driver):
 
 def fidelityLogin(driver):
     driver.openNewWindow('https://digital.fidelity.com/prgw/digital/login/full-page')
-    time.sleep(1)
-    driver.webDriver.find_element(By.ID,'password').send_keys(getPassword('Fidelity'))
-    time.sleep(1)
+    driver.webDriver.refresh()
+    # time.sleep(1)
+    # driver.webDriver.find_element(By.ID,'password').send_keys(getPassword('Fidelity')) # pre-filled
+    time.sleep(2)
     driver.webDriver.find_element(By.ID,'fs-login-button').click() # login
 
 def getFidelityBalance(driver):

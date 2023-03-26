@@ -1,4 +1,5 @@
 import time
+from statistics import mode
 
 from random_words import RandomWords
 from selenium.common.exceptions import (NoSuchElementException,
@@ -13,6 +14,34 @@ if __name__ == '__main__' or __name__ == "Presearch":
 else:
     from .Classes.Asset import Crypto
     from .Functions.GeneralFunctions import showMessage
+    
+class Node(object):
+    "this is a class for tracking presearch node information"
+    # def __init__(self, num, name, currentStake, reliabilityScore):
+    def __init__(self, num, name, reliabilityScore):
+        self.num = num
+        self.name = name
+        self.reliabilityScore = reliabilityScore
+    
+    def stakePRE(self, driver, stakeAmount):
+        availToStake = float(driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
+        driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '6]/div/table/tbody/tr[' + str(self.num) + ']/td[12]/a[1]').click() # stake button
+        if availToStake < stakeAmount:
+            stakeAmount = availToStake
+        while stakeAmount > 0:
+            driver.webDriver.find_element(By.ID, 'stake_amount').send_keys(Keys.ARROW_UP)
+            stakeAmount -= 1
+        driver.webDriver.find_element(By.XPATH, "//*[@id='editNodeForm']/div[8]/button").click() # update
+        time.sleep(1)
+        # try:
+        #     driver.webDriver.find_element(By.XPATH, "/html/body/div[2]/div[2]/div[2]/div/div/div[2]/div[2]").click() # continue
+        #     time.sleep(2)
+        # except NoSuchElementException:
+        #     exception = "No Continue button, minimum PRE met"
+        driver.webDriver.get('https://nodes.presearch.org/dashboard')
+    
+    def checkme(self):
+        print(str(self.num) + '\n' + self.name + '\n' + str(self.reliabilityScore))
     
 def getPresearchBasePath():
     return '/html/body/div[2]/div[2]/div[5]/div[' 
@@ -47,11 +76,10 @@ def claimPresearchRewards(driver):
     driver = driver.webDriver
     driver.get("https://nodes.presearch.org/dashboard")   
     try:
-        availToStake = float(driver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
+        float(driver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
     except NoSuchElementException:
         showMessage('Presearch fail', 'Check Presearch. May need to login or check element. Click OK once logged in to continue')
         driver.get("https://nodes.presearch.org/dashboard")
-        availToStake = float(driver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
     # claim rewards
     unclaimed = driver.find_element(By.XPATH, getPresearchBasePath() + '2]/div[3]/div[2]/div/div/div[1]/h2').text.strip(' PRE')
     if float(unclaimed) > 0:
@@ -62,35 +90,34 @@ def claimPresearchRewards(driver):
         time.sleep(4)
         driver.refresh()
         time.sleep(1)
-        availToStake = float(driver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
-    
-    # stake available PRE to highest rated node
-    time.sleep(2)
-    if availToStake:
-        # get reliability scores
-        num = 1
-        node_found = False
-        while not node_found:
-            name = driver.find_element(By.XPATH, getPresearchBasePath() + '6]/div/table/tbody/tr[' + str(num) + ']/td[1]').text
-            if name.lower() == 'aws':
-                stakeAmount = availToStake
-                # click Stake button
-                driver.find_element(By.XPATH, getPresearchBasePath() + '6]/div/table/tbody/tr[' + str(num) + ']/td[12]/a[1]').click()
-                while stakeAmount > 0:
-                    driver.find_element(By.ID, 'stake_amount').send_keys(Keys.ARROW_UP)
-                    stakeAmount -= 1
-                # click Update
-                driver.find_element(By.XPATH, "//*[@id='editNodeForm']/div[8]/button").click()
-                time.sleep(1)
-                try:
-                    #click Continue
-                    driver.find_element(By.XPATH, "/html/body/div[2]/div[2]/div[2]/div/div/div[2]/div[2]").click()
-                    time.sleep(2)
-                except NoSuchElementException:
-                    exception = "No Continue button, minimum PRE met"
-                driver.get('https://nodes.presearch.org/dashboard')
-                node_found = True
+    return float(driver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
+
+def stakePresearchRewards(driver, availToStake):
+    locatePresearchWindow(driver)
+    nodes = []
+    reliabilityScores = []
+    num = 1
+    stillNodes = True
+    while stillNodes:
+        try:
+            name = driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '6]/div/table/tbody/tr[' + str(num) + ']/td[1]').text
+            reliabilityScore = driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '6]/div/table/tbody/tr[' + str(num) + ']/td[10]').text
+            nodes.append(Node(num=num, name=name, reliabilityScore=reliabilityScore))
+            reliabilityScores.append(reliabilityScore)
             num += 1
+        except NoSuchElementException:
+            stillNodes = False
+    reliabilityScores.sort()
+    rsMode = mode(reliabilityScores)
+    rsMax = max(reliabilityScores)
+    if rsMode == rsMax: # duplicate high scores
+        count = dict((i, reliabilityScores.count(i)) for i in reliabilityScores)
+        stakeAmount = availToStake / count[rsMax]
+    else: # single high score
+        stakeAmount = availToStake
+    for n in nodes:
+        if n.reliabilityScore == rsMax:
+            n.stakePRE(driver, stakeAmount)
 
 def getPresearchBalance(driver):
     found = driver.findWindowByUrl("presearch.com/dashboard")
@@ -106,7 +133,9 @@ def getPresearchBalance(driver):
 
 def presearchRewardsRedemptionAndBalanceUpdates(driver, account):
     driver.webDriver.implicitly_wait(5)
-    claimPresearchRewards(driver)
+    preAvailableToStake = claimPresearchRewards(driver)
+    if preAvailableToStake:
+        stakePresearchRewards(driver, preAvailableToStake)
     account.setBalance(getPresearchBalance(driver))
     account.setPrice(account.getPriceFromCoinGecko())
     account.updateSpreadsheetAndGnuCash()

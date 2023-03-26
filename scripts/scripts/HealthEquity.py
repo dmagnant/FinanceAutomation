@@ -64,8 +64,8 @@ def getHealthEquityDividends(driver):
         driver.find_element(By.ID, "endDate").click()
         driver.find_element(By.ID, "endDate").send_keys(Keys.BACKSPACE)  
         num += 1
-    driver.find_element(By.ID, "startDate").send_keys(datetime.strftime(lastMonth[0], '%m/%d/%Y'))
-    driver.find_element(By.ID, "endDate").send_keys(datetime.strftime(lastMonth[1], '%m/%d/%Y'))
+    driver.find_element(By.ID, "startDate").send_keys(datetime.strftime(lastMonth['startDate'], '%m/%d/%Y'))
+    driver.find_element(By.ID, "endDate").send_keys(datetime.strftime(lastMonth['endDate'], '%m/%d/%Y'))
     driver.find_element(By.ID, "fundPerformanceRefresh").click() # Refresh
     time.sleep(1)
     return Decimal(driver.find_element(By.XPATH, "//*[@id='EditPortfolioTab-panel']/member-portfolio-edit-display/member-overall-portfolio-performance-display/div[1]/div/div[3]/div/span").text.strip('$').strip(','))

@@ -42,7 +42,7 @@ def allyLogin(driver):
         # click Login
         driver.webDriver.find_element(By.ID,"login").click()
         # enter Password (username already filled in)
-        driver.webDriver.find_element(By.ID,"allysf-login-v2-password-367761b575af35f6ccb5b53e96b2fa2d").send_keys(getPassword('Ally Bank'))
+        # driver.webDriver.find_element(By.ID,"allysf-login-v2-password-367761b575af35f6ccb5b53e96b2fa2d").send_keys(getPassword('Ally Bank')) # autofilled right now
         # click Login
         driver.webDriver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button").click()
         time.sleep(5)
@@ -82,7 +82,7 @@ def captureAllyTransactions(driver, dateRange):
     while insideDateRange:
         try:
             date = datetime.strptime(driver.find_element(By.XPATH, element + "span").text, '%b %d, %Y').date()
-            if date < dateRange[0] or date > dateRange[1]:
+            if date < dateRange['startDate'] or date > dateRange['endDate']:
                 insideDateRange = False
             else:
                 column += 1

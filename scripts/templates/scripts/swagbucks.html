@@ -1,7 +1,5 @@
 {% extends "base.html" %}
-
 {% block title %}Swagbucks{% endblock %}
-
 {% block content %}
     <h1>Swagbucks</h1>
     <div style="width: 100%; display: table;">
@@ -16,6 +14,7 @@
                     {% csrf_token %}
                     <button type="submit" name="login">Login</button><br>
                     <button type="submit" name="alu">Alus Revenge</button><br>
+                    <button type="submit" name="balance">Balance</button><br>
                     <button type="submit" name="content">Content Discovery</button><br>
                     <button type="submit" name="search">Search</button><br>
                     <button type="submit" name="rewards">Rewards</button><br>
@@ -23,7 +22,7 @@
                 </form>
             </div>
             <div style="width: 80%; display:table-cell">
-                &emsp;&thinsp;Balance: <b>{{Swagbucks.gnuBalance}}</b><br>
+                &emsp;&thinsp;Balance: <b>{{account.gnuBalance}}</b><br>
                 Redeem at: 1000<br><br>
             </div>
         </div>

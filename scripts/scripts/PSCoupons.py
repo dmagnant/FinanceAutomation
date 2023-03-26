@@ -18,21 +18,22 @@ def locatePSCouponWindow(driver):
 
 def psCouponLogin(driver):
     driver.openNewWindow('https://www.picknsave.com/savings/cl/coupons/')
+    try:
+        driver.webDriver.find_element(By.ID, 'SignIn-submitButton').click()
+    except NoSuchElementException:
+        exception = 'already logged in'
     
 def setPSCouponFilters(driver):
     # In-Store
     driver.webDriver.find_element(By.ID,"Filter-item-In-Store").click()
     time.sleep(1)
-    # Departments?
-    departmentList = ["Adult-Beverage", "Baking-Goods", "Breakfast", "Canned-& Packaged", "Dairy", "Frozen", "Natural-& Organic", "Pasta-Sauces Grain", "Personal-Care", "Produce", "Snacks"]
+    departmentList = ["Adult-Beverage", 'Bakery', "Baking-Goods", 'Beauty', "Breakfast", "Canned-& Packaged", "Dairy", "Frozen", "Natural-& Organic", "Pasta-Sauces Grain", "Personal-Care", "Produce", "Snacks"]
     for dept in departmentList:
         driver.webDriver.find_element(By.ID,"Filter-item-" + dept).click()
         time.sleep(1)
     # last 7 days
-    # driver.webDriver.find_element(By.ID,"new-coupons-filer").click()
-    
+    driver.webDriver.find_element(By.ID,"new-coupons-filer").click()
     driver.webDriver.execute_script("window.scrollTo(0, 0)")
-
 
 def clipCoupons(driver):
     def getCouponBaseElement(num):

@@ -1,7 +1,7 @@
 import csv
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from os import listdir
 
@@ -87,6 +87,8 @@ def getAccountPath(account):
             return "Assets:Non-Liquid Assets:IRA:Fidelity"
         case 'HSA':
             return "Assets:Non-Liquid Assets:HSA:NM HSA"
+        case 'Home':
+            return "Liabilities:Mortgage Loan"
         case 'IoTex':
             return "Assets:Non-Liquid Assets:CryptoCurrency:IoTex"
         case 'Liquid Assets':
@@ -303,7 +305,6 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
         return toAccount
     def formatTransactionVariables(account, row):
         skipTransaction = False
-        description = row[1]
         if account == 'Ally':
             postDate = datetime.strptime(row[0], '%Y-%m-%d')
             description = row[1]
@@ -373,7 +374,15 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
             fromAccount = "Assets:Liquid Assets:Sofi:Savings"
             reviewTransPath = row[0] + ", " + row[1] + ", " + row[2]
         description = modifyTransactionDescription(description)
-        return [postDate, description, amount, skipTransaction, fromAccount, reviewTransPath]
+        return {
+            'postDate': postDate.date(),
+            'description': description,
+            'amount': amount,
+            'skipTransaction': skipTransaction,
+            'fromAccount': fromAccount,
+            'reviewTransPath': reviewTransPath,            
+        }
+        # [postDate, description, amount, skipTransaction, fromAccount, reviewTransPath]
     def getEnergyBillAmounts(driver, amount, energyBillNum):
         if energyBillNum == 1:
             closeExpressVPN()
@@ -428,7 +437,7 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
         # comb through lines of Arcadia Statement for Arcadia Membership (and Free trial rebate), Community Solar lines (3)
         arcadiaStatementLinesLeft = True
         statementRow = 1
-        solar = 0
+        solarAmount = 0
         arcadiaMembership = 0
         while arcadiaStatementLinesLeft:
             try:
@@ -436,18 +445,18 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
                 statementTrans = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/div[5]/ul/li[" + str(statementRow) + "]/div/h2").text
                 if statementTrans == "Arcadia Membership":
                     arcadiaMembership = Decimal(driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/div[5]/ul/li[" + str(statementRow) + "]/div/p").text.strip('$'))
-                    arcadiaamt = Decimal(arcadiaMembership)
+                    arcadia = Decimal(arcadiaMembership)
                 elif statementTrans == "Free Trial":
                     arcadiaMembership = arcadiaMembership + Decimal(driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/div[5]/ul/li[" + str(statementRow) + "]/div/p").text.strip('$'))
                 elif statementTrans == "Community Solar":
-                    solar = solar + Decimal(driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/div[5]/ul/li[" + str(statementRow) + "]/div/p").text.replace('$',''))
+                    solarAmount = solarAmount + Decimal(driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/div[5]/ul/li[" + str(statementRow) + "]/div/p").text.replace('$',''))
                 elif statementTrans == "WE Energies Utility":
                     weBill = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/div[5]/ul/li[" + str(statementRow) + "]/div/p").text
                 statementRow += 1
             except NoSuchElementException:
                 arcadiaStatementLinesLeft = False
-        arcadiaamt = Decimal(arcadiaMembership)
-        solarAmount = Decimal(solar)
+        arcadia = Decimal(arcadiaMembership)
+        solar = Decimal(solarAmount)
         # Get balances from WE Energies
         if energyBillNum == 1:
             driver.execute_script("window.open('https://www.we-energies.com/secure/auth/l/acct/summary_accounts.aspx');")
@@ -482,12 +491,19 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
         # capture gas charges
         billColumn -= 2
         weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
-        gasAmount = Decimal(driver.find_element(By.XPATH, weAmountPath).text.strip('$'))
+        gas = Decimal(driver.find_element(By.XPATH, weAmountPath).text.strip('$'))
         # capture electricity charges
         billColumn -= 2
         weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
-        electricityAmount = Decimal(driver.find_element(By.XPATH, weAmountPath).text.strip('$'))
-        return [arcadiaamt, solarAmount, electricityAmount, gasAmount, amount]
+        electricity = Decimal(driver.find_element(By.XPATH, weAmountPath).text.strip('$'))
+        return {
+            'arcadia': arcadia,
+            'solar': solar,
+            'electricity': electricity,
+            'gas': gas,
+            'total': amount,            
+        }
+        # [arcadia, solarAmount, electricity, gas, amount]
 
     book = 'Home' if (account.name == 'Ally' or account.name == 'BoA-joint') else 'Finance'
     myBook = openGnuCashBook(book, False, False)
@@ -501,21 +517,16 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
             lineCount += 1
         else:
             transactionVariables = formatTransactionVariables(account.name, row)
-            # Skip transactions between automated accounts to prevent duplicates
-            if transactionVariables[3]:
+            if transactionVariables['skipTransaction']:
                 continue
             else:
-                description = transactionVariables[1]
-                postDate = transactionVariables[0].date()
-                fromAccount = transactionVariables[4]
-                amount = transactionVariables[2]
-                toAccount = setToAccount(account.name, description)
-                if 'ARCADIA' in description.upper():
+                toAccount = setToAccount(account.name, transactionVariables['description'])
+                if 'ARCADIA' in transactionVariables['description'].upper():
                     energyBillNum += 1
-                    amount = getEnergyBillAmounts(driver, transactionVariables[2], energyBillNum)
-                elif 'NM PAYCHECK' in description.upper() or "CRYPTO PURCHASE" in description.upper() or toAccount == "Expenses:Other":
-                    account.setReviewTransactions(transactionVariables[5])
-                writeGnuTransaction(myBook, description, postDate, amount, fromAccount, toAccount)
+                    transactionVariables['amount'] = getEnergyBillAmounts(driver, transactionVariables['amount'], energyBillNum)
+                elif 'NM PAYCHECK' in transactionVariables['description'].upper() or "CRYPTO PURCHASE" in transactionVariables['description'].upper() or toAccount == "Expenses:Other":
+                    account.setReviewTransactions(transactionVariables['reviewTransPath'])
+                writeGnuTransaction(myBook, transactionVariables, toAccount)
     account.updateGnuBalance(myBook)
     
 def importUniqueTransactionsToGnuCash(account, transactionsCSV, driver, dateRange, lineStart=1):
@@ -536,7 +547,7 @@ def importUniqueTransactionsToGnuCash(account, transactionsCSV, driver, dateRang
     open(gnuCSV, 'w', newline='').truncate()
     # retrieve transactions from GnuCash for the same date range
     transactions = [tr for tr in myBook.transactions
-                    if tr.post_date >= dateRange[0] and tr.post_date <= dateRange[1]
+                    if tr.post_date >= dateRange['startDate'] and tr.post_date <= dateRange['endDate']
                     for spl in tr.splits
                     if spl.account.fullname == gnuAccount]
     for tr in transactions:
@@ -552,28 +563,28 @@ def importUniqueTransactionsToGnuCash(account, transactionsCSV, driver, dateRang
             csv.writer(open(importCSV, 'a', newline='')).writerow(row)
     importGnuTransaction(account, importCSV, driver, lineStart)
 
-def writeGnuTransaction(myBook, description, postDate, amount, fromAccount, toAccount=''):
+def writeGnuTransaction(myBook, transactionVariables, toAccount=''):
     with myBook as book:
-        if "Contribution + Interest" in description:
-            split = [Split(value=amount[0], memo="scripted", account=myBook.accounts(fullname="Income:Investments:Interest")),
-                    Split(value=amount[1], memo="scripted",account=myBook.accounts(fullname="Income:Employer Contributions:Pension Contributions")),
-                    Split(value=amount[2], memo="scripted",account=myBook.accounts(fullname=fromAccount))]
-        elif "HSA Statement" in description:
-            if amount[1]:
-                split = [Split(value=amount[0], account=myBook.accounts(fullname=toAccount)),
-                        Split(value=amount[1], account=myBook.accounts(fullname=fromAccount[0])),
-                        Split(value=amount[2], account=myBook.accounts(fullname=fromAccount[1]))]
+        if "Contribution + Interest" in transactionVariables['description']:
+            split = [Split(value=transactionVariables['amount']['interest'], memo="scripted", account=myBook.accounts(fullname="Income:Investments:Interest")),
+                    Split(value=transactionVariables['amount']['employerContribution'], memo="scripted",account=myBook.accounts(fullname="Income:Employer Contributions:Pension Contributions")),
+                    Split(value=transactionVariables['amount']['accountChange'], memo="scripted",account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
+        elif "HSA Statement" in transactionVariables['description']:
+            if transactionVariables['amount']['HSADividends']:
+                split = [Split(value=transactionVariables['amount']['change'], account=myBook.accounts(fullname=toAccount)),
+                        Split(value=transactionVariables['amount']['HSADividends'], account=myBook.accounts(fullname="Income:Investments:Dividends")),
+                        Split(value=transactionVariables['amount']['HEHSAMarketChange'], account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
             else:
-                split = [Split(value=amount[0], account=myBook.accounts(fullname=toAccount)),
-                        Split(value=amount[2], account=myBook.accounts(fullname=fromAccount[1]))]
-        elif "ARCADIA" in description:
-            split=[Split(value=amount[0], memo="Arcadia Membership Fee", account=myBook.accounts(fullname="Expenses:Utilities:Arcadia Membership")),
-                    Split(value=amount[1], memo="Solar Rebate", account=myBook.accounts(fullname="Expenses:Utilities:Arcadia Membership")),
-                    Split(value=amount[2], account=myBook.accounts(fullname="Expenses:Utilities:Electricity")),
-                    Split(value=amount[3], account=myBook.accounts(fullname="Expenses:Utilities:Gas")),
-                    Split(value=amount[4], account=myBook.accounts(fullname=fromAccount))]
-        elif "NM Paycheck" in description:
-            split = [Split(value=round(Decimal(2037.85), 2), memo="scripted",account=myBook.accounts(fullname=fromAccount)),
+                split = [Split(value=transactionVariables['amount']['change'], account=myBook.accounts(fullname=toAccount)),
+                        Split(value=transactionVariables['amount']['HEHSAMarketChange'], account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
+        elif "ARCADIA" in transactionVariables['description']:
+            split=[Split(value=transactionVariables['amount']['arcadia'], memo="Arcadia Membership Fee", account=myBook.accounts(fullname="Expenses:Utilities:Arcadia Membership")),
+                    Split(value=transactionVariables['amount']['solar'], memo="Solar Rebate", account=myBook.accounts(fullname="Expenses:Utilities:Arcadia Membership")),
+                    Split(value=transactionVariables['amount']['electricity'], account=myBook.accounts(fullname="Expenses:Utilities:Electricity")),
+                    Split(value=transactionVariables['amount']['gas'], account=myBook.accounts(fullname="Expenses:Utilities:Gas")),
+                    Split(value=transactionVariables['amount']['total'], account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
+        elif "NM Paycheck" in transactionVariables['description']:
+            split = [Split(value=round(Decimal(2037.85), 2), memo="scripted",account=myBook.accounts(fullname=transactionVariables['fromAccount'])),
                     Split(value=round(Decimal(412.00), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:401k")),
                     Split(value=round(Decimal(5.49), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Dental")),
                     Split(value=round(Decimal(35.47), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Health")),
@@ -585,9 +596,10 @@ def writeGnuTransaction(myBook, description, postDate, amount, fromAccount, toAc
                     Split(value=round(Decimal(139.58), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:HSA:NM HSA")),
                     Split(value=-round(Decimal(3433.33), 2), memo="scripted",account=myBook.accounts(fullname=toAccount))]
         else:
-            split = [Split(value=-amount, memo="scripted", account=myBook.accounts(fullname=toAccount)),
-                    Split(value=amount, memo="scripted", account=myBook.accounts(fullname=fromAccount))]
-        Transaction(post_date=postDate, currency=myBook.currencies(mnemonic="USD"), description=description, splits=split)
+            split = [Split(value=-transactionVariables['amount'], memo="scripted", account=myBook.accounts(fullname=toAccount)),
+                    Split(value=transactionVariables['amount'], memo="scripted", account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
+        Transaction(post_date=transactionVariables['postDate'], currency=myBook.currencies(mnemonic="USD"), description=transactionVariables['description'], splits=split)
+        print('here')
         book.save()
         book.flush()
         book.close()
@@ -597,9 +609,15 @@ def getPriceInGnucash(symbol, date=''):
     if symbol == "ETH2":
         symbol = 'ETH'
     if date:
-        return myBook.prices(commodity=myBook.commodities(mnemonic=symbol), currency=myBook.currencies(mnemonic="USD"), date=date).value  # raise a KeyError if Price does not exist
+        price = ''
+        while not price:
+            try:
+                price =  myBook.prices(commodity=myBook.commodities(mnemonic=symbol), currency=myBook.currencies(mnemonic="USD"), date=date).value
+            except KeyError:
+                date = date - timedelta(days=1)
+        return price
     else:
-        return myBook.prices(commodity=myBook.commodities(mnemonic=symbol), currency=myBook.currencies(mnemonic="USD")).value  # raise a KeyError if Price does not exist
+        return myBook.prices(commodity=myBook.commodities(mnemonic=symbol), currency=myBook.currencies(mnemonic="USD")).value 
 
 def updatePriceInGnucash(symbol, coinPrice):
     myBook = openGnuCashBook('Finance', False, False)
@@ -634,11 +652,10 @@ def purgeOldGnucashFiles():
     dateRange = getStartAndEndOfDateRange(datetime.today().date(), 14)
     directories = [directory + r'\Finances\Personal Finances', directory + r'\Stuff\Home\Finances']
     for d in directories:
-        directory = d
-        for fileName in listdir(directory):
-            filePath = (directory + r'\'' + fileName).replace("'",'')
+        for fileName in listdir(d):
+            filePath = (d + r'\'' + fileName).replace("'",'')
             fileModifiedDate = datetime.fromtimestamp(os.path.getmtime(filePath)).date()
-            if fileModifiedDate < dateRange[0]:
+            if fileModifiedDate < dateRange['startDate']:
                 os.remove(filePath)
     
 def consolidatePastYearsTransactions(myBook):

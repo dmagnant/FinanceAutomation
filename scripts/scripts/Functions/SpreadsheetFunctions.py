@@ -1,7 +1,6 @@
 import time
 
 import gspread
-
 from .GeneralFunctions import getCryptocurrencyPrice, setDirectory, showMessage, getStockPrice
 from .GnuCashFunctions import updatePriceInGnucash
 
@@ -136,7 +135,7 @@ def updateCryptoPrices(driver):
         updatePriceInGnucash(symbol, price)
         worksheet.update((priceColumn + str(i + 2)), float(price))
 
-def updateInvestmentPrices(driver):
+def updateInvestmentPrices(driver, Home):
     print('updating investment prices')
     url = "edit#gid=361024172"
     spreadsheetWindow = driver.findWindowByUrl(url)
@@ -145,20 +144,26 @@ def updateInvestmentPrices(driver):
         spreadsheetWindow = driver.webDriver.current_window_handle
     else:
         driver.webDriver.switch_to.window(spreadsheetWindow)
-    row = 18
+    row = 14
     symbolColumn = 'B'
-    priceColumn = 'E'
     sheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Asset Allocation')
     worksheet = sheet.worksheet('Investments')
     stillCoins = True
     while stillCoins:
+        priceColumn = 'E'
         coinSymbol = worksheet.acell(symbolColumn+str(row)).value
         if coinSymbol != None:
-            price = getStockPrice(driver, coinSymbol)
-            driver.webDriver.close()
-            driver.webDriver.switch_to.window(spreadsheetWindow)
-            worksheet.update((priceColumn + str(row)), float(price))
-            row += 1
+            if coinSymbol == 'VSMPX' or coinSymbol == 'VTMGX':
+                showMessage(f'get ${coinSymbol} price from Vanguard', 'Write code to fetch from Vanguard')
+            else:
+                if coinSymbol == 'HOME':
+                    price = (250000 - Home.gnuBalance) / 2
+                    priceColumn = 'F'
+                else :
+                    price = getStockPrice(driver, coinSymbol)
+                    driver.webDriver.switch_to.window(spreadsheetWindow)
+                worksheet.update((priceColumn + str(row)), float(price))
+                row += 1
         else:
             stillCoins = False
 

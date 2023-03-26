@@ -1,5 +1,5 @@
+from datetime import datetime
 from django.shortcuts import render
-
 from scripts.scripts.Ally import *
 from scripts.scripts.AmazonGC import *
 from scripts.scripts.Amex import *
@@ -280,11 +280,13 @@ def creditCards(request):
 def daily(request):
     mrAccounts = getDailyAccounts('MR')
     bankAccounts = getDailyAccounts('Bank')
-    GME = getPriceInGnucash('GME')
+    GME = getPriceInGnucash('GME', datetime.today().date())    
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "bank" in request.POST:
             GME = runDailyBank(bankAccounts)
+        elif "paypal" in request.POST:
+            runPaypal(driver)
         elif "tearDown" in request.POST:
             tearDown(driver)
         elif "crypto" in request.POST:
@@ -292,6 +294,7 @@ def daily(request):
             bankAccounts['CryptoPortfolio'].updateGnuBalance(openGnuCashBook('Finance', True, True))
         elif "GME" in request.POST:
             GME = getStockPrice(driver, 'GME')
+            updatePriceInGnucash('GME', GME)
         elif "MR" in request.POST:
             runDailyMR(mrAccounts)
         elif "sofiMain" in request.POST:
@@ -349,6 +352,9 @@ def daily(request):
             locateSwagBucksWindow(driver)
         elif "swagbucksAlu" in request.POST:
             runAlusRevenge(driver.webDriver)
+        elif 'swagbucksBalance' in request.POST:
+            mrAccounts['Swagbucks'].setBalance(getSwagBucksBalance(driver))
+            mrAccounts['Swagbucks'].updateMRBalance(openGnuCashBook('Finance', False, False))
         elif "swagbucksContent" in request.POST:
             swagBuckscontentDiscovery(driver)
         elif "swabucksSearch" in request.POST:
@@ -530,7 +536,8 @@ def monthly(request):
         if "USD" in request.POST:
             runUSD(driver, today, usdAccounts)
         elif "prices" in request.POST:
-            updateInvestmentPrices(driver)
+            Home = USD("Home")
+            updateInvestmentPrices(driver, Home)
         elif "Crypto" in request.POST:
             runCrypto(driver, today, cryptoAccounts)
         elif "fidelityMain" in request.POST:
@@ -721,6 +728,9 @@ def swagbucks(request):
             locateSwagBucksWindow(driver)
         elif "alu" in request.POST:
             runAlusRevenge(driver.webDriver)
+        elif 'balance' in request.POST:
+            Swagbucks.setBalance(getSwagBucksBalance(driver))
+            Swagbucks.updateMRBalance(openGnuCashBook('Finance', False, False))            
         elif "content" in request.POST:
             swagBuckscontentDiscovery(driver)
         elif "search" in request.POST:
@@ -730,8 +740,11 @@ def swagbucks(request):
         elif "inbox" in request.POST:
             swagbucksInbox(driver)
         elif "close windows" in request.POST:
-            driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/swagbucks"))                   
-    return render(request,"scripts/swagbucks.html")
+            driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/swagbucks"))
+    context = {
+        'account': Swagbucks
+    }
+    return render(request,"scripts/swagbucks.html", context)
 
 def tellwut(request):
     Tellwut = Crypto("Tellwut")    
@@ -777,8 +790,8 @@ def vanguard(request):
         driver = Driver("Chrome")
         if "main" in request.POST:
             interestAndEmployerContribution = runVanguard(driver, accounts)
-            pensionInterest = str(interestAndEmployerContribution[0])
-            pensionContributions = str(interestAndEmployerContribution[1])
+            pensionInterest = str(interestAndEmployerContribution['interest'])
+            pensionContributions = str(interestAndEmployerContribution['employerContribution'])
         elif "login" in request.POST:
             locateVanguardWindow(driver)
         elif "balance" in request.POST:
