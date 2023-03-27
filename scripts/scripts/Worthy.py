@@ -7,10 +7,12 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Worthy":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import (getPassword, getUsername, showMessage)    
+    from Functions.GeneralFunctions import (getPassword, getUsername)
+    from Functions.GnuCashFunctions import openGnuCashBook
 else:
     from .Classes.Asset import USD
-    from .Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
+    from .Functions.GeneralFunctions import (getPassword, getUsername)
+    from .Functions.GnuCashFunctions import openGnuCashBook
 
 def locateWorthyWindow(driver):
     found = driver.findWindowByUrl("worthy.capital")
@@ -49,7 +51,11 @@ def getWorthyBalance(driver, account):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    Worthy = USD("Worthy")    
+    book = openGnuCashBook('Finance', False, False)
+    Worthy = USD("Worthy", book)    
     getWorthyBalance(driver, Worthy)
     Worthy.getData()
+    if not book.is_saved:
+        book.save()
+    book.close()
     

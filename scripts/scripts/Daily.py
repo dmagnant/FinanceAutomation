@@ -2,8 +2,8 @@ if __name__ == '__main__' or __name__ == "Daily":
     from Ally import allyLogout, runAlly
     from Classes.Asset import USD, Crypto
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import showMessage, getStockPrice, setDirectory, getCryptocurrencyPrice
-    from Functions.GnuCashFunctions import purgeOldGnucashFiles, openGnuCashUI, openGnuCashBook, getPriceInGnucash, updatePriceInGnucash
+    from Functions.GeneralFunctions import getStockPrice 
+    from Functions.GnuCashFunctions import purgeOldGnucashFiles, openGnuCashUI, openGnuCashBook, updatePriceInGnucash
     from Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet
     from Paypal import runPaypal
     from Presearch import presearchRewardsRedemptionAndBalanceUpdates, searchUsingPresearch
@@ -17,8 +17,8 @@ else:
     from .Ally import allyLogout, runAlly
     from .Classes.Asset import USD, Crypto
     from .Classes.WebDriver import Driver
-    from .Functions.GeneralFunctions import showMessage, getStockPrice, setDirectory, getCryptocurrencyPrice
-    from .Functions.GnuCashFunctions import purgeOldGnucashFiles, openGnuCashUI, openGnuCashBook, getPriceInGnucash, updatePriceInGnucash
+    from .Functions.GeneralFunctions import getStockPrice
+    from .Functions.GnuCashFunctions import purgeOldGnucashFiles, openGnuCashUI, openGnuCashBook, updatePriceInGnucash
     from .Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet
     from .Paypal import runPaypal
     from .Presearch import presearchRewardsRedemptionAndBalanceUpdates, searchUsingPresearch
@@ -29,54 +29,40 @@ else:
     from .Swagbucks import runSwagbucks
     from .Tellwut import runTellwut
 
-def getDailyAccounts(type):
-    accounts = dict()
+def getDailyAccounts(type, personalReadBook, jointReadBook=''):
     if type == 'Bank':
-        CryptoPortfolio = USD("Crypto")
-        Checking = USD("Sofi Checking")
-        Savings = USD("Sofi Savings")
-        Ally = USD("Ally")
-        Presearch = Crypto("Presearch")
-        accounts = {
-            'CryptoPortfolio': CryptoPortfolio,
-            'Checking': Checking,
-            'Savings': Savings,
-            'Ally': Ally,
-            'Presearch': Presearch
-        }
+        CryptoPortfolio = USD("Crypto", personalReadBook)
+        Checking = USD("Sofi Checking", personalReadBook)
+        Savings = USD("Sofi Savings", personalReadBook)
+        Ally = USD("Ally", jointReadBook)
+        Presearch = Crypto("Presearch", personalReadBook)
+        accounts = {'CryptoPortfolio': CryptoPortfolio, 'Checking': Checking, 'Savings': Savings, 'Ally': Ally, 'Presearch': Presearch}
     elif type == 'MR':
-        AmazonGC = USD("AmazonGC")
-        Bing = Crypto("Bing")
-        Pinecone = Crypto("Pinecone")
-        Swagbucks = Crypto("Swagbucks")
-        Tellwut = Crypto("Tellwut")
-        Paidviewpoint = USD("Paidviewpoint")
-        accounts = {
-            'AmazonGC': AmazonGC,
-            'Bing': Bing,
-            'Pinecone': Pinecone,
-            'Swagbucks': Swagbucks,
-            'Tellwut': Tellwut,
-            'Paidviewpoint': Paidviewpoint
-        }
+        AmazonGC = USD("AmazonGC", personalReadBook)
+        Bing = Crypto("Bing", personalReadBook)
+        Pinecone = Crypto("Pinecone", personalReadBook)
+        Swagbucks = Crypto("Swagbucks", personalReadBook)
+        Tellwut = Crypto("Tellwut", personalReadBook)
+        Paidviewpoint = USD("Paidviewpoint", personalReadBook)
+        accounts = {'AmazonGC': AmazonGC, 'Bing': Bing, 'Pinecone': Pinecone, 'Swagbucks': Swagbucks, 'Tellwut': Tellwut, 'Paidviewpoint': Paidviewpoint}
     return accounts
 
-def runDailyBank(accounts):
+def runDailyBank(accounts, personalBook, jointBook):
     driver = Driver("Chrome")
-    runSofi(driver, [accounts['Checking'], accounts['Savings']])
-    runAlly(driver, accounts['Ally'])
+    runSofi(driver, [accounts['Checking'], accounts['Savings']], personalBook)
+    runAlly(driver, accounts['Ally'], jointBook)
     presearchRewardsRedemptionAndBalanceUpdates(driver, accounts['Presearch'])
     openSpreadsheet(driver, 'Checking Balance', '2023')
     openSpreadsheet(driver, 'Asset Allocation', 'Cryptocurrency')
-    updateCryptoPrices(driver)
-    accounts['CryptoPortfolio'].updateGnuBalance(openGnuCashBook('Finance', True, True))
+    updateCryptoPrices(driver, personalBook)
+    accounts['CryptoPortfolio'].updateGnuBalance(personalBook)
     openSpreadsheet(driver, 'Home', '2023 Balance')
     if accounts['Checking'].reviewTransactions or accounts['Savings'].reviewTransactions:
         openGnuCashUI('Finances')
     if accounts['Ally'].reviewTransactions:
         openGnuCashUI('Home')
     GMEprice = getStockPrice(driver, 'GME')
-    updatePriceInGnucash('GME', GMEprice)
+    updatePriceInGnucash('GME', GMEprice, personalBook)
     purgeOldGnucashFiles()
     return GMEprice
 
@@ -85,24 +71,31 @@ def tearDown(driver):
     allyLogout(driver)        
     driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/daily"))
 
-def runDailyMR(accounts):
+def runDailyMR(accounts, book):
     driver = Driver("Chrome")
-    runBing(driver, accounts['Bing'])
+    runBing(driver, accounts['Bing'], book)
     searchUsingPresearch(driver)
-    runTellwut(driver, accounts['Tellwut'])
+    runTellwut(driver, accounts['Tellwut'], book)
     confirmAmazonGCBalance(driver, accounts['AmazonGC'])
-    runPinecone(driver, accounts['Pinecone'])
+    runPinecone(driver, accounts['Pinecone'], book)
     searchUsingPresearch(driver)
-    runSwagbucks(driver, True, accounts['Swagbucks'])
+    runSwagbucks(driver, True, accounts['Swagbucks'], book)
  
-# if __name__ == '__main__': # Bank
-    # accounts = getDailyAccounts('Bank')
-    # GME = runDailyBank(accounts)
-    
-if __name__ == '__main__': # MR
-    # accounts = getDailyAccounts('MR')
-    # runDailyMR(accounts)
-    from datetime import datetime, timedelta
-    today = datetime.today().date()
-    GME = getPriceInGnucash('GME', today)
-    print(GME)
+if __name__ == '__main__': # Bank
+    personalBook = openGnuCashBook('Finance', False, False)
+    jointBook = openGnuCashBook('Home', False, False)
+    accounts = getDailyAccounts('Bank', personalBook, jointBook)
+    GME = runDailyBank(accounts, personalBook, jointBook)
+    if not personalBook.is_saved:
+        personalBook.save()
+    if not jointBook.is_saved:
+        jointBook.save()
+    personalBook.close()
+    jointBook.close()    
+# if __name__ == '__main__': # MR
+    personalBook = openGnuCashBook('Finance', False, False)
+    # accounts = getDailyAccounts('MR', personalBook)
+    # runDailyMR(accounts, personalBook)
+    if not personalBook.is_saved:
+        personalBook.save()
+    personalBook.close()

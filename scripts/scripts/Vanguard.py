@@ -60,46 +60,43 @@ def getVanguardBalanceAndInterestYTD(driver, accounts):
 def importGnuTransactions(myBook, today, account, interestYTD):
     lastMonth = getStartAndEndOfDateRange(today, "month")
     interestAmount = 0
-    with myBook as book:
-        transactions = [tr for tr in book.transactions
-                        if str(tr.post_date.strftime('%Y')) == str(lastMonth['startDate'].year)
-                        for spl in tr.splits
-                        if spl.account.fullname == account.gnuAccount
-                        ]
-        for tr in transactions:
-            date = str(tr.post_date.strftime('%Y'))
-            for spl in tr.splits:
-                if spl.account.fullname == "Income:Investments:Interest":
-                    interestAmount = interestAmount + abs(spl.value)
-        accountChange = Decimal(account.balance) - account.gnuBalance
-        interest = Decimal(interestYTD) - interestAmount
-        employerContribution = accountChange - interest
-        amount = {
-            'interest': -interest,
-            'employerContribution': -employerContribution,
-            'accountChange': accountChange
-        }
-        transactionVariables = {
-            'postDate': lastMonth['endDate'],
-            'description': "Contribution + Interest",
-            'amount': amount,
-            'fromAccount': account.gnuAccount,
-        }
-        # writeGnuTransaction(myBook, "Contribution + Interest", lastMonth.endDate, [-interest, -employerContribution, accountChange], account.gnuAccount)
-        writeGnuTransaction(myBook, transactionVariables)
+    transactions = [tr for tr in myBook.transactions
+                    if str(tr.post_date.strftime('%Y')) == str(lastMonth['startDate'].year)
+                    for spl in tr.splits
+                    if spl.account.fullname == account.gnuAccount
+                    ]
+    for tr in transactions:
+        for spl in tr.splits:
+            if spl.account.fullname == "Income:Investments:Interest":
+                interestAmount = interestAmount + abs(spl.value)
+    accountChange = Decimal(account.balance) - account.gnuBalance
+    interest = Decimal(interestYTD) - interestAmount
+    employerContribution = accountChange - interest
+    amount = {
+        'interest': -interest,
+        'employerContribution': -employerContribution,
+        'accountChange': accountChange
+    }
+    transactionVariables = {
+        'postDate': lastMonth['endDate'],
+        'description': "Contribution + Interest",
+        'amount': amount,
+        'fromAccount': account.gnuAccount,
+    }
+    # writeGnuTransaction(myBook, "Contribution + Interest", lastMonth.endDate, [-interest, -employerContribution, accountChange], account.gnuAccount)
+    writeGnuTransaction(myBook, transactionVariables)
     book.close()
     return {
         "interest": interest,
         "employerContribution": employerContribution
     }
     
-def runVanguard(driver, accounts):
+def runVanguard(driver, accounts, book):
     today = datetime.today().date()
-    myBook = openGnuCashBook('Finance', False, False)
     locateVanguardWindow(driver)
     interestYTD = getVanguardBalanceAndInterestYTD(driver, accounts)
-    pensionInfo = importGnuTransactions(myBook, today, accounts[0], interestYTD)
-    accounts[0].updateGnuBalance(myBook)
+    pensionInfo = importGnuTransactions(book, today, accounts[0], interestYTD)
+    accounts[0].updateGnuBalance(book)
     openSpreadsheet(driver, 'Asset Allocation', '2022')
     updateSpreadsheet('Asset Allocation', today.year, 'VanguardPension', today.month, float(accounts[0].balance))
     openGnuCashUI('Finances')
@@ -107,11 +104,15 @@ def runVanguard(driver, accounts):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    Pension = USD("VanguardPension")
-    V401k = USD("Vanguard401k")
+    book = openGnuCashBook('Finance', False, False)
+    Pension = USD("VanguardPension", book)
+    V401k = USD("Vanguard401k", book)
     accounts = [Pension, V401k]
-    pensionInfo = runVanguard(driver, accounts)
+    pensionInfo = runVanguard(driver, accounts, book)
     for a in accounts:
         a.getData()
     print('  Interested Earned: ' + str(pensionInfo.interest))
     print('total contributions: ' + str(pensionInfo.employerContributions))
+    if not book.is_saved:
+        book.save()
+    book.close()

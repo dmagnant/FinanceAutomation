@@ -11,11 +11,11 @@ if __name__ == '__main__' or __name__ == "BoA":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
-    from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
+    from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI, openGnuCashBook
 else:
     from .Classes.Asset import USD
     from .Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
-    from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
+    from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI, openGnuCashBook
 
 def locateBoAWindowAndOpenAccount(driver, account):
     found = driver.findWindowByUrl("secure.bankofamerica.com")
@@ -157,13 +157,13 @@ def claimBoARewards(driver, account):
         except ElementNotInteractableException:
             exception = "caught"
 
-def runBoA(driver, account):
+def runBoA(driver, account, book):
     today = datetime.today()
     locateBoAWindowAndOpenAccount(driver, account.name)
     account.setBalance(getBoABalance(driver, account.name))
     transactionsCSV = exportBoATransactions(driver.webDriver, account.name, today)
     claimBoARewards(driver, account.name)
-    importGnuTransaction(account, transactionsCSV, driver.webDriver)
+    importGnuTransaction(account, transactionsCSV, driver.webDriver, book)
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:
         openGnuCashUI('Home') if 'joint' in account.name else openGnuCashUI('Finances')
@@ -171,7 +171,13 @@ def runBoA(driver, account):
 
 if __name__ == '__main__':
     SET_ACCOUNT_VARIABLE = "Personal" # Personal or BoA-joint
-    driver = Driver("Chrome")
-    BoA = USD(SET_ACCOUNT_VARIABLE)
+    bookName = 'Finance' if SET_ACCOUNT_VARIABLE == 'Personal' else 'Home'
+    book = openGnuCashBook(bookName, False, False)
+    driver = Driver("Chrome", book)
+    BoA = USD(SET_ACCOUNT_VARIABLE, book)
     runBoA(driver, BoA)
     BoA.getData()
+    if not book.is_saved:
+        book.save()
+    book.close()
+    

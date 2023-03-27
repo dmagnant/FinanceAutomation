@@ -5,9 +5,11 @@ if __name__ == '__main__' or __name__ == "AmazonGC":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import showMessage
+    from Functions.GnuCashFunctions import openGnuCashBook
 else:
     from .Classes.Asset import USD
     from .Functions.GeneralFunctions import showMessage
+    from .Functions.GnuCashFunctions import openGnuCashBook
 
 def locateAmazonWindow(driver):
         found = driver.findWindowByUrl("www.amazon.com/gc/balance")
@@ -24,8 +26,9 @@ def confirmAmazonGCBalance(driver, account):
         showMessage("Amazon GC Mismatch", f'Amazon balance: {account.balance} \n' f'Gnu Cash balance: {account.gnuBalance} \n')
 
 if __name__ == '__main__':
+    readBook = openGnuCashBook('Finance', True, True)
     driver = Driver("Chrome")
-    AmazonGC = USD("AmazonGC")    
+    AmazonGC = USD("AmazonGC", readBook)    
     confirmAmazonGCBalance(driver, AmazonGC)
     AmazonGC.getData()
-
+    readBook.close()

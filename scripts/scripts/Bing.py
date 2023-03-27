@@ -94,14 +94,17 @@ def runBing(driver, account, book):
     locateBingWindow(driver)
     bingActivities(driver)
     account.setBalance(getBingBalance(driver))
-    account.updateMRBalance()
+    account.updateMRBalance(book)
     if int(account.balance) >= 5250:
         claimBingRewards(driver)
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    Bing = Crypto("Bing")
     book = openGnuCashBook('Finance', False, False)
+    Bing = Crypto("Bing", book)
     runBing(driver, Bing, book)
     Bing.getData()
+    if not book.is_saved:
+        book.save()
     book.close()
+    

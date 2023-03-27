@@ -180,7 +180,7 @@ def modifyTransactionDescription(description, amount="0.00"):
         description = "BoA CC Rewards"
     return description
 
-def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
+def importGnuTransaction(account, transactionsCSV, driver, myBook, lineStart=1):
     def setToAccount(account, description):
         toAccount = ''
         if "BoA CC" in description:
@@ -505,8 +505,6 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
         }
         # [arcadia, solarAmount, electricity, gas, amount]
 
-    book = 'Home' if (account.name == 'Ally' or account.name == 'BoA-joint') else 'Finance'
-    myBook = openGnuCashBook(book, False, False)
     rowCount = 0
     lineCount = 0
     energyBillNum = 0
@@ -529,15 +527,13 @@ def importGnuTransaction(account, transactionsCSV, driver, lineStart=1):
                 writeGnuTransaction(myBook, transactionVariables, toAccount)
     account.updateGnuBalance(myBook)
     
-def importUniqueTransactionsToGnuCash(account, transactionsCSV, driver, dateRange, lineStart=1):
+def importUniqueTransactionsToGnuCash(account, transactionsCSV, driver, dateRange, myBook, lineStart=1):
     directory = setDirectory()
     importCSV = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\import.csv"
     open(importCSV, 'w', newline='').truncate()
-    myBook = openGnuCashBook('Finance', False, False)
     if account.name == 'Ally':
         gnuAccount = "Assets:Ally Checking Account"
         gnuCSV = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\gnu_ally.csv"
-        myBook = openGnuCashBook('Home', False, False)
     elif account.name == 'Sofi Checking':
         gnuAccount = "Assets:Liquid Assets:Sofi:Checking"
         gnuCSV = directory + r"\Projects\Coding\Python\FinanceAutomation\Resources\gnu_sofi.csv"
@@ -561,7 +557,7 @@ def importUniqueTransactionsToGnuCash(account, transactionsCSV, driver, dateRang
     for row in csv.reader(open(transactionsCSV, 'r'), delimiter=','):
         if row not in csv.reader(open(gnuCSV, 'r'), delimiter=','):
             csv.writer(open(importCSV, 'a', newline='')).writerow(row)
-    importGnuTransaction(account, importCSV, driver, lineStart)
+    importGnuTransaction(account, importCSV, driver, myBook, lineStart)
 
 def writeGnuTransaction(myBook, transactionVariables, toAccount=''):
     if "Contribution + Interest" in transactionVariables['description']:
@@ -598,11 +594,9 @@ def writeGnuTransaction(myBook, transactionVariables, toAccount=''):
         split = [Split(value=-transactionVariables['amount'], memo="scripted", account=myBook.accounts(fullname=toAccount)),
                 Split(value=transactionVariables['amount'], memo="scripted", account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
     Transaction(post_date=transactionVariables['postDate'], currency=myBook.currencies(mnemonic="USD"), description=transactionVariables['description'], splits=split)
-    myBook.save()
     myBook.flush()
 
-def getPriceInGnucash(symbol, date=''):
-    myBook = openGnuCashBook('Finance', True, True)
+def getPriceInGnucash(symbol, myBook, date=''):
     if symbol == "ETH2":
         symbol = 'ETH'
     if date:
@@ -622,7 +616,6 @@ def updatePriceInGnucash(symbol, coinPrice, myBook):
         gnuCashPrice.value = coinPrice
     except KeyError:
         p = Price(myBook.commodities(mnemonic=symbol), myBook.currencies(mnemonic="USD"), datetime.today().date(), coinPrice, "last")
-    myBook.save()
     myBook.flush()
 
 def getDollarsInvestedPerCoin(name):
@@ -691,7 +684,6 @@ def consolidatePastYearsTransactions(myBook):
         for spl in transaction.splits:
             if spl.value == 0 and spl.quantity == 0:
                 myBook.delete(spl)
-    myBook.save()
     myBook.flush()
 
 def openGnuCashUI(book):
@@ -786,5 +778,4 @@ def writeCryptoTransaction(myBook):
             Split(value=round(amount-Decimal(1.99), 2), quantity=round(Decimal(35.052832), 6), memo="scripted", account=myBook.accounts(fullname=to_account)),
             Split(value=round(Decimal(1.99),2), memo="scripted", account=myBook.accounts(fullname=fee_account))]
     Transaction(post_date=postdate.date(), currency=myBook.currencies(mnemonic="USD"), description=description, splits=split)
-    myBook.save()
     myBook.flush()

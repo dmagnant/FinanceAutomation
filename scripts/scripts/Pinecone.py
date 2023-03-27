@@ -3,8 +3,6 @@ import time
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Pinecone":
-    from Classes.WebDriver import Driver
-if __name__ == '__main__' or __name__ == "Pinecone":
     from Classes.Asset import Crypto
     from Classes.WebDriver import Driver
     from Functions.GnuCashFunctions import openGnuCashBook
@@ -47,15 +45,19 @@ def claimPineConeRewards(driver):
     driver.find_element(By.XPATH, "/html/body/div[2]/div/div/div[3]/div/div/div[2]/div/form/div[2]/div/button").click() # Review Order
     driver.find_element(By.XPATH, "/html/body/div[2]/div/div/div[3]/div/div[3]/div/table/tbody/tr[5]/td/form/button").click() # Place Order
 
-def runPinecone(driver, account):
+def runPinecone(driver, account, book):
     locatePineconeWindow(driver)
     account.setBalance(getPineConeBalance(driver))
-    account.updateMRBalance(openGnuCashBook('Finance', False, False))
+    account.updateMRBalance(book)
     if float(account.balance) >= 300:
         claimPineConeRewards(driver)
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    Pinecone = Crypto("Pinecone")
-    runPinecone(driver, Pinecone)
+    book = openGnuCashBook('Finance', False, False)
+    Pinecone = Crypto("Pinecone", book)
+    runPinecone(driver, Pinecone, book)
     Pinecone.getData()
+    if not book.is_saved:
+        book.save()
+    book.close()

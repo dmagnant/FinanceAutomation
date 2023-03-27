@@ -15,9 +15,11 @@ from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Swagbucks":
     from Classes.WebDriver import Driver
+    from Classes.Asset import Crypto
     from Functions.GeneralFunctions import showMessage
     from Functions.GnuCashFunctions import openGnuCashBook
 else:
+    from .Classes.Asset import Crypto
     from .Functions.GeneralFunctions import showMessage
     from .Functions.GnuCashFunctions import openGnuCashBook
 
@@ -280,7 +282,7 @@ def claimSwagBucksRewards(driver):
     # click Submit
     driver.find_element(By.ID,"verifyViaSecurityQuestionCta").click()
 
-def runSwagbucks(driver, runAlu, account):
+def runSwagbucks(driver, runAlu, account, book):
     # closeExpressVPN()
     driver.webDriver.implicitly_wait(2)
     locateSwagBucksWindow(driver)
@@ -291,12 +293,17 @@ def runSwagbucks(driver, runAlu, account):
     toDoList(driver)
     swagBuckscontentDiscovery(driver)
     account.setBalance(getSwagBucksBalance(driver))
-    account.updateMRBalance(openGnuCashBook('Finance', False, False))
+    account.updateMRBalance(book)
     if int(account.balance) > 1000:
         claimSwagBucksRewards(driver)
     swagbucksSearch(driver)
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    runSwagbucks(driver, False)
+    book = openGnuCashBook('Finance', False, False)
+    Swagbucks = Crypto("Swagbucks", book)
+    runSwagbucks(driver, False, Swagbucks, book)
+    if not book.is_saved:
+        book.save()
+    book.close()
     

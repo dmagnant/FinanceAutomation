@@ -11,10 +11,12 @@ if __name__ == '__main__' or __name__ == "Presearch":
     from Classes.Asset import Crypto
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import showMessage
+    from Functions.GnuCashFunctions import openGnuCashBook    
 else:
     from .Classes.Asset import Crypto
     from .Functions.GeneralFunctions import showMessage
-    
+    from .Functions.GnuCashFunctions import openGnuCashBook
+
 class Node(object):
     "this is a class for tracking presearch node information"
     # def __init__(self, num, name, currentStake, reliabilityScore):
@@ -131,19 +133,24 @@ def getPresearchBalance(driver):
     balance = searchRewards + stakedTokens
     return balance
 
-def presearchRewardsRedemptionAndBalanceUpdates(driver, account):
+def presearchRewardsRedemptionAndBalanceUpdates(driver, account, book):
     driver.webDriver.implicitly_wait(5)
     preAvailableToStake = claimPresearchRewards(driver)
     if preAvailableToStake:
         stakePresearchRewards(driver, preAvailableToStake)
     account.setBalance(getPresearchBalance(driver))
     account.setPrice(account.getPriceFromCoinGecko())
-    account.updateSpreadsheetAndGnuCash()
+    account.updateSpreadsheetAndGnuCash(book)
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
+    book = openGnuCashBook('Finance', False, False)
     locatePresearchWindow(driver)
     searchUsingPresearch(driver)
-    Presearch = Crypto("Presearch")
-    presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch)
+    Presearch = Crypto("Presearch", book)
+    presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book)
     Presearch.getData()
+    if not book.is_saved:
+        book.save()
+    book.close()
+    

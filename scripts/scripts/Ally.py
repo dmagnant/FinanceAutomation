@@ -11,17 +11,17 @@ if __name__ == '__main__' or __name__ == "Ally":
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import (closeExpressVPN, getPassword,
                                             getStartAndEndOfDateRange, setDirectory, showMessage)
-    from Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription
-elif __name__ == 'scripts.Ally':
-    from scripts.Classes.Asset import USD
-    from scripts.Functions.GeneralFunctions import (closeExpressVPN, getPassword,
-                                             getStartAndEndOfDateRange, showMessage, setDirectory)
-    from scripts.Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription    
+    from Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription, openGnuCashBook
+# elif __name__ == 'scripts.Ally':
+#     from scripts.Classes.Asset import USD
+#     from scripts.Functions.GeneralFunctions import (closeExpressVPN, getPassword,
+#                                              getStartAndEndOfDateRange, showMessage, setDirectory)
+#     from scripts.Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription    
 else:
     from .Classes.Asset import USD
     from .Functions.GeneralFunctions import (closeExpressVPN, getPassword,
                                              getStartAndEndOfDateRange, showMessage, setDirectory)
-    from .Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription
+    from .Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription, openGnuCashBook
 
 def locateAllyWindow(driver):
     found = driver.findWindowByUrl("secure.ally.com")
@@ -103,18 +103,21 @@ def captureAllyTransactions(driver, dateRange):
             insideDateRange = False
     return allyActivity
 
-def runAlly(driver, account):
+def runAlly(driver, account, book):
     dateRange = getStartAndEndOfDateRange(datetime.today().date(), 7)
     locateAllyWindow(driver)
     account.setBalance(getAllyBalance(driver))
     allyActivity = captureAllyTransactions(driver.webDriver, dateRange)
-    importUniqueTransactionsToGnuCash(account, allyActivity, driver.webDriver, dateRange, 0)
-    
+    importUniqueTransactionsToGnuCash(account, allyActivity, driver.webDriver, dateRange, book, 0)
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    Ally = USD("Ally")
-    runAlly(driver, Ally)
+    book = openGnuCashBook('Home', False, False)
+    Ally = USD("Ally", book)
+    runAlly(driver, Ally, book)
     Ally.getData()
     allyLogout(driver)
+    if not book.is_saved:
+        book.save()
+    book.close()
     

@@ -91,16 +91,21 @@ def redeemTellWutRewards(driver):
     driver.webDriver.find_element(By.ID, "accept-additional").click()
     time.sleep(3)
 
-def runTellwut(driver, account):
+def runTellwut(driver, account, book):
     locateTellWutWindow(driver)
     completeTellWutSurveys(driver)
     account.setBalance(getTellWutBalance(driver))
-    account.updateMRBalance(openGnuCashBook('Finance', False, False))
+    account.updateMRBalance(book)
     if int(account.balance) >= 4000:
         redeemTellWutRewards(driver)
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    Tellwut = Crypto("Tellwut")
-    runTellwut(driver, Tellwut)
+    book = openGnuCashBook('Finance', False, False)
+    Tellwut = Crypto("Tellwut", book)
+    runTellwut(driver, Tellwut, book)
     Tellwut.getData()
+    if not book.is_saved:
+        book.save()
+    book.close()
+    

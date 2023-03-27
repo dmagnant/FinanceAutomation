@@ -9,12 +9,12 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Discover":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import (getPassword, showMessage)
-    from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
+    from Functions.GeneralFunctions import (getPassword)
+    from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI, openGnuCashBook
 else:
     from .Classes.Asset import USD
-    from .Functions.GeneralFunctions import (getPassword, showMessage)
-    from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
+    from .Functions.GeneralFunctions import (getPassword)
+    from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI, openGnuCashBook
 
 def locateDiscoverWindow(driver):
     found = driver.findWindowByUrl("discover.com")
@@ -77,20 +77,24 @@ def claimDiscoverRewards(driver):
     except (NoSuchElementException, ElementClickInterceptedException):
         exception = "caught"
 
-def runDiscover(driver, account):
+def runDiscover(driver, account, book):
     today = datetime.today()
     locateDiscoverWindow(driver)
     account.setBalance(getDiscoverBalance(driver))
     transactionsCSV = exportDiscoverTransactions(driver.webDriver, today)
     claimDiscoverRewards(driver)
-    importGnuTransaction(account, transactionsCSV, driver.webDriver)
+    importGnuTransaction(account, transactionsCSV, driver.webDriver, book)
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:
         openGnuCashUI('Finances')
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    Discover = USD("Discover")
-    runDiscover(driver, Discover)
+    book = openGnuCashBook('Finance', False, False)
+    Discover = USD("Discover", book)
+    runDiscover(driver, Discover, book)
     Discover.getData()
+    if not book.is_saved:
+        book.save()
+    book.close()
     
