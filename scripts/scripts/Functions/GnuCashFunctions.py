@@ -564,44 +564,42 @@ def importUniqueTransactionsToGnuCash(account, transactionsCSV, driver, dateRang
     importGnuTransaction(account, importCSV, driver, lineStart)
 
 def writeGnuTransaction(myBook, transactionVariables, toAccount=''):
-    with myBook as book:
-        if "Contribution + Interest" in transactionVariables['description']:
-            split = [Split(value=transactionVariables['amount']['interest'], memo="scripted", account=myBook.accounts(fullname="Income:Investments:Interest")),
-                    Split(value=transactionVariables['amount']['employerContribution'], memo="scripted",account=myBook.accounts(fullname="Income:Employer Contributions:Pension Contributions")),
-                    Split(value=transactionVariables['amount']['accountChange'], memo="scripted",account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
-        elif "HSA Statement" in transactionVariables['description']:
-            if transactionVariables['amount']['HSADividends']:
-                split = [Split(value=transactionVariables['amount']['change'], account=myBook.accounts(fullname=toAccount)),
-                        Split(value=transactionVariables['amount']['HSADividends'], account=myBook.accounts(fullname="Income:Investments:Dividends")),
-                        Split(value=transactionVariables['amount']['HEHSAMarketChange'], account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
-            else:
-                split = [Split(value=transactionVariables['amount']['change'], account=myBook.accounts(fullname=toAccount)),
-                        Split(value=transactionVariables['amount']['HEHSAMarketChange'], account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
-        elif "ARCADIA" in transactionVariables['description']:
-            split=[Split(value=transactionVariables['amount']['arcadia'], memo="Arcadia Membership Fee", account=myBook.accounts(fullname="Expenses:Utilities:Arcadia Membership")),
-                    Split(value=transactionVariables['amount']['solar'], memo="Solar Rebate", account=myBook.accounts(fullname="Expenses:Utilities:Arcadia Membership")),
-                    Split(value=transactionVariables['amount']['electricity'], account=myBook.accounts(fullname="Expenses:Utilities:Electricity")),
-                    Split(value=transactionVariables['amount']['gas'], account=myBook.accounts(fullname="Expenses:Utilities:Gas")),
-                    Split(value=transactionVariables['amount']['total'], account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
-        elif "NM Paycheck" in transactionVariables['description']:
-            split = [Split(value=round(Decimal(2037.85), 2), memo="scripted",account=myBook.accounts(fullname=transactionVariables['fromAccount'])),
-                    Split(value=round(Decimal(412.00), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:401k")),
-                    Split(value=round(Decimal(5.49), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Dental")),
-                    Split(value=round(Decimal(35.47), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Health")),
-                    Split(value=round(Decimal(2.93), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Vision")),
-                    Split(value=round(Decimal(201.78), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Social Security")),
-                    Split(value=round(Decimal(47.19), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Medicare")),
-                    Split(value=round(Decimal(392.49), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Federal Tax")),
-                    Split(value=round(Decimal(158.55), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:State Tax")),
-                    Split(value=round(Decimal(139.58), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:HSA:NM HSA")),
-                    Split(value=-round(Decimal(3433.33), 2), memo="scripted",account=myBook.accounts(fullname=toAccount))]
+    if "Contribution + Interest" in transactionVariables['description']:
+        split = [Split(value=transactionVariables['amount']['interest'], memo="scripted", account=myBook.accounts(fullname="Income:Investments:Interest")),
+                Split(value=transactionVariables['amount']['employerContribution'], memo="scripted",account=myBook.accounts(fullname="Income:Employer Contributions:Pension Contributions")),
+                Split(value=transactionVariables['amount']['accountChange'], memo="scripted",account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
+    elif "HSA Statement" in transactionVariables['description']:
+        if transactionVariables['amount']['HSADividends']:
+            split = [Split(value=transactionVariables['amount']['change'], account=myBook.accounts(fullname=toAccount)),
+                    Split(value=transactionVariables['amount']['HSADividends'], account=myBook.accounts(fullname="Income:Investments:Dividends")),
+                    Split(value=transactionVariables['amount']['HEHSAMarketChange'], account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
         else:
-            split = [Split(value=-transactionVariables['amount'], memo="scripted", account=myBook.accounts(fullname=toAccount)),
-                    Split(value=transactionVariables['amount'], memo="scripted", account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
-        Transaction(post_date=transactionVariables['postDate'], currency=myBook.currencies(mnemonic="USD"), description=transactionVariables['description'], splits=split)
-        book.save()
-        book.flush()
-        book.close()
+            split = [Split(value=transactionVariables['amount']['change'], account=myBook.accounts(fullname=toAccount)),
+                    Split(value=transactionVariables['amount']['HEHSAMarketChange'], account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
+    elif "ARCADIA" in transactionVariables['description']:
+        split=[Split(value=transactionVariables['amount']['arcadia'], memo="Arcadia Membership Fee", account=myBook.accounts(fullname="Expenses:Utilities:Arcadia Membership")),
+                Split(value=transactionVariables['amount']['solar'], memo="Solar Rebate", account=myBook.accounts(fullname="Expenses:Utilities:Arcadia Membership")),
+                Split(value=transactionVariables['amount']['electricity'], account=myBook.accounts(fullname="Expenses:Utilities:Electricity")),
+                Split(value=transactionVariables['amount']['gas'], account=myBook.accounts(fullname="Expenses:Utilities:Gas")),
+                Split(value=transactionVariables['amount']['total'], account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
+    elif "NM Paycheck" in transactionVariables['description']:
+        split = [Split(value=round(Decimal(2037.85), 2), memo="scripted",account=myBook.accounts(fullname=transactionVariables['fromAccount'])),
+                Split(value=round(Decimal(412.00), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:401k")),
+                Split(value=round(Decimal(5.49), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Dental")),
+                Split(value=round(Decimal(35.47), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Health")),
+                Split(value=round(Decimal(2.93), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Vision")),
+                Split(value=round(Decimal(201.78), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Social Security")),
+                Split(value=round(Decimal(47.19), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Medicare")),
+                Split(value=round(Decimal(392.49), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Federal Tax")),
+                Split(value=round(Decimal(158.55), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:State Tax")),
+                Split(value=round(Decimal(139.58), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:HSA:NM HSA")),
+                Split(value=-round(Decimal(3433.33), 2), memo="scripted",account=myBook.accounts(fullname=toAccount))]
+    else:
+        split = [Split(value=-transactionVariables['amount'], memo="scripted", account=myBook.accounts(fullname=toAccount)),
+                Split(value=transactionVariables['amount'], memo="scripted", account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
+    Transaction(post_date=transactionVariables['postDate'], currency=myBook.currencies(mnemonic="USD"), description=transactionVariables['description'], splits=split)
+    myBook.save()
+    myBook.flush()
 
 def getPriceInGnucash(symbol, date=''):
     myBook = openGnuCashBook('Finance', True, True)
@@ -618,8 +616,7 @@ def getPriceInGnucash(symbol, date=''):
     else:
         return myBook.prices(commodity=myBook.commodities(mnemonic=symbol), currency=myBook.currencies(mnemonic="USD")).value 
 
-def updatePriceInGnucash(symbol, coinPrice):
-    myBook = openGnuCashBook('Finance', False, False)
+def updatePriceInGnucash(symbol, coinPrice, myBook):
     try: 
         gnuCashPrice = myBook.prices(commodity=myBook.commodities(mnemonic=symbol), currency=myBook.currencies(mnemonic="USD"), date=datetime.today().date())  # raise a KeyError if Price does not exist
         gnuCashPrice.value = coinPrice
@@ -627,7 +624,6 @@ def updatePriceInGnucash(symbol, coinPrice):
         p = Price(myBook.commodities(mnemonic=symbol), myBook.currencies(mnemonic="USD"), datetime.today().date(), coinPrice, "last")
     myBook.save()
     myBook.flush()
-    myBook.close()
 
 def getDollarsInvestedPerCoin(name):
     # get dollars invested balance (must be run per coin)
@@ -697,7 +693,6 @@ def consolidatePastYearsTransactions(myBook):
                 myBook.delete(spl)
     myBook.save()
     myBook.flush()
-    myBook.close()
 
 def openGnuCashUI(book):
     if book == 'Finances':
@@ -778,8 +773,7 @@ def getTotalOfAutomatedMRAccounts(myBook):
     print('        MR total: ' + str(mrTotal))
     print('paid in amazonGC: ' + str(amazonGC))
 
-def writeCryptoTransaction():
-    mybook = openGnuCashBook('Finance', False, False)
+def writeCryptoTransaction(myBook):
     from_account = 'Assets:Liquid Assets:Sofi:Checking'
     to_account = 'Assets:Non-Liquid Assets:CryptoCurrency:Cardano'
     fee_account = 'Expenses:Bank Fees:Coinbase Fee'
@@ -788,11 +782,9 @@ def writeCryptoTransaction():
     today = datetime.today()
     year = today.year
     postdate = today.replace(month=1, day=1, year=year)
-    with mybook as book:
-        split = [Split(value=-amount, memo="scripted", account=mybook.accounts(fullname=from_account)),
-                Split(value=round(amount-Decimal(1.99), 2), quantity=round(Decimal(35.052832), 6), memo="scripted", account=mybook.accounts(fullname=to_account)),
-                Split(value=round(Decimal(1.99),2), memo="scripted", account=mybook.accounts(fullname=fee_account))]
-        Transaction(post_date=postdate.date(), currency=mybook.currencies(mnemonic="USD"), description=description, splits=split)
-        book.save()
-        book.flush()
-        book.close()
+    split = [Split(value=-amount, memo="scripted", account=myBook.accounts(fullname=from_account)),
+            Split(value=round(amount-Decimal(1.99), 2), quantity=round(Decimal(35.052832), 6), memo="scripted", account=myBook.accounts(fullname=to_account)),
+            Split(value=round(Decimal(1.99),2), memo="scripted", account=myBook.accounts(fullname=fee_account))]
+    Transaction(post_date=postdate.date(), currency=myBook.currencies(mnemonic="USD"), description=description, splits=split)
+    myBook.save()
+    myBook.flush()

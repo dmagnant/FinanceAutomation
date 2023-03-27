@@ -90,16 +90,18 @@ def claimBingRewards(driver):
     except NoSuchElementException:
         exception = "caught"
 
-def runBing(driver, account):
+def runBing(driver, account, book):
     locateBingWindow(driver)
     bingActivities(driver)
     account.setBalance(getBingBalance(driver))
-    account.updateMRBalance(openGnuCashBook('Finance', False, False))
+    account.updateMRBalance()
     if int(account.balance) >= 5250:
         claimBingRewards(driver)
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
     Bing = Crypto("Bing")
-    runBing(driver, Bing)
+    book = openGnuCashBook('Finance', False, False)
+    runBing(driver, Bing, book)
     Bing.getData()
+    book.close()

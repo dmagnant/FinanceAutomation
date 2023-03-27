@@ -59,17 +59,14 @@ def getCryptoSymbolByName(self):
         case _:
             print(f'Cryptocurrency: {self.name} not found in "getCryptoSymbolByName" function')
                 
-def updateCoinQuantityFromStakingInGnuCash(self):
-        myBook = openGnuCashBook('Finance', False, False)
+def updateCoinQuantityFromStakingInGnuCash(self, myBook):
         coinDifference = Decimal(self.balance) - Decimal(self.gnuBalance)
         if coinDifference > 0.001:
-            with myBook:
-                split = [Split(value=-0, memo="scripted", account=myBook.accounts(fullname='Income:Investments:Staking')),
-                        Split(value=0, quantity=round(Decimal(coinDifference), 6), memo="scripted", account=myBook.accounts(fullname=self.gnuAccount))]
-                Transaction(post_date=datetime.today().date(), currency=myBook.currencies(mnemonic="USD"), description=self.symbol + ' staking', splits=split)
-                myBook.save()
-                myBook.flush()
-            myBook.close()
+            split = [Split(value=-0, memo="scripted", account=myBook.accounts(fullname='Income:Investments:Staking')),
+                    Split(value=0, quantity=round(Decimal(coinDifference), 6), memo="scripted", account=myBook.accounts(fullname=self.gnuAccount))]
+            Transaction(post_date=datetime.today().date(), currency=myBook.currencies(mnemonic="USD"), description=self.symbol + ' staking', splits=split)
+            myBook.save()
+            myBook.flush()
         elif coinDifference < 0:
             print(f'given balance of {self.balance} {self.symbol} '
             f'minus gnuCash balance of {self.gnuBalance} '
@@ -158,14 +155,12 @@ class Crypto(Asset):
             for spl in tr.splits
             if spl.account.fullname == self.gnuAccount]
         myBook.delete(transactions[0])
-        with myBook as book:
-            split = [Split(value=-Decimal(self.price), memo="scripted", account=myBook.accounts(fullname='Income:Market Research')),
-                    Split(value=Decimal(self.price), quantity=Decimal(self.balance), memo="scripted", account=myBook.accounts(fullname=self.gnuAccount))]
-            Transaction(post_date=today, currency=myBook.currencies(mnemonic="USD"), description=self.name + ' account balance', splits=split)
-            book.save()
-            book.flush()
-            self.updateGnuBalance(book)
-            book.close()
+        split = [Split(value=-Decimal(self.price), memo="scripted", account=myBook.accounts(fullname='Income:Market Research')),
+                Split(value=Decimal(self.price), quantity=Decimal(self.balance), memo="scripted", account=myBook.accounts(fullname=self.gnuAccount))]
+        Transaction(post_date=today, currency=myBook.currencies(mnemonic="USD"), description=self.name + ' account balance', splits=split)
+        myBook.save()
+        myBook.flush()
+        self.updateGnuBalance(myBook)
 
 class USD(Asset):
     "this is a class for tracking USD information"
@@ -219,12 +214,10 @@ class USD(Asset):
             for spl in tr.splits
             if spl.account.fullname == self.gnuAccount]
         myBook.delete(transactions[0])
-        with myBook as book:
-            split = [Split(value=-Decimal(self.balance), memo="scripted", account=myBook.accounts(fullname='Income:Market Research')),
-                    Split(value=Decimal(self.balance), memo="scripted", account=myBook.accounts(fullname=self.gnuAccount))]
-            Transaction(post_date=today, currency=myBook.currencies(mnemonic="USD"), description=self.name + ' account balance', splits=split)
-            book.save()
-            book.flush()
-            self.updateGnuBalance(book)
-            book.close()
+        split = [Split(value=-Decimal(self.balance), memo="scripted", account=myBook.accounts(fullname='Income:Market Research')),
+                Split(value=Decimal(self.balance), memo="scripted", account=myBook.accounts(fullname=self.gnuAccount))]
+        Transaction(post_date=today, currency=myBook.currencies(mnemonic="USD"), description=self.name + ' account balance', splits=split)
+        myBook.save()
+        myBook.flush()
+        self.updateGnuBalance(myBook)
             
