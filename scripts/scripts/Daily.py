@@ -102,7 +102,12 @@ def runDailyMR(accounts):
 if __name__ == '__main__': # MR
     # accounts = getDailyAccounts('MR')
     # runDailyMR(accounts)
-    from datetime import datetime, timedelta
-    today = datetime.today().date()
-    GME = getPriceInGnucash('GME', today)
-    print(GME)
+    # from datetime import datetime, timedelta
+    # today = datetime.today().date()
+    # GME = getPriceInGnucash('GME', today)
+    # print(GME)
+    
+    driver = Driver("Chrome")
+    coinNames = ['presearch']
+    coinPrices = getCryptocurrencyPrice(coinNames)
+    print(coinPrices)
