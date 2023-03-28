@@ -12,19 +12,19 @@ if __name__ == '__main__' or __name__ == "Sofi":
                                             getStartAndEndOfDateRange,
                                             getUsername, setDirectory,
                                             showMessage)
-    from Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription
-elif __name__ == 'scripts.Sofi':
-    from scripts.Classes.Asset import USD
-    from scripts.Functions.GeneralFunctions import (closeExpressVPN, getPassword,
-                                             getStartAndEndOfDateRange,
-                                             setDirectory, showMessage)
-    from scripts.Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription
+    from Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription, openGnuCashBook
+# elif __name__ == 'scripts.Sofi':
+#     from scripts.Classes.Asset import USD
+#     from scripts.Functions.GeneralFunctions import (closeExpressVPN, getPassword,
+#                                              getStartAndEndOfDateRange,
+#                                              setDirectory, showMessage)
+#     from scripts.Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription
 else:
     from .Classes.Asset import USD
     from .Functions.GeneralFunctions import (closeExpressVPN, getPassword,
                                              getStartAndEndOfDateRange,
                                              setDirectory, showMessage)
-    from .Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription
+    from .Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription, openGnuCashBook
 
 def locateSofiWindow(driver):
     found = driver.findWindowByUrl("sofi.com")
@@ -132,25 +132,29 @@ def getTransactionsFromSofiWebsite(driver, dateRange, today, tableStart, div):
                 insideDateRange = False
     return sofiActivity
 
-def runSofiAccount(driver, dateRange, today, account):
+def runSofiAccount(driver, dateRange, today, account, book):
     page = getSofiBalanceAndOrientPage(driver, account)
     sofiActivity = getTransactionsFromSofiWebsite(driver.webDriver, dateRange, today, page['table'], page['div'])
-    importUniqueTransactionsToGnuCash(account, sofiActivity, driver.webDriver, dateRange, 0)
+    importUniqueTransactionsToGnuCash(account, sofiActivity, driver.webDriver, dateRange, book, 0)
 
-def runSofi(driver, accounts):
+def runSofi(driver, accounts, book):
     today = datetime.today().date()
     dateRange = getStartAndEndOfDateRange(today, 7)
     locateSofiWindow(driver)
     for account in accounts:
-        runSofiAccount(driver, dateRange, today, account)
+        runSofiAccount(driver, dateRange, today, account, book)
     driver.webDriver.get("https://www.sofi.com/my/money/account/#/1000028154579/account-detail") # switch back to checking page
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    Checking = USD("Sofi Checking")
-    Savings = USD("Sofi Savings")
+    book = openGnuCashBook('Finance', False, False)
+    Checking = USD("Sofi Checking", book)
+    Savings = USD("Sofi Savings", book)
     accounts = [Checking, Savings]
-    runSofi(driver, accounts)
+    runSofi(driver, accounts, book)
     for account in accounts:
         account.getData()
     sofiLogout(driver)
+    if not book.is_saved:
+        book.save()
+    book.close()

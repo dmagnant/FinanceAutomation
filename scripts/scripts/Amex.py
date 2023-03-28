@@ -7,12 +7,12 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Amex":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
-    from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
+    from Functions.GeneralFunctions import (getPassword, getUsername)
+    from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI, openGnuCashBook
 else:
     from .Classes.Asset import USD
-    from .Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
-    from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
+    from .Functions.GeneralFunctions import (getPassword, getUsername)
+    from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI, openGnuCashBook
 
 def getAmexBasePath():
     return '/html/body/div[1]/div[2]/div[3]/div/div/div/div/div[2]/div/div[2]/div/div/'
@@ -74,18 +74,22 @@ def claimAmexRewards(driver):
         driver.webDriver.find_element(By.XPATH, "//*[@id='continue-btn']/span").click()
         driver.webDriver.find_element(By.XPATH, "//*[@id='use-dollars-btn']/span").click()
 
-def runAmex(driver, account):
+def runAmex(driver, account, book):
     locateAmexWindow(driver)
     account.setBalance(getAmexBalance(driver))
     exportAmexTransactions(driver.webDriver)
     claimAmexRewards(driver)
-    importGnuTransaction(account, r'C:\Users\dmagn\Downloads\activity.csv', driver.webDriver)
+    importGnuTransaction(account, r'C:\Users\dmagn\Downloads\activity.csv', driver.webDriver, book)
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:
         openGnuCashUI('Finances')
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    Amex = USD("Amex")    
-    runAmex(driver, Amex)
+    book = openGnuCashBook('Finance', False, False)
+    Amex = USD("Amex", book)    
+    runAmex(driver, Amex, book)
     Amex.getData()
+    if not book.is_saved:
+        book.save()
+    book.close()

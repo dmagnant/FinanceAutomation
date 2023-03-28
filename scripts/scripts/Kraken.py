@@ -8,11 +8,13 @@ if __name__ == '__main__' or __name__ == "Kraken":
     from Classes.Asset import Crypto
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import (getCryptocurrencyPrice, getOTP,
-                                            getPassword, getUsername)  
+                                            getPassword, getUsername)
+    from Functions.GnuCashFunctions import openGnuCashBook      
 else:
     from .Classes.Asset import Crypto
     from .Functions.GeneralFunctions import (getCryptocurrencyPrice, getOTP,
                                              getPassword, getUsername)
+    from .Functions.GnuCashFunctions import openGnuCashBook
     
 def locateKrakenWindow(driver):
     found = driver.findWindowByUrl("kraken.com")
@@ -54,16 +56,19 @@ def getKrakenBalance(driver):
         num = 21 if eth2Balance else num + 1
     return eth2Balance
 
-def runKraken(driver, account):
+def runKraken(driver, account, book):
     locateKrakenWindow(driver)
     account.setBalance(getKrakenBalance(driver))
     account.setPrice(getCryptocurrencyPrice('ethereum')['ethereum']['usd'])
     account.updateBalanceInSpreadSheet()
-    account.updateBalanceInGnuCash()
+    account.updateBalanceInGnuCash(book)
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    Ethereum2 = Crypto("Ethereum2")
-    runKraken(driver, Ethereum2)
+    book = openGnuCashBook('Finance', False, False)    
+    Ethereum2 = Crypto("Ethereum2", book)
+    runKraken(driver, Ethereum2, book)
     Ethereum2.getData()
-        
+    if not book.is_saved:
+        book.save()
+    book.close()    

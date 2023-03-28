@@ -10,12 +10,14 @@ if __name__ == '__main__' or __name__ == "HealthEquity":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange,
-                                            showMessage)    
+                                            showMessage)
+    from Functions.GnuCashFunctions import openGnuCashBook
 else:
     from .Classes.Asset import USD
     from .Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                              showMessage)    
-    
+    from .Functions.GnuCashFunctions import openGnuCashBook
+
 def locateHealthEquityWindow(driver):
     found = driver.findWindowByUrl("member.my.healthequity.com")
     if not found:
@@ -77,14 +79,15 @@ def runHealthEquity(driver, accounts):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    HealthEquity = USD("HSA")
-    Vanguard = USD("Vanguard401k")
-    HEaccounts = {
-        'HealthEquity': HealthEquity, 
-        'Vanguard': Vanguard
-    }
+    book = openGnuCashBook('Finance', False, False)
+    HealthEquity = USD("HSA", book)
+    Vanguard = USD("Vanguard401k", book)
+    HEaccounts = {'HealthEquity': HealthEquity, 'Vanguard': Vanguard}
     HSA_dividends = runHealthEquity(driver, HEaccounts)
     HealthEquity.getData()
     Vanguard.getData()
     print("HSA Dividends: " + str(HSA_dividends))
+    if not book.is_saved:
+        book.save()
+    book.close()
     

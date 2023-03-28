@@ -8,9 +8,11 @@ if __name__ == '__main__' or __name__ == "IoPay":
     from Classes.Asset import Crypto
     from Functions.GeneralFunctions import showMessage
     from Classes.WebDriver import Driver
+    from Functions.GnuCashFunctions import openGnuCashBook       
 else:
     from .Classes.Asset import Crypto
-    from .Functions.GeneralFunctions import showMessage    
+    from .Functions.GeneralFunctions import showMessage
+    from .Functions.GnuCashFunctions import openGnuCashBook       
 
 def locateIoPayWindow(driver):
     found = driver.findWindowByUrl("stake.iotex.io")
@@ -24,7 +26,7 @@ def IoPayLogin(driver):
     driver.openNewWindow('https://stake.iotex.io/')
     time.sleep(1)
 
-def runIoPay(driver, account):
+def runIoPay(driver, account, book):
     locateIoPayWindow(driver)
     showMessage('Open Ledger Wallet - IoPay App', 'Once Open, click OK')
     try:
@@ -48,10 +50,15 @@ def runIoPay(driver, account):
     iotxBalance = round(float(walletBalance + stakedBalance), 2)
     account.setBalance(iotxBalance)
     account.setPrice(account.getPriceFromCoinGecko())
-    account.updateSpreadsheetAndGnuCash()
+    account.updateSpreadsheetAndGnuCash(book)
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    IoTex = Crypto("IoTex")
-    runIoPay(driver, IoTex)
+    book = openGnuCashBook('Finance', False, False)
+    IoTex = Crypto("IoTex", book)
+    runIoPay(driver, IoTex, book)
     IoTex.getData()
+    if not book.is_saved:
+        book.save()
+    book.close()
+    

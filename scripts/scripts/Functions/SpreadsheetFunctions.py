@@ -94,7 +94,7 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
         f'This is likely due to an update on the spreadsheet: {sheetTitle} > {tabTitle} \n'
         f'Check spreadsheet and verify the getCell method is getting the correct Cell')
 
-def updateCryptoPrices(driver):
+def updateCryptoPrices(driver, book):
     print('updating coin prices')
     url = "edit#gid=623829469"
     found = driver.findWindowByUrl(url)
@@ -132,7 +132,7 @@ def updateCryptoPrices(driver):
         i = coinNames.index(coin)
         symbol = coinSymbols[i]
         price = format(coinPrices[coin]["usd"], ".2f")
-        updatePriceInGnucash(symbol, price)
+        updatePriceInGnucash(symbol, price, book)
         worksheet.update((priceColumn + str(i + 2)), float(price))
 
 def updateInvestmentPrices(driver, Home):

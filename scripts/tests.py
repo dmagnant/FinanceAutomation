@@ -9,8 +9,7 @@ from scripts.BoA import *
 from scripts.Chase import *
 from scripts.Coinbase import *
 from scripts.Cointiply import *
-from scripts.Daily_Bank import *
-from scripts.Daily_MR import *
+from scripts.Daily import *
 from scripts.Discover import *
 from scripts.Eternl import *
 from scripts.Exodus import *
@@ -19,7 +18,7 @@ from scripts.HealthEquity import *
 from scripts.IoPay import *
 from scripts.Kraken import *
 from scripts.Ledger import *
-from scripts.Monthly_Bank import *
+from scripts.Monthly import *
 from scripts.MyConstant import *
 from scripts.Paypal import *
 from scripts.Paidviewpoint import *

@@ -8,10 +8,12 @@ if __name__ == '__main__' or __name__ == "Coinbase":
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import (getCryptocurrencyPrice, getOTP,
                                             getPassword, getUsername)  
+    from Functions.GnuCashFunctions import openGnuCashBook    
 else:
     from .Classes.Asset import Crypto
     from .Functions.GeneralFunctions import (getCryptocurrencyPrice, getOTP,
                                              getPassword, getUsername)
+    from .Functions.GnuCashFunctions import openGnuCashBook    
     
 def locateCoinbaseWindow(driver):
     found = driver.findWindowByUrl("coinbase.com")
@@ -33,51 +35,39 @@ def coinbaseLogin(driver):
     except NoSuchElementException:
         exception = "OTP not required"
 
-def getCoinbaseBalances(driver, coinList):
+def getCoinbaseBalances(driver, account):
     def getBasePath():
         return "//*[@id='main']/div/div/div/div/div/div/main/div[2]/div/div[1]/div/div[4]/table/tbody/tr["
-    
     def getNamePath(num):
-        return getBasePath() + str(num) + ']/td[1]/div/div/div[2]/div/div[1]'
-                    
+        return getBasePath() + str(num) + ']/td[1]/div/div/div[2]/div/div[1]'          
     def getBalancePath(num):
         return getBasePath() + str(num) + ']/td[2]/div/div/div/div/div[2]'
-
+    
     locateCoinbaseWindow(driver)
     driver.webDriver.get('https://www.coinbase.com/assets')
     driver.webDriver.implicitly_wait(10)
     time.sleep(5)
     num = 1
-    coinsFound = 0
-    while coinsFound < len(coinList):
+    coinFound = 0
+    while not coinFound:
         name = driver.webDriver.find_element(By.XPATH, getNamePath(num)).text
-        print(name)
-        for coin in coinList:
-            if name == coin.name:
-                balance = driver.webDriver.find_element(By.XPATH, getBalancePath(num)).text.replace(' ' + coin.symbol, '').replace(',','')
-                coin.setBalance(float(balance))
-                coin.setPrice(getCryptocurrencyPrice(coin.name.lower())[coin.name.lower()]['usd'])
-                coin.updateBalanceInSpreadSheet()
-                coin.updateBalanceInGnuCash()
-                coinsFound += 1
+        if name == account.name:
+            return float(driver.webDriver.find_element(By.XPATH, getBalancePath(num)).text.replace(' ' + account.symbol, '').replace(',',''))
         num+=1
 
-def runCoinbase(driver, coinList):
+def runCoinbase(driver, account, book):
     locateCoinbaseWindow(driver)
-    getCoinbaseBalances(driver, coinList)
+    account.setBalance(getCoinbaseBalances(driver, account))
+    account.setPrice(account.getPriceFromCoinGecko())
+    account.updateSpreadsheetAndGnuCash(book)
+
     
 if __name__ == '__main__':
-    # driver = Driver("Chrome")
-    # Loopring = Crypto("Loopring")
-    # runCoinbase(driver, [Loopring])
-    # Loopring.getData()
-    color = 'blue'
-    
-    Test = {
-        'test': color
-    }
-    print(Test['test'])
-    
-    Test['test'] = 'red'
-    
-    print(Test['test'])
+    driver = Driver("Chrome")
+    book = openGnuCashBook('Finance', False, False)
+    Loopring = Crypto("Loopring", book)
+    runCoinbase(driver, Loopring, book)
+    Loopring.getData()
+    if not book.is_saved:
+        book.save()
+    book.close()

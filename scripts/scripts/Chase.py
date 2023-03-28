@@ -7,12 +7,10 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Chase":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import showMessage
-    from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
+    from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI, openGnuCashBook
 else:
     from .Classes.Asset import USD
-    from .Functions.GeneralFunctions import showMessage
-    from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI
+    from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI, openGnuCashBook
 
 def locateChaseWindow(driver):
     found = driver.findWindowByUrl("chase.com/web/auth")
@@ -77,19 +75,24 @@ def claimChaseRewards(driver):
         pyautogui.press('tab')
         pyautogui.press('enter')                
 
-def runChase(driver, account):
+def runChase(driver, account, book):
     today = datetime.today()
     locateChaseWindow(driver)
     account.setBalance(getChaseBalance(driver))
     transactionsCSV = exportChaseTransactions(driver.webDriver, today)
     claimChaseRewards(driver)
-    importGnuTransaction(account, transactionsCSV, driver.webDriver)
+    importGnuTransaction(account, transactionsCSV, driver.webDriver, book)
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:
         openGnuCashUI('Finances')
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    Chase = USD("Chase")    
-    runChase(driver, Chase)
+    book = openGnuCashBook('Finance', False, False)   
+    Chase = USD("Chase", book)    
+    runChase(driver, Chase, book)
     Chase.getData()
+    if not book.is_saved:
+        book.save()
+    book.close()
+    
