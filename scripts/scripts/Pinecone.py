@@ -1,6 +1,8 @@
 import time
 
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import ElementClickInterceptedException
+
 
 if __name__ == '__main__' or __name__ == "Pinecone":
     from Classes.Asset import Crypto
@@ -36,7 +38,13 @@ def getPineConeBalance(driver):
 def claimPineConeRewards(driver):
     locatePineconeWindow(driver)    
     driver = driver.webDriver
-    driver.find_element(By.ID, "3").click() # Redeem
+    loading = True
+    while loading:
+        try:
+            driver.find_element(By.ID, "3").click() # Redeem
+            loading = False
+        except ElementClickInterceptedException:
+            exception = "still Loading"
     time.sleep(3)
     driver.get("https://rewards.pineconeresearch.com/shop/wishlist/")
     driver.find_element(By.XPATH, "/html/body/div[2]/div/div/div[3]/div[1]/div/div[2]/div/div/div/div[2]/div[1]/span[1]/a").click()  # link for product

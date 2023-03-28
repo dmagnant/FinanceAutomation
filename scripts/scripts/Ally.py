@@ -9,7 +9,7 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Ally":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import (closeExpressVPN, getPassword,
+    from Functions.GeneralFunctions import (getPassword,
                                             getStartAndEndOfDateRange, setDirectory, showMessage)
     from Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription, openGnuCashBook
 # elif __name__ == 'scripts.Ally':
@@ -19,7 +19,7 @@ if __name__ == '__main__' or __name__ == "Ally":
 #     from scripts.Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription    
 else:
     from .Classes.Asset import USD
-    from .Functions.GeneralFunctions import (closeExpressVPN, getPassword,
+    from .Functions.GeneralFunctions import (getPassword,
                                              getStartAndEndOfDateRange, showMessage, setDirectory)
     from .Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription, openGnuCashBook
 
@@ -33,21 +33,18 @@ def locateAllyWindow(driver):
     return True
 
 def allyLogin(driver):
-    # closeExpressVPN()
     driver.webDriver.implicitly_wait(10)
     loggedIn = False
     while not loggedIn:
         driver.openNewWindow('https://ally.com/')
         time.sleep(1)
-        # click Login
-        driver.webDriver.find_element(By.ID,"login").click()
+        driver.webDriver.find_element(By.ID,"login").click() # login
+        time.sleep(1)
         # enter Password (username already filled in)
         # driver.webDriver.find_element(By.ID,"allysf-login-v2-password-367761b575af35f6ccb5b53e96b2fa2d").send_keys(getPassword('Ally Bank')) # autofilled right now
-        # click Login
-        driver.webDriver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button").click()
+        driver.webDriver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button").click() # login
         time.sleep(5)
-        # check if login button is still seen
-        try:
+        try: # check if login button is still seen
             driver.webDriver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div/div[1]/form/div[3]/button/span")
             loggedIn = False
             driver.webDriver.close()
