@@ -311,9 +311,9 @@ def daily(request):
         if "bank" in request.POST or "ally" in request.POST:
             jointWriteBook = openGnuCashBook('Home', False, False)
             if "bank" in request.POST:
-                GME = runDailyBank(bankAccounts)
+                GME = runDailyBank(bankAccounts, personalWriteBook, jointWriteBook)
             elif "allyMain" in request.POST:
-                runAlly(driver, bankAccounts['Ally'])
+                runAlly(driver, bankAccounts['Ally'], jointWriteBook)
             elif "allyLogin" in request.POST:
                 locateAllyWindow(driver)
             elif "allyLogout" in request.POST:
@@ -416,7 +416,6 @@ def daily(request):
         elif "paidviewpointRewards" in request.POST:
             redeemPaidviewpointRewards(driver)            
         elif "close windows" in request.POST:
-            print('YEET YYET ' + str(personalWriteBook.is_saved))
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/daily"))
         if not personalWriteBook.is_saved:
             personalWriteBook.save()
@@ -835,6 +834,7 @@ def tellwut(request):
         if "main" in request.POST:
             runTellwut(driver, Tellwut)
         elif "login" in request.POST:
+            print(driver.webDriver.current_window_handle)
             locateTellWutWindow(driver)
         elif "surveys" in request.POST:
             completeTellWutSurveys(driver)

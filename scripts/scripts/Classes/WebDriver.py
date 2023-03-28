@@ -99,13 +99,15 @@ class Driver:
         self.webDriver.implicitly_wait(5)
         
     def findWindowByUrl(self, url):
+        currentWindow = self.webDriver.current_window_handle
         if url in self.webDriver.current_url:
-            return self.webDriver.current_window_handle
+            return currentWindow
         if len(self.webDriver.window_handles) > 1:
             for i in self.webDriver.window_handles:
                 self.webDriver.switch_to.window(i)
                 if url in self.webDriver.current_url:
                     return self.webDriver.current_window_handle
+        self.webDriver.switch_to.window(currentWindow)
         return False
 
     def closeWindowsExcept(self, urls, displayWindowHandle=''):
@@ -126,12 +128,8 @@ class Driver:
             self.switchToLastWindow()
                 
     def openNewWindow(self, url):
-        url = "'" + url + "'"
-        self.webDriver.execute_script("window.open(" + url + ");")
-        self.switchToLastWindow()
+        self.webDriver.switch_to.new_window('tab')
+        self.webDriver.get(url)
                 
     def switchToLastWindow(self):
         self.webDriver.switch_to.window(self.webDriver.window_handles[len(self.webDriver.window_handles)-1])
-
-        
-    

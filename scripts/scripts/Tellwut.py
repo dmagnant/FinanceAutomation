@@ -15,7 +15,6 @@ else:
     from .Functions.GeneralFunctions import showMessage
     from .Functions.GnuCashFunctions import openGnuCashBook   
     from .Classes.Asset import Crypto
- 
 
 def locateTellWutWindow(driver):
     found = driver.findWindowByUrl("tellwut.com")
