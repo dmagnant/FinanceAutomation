@@ -110,15 +110,15 @@ def getAccountPath(account):
         case 'Worthy':
             return "Assets:Liquid Assets:Bonds:Worthy Bonds"
         case 'Bing':
-            return "Assets:Non-Liquid Assets:MR:Bing"
+            return "Assets:Liquid Assets:MR:Bing"
         case 'Paidviewpoint':
-            return "Assets:Non-Liquid Assets:MR:Paidviewpoint"        
+            return "Assets:Liquid Assets:MR:Paidviewpoint"        
         case 'Pinecone':
-            return "Assets:Non-Liquid Assets:MR:Pinecone"
+            return "Assets:Liquid Assets:MR:Pinecone"
         case 'Swagbucks':
-            return "Assets:Non-Liquid Assets:MR:Swagbucks"
+            return "Assets:Liquid Assets:MR:Swagbucks"
         case 'Tellwut':
-            return "Assets:Non-Liquid Assets:MR:Tellwut"
+            return "Assets:Liquid Assets:MR:Tellwut"
         case _:
             print(f'account: {accountName} not found in "getAccountPath" function')
 

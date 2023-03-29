@@ -12,11 +12,6 @@ if __name__ == '__main__' or __name__ == "Ally":
     from Functions.GeneralFunctions import (getPassword,
                                             getStartAndEndOfDateRange, setDirectory, showMessage)
     from Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription, openGnuCashBook
-# elif __name__ == 'scripts.Ally':
-#     from scripts.Classes.Asset import USD
-#     from scripts.Functions.GeneralFunctions import (closeExpressVPN, getPassword,
-#                                              getStartAndEndOfDateRange, showMessage, setDirectory)
-#     from scripts.Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription    
 else:
     from .Classes.Asset import USD
     from .Functions.GeneralFunctions import (getPassword,

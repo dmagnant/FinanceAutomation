@@ -82,13 +82,10 @@ def claimPresearchRewards(driver):
     except NoSuchElementException:
         showMessage('Presearch fail', 'Check Presearch. May need to login or check element. Click OK once logged in to continue')
         driver.get("https://nodes.presearch.org/dashboard")
-    # claim rewards
     unclaimed = driver.find_element(By.XPATH, getPresearchBasePath() + '2]/div[3]/div[2]/div/div/div[1]/h2').text.strip(' PRE')
     if float(unclaimed) > 0:
-        # click Claim
-        driver.find_element(By.XPATH, getPresearchBasePath() + '2]/div[3]/div[2]/div/div/div[2]/div/a').click()
-        # click Claim Reward
-        driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div/div/div/div[2]/div/form/div/button').click()
+        driver.find_element(By.XPATH, getPresearchBasePath() + '2]/div[3]/div[2]/div/div/div[2]/div/a').click() # claim
+        driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div/div/div/div[2]/div/form/div/button').click() # claim reward
         time.sleep(4)
         driver.refresh()
         time.sleep(1)

@@ -375,7 +375,7 @@ def daily(request):
         elif "presearchSearch" in request.POST:
             searchUsingPresearch(driver)
         elif "presearchRewards" in request.POST:
-            presearchRewardsRedemptionAndBalanceUpdates(driver, bankAccounts['Presearch'])
+            presearchRewardsRedemptionAndBalanceUpdates(driver, bankAccounts['Presearch'], personalWriteBook)
         elif "swagbucksMain" in request.POST:
             runSwagbucks(driver, True, mrAccounts['Swagbucks'], personalWriteBook) if "Run Alu" in request.POST else runSwagbucks(driver, False, mrAccounts['Swagbucks'], personalWriteBook)
         elif "swagbucksLogin" in request.POST:
@@ -412,7 +412,7 @@ def daily(request):
             paidviewpointLogin(driver)        
         elif "paidviewpointBalance" in request.POST:
             mrAccounts['Paidviewpoint'].setBalance(getPaidviewpointBalance(driver))
-            mrAccounts['Paidviewpoint'].overwriteBalance(openGnuCashBook('Finance', False, False))            
+            mrAccounts['Paidviewpoint'].overwriteBalance(personalWriteBook)            
         elif "paidviewpointRewards" in request.POST:
             redeemPaidviewpointRewards(driver)            
         elif "close windows" in request.POST:
@@ -420,6 +420,8 @@ def daily(request):
         if not personalWriteBook.is_saved:
             personalWriteBook.save()
         personalWriteBook.close()
+        if "MR" in request.POST: # run after book is saved/closed in case of failure
+            swagbucksSearch(driver)
     context = {'mrAccounts': mrAccounts, 'bankAccounts': bankAccounts, 'GME': "%.2f" % GME}
     personalReadBook.close()
     jointReadBook.close()
@@ -840,7 +842,7 @@ def tellwut(request):
             completeTellWutSurveys(driver)
         elif "balance" in request.POST:
             Tellwut.setBalance(getTellWutBalance(driver))
-            Tellwut.updateMRBalance(openGnuCashBook('Finance', False, False))
+            Tellwut.updateMRBalance(writeBook)
         elif "rewards" in request.POST:
             redeemTellWutRewards(driver)
         elif "close windows" in request.POST:

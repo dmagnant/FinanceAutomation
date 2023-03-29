@@ -45,16 +45,15 @@ def clickButtons(driver, type):
         except(ElementNotInteractableException):
             exception = 'notInteractable'
         except(ElementClickInterceptedException):
-            if type == 'radio':
-                findSubmitButton(driver)
-                i.click()
+            findSubmitButton(driver)
+            i.click()
 
 def findSubmitButton(driver):
     return driver.webDriver.find_element(By.ID,'survey_form_submit')
 
 def completeTellWutSurveys(driver):
     locateTellWutWindow(driver)
-    driver.webDriver.implicitly_wait(2)
+    driver.webDriver.implicitly_wait(1)
     driver.webDriver.get('https://www.tellwut.com/most_recent_surveys') # load most recent surveys page
     time.sleep(2)
     try:
@@ -62,8 +61,10 @@ def completeTellWutSurveys(driver):
     except NoSuchElementException:
         exception = "no surveys"
         return False
+    num = 1
     while True:
         try:
+            driver.webDriver.find_element(By.XPATH,"//*[@id='main']/section/div/div[2]/div[4]/div[1]") # scroll past to comments section
             clickButtons(driver, 'radio')
             clickButtons(driver, 'checkbox')
             submitButton = findSubmitButton(driver)
@@ -77,10 +78,15 @@ def completeTellWutSurveys(driver):
         except NoSuchElementException:
             try:
                 submitButton = findSubmitButton(driver)
-                showMessage('survey not complete', 'finish survey manually')
+                showMessage('survey not complete', 'click survey answers manually, then click OK')
+                try:
+                    submitButton.click()
+                except NoSuchElementException:
+                    exception = 'clicked submit manually'
                 driver.webDriver.find_element(By.XPATH,"//*[@id='next-survey-btn']/a").click() # NEXT POLL
             except NoSuchElementException:
                 break
+        num+=1
 
 def redeemTellWutRewards(driver):
     locateTellWutWindow(driver)

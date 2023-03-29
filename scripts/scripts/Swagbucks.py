@@ -296,7 +296,7 @@ def runSwagbucks(driver, runAlu, account, book):
     account.updateMRBalance(book)
     if int(account.balance) > 1000:
         claimSwagBucksRewards(driver)
-    swagbucksSearch(driver)
+    # swagbucksSearch(driver)
     
 if __name__ == '__main__':
     driver = Driver("Chrome")

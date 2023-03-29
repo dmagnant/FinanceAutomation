@@ -8,13 +8,6 @@ if __name__ == "Classes.Asset":
     from Functions.GnuCashFunctions import (getAccountPath, getGnuCashBalance,
                                             updatePriceInGnucash, getPriceInGnucash)
     from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
-# elif __name__ == 'scripts.Classes.Asset':
-#     from scripts.Functions.GeneralFunctions import (
-#         getCryptocurrencyPrice)
-#     from scripts.Functions.GnuCashFunctions import (
-#         getAccountPath, getGnuCashBalance,
-#         updatePriceInGnucash, getPriceInGnucash)
-#     from scripts.Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
 else:
     from scripts.scripts.Functions.GeneralFunctions import (
         getCryptocurrencyPrice)
@@ -152,9 +145,10 @@ class Crypto(Asset):
             if tr.post_date.year == today.year
             for spl in tr.splits
             if spl.account.fullname == self.gnuAccount]
+        value = int(self.balance) * self.price
         myBook.delete(transactions[0])
-        split = [Split(value=-Decimal(self.price), memo="scripted", account=myBook.accounts(fullname='Income:Market Research')),
-                Split(value=Decimal(self.price), quantity=Decimal(self.balance), memo="scripted", account=myBook.accounts(fullname=self.gnuAccount))]
+        split = [Split(value=-value, memo="scripted", account=myBook.accounts(fullname='Income:Market Research')),
+                Split(value=value, quantity=Decimal(self.balance), memo="scripted", account=myBook.accounts(fullname=self.gnuAccount))]
         Transaction(post_date=today, currency=myBook.currencies(mnemonic="USD"), description=self.name + ' account balance', splits=split)
         myBook.flush()
         self.updateGnuBalance(myBook)

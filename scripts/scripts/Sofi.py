@@ -13,12 +13,6 @@ if __name__ == '__main__' or __name__ == "Sofi":
                                             getUsername, setDirectory,
                                             showMessage)
     from Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription, openGnuCashBook
-# elif __name__ == 'scripts.Sofi':
-#     from scripts.Classes.Asset import USD
-#     from scripts.Functions.GeneralFunctions import (closeExpressVPN, getPassword,
-#                                              getStartAndEndOfDateRange,
-#                                              setDirectory, showMessage)
-#     from scripts.Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription
 else:
     from .Classes.Asset import USD
     from .Functions.GeneralFunctions import (closeExpressVPN, getPassword,
@@ -41,16 +35,12 @@ def sofiLogin(driver):
     time.sleep(2)
     # click Login
     driver.find_element(By.XPATH, "//*[@id='widget_block']/main/section/div/div/div/form/div[2]/button").click()
-    # # look for email is required error (suggesting that auto-fill didn't occur)
-    # driver.find_element(By.ID,"error-3")
-    # # username
+    # driver.find_element(By.ID,"error-3") # look for email is required error
     # driver.find_element(By.ID, "username").send_keys(getUsername('Sofi'))
     # time.sleep(1)
-    # # # password
     # driver.find_element(By.ID, "password").send_keys(getPassword('Sofi'))
     # time.sleep(1)
-    # # click LOG IN
-    # driver.find_element(By.XPATH, "//*[@id='widget_block']/main/section/div/div/div/form/div[2]/button").click()
+    # driver.find_element(By.XPATH, "//*[@id='widget_block']/main/section/div/div/div/form/div[2]/button").click() # login
     try:
         driver.find_element(By.ID,'code')
         showMessage("OTP Verification", "Enter code from phone, then click OK")
