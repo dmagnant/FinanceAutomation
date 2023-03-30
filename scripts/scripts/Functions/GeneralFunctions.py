@@ -2,12 +2,9 @@ import ctypes
 import os
 import time
 from datetime import timedelta
-import math
 from decimal import Decimal
 
 import psutil
-import pyautogui
-import pygetwindow
 import pyotp
 from pycoingecko import CoinGeckoAPI
 from pykeepass import PyKeePass
@@ -22,12 +19,6 @@ def showMessage(header, body):
 def setDirectory():
     return os.environ.get('StorageDirectory')    
 
-def startExpressVPN():
-    os.startfile(r'C:\Program Files (x86)\ExpressVPN\expressvpn-ui\ExpressVPN.exe')
-    time.sleep(5)
-    EVPN = pygetwindow.getWindowsWithTitle('ExpressVPN')[0]
-    EVPN.close()  # stays open in system tray
-
 def isProcessRunning(processName):
         # Iterate over the all the running process
         for proc in psutil.process_iter():
@@ -38,19 +29,6 @@ def isProcessRunning(processName):
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         return False
- 
-def closeExpressVPN():
-    if isProcessRunning('ExpressVPN.exe'):
-        os.startfile(r'C:\Program Files (x86)\ExpressVPN\expressvpn-ui\ExpressVPN.exe')
-        time.sleep(3)
-        EVPN = pygetwindow.getWindowsWithTitle('ExpressVPN')[0]
-        EVPN.restore()
-        EVPN.move(0, 0)
-        EVPN.activate()
-        pyautogui.leftClick(40, 50)
-        time.sleep(1)
-        pyautogui.leftClick(40, 280)
-        time.sleep(4)
 
 def getUsername(name):
     keepass_file = setDirectory() + r"\Other\KeePass.kdbx"
@@ -144,3 +122,147 @@ def getStockPrice(driver, symbol):
     driver.switchToLastWindow()
     driver.webDriver.implicitly_wait(3)
     return round(Decimal(price), 2)
+
+def modifyTransactionDescription(description, amount="0.00"):
+    if "INTERNET TRANSFER FROM ONLINE SAVINGS ACCOUNT XXXXXX9703" in description.upper():
+        description = "Tessa Deposit"
+    elif "INTEREST EARNED" in description.upper():
+        description = "Interest earned"
+    elif "SOFI REWARDS REDEMPTION" in description.upper():
+        description = "Interest earned"
+    elif "JONATHON MAGNANT" in description.upper():
+        description = "Jonny payment"
+    elif "SAVINGS - 3467" in description.upper():
+        description = "Savings Transfer"
+    elif "ALLY BANK TRANSFER" in description.upper():
+        description = "Dan Deposit"
+    elif "ALLY BANK" in description.upper():
+        description = "Ally Transfer"
+    elif "FID BKG SVC LLC" in description.upper():
+        description = "Fidelity IRA Transfer"
+    elif "CITY OF MILWAUKE B2P*MILWWA" in description.upper():
+        description = "Water Bill"
+    elif "DOVENMUEHLE MTG MORTG PYMT" in description.upper():
+        description = "Mortgage Payment"
+    elif "NORTHWESTERN MUT" in description.upper():
+        description = "NM Paycheck"
+    elif "PAYPAL" in description.upper() and "10.00" in amount:
+        description = "Swagbucks"  
+    elif "PAYPAL" in description.upper():
+        description = "Paypal"
+    elif "NIELSEN" in description.upper() and "3.00" in amount:
+        description = "Pinecone Research"
+    elif "VENMO" in description.upper():
+        description = "Venmo"
+    elif "ALLIANT CU" in description.upper():
+        description = "Alliant Transfer"        
+    elif "AMEX EPAYMENT" in description.upper():
+        description = "Amex CC"
+    elif "SPECTRUM" in description.upper():
+        description = "Internet Bill"
+    elif "COINBASE" in description.upper():
+        description = "Crypto purchase"
+    elif "CHASE CREDIT CRD" in description.upper() and float(amount) > 0:
+        description = "Chase CC Rewards"
+    elif "CHASE CREDIT CRD" in description.upper() and float(amount) < 0:
+        description = "Chase CC"
+    elif "DISCOVER CASH AWARD" in description.upper():
+        description = "Discover CC Rewards"        
+    elif "DISCOVER" in description.upper():
+        description = "Discover CC"
+    elif "BARCLAYCARD US" in description.upper() and float(amount) > 0:
+        description = "Barclays CC Rewards"
+    elif "BARCLAYCARD US" in description.upper() and float(amount) < 0:
+        description = "Barclays CC"        
+    elif "BK OF AMER VISA" in description.upper():
+        description = "BoA CC"
+    elif "CASH REWARDS STATEMENT CREDIT" in description.upper():
+        description = "BoA CC Rewards"
+    return description
+
+def getAccountPath(account):
+    if account.account != None:
+        accountName = account.account
+    else:
+        accountName = account.name
+    match accountName:
+        case 'Cardano':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Cardano"
+        case 'ADA-Eternl':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Cardano:ADA-Eternl"    
+        case 'ADA-Nami':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Cardano:ADA-Nami"    
+        case 'Algorand':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Algorand"
+        case 'Ally':
+            return "Assets:Ally Checking Account"
+        case 'AmazonGC':
+            return "Assets:Liquid Assets:Amazon GC"
+        case 'Amex':
+            return "Liabilities:Credit Cards:Amex BlueCash Everyday"
+        case 'Cosmos':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Cosmos"                  
+        case 'Barclays':
+            return "Liabilities:Credit Cards:BarclayCard CashForward"
+        case 'Bitcoin':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Bitcoin"                               
+        case 'BoA':
+            return "Liabilities:Credit Cards:BankAmericard Cash Rewards"
+        case 'BoA-joint':
+            return "Liabilities:BoA Credit Card"
+        case 'Bonds':
+            return "Assets:Liquid Assets:Bonds"
+        case 'Chase':
+            return "Liabilities:Credit Cards:Chase Freedom"
+        case 'Crypto':
+            return "Assets:Non-Liquid Assets:CryptoCurrency"
+        case 'Discover':
+            return "Liabilities:Credit Cards:Discover It"
+        case 'Polkadot':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Polkadot"
+        case 'Ethereum':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum"
+        case 'ETH-Kraken':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum:ETH-Kraken"
+        case 'ETH-Ledger':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum:ETH-Ledger"
+        case 'Ethereum2':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum2"
+        case 'Fidelity':
+            return "Assets:Non-Liquid Assets:IRA:Fidelity"
+        case 'HSA':
+            return "Assets:Non-Liquid Assets:HSA:NM HSA"
+        case 'Home':
+            return "Liabilities:Mortgage Loan"
+        case 'IoTex':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:IoTex"
+        case 'Liquid Assets':
+            return "Assets:Liquid Assets"
+        case 'Loopring':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Loopring"              
+        case 'MyConstant':
+            return "Assets:Liquid Assets:Bonds:My Constant"
+        case 'Presearch':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Presearch"
+        case 'Sofi Checking':
+            return "Assets:Liquid Assets:Sofi:Checking"
+        case 'Sofi Savings':
+            return "Assets:Liquid Assets:Sofi:Savings"
+        case 'Vanguard401k':
+            return "Assets:Non-Liquid Assets:401k"                         
+        case 'VanguardPension':
+            return "Assets:Non-Liquid Assets:Pension"  
+        case 'Worthy':
+            return "Assets:Liquid Assets:Bonds:Worthy Bonds"
+        case 'Bing':
+            return "Assets:Liquid Assets:MR:Bing"
+        case 'Paidviewpoint':
+            return "Assets:Liquid Assets:MR:Paidviewpoint"        
+        case 'Pinecone':
+            return "Assets:Liquid Assets:MR:Pinecone"
+        case 'Swagbucks':
+            return "Assets:Liquid Assets:MR:Swagbucks"
+        case 'Tellwut':
+            return "Assets:Liquid Assets:MR:Tellwut"
+        case _:
+            print(f'account: {accountName} not found in "getAccountPath" function')

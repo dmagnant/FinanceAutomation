@@ -10,12 +10,12 @@ from selenium.webdriver.common.keys import Keys
 if __name__ == '__main__' or __name__ == "Presearch":
     from Classes.Asset import Crypto
     from Classes.WebDriver import Driver
+    from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import showMessage
-    from Functions.GnuCashFunctions import openGnuCashBook    
 else:
     from .Classes.Asset import Crypto
+    from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import showMessage
-    from .Functions.GnuCashFunctions import openGnuCashBook
 
 class Node(object):
     "this is a class for tracking presearch node information"
@@ -141,13 +141,11 @@ def presearchRewardsRedemptionAndBalanceUpdates(driver, account, book):
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = openGnuCashBook('Finance', False, False)
+    book = GnuCash('Finance')
     locatePresearchWindow(driver)
     searchUsingPresearch(driver)
     Presearch = Crypto("Presearch", book)
     presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book)
     Presearch.getData()
-    if not book.is_saved:
-        book.save()
-    book.close()
+    book.closeBook()
     

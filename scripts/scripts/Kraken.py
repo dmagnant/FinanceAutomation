@@ -7,14 +7,14 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Kraken":
     from Classes.Asset import Crypto
     from Classes.WebDriver import Driver
+    from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getCryptocurrencyPrice, getOTP,
                                             getPassword, getUsername)
-    from Functions.GnuCashFunctions import openGnuCashBook      
 else:
     from .Classes.Asset import Crypto
+    from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import (getCryptocurrencyPrice, getOTP,
                                              getPassword, getUsername)
-    from .Functions.GnuCashFunctions import openGnuCashBook
     
 def locateKrakenWindow(driver):
     found = driver.findWindowByUrl("kraken.com")
@@ -65,10 +65,8 @@ def runKraken(driver, account, book):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = openGnuCashBook('Finance', False, False)    
+    book = GnuCash('Finance')    
     Ethereum2 = Crypto("Ethereum2", book)
     runKraken(driver, Ethereum2, book)
     Ethereum2.getData()
-    if not book.is_saved:
-        book.save()
-    book.close()    
+    book.closeBook()    

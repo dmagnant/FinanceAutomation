@@ -96,7 +96,7 @@ class Driver:
     "this is a class for creating webdriver with implicit wait"
     def __init__(self, browser, asUser=True):
         self.webDriver = openWebDriver(browser, asUser)
-        self.webDriver.implicitly_wait(5)
+        self.webDriver.implicitly_wait(1)
         
     def findWindowByUrl(self, url):
         currentWindow = self.webDriver.current_window_handle

@@ -9,14 +9,14 @@ from selenium.webdriver.common.keys import Keys
 if __name__ == '__main__' or __name__ == "HealthEquity":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
+    from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                             showMessage)
-    from Functions.GnuCashFunctions import openGnuCashBook
 else:
     from .Classes.Asset import USD
+    from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                              showMessage)    
-    from .Functions.GnuCashFunctions import openGnuCashBook
 
 def locateHealthEquityWindow(driver):
     found = driver.findWindowByUrl("member.my.healthequity.com")
@@ -79,7 +79,7 @@ def runHealthEquity(driver, accounts):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = openGnuCashBook('Finance', False, False)
+    book = GnuCash('Finance')    
     HealthEquity = USD("HSA", book)
     Vanguard = USD("Vanguard401k", book)
     HEaccounts = {'HealthEquity': HealthEquity, 'Vanguard': Vanguard}
@@ -87,7 +87,5 @@ if __name__ == '__main__':
     HealthEquity.getData()
     Vanguard.getData()
     print("HSA Dividends: " + str(HSA_dividends))
-    if not book.is_saved:
-        book.save()
-    book.close()
+    book.closeBook()
     

@@ -2,19 +2,18 @@ import os
 import time
 from datetime import datetime
 from selenium.webdriver.common.keys import Keys
-
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Barclays":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
+    from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
-    from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI, openGnuCashBook
 else:
     from .Classes.Asset import USD
+    from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
-    from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI, openGnuCashBook
 
 def locateBarclaysWindow(driver):
     found = driver.findWindowByUrl("barclaycardus.com")
@@ -122,18 +121,16 @@ def runBarclays(driver, account, book):
     transactionsCSV = exportBarclaysTransactions(driver.webDriver, today)
     if rewardsBalance >= float(50):
         claimBarclaysRewards(driver)
-    importGnuTransaction(account, transactionsCSV, driver.webDriver, book, 5)
+    book.importGnuTransaction(account, transactionsCSV, driver, 5)
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:
-        openGnuCashUI('Finances')
+        book.openGnuCashUI()
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = openGnuCashBook('Finance', False, False)    
+    book = GnuCash('Finance')
     Barclays = USD("Barclays", book)    
     runBarclays(driver, Barclays, book)
     Barclays.getData()
-    if not book.is_saved:
-        book.save()
-    book.close()
+    book.closeBook()
     

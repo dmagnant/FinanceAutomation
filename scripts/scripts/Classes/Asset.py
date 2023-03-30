@@ -4,16 +4,13 @@ from decimal import Decimal
 from piecash import Split, Transaction
 
 if __name__ == "Classes.Asset":
-    from Functions.GeneralFunctions import getCryptocurrencyPrice
-    from Functions.GnuCashFunctions import (getAccountPath, getGnuCashBalance,
-                                            updatePriceInGnucash, getPriceInGnucash)
+    from Functions.GeneralFunctions import getCryptocurrencyPrice, getAccountPath
+
     from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
 else:
     from scripts.scripts.Functions.GeneralFunctions import (
-        getCryptocurrencyPrice)
-    from scripts.scripts.Functions.GnuCashFunctions import (
-        getAccountPath, getGnuCashBalance,
-        updatePriceInGnucash, getPriceInGnucash)
+        getCryptocurrencyPrice, getAccountPath
+)
     from scripts.scripts.Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
 
 def getCryptoSymbolByName(self):
@@ -52,6 +49,7 @@ def getCryptoSymbolByName(self):
             print(f'Cryptocurrency: {self.name} not found in "getCryptoSymbolByName" function')
                 
 def updateCoinQuantityFromStakingInGnuCash(self, myBook):
+    myBook = myBook.getWriteBook()
     coinDifference = Decimal(self.balance) - Decimal(self.gnuBalance)
     if coinDifference > 0.001:
         split = [Split(value=-0, memo="scripted", account=myBook.accounts(fullname='Income:Investments:Staking')),
@@ -64,7 +62,7 @@ def updateCoinQuantityFromStakingInGnuCash(self, myBook):
         f'leaves unexpected coin difference of {coinDifference} '
         f'is it rounding issue?')                
 
-class Asset(object):
+class Asset:
     "this is a class for tracking asset information"
     def getName(self):
         return self.name
@@ -78,14 +76,14 @@ class Asset(object):
     def getGnuAccount(self):
         return self.gnuAccount
 
-    def setGnuAccount(self, account):
-        self.gnuAccount = getAccountPath(account)
+    def setGnuAccount(self, book):
+        self.gnuAccount = getAccountPath(self)
     
     def getGnuBalance(self):
         return self.gnuBalance
     
-    def updateGnuBalance(self, myBook):
-        self.gnuBalance = round(Decimal(getGnuCashBalance(myBook, self.gnuAccount)), 2)
+    def updateGnuBalance(self, balance):
+        self.gnuBalance = round(Decimal(balance), 2)
         
 class Crypto(Asset):
     "this is a class for tracking cryptocurrency information"
@@ -94,9 +92,9 @@ class Crypto(Asset):
         self.balance = ''
         self.account = account
         self.symbol = getCryptoSymbolByName(self)
-        self.price = getPriceInGnucash(self.symbol, book)
+        self.price = book.getPriceInGnucash(self.symbol)
         self.gnuAccount = getAccountPath(self)
-        self.gnuBalance = getGnuCashBalance(book, self.gnuAccount)
+        self.gnuBalance = book.getBalance(self.gnuAccount)
                 
     def getData(self):
         print(  f'name: {self.name} \n'
@@ -135,23 +133,25 @@ class Crypto(Asset):
         account = self.symbol if account == None else account
         updateCoinQuantityFromStakingInGnuCash(self, book)
 
-    def updatePriceInGnuCash(self, account=None):
-        account = self.symbol if account == None else account
-        updatePriceInGnucash(self.symbol, format(self.price, ".2f"))
+    # def updatePriceInGnuCash(self, account=None):
+    #     account = self.symbol if account == None else account
+    #     updatePriceInGnucash(self.symbol, format(self.price, ".2f"))
 
-    def updateMRBalance(self, myBook):
-        today = datetime.today().date()
-        transactions = [tr for tr in myBook.transactions
-            if tr.post_date.year == today.year
-            for spl in tr.splits
-            if spl.account.fullname == self.gnuAccount]
-        value = int(self.balance) * self.price
-        myBook.delete(transactions[0])
-        split = [Split(value=-value, memo="scripted", account=myBook.accounts(fullname='Income:Market Research')),
-                Split(value=value, quantity=Decimal(self.balance), memo="scripted", account=myBook.accounts(fullname=self.gnuAccount))]
-        Transaction(post_date=today, currency=myBook.currencies(mnemonic="USD"), description=self.name + ' account balance', splits=split)
-        myBook.flush()
-        self.updateGnuBalance(myBook)
+    # def updateMRBalance(self, myBook):
+    #     today = datetime.today().date()
+    #     transactions = [tr for tr in myBook.readBook.transactions
+    #         if tr.post_date.year == today.year
+    #         for spl in tr.splits
+    #         if spl.account.fullname == self.gnuAccount]
+    #     print('before :' + str(transactions))
+    #     # myBook.delete(transactions[0])
+    #     value = int(self.balance) * self.price
+    #     book = myBook.getWriteBook()
+    #     split = [Split(value=-value, memo="scripted", account=book.accounts(fullname='Income:Market Research')),
+    #             Split(value=value, quantity=Decimal(self.balance), memo="scripted", account=book.accounts(fullname=self.gnuAccount))]
+    #     Transaction(post_date=today, currency=book.currencies(mnemonic="USD"), description=self.name + ' account balance', splits=split)
+    #     book.flush()
+    #     self.updateGnuBalance(myBook)
 
 class USD(Asset):
     "this is a class for tracking USD information"
@@ -163,7 +163,7 @@ class USD(Asset):
         self.account = None
         self.gnuAccount = getAccountPath(self)
         # book = 'Home' if (self.name in ['Ally', 'BoA-joint', 'Home']) else 'Finance'
-        balance = getGnuCashBalance(book, self.gnuAccount)
+        balance = book.getBalance(self.gnuAccount)
         self.gnuBalance = round(balance, 2) if float(balance)>0 else 0
     
     def getData(self):
@@ -198,16 +198,5 @@ class USD(Asset):
             updateSpreadsheet('Checking Balance', year, self.name, month, balance, self.name + " CC")
             updateSpreadsheet('Checking Balance', year, self.name, month, balance, self.name + " CC", True)
     
-    def overwriteBalance(self, myBook):
-        today = datetime.today().date()
-        transactions = [tr for tr in myBook.transactions
-            if tr.post_date.year == today.year
-            for spl in tr.splits
-            if spl.account.fullname == self.gnuAccount]
-        myBook.delete(transactions[0])
-        split = [Split(value=-Decimal(self.balance), memo="scripted", account=myBook.accounts(fullname='Income:Market Research')),
-                Split(value=Decimal(self.balance), memo="scripted", account=myBook.accounts(fullname=self.gnuAccount))]
-        Transaction(post_date=today, currency=myBook.currencies(mnemonic="USD"), description=self.name + ' account balance', splits=split)
-        myBook.flush()
-        self.updateGnuBalance(myBook)
+
             

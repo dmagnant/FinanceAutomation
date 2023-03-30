@@ -9,12 +9,12 @@ from selenium.webdriver.common.keys import Keys
 if __name__ == '__main__' or __name__ == "Tellwut":
     from Classes.WebDriver import Driver
     from Classes.Asset import Crypto
+    from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import showMessage
-    from Functions.GnuCashFunctions import openGnuCashBook
 else:
     from .Functions.GeneralFunctions import showMessage
-    from .Functions.GnuCashFunctions import openGnuCashBook   
     from .Classes.Asset import Crypto
+    from .Classes.GnuCash import GnuCash
 
 def locateTellWutWindow(driver):
     found = driver.findWindowByUrl("tellwut.com")
@@ -100,17 +100,15 @@ def runTellwut(driver, account, book):
     locateTellWutWindow(driver)
     completeTellWutSurveys(driver)
     account.setBalance(getTellWutBalance(driver))
-    account.updateMRBalance(book)
+    book.updateMRBalance(account)
     if int(account.balance) >= 4000:
         redeemTellWutRewards(driver)
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = openGnuCashBook('Finance', False, False)
+    book = GnuCash('Finance')
     Tellwut = Crypto("Tellwut", book)
     runTellwut(driver, Tellwut, book)
     Tellwut.getData()
-    if not book.is_saved:
-        book.save()
-    book.close()
+    book.closeBook()
     
