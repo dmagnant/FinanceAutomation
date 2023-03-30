@@ -37,3 +37,8 @@ scripts/__pycache__/views.cpython-310.pyc
 scripts/__pycache__/views.cpython-310.pyc
 scripts/scripts/Classes/__pycache__/Asset.cpython-310.pyc
 scripts/scripts/Functions/__pycache__/GnuCashFunctions.cpython-310.pyc
+scripts/scripts/Classes/__pycache__/Asset.cpython-310.pyc
+scripts/scripts/Classes/__pycache__/WebDriver.cpython-310.pyc
+scripts/scripts/Functions/__pycache__/GeneralFunctions.cpython-310.pyc
+scripts/scripts/Functions/__pycache__/GnuCashFunctions.cpython-310.pyc
+scripts/scripts/Functions/__pycache__/SpreadsheetFunctions.cpython-310.pyc
