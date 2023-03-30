@@ -4,12 +4,12 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "AmazonGC":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
+    from Classes.GnuCash import GnuCash    
     from Functions.GeneralFunctions import showMessage
-    from Functions.GnuCashFunctions import openGnuCashBook
 else:
     from .Classes.Asset import USD
+    from .Classes.GnuCash import GnuCash    
     from .Functions.GeneralFunctions import showMessage
-    from .Functions.GnuCashFunctions import openGnuCashBook
 
 def locateAmazonWindow(driver):
         found = driver.findWindowByUrl("www.amazon.com/gc/balance")
@@ -26,9 +26,9 @@ def confirmAmazonGCBalance(driver, account):
         showMessage("Amazon GC Mismatch", f'Amazon balance: {account.balance} \n' f'Gnu Cash balance: {account.gnuBalance} \n')
 
 if __name__ == '__main__':
-    readBook = openGnuCashBook('Finance', True, True)
+    book = GnuCash('Finance')
     driver = Driver("Chrome")
-    AmazonGC = USD("AmazonGC", readBook)    
+    AmazonGC = USD("AmazonGC", book)    
     confirmAmazonGCBalance(driver, AmazonGC)
     AmazonGC.getData()
-    readBook.close()
+    book.closeBook()

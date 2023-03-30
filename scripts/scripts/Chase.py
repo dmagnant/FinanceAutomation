@@ -7,10 +7,10 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Chase":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
-    from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI, openGnuCashBook
+    from Classes.GnuCash import GnuCash
 else:
     from .Classes.Asset import USD
-    from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI, openGnuCashBook
+    from .Classes.GnuCash import GnuCash
 
 def locateChaseWindow(driver):
     found = driver.findWindowByUrl("chase.com/web/auth")
@@ -81,18 +81,16 @@ def runChase(driver, account, book):
     account.setBalance(getChaseBalance(driver))
     transactionsCSV = exportChaseTransactions(driver.webDriver, today)
     claimChaseRewards(driver)
-    importGnuTransaction(account, transactionsCSV, driver.webDriver, book)
+    book.importGnuTransaction(account, transactionsCSV, driver)
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:
-        openGnuCashUI('Finances')
+        book.openGnuCashUI()
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = openGnuCashBook('Finance', False, False)   
+    book = GnuCash('Finance')
     Chase = USD("Chase", book)    
     runChase(driver, Chase, book)
     Chase.getData()
-    if not book.is_saved:
-        book.save()
-    book.close()
+    book.closeBook()
     

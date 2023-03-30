@@ -4,36 +4,32 @@ from decimal import Decimal
 if __name__ == '__main__' or __name__ == "Monthly":
     from Classes.Asset import USD, Crypto
     from Classes.WebDriver import Driver
-    from Functions.GnuCashFunctions import getGnuCashBalance, getAccountPath
+    from Classes.GnuCash import GnuCash
     from Eternl import runEternl
     from Coinbase import runCoinbase
     from Exodus import runExodus
     from Ledger import runLedger
-    from Functions.GeneralFunctions import (getStartAndEndOfDateRange, showMessage)
-    from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction, getTotalOfAutomatedMRAccounts
+    from Functions.GeneralFunctions import (getStartAndEndOfDateRange)
     from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPrices
     from HealthEquity import runHealthEquity
     from IoPay import runIoPay
     from Kraken import runKraken
     from MyConstant import runMyConstant
-    from Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from Worthy import getWorthyBalance 
 else:
     from .Classes.Asset import USD, Crypto
     from .Classes.WebDriver import Driver
-    from .Functions.GnuCashFunctions import getGnuCashBalance, getAccountPath    
+    from .Classes.GnuCash import GnuCash
     from .Coinbase import runCoinbase
     from .Eternl import runEternl
     from .Exodus import runExodus
     from .Ledger import runLedger, getLedgerAccounts
-    from .Functions.GeneralFunctions import (getStartAndEndOfDateRange, showMessage)
-    from .Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction, getTotalOfAutomatedMRAccounts
+    from .Functions.GeneralFunctions import (getStartAndEndOfDateRange)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPrices
     from .HealthEquity import runHealthEquity
     from .IoPay import runIoPay
     from .Kraken import runKraken
     from .MyConstant import runMyConstant
-    from .Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from .Worthy import getWorthyBalance
 
 def getMonthlyAccounts(type, readBook):
@@ -66,19 +62,18 @@ def monthlyRoundUp(account, myBook, date, HSADividends):
         amount = {'change': change, 'HSADividends': -HSADividends, 'HEHSAMarketChange': -HEHSAMarketChange}
         transactionVariables = {'postDate': date, 'description': "HSA Statement", 'amount': amount, 'fromAccount': "Income:Investments:Market Change"}
         # writeGnuTransaction(myBook, "HSA Statement", date, [change, -HSADividends, -HEHSAMarketChange], ["Income:Investments:Dividends", "Income:Investments:Market Change"], "Assets:Non-Liquid Assets:HSA:NM HSA")
-    writeGnuTransaction(myBook, transactionVariables, "Assets:Non-Liquid Assets:HSA:NM HSA")
+    myBook.writeGnuTransaction(transactionVariables, "Assets:Non-Liquid Assets:HSA:NM HSA")
 
-def runUSD(driver, today, accounts, myBook):
+def runUSD(driver, today, accounts, book):
     year = today.year
     month = today.month
     lastMonth = getStartAndEndOfDateRange(today, "month")
-    myBook = openGnuCashBook('Finance', False, False)
     # MyConstant = runMyConstant(driver, "USD")
     getWorthyBalance(driver, accounts['Worthy'])
     HEaccounts = {'HealthEquity': accounts['HealthEquity'], 'Vanguard': accounts['Vanguard']}
     HSA_dividends = runHealthEquity(driver, HEaccounts)
-    monthlyRoundUp(accounts['Worthy'], myBook, lastMonth['endDate'], HSA_dividends)
-    monthlyRoundUp(accounts['HealthEquity'], myBook, lastMonth['endDate'], HSA_dividends)
+    monthlyRoundUp(accounts['Worthy'], book, lastMonth['endDate'], HSA_dividends)
+    monthlyRoundUp(accounts['HealthEquity'], book, lastMonth['endDate'], HSA_dividends)
     LiquidAssets = USD("Liquid Assets")
     Bonds = USD("Bonds")
     openSpreadsheet(driver, 'Asset Allocation', '2022')
@@ -108,11 +103,9 @@ def runMonthlyBank(book):
     runCrypto(driver, today, cryptoAccounts, book)
 
 if __name__ == '__main__':
-    book = openGnuCashBook('Finance', False, False)
+    book = GnuCash('Finance')
     runMonthlyBank(book)
-    if not book.is_saved:
-        book.save()
-    book.close()
+    book.closeBook()
 
     # myBook = openGnuCashBook('Finance', True, True)
     # getTotalOfAutomatedMRAccounts(myBook)

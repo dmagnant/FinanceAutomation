@@ -2,7 +2,6 @@ import time
 
 import gspread
 from .GeneralFunctions import getCryptocurrencyPrice, setDirectory, showMessage, getStockPrice
-from .GnuCashFunctions import updatePriceInGnucash
 
 def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", modified=False):
     def getCell(account, month):
@@ -132,7 +131,7 @@ def updateCryptoPrices(driver, book):
         i = coinNames.index(coin)
         symbol = coinSymbols[i]
         price = format(coinPrices[coin]["usd"], ".2f")
-        updatePriceInGnucash(symbol, price, book)
+        book.updatePriceInGnucash(symbol, price)
         worksheet.update((priceColumn + str(i + 2)), float(price))
 
 def updateInvestmentPrices(driver, Home):

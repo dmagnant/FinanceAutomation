@@ -16,12 +16,12 @@ from selenium.webdriver.common.keys import Keys
 if __name__ == '__main__' or __name__ == "Swagbucks":
     from Classes.WebDriver import Driver
     from Classes.Asset import Crypto
+    from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import showMessage
-    from Functions.GnuCashFunctions import openGnuCashBook
 else:
     from .Classes.Asset import Crypto
+    from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import showMessage
-    from .Functions.GnuCashFunctions import openGnuCashBook
 
 def getSwagbucksBasePath():
     return '/html/body/div[2]/div[' 
@@ -293,17 +293,15 @@ def runSwagbucks(driver, runAlu, account, book):
     toDoList(driver)
     swagBuckscontentDiscovery(driver)
     account.setBalance(getSwagBucksBalance(driver))
-    account.updateMRBalance(book)
+    book.updateMRBalance(account)
     if int(account.balance) > 1000:
         claimSwagBucksRewards(driver)
     # swagbucksSearch(driver)
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = openGnuCashBook('Finance', False, False)
+    book = GnuCash('Finance')
     Swagbucks = Crypto("Swagbucks", book)
     runSwagbucks(driver, False, Swagbucks, book)
-    if not book.is_saved:
-        book.save()
-    book.close()
+    book.closeBook()
     

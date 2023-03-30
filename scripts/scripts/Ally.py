@@ -9,14 +9,14 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Ally":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
+    from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getPassword,
-                                            getStartAndEndOfDateRange, setDirectory, showMessage)
-    from Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription, openGnuCashBook
+                                            getStartAndEndOfDateRange, setDirectory, showMessage, modifyTransactionDescription)
 else:
     from .Classes.Asset import USD
+    from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import (getPassword,
-                                             getStartAndEndOfDateRange, showMessage, setDirectory)
-    from .Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription, openGnuCashBook
+                                             getStartAndEndOfDateRange, showMessage, setDirectory, modifyTransactionDescription)
 
 def locateAllyWindow(driver):
     found = driver.findWindowByUrl("secure.ally.com")
@@ -100,16 +100,14 @@ def runAlly(driver, account, book):
     locateAllyWindow(driver)
     account.setBalance(getAllyBalance(driver))
     allyActivity = captureAllyTransactions(driver.webDriver, dateRange)
-    importUniqueTransactionsToGnuCash(account, allyActivity, driver.webDriver, dateRange, book, 0)
+    book.importUniqueTransactionsToGnuCash(account, allyActivity, driver.webDriver, dateRange, 0)
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = openGnuCashBook('Home', False, False)
+    book = GnuCash('Home')
     Ally = USD("Ally", book)
     runAlly(driver, Ally, book)
     Ally.getData()
     allyLogout(driver)
-    if not book.is_saved:
-        book.save()
-    book.close()
+    book.closeBook()
     

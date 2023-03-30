@@ -8,17 +8,17 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Sofi":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
-    from Functions.GeneralFunctions import (closeExpressVPN, getPassword,
+    from Classes.GnuCash import GnuCash
+    from Functions.GeneralFunctions import (getPassword,
                                             getStartAndEndOfDateRange,
                                             getUsername, setDirectory,
-                                            showMessage)
-    from Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription, openGnuCashBook
+                                            showMessage, modifyTransactionDescription)
 else:
     from .Classes.Asset import USD
-    from .Functions.GeneralFunctions import (closeExpressVPN, getPassword,
+    from .Classes.GnuCash import GnuCash
+    from .Functions.GeneralFunctions import (getPassword,
                                              getStartAndEndOfDateRange,
-                                             setDirectory, showMessage)
-    from .Functions.GnuCashFunctions import importUniqueTransactionsToGnuCash, modifyTransactionDescription, openGnuCashBook
+                                             setDirectory, showMessage, modifyTransactionDescription)
 
 def locateSofiWindow(driver):
     found = driver.findWindowByUrl("sofi.com")
@@ -125,7 +125,7 @@ def getTransactionsFromSofiWebsite(driver, dateRange, today, tableStart, div):
 def runSofiAccount(driver, dateRange, today, account, book):
     page = getSofiBalanceAndOrientPage(driver, account)
     sofiActivity = getTransactionsFromSofiWebsite(driver.webDriver, dateRange, today, page['table'], page['div'])
-    importUniqueTransactionsToGnuCash(account, sofiActivity, driver.webDriver, dateRange, book, 0)
+    book.importUniqueTransactionsToGnuCash(account, sofiActivity, driver.webDriver, dateRange, 0)
 
 def runSofi(driver, accounts, book):
     today = datetime.today().date()
@@ -137,7 +137,7 @@ def runSofi(driver, accounts, book):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = openGnuCashBook('Finance', False, False)
+    book = GnuCash('Finance')
     Checking = USD("Sofi Checking", book)
     Savings = USD("Sofi Savings", book)
     accounts = [Checking, Savings]
@@ -145,6 +145,4 @@ if __name__ == '__main__':
     for account in accounts:
         account.getData()
     sofiLogout(driver)
-    if not book.is_saved:
-        book.save()
-    book.close()
+    book.closeBook()

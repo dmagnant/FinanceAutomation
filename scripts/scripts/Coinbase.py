@@ -6,14 +6,14 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Coinbase":
     from Classes.Asset import Crypto
     from Classes.WebDriver import Driver
+    from Classes.GnuCash import GnuCash    
     from Functions.GeneralFunctions import (getCryptocurrencyPrice, getOTP,
                                             getPassword, getUsername)  
-    from Functions.GnuCashFunctions import openGnuCashBook    
 else:
     from .Classes.Asset import Crypto
+    from .Classes.GnuCash import GnuCash    
     from .Functions.GeneralFunctions import (getCryptocurrencyPrice, getOTP,
                                              getPassword, getUsername)
-    from .Functions.GnuCashFunctions import openGnuCashBook    
     
 def locateCoinbaseWindow(driver):
     found = driver.findWindowByUrl("coinbase.com")
@@ -64,10 +64,8 @@ def runCoinbase(driver, account, book):
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = openGnuCashBook('Finance', False, False)
+    book = GnuCash('Finance')
     Loopring = Crypto("Loopring", book)
     runCoinbase(driver, Loopring, book)
     Loopring.getData()
-    if not book.is_saved:
-        book.save()
-    book.close()
+    book.closeBook()

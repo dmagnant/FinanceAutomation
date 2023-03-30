@@ -7,11 +7,11 @@ from selenium.common.exceptions import ElementClickInterceptedException
 if __name__ == '__main__' or __name__ == "Pinecone":
     from Classes.Asset import Crypto
     from Classes.WebDriver import Driver
-    from Functions.GnuCashFunctions import openGnuCashBook
+    from Classes.GnuCash import GnuCash
 else:
     from .Classes.Asset import Crypto
     from .Classes.WebDriver import Driver
-    from .Functions.GnuCashFunctions import openGnuCashBook    
+    from .Classes.GnuCash import GnuCash
 
 def locatePineconeWindow(driver):
     found = driver.findWindowByUrl("members.pineconeresearch.com")
@@ -56,16 +56,14 @@ def claimPineConeRewards(driver):
 def runPinecone(driver, account, book):
     locatePineconeWindow(driver)
     account.setBalance(getPineConeBalance(driver))
-    account.updateMRBalance(book)
+    book.updateMRBalance(account)
     if float(account.balance) >= 300:
         claimPineConeRewards(driver)
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = openGnuCashBook('Finance', False, False)
+    book = GnuCash('Finance')
     Pinecone = Crypto("Pinecone", book)
     runPinecone(driver, Pinecone, book)
     Pinecone.getData()
-    if not book.is_saved:
-        book.save()
-    book.close()
+    book.closeBook()

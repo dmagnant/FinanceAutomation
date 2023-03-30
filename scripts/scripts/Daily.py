@@ -2,8 +2,8 @@ if __name__ == '__main__' or __name__ == "Daily":
     from Ally import allyLogout, runAlly
     from Classes.Asset import USD, Crypto
     from Classes.WebDriver import Driver
+    from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import getStockPrice 
-    from Functions.GnuCashFunctions import purgeOldGnucashFiles, openGnuCashUI, openGnuCashBook, updatePriceInGnucash
     from Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet
     from Paypal import runPaypal
     from Presearch import presearchRewardsRedemptionAndBalanceUpdates, searchUsingPresearch
@@ -17,8 +17,8 @@ else:
     from .Ally import allyLogout, runAlly
     from .Classes.Asset import USD, Crypto
     from .Classes.WebDriver import Driver
+    from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import getStockPrice
-    from .Functions.GnuCashFunctions import purgeOldGnucashFiles, openGnuCashUI, openGnuCashBook, updatePriceInGnucash
     from .Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet
     from .Paypal import runPaypal
     from .Presearch import presearchRewardsRedemptionAndBalanceUpdates, searchUsingPresearch
@@ -55,15 +55,16 @@ def runDailyBank(accounts, personalBook, jointBook):
     openSpreadsheet(driver, 'Checking Balance', '2023')
     openSpreadsheet(driver, 'Asset Allocation', 'Cryptocurrency')
     updateCryptoPrices(driver, personalBook)
-    accounts['CryptoPortfolio'].updateGnuBalance(personalBook)
+    accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getBalance(accounts['CryptoPortfolio'].gnuAccount))
     openSpreadsheet(driver, 'Home', '2023 Balance')
     if accounts['Checking'].reviewTransactions or accounts['Savings'].reviewTransactions:
-        openGnuCashUI('Finances')
+        personalBook.openGnuCashUI()
     if accounts['Ally'].reviewTransactions:
-        openGnuCashUI('Home')
+        jointBook.openGnuCashUI()
     GMEprice = getStockPrice(driver, 'GME')
-    updatePriceInGnucash('GME', GMEprice, personalBook)
-    purgeOldGnucashFiles()
+    personalBook.updatePriceInGnucash('GME', GMEprice)
+    personalBook.purgeOldGnucashFiles()
+    jointBook.purgeOldGnucashFiles()
     return GMEprice
 
 def tearDown(driver):
@@ -82,20 +83,14 @@ def runDailyMR(accounts, book):
     runSwagbucks(driver, True, accounts['Swagbucks'], book)
  
 if __name__ == '__main__': # Bank
-    personalBook = openGnuCashBook('Finance', False, False)
-    jointBook = openGnuCashBook('Home', False, False)
+    personalBook = GnuCash('Finance')
+    jointBook = GnuCash('Home')
     accounts = getDailyAccounts('Bank', personalBook, jointBook)
     GME = runDailyBank(accounts, personalBook, jointBook)
-    if not personalBook.is_saved:
-        personalBook.save()
-    if not jointBook.is_saved:
-        jointBook.save()
-    personalBook.close()
-    jointBook.close()    
+    personalBook.closeBook()
+    jointBook.closeBook()    
 # if __name__ == '__main__': # MR
-    personalBook = openGnuCashBook('Finance', False, False)
-    # accounts = getDailyAccounts('MR', personalBook)
-    # runDailyMR(accounts, personalBook)
-    if not personalBook.is_saved:
-        personalBook.save()
-    personalBook.close()
+    # personalBook = GnuCash('Finance')
+    # # accounts = getDailyAccounts('MR', personalBook)
+    # # runDailyMR(accounts, personalBook)
+    # personalBook.closeBook()

@@ -8,11 +8,11 @@ if __name__ == '__main__' or __name__ == "IoPay":
     from Classes.Asset import Crypto
     from Functions.GeneralFunctions import showMessage
     from Classes.WebDriver import Driver
-    from Functions.GnuCashFunctions import openGnuCashBook       
+    from Classes.GnuCash import GnuCash
 else:
     from .Classes.Asset import Crypto
+    from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import showMessage
-    from .Functions.GnuCashFunctions import openGnuCashBook       
 
 def locateIoPayWindow(driver):
     found = driver.findWindowByUrl("stake.iotex.io")
@@ -54,11 +54,9 @@ def runIoPay(driver, account, book):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = openGnuCashBook('Finance', False, False)
+    book = GnuCash('Finance')    
     IoTex = Crypto("IoTex", book)
     runIoPay(driver, IoTex, book)
     IoTex.getData()
-    if not book.is_saved:
-        book.save()
-    book.close()
+    book.closeBook()
     

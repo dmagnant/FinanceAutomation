@@ -2,12 +2,12 @@ import os
 
 if __name__ == '__main__' or __name__ == "Ledger":
     from Classes.Asset import Crypto
+    from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import showMessage, isProcessRunning
-    from Functions.GnuCashFunctions import openGnuCashBook       
 else:
     from .Classes.Asset import Crypto
+    from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import showMessage, isProcessRunning
-    from .Functions.GnuCashFunctions import openGnuCashBook   
 
 def getLedgerAccounts(readBook):
     Bitcoin = Crypto("Bitcoin", readBook)
@@ -31,12 +31,10 @@ def runLedger(coinList, book):
         updateCoin(coin, book)
 
 if __name__ == '__main__':
-    book = openGnuCashBook('Finance', False, False)
+    book = GnuCash('Finance')    
     coinList = getLedgerAccounts(book)
     runLedger(coinList, book)
     for coin in coinList:
         coin.getData()
-    if not book.is_saved:
-        book.save()
-    book.close()
+    book.closeBook()
     
