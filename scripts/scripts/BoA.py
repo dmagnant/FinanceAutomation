@@ -10,12 +10,12 @@ from selenium.webdriver.common.keys import Keys
 if __name__ == '__main__' or __name__ == "BoA":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
+    from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
-    from Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI, openGnuCashBook
 else:
     from .Classes.Asset import USD
+    from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
-    from .Functions.GnuCashFunctions import importGnuTransaction, openGnuCashUI, openGnuCashBook
 
 def locateBoAWindowAndOpenAccount(driver, account):
     found = driver.findWindowByUrl("secure.bankofamerica.com")
@@ -163,21 +163,19 @@ def runBoA(driver, account, book):
     account.setBalance(getBoABalance(driver, account.name))
     transactionsCSV = exportBoATransactions(driver.webDriver, account.name, today)
     claimBoARewards(driver, account.name)
-    importGnuTransaction(account, transactionsCSV, driver.webDriver, book)
+    book.importGnuTransaction(account, transactionsCSV, driver)
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:
-        openGnuCashUI('Home') if 'joint' in account.name else openGnuCashUI('Finances')
+        book.openGnuCashUI()
     # startExpressVPN()
 
 if __name__ == '__main__':
     SET_ACCOUNT_VARIABLE = "Personal" # Personal or BoA-joint
     bookName = 'Finance' if SET_ACCOUNT_VARIABLE == 'Personal' else 'Home'
-    book = openGnuCashBook(bookName, False, False)
+    book = GnuCash('bookName')
     driver = Driver("Chrome", book)
     BoA = USD(SET_ACCOUNT_VARIABLE, book)
     runBoA(driver, BoA)
     BoA.getData()
-    if not book.is_saved:
-        book.save()
-    book.close()
+    book.closeBook()
     

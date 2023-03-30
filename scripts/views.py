@@ -33,7 +33,7 @@ from scripts.scripts.Vanguard import *
 from scripts.scripts.Worthy import *
 from scripts.scripts.Classes.WebDriver import Driver
 from scripts.scripts.Classes.Asset import USD, Crypto
-from scripts.scripts.Functions.GnuCashFunctions import getPriceInGnucash
+from scripts.scripts.Classes.GnuCash import GnuCash
 
 def scripts(request):
     bank = ['Ally', 'Sofi', 'Fidelity', 'HealthEquity', 'Vanguard', 'Worthy']
@@ -51,29 +51,25 @@ def scripts(request):
     return render(request,"scripts/scripts.html", context)
 
 def ally(request):
-    readBook = openGnuCashBook('Home', True, True)
-    Ally = USD("Ally", readBook)
+    book = GnuCash('Home')
+    Ally = USD("Ally", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Home', False, False)        
         if "main" in request.POST:
-            runAlly(driver, Ally, writeBook)
+            runAlly(driver, Ally, book)
         elif "login" in request.POST:
             locateAllyWindow(driver)
         elif "logout" in request.POST:
             allyLogout(driver)
         elif "balance" in request.POST:
             Ally.setBalance(getAllyBalance(driver))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'account': Ally}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/ally.html", context)
 
 def amazon(request):
-    readBook = openGnuCashBook('Finance', True, True)
-    AmazonGC = USD("AmazonGC", readBook)
+    book = GnuCash('Finance')
+    AmazonGC = USD("AmazonGC", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
@@ -81,17 +77,16 @@ def amazon(request):
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/amazon"))
     context = {'AmazonGC': AmazonGC}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/amazon.html", context)
 
 def amex(request):
-    readBook = openGnuCashBook('Finance', True, True)
-    Amex = USD("Amex", readBook)
+    book = GnuCash('Finance')
+    Amex = USD("Amex", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Home', False, False)
         if "main" in request.POST:
-            runAmex(driver, Amex, writeBook)
+            runAmex(driver, Amex, book)
         elif "login" in request.POST:
             locateAmexWindow(driver)
         elif "balance" in request.POST:
@@ -100,21 +95,17 @@ def amex(request):
             claimAmexRewards(driver)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/amex"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'account': Amex}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/amex.html", context)
 
 def barclays(request):
-    readBook = openGnuCashBook('Finance', True, True)    
-    Barclays = USD("Barclays", readBook)
+    book = GnuCash('Finance')
+    Barclays = USD("Barclays", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Home', False, False)
         if "main" in request.POST:
-            runBarclays(driver, Barclays)
+            runBarclays(driver, Barclays, book)
         elif "login" in request.POST:
             locateBarclaysWindow(driver)
         elif "balance" in request.POST:
@@ -123,53 +114,44 @@ def barclays(request):
             claimBarclaysRewards(driver)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/barclays"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'account': Barclays}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/barclays.html", context)
 
 def bing(request):
-    readBook = openGnuCashBook('Finance', True, True)
-    Bing = Crypto("Bing", readBook)
+    book = GnuCash('Finance')
+    Bing = Crypto("Bing", book)
     Bing.getData()
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Finance', False, False)
         if "main" in request.POST:
-            runBing(driver, Bing, writeBook)
+            runBing(driver, Bing, book)
         elif "login" in request.POST:
             bingLogin(driver)
         elif "activities" in request.POST:
             bingActivities(driver)
         elif "balance" in request.POST:
             Bing.setBalance(getBingBalance(driver))
-            Bing.updateMRBalance(writeBook)
+            book.updateMRBalance(Bing)
         elif "rewards" in request.POST:
             claimBingRewards(driver)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/bing"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'Bing': Bing}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/bing.html", context)
 
 def boa(request):
-    personalReadBook = openGnuCashBook('Finance', True, True)
-    jointReadBook = openGnuCashBook('Home', True, True)
-    Personal = USD("BoA", personalReadBook)
-    Joint = USD("BoA-joint", jointReadBook)
+    personalBook = GnuCash('Finance')
+    jointBook = GnuCash('Home')
+    Personal = USD("BoA", personalBook)
+    Joint = USD("BoA-joint", jointBook)
     if request.method == 'POST':
         driver = Driver("Chrome")
         body = request.POST.copy()
         account = body.get("account")
-        bookName = 'Finance' if account == 'Personal' else 'Home'
-        book = openGnuCashBook(bookName, False, False)
         if "main" in request.POST:
-            runBoA(driver, Personal, book) if account == 'Personal' else runBoA(driver, Joint, book)
+            runBoA(driver, Personal, personalBook) if account == 'Personal' else runBoA(driver, Joint, jointBook)
         elif "login" in request.POST:
             locateBoAWindowAndOpenAccount(driver, account)
         elif "balance" in request.POST:
@@ -178,20 +160,18 @@ def boa(request):
             claimBoARewards(driver, account)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/boa"))
-        book.close()
     context = {'Personal': Personal, 'Joint': Joint}
-    personalReadBook.close()
-    jointReadBook.close()
+    personalBook.closeBook()
+    jointBook.closeBook()
     return render(request,"scripts/boa.html", context)
 
 def chase(request):
-    readBook = openGnuCashBook('Finance', True, True)    
-    Chase = USD("Chase", readBook)
+    book = GnuCash('Finance')
+    Chase = USD("Chase", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Finance', False, False)
         if "main" in request.POST:
-            runChase(driver, Chase)
+            runChase(driver, Chase, book)
         elif "login" in request.POST:
             locateChaseWindow(driver)
         elif "balance" in request.POST:
@@ -200,49 +180,41 @@ def chase(request):
             claimChaseRewards(driver)   
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/chase"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'account': Chase}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/chase.html", context)
 
 def coinbase(request):
-    readBook = openGnuCashBook('Finance', True, True)    
-    Loopring = Crypto("Loopring", readBook)
+    book = GnuCash('Finance')
+    Loopring = Crypto("Loopring", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Finance', False, False)
         if "main" in request.POST:
-            runCoinbase(driver, [Loopring], writeBook)
+            runCoinbase(driver, [Loopring], book)
         elif "login" in request.POST:
             locateCoinbaseWindow(driver)
         elif "balance" in request.POST:
             getCoinbaseBalances(driver, [Loopring])
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/coinbase"))      
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'Loopring': Loopring}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/coinbase.html", context)
 
 def creditCards(request):
-    personalReadBook = openGnuCashBook('Finance', True, True)
-    jointReadBook = openGnuCashBook('Home', True, True)    
-    Amex = USD("Amex", personalReadBook)
-    Barclays = USD("Barclays", personalReadBook)
-    Chase = USD("Chase", personalReadBook)
-    Discover = USD("Discover", personalReadBook)
-    BoA_P = USD("BoA", personalReadBook)
-    BoA_J = USD("BoA-joint", jointReadBook)    
+    personalBook = GnuCash('Finance')
+    jointBook = GnuCash('Home') 
+    Amex = USD("Amex", personalBook)
+    Barclays = USD("Barclays", personalBook)
+    Chase = USD("Chase", personalBook)
+    Discover = USD("Discover", personalBook)
+    BoA_P = USD("BoA", personalBook)
+    BoA_J = USD("BoA-joint", jointBook)    
     if request.method == 'POST':
         driver = Driver("Chrome")
         bookName = 'Home' if 'boaJ' in request.POST else 'Finance'
-        writeBook = openGnuCashBook(bookName, False, False)
         if "amexMain" in request.POST:
-            runAmex(driver, Amex, writeBook)
+            runAmex(driver, Amex, personalBook)
         elif "amexLogin" in request.POST:
             locateAmexWindow(driver)
         elif "amexBalances" in request.POST:
@@ -250,7 +222,7 @@ def creditCards(request):
         elif "amexRewards" in request.POST:
             claimAmexRewards(driver)
         elif "barclaysMain" in request.POST:
-            runBarclays(driver, Barclays, writeBook)
+            runBarclays(driver, Barclays, personalBook)
         elif "barclaysLogin" in request.POST:
             locateBarclaysWindow(driver)
         elif "barclaysBalances" in request.POST:
@@ -258,7 +230,7 @@ def creditCards(request):
         elif "barclaysRewards" in request.POST:
             claimBarclaysRewards(driver)
         elif "boaPMain" in request.POST:
-            runBoA(driver, BoA_P, writeBook)
+            runBoA(driver, BoA_P, personalBook)
         elif "boaPLogin" in request.POST:
             locateBoAWindowAndOpenAccount(driver, BoA_P.name)
         elif "boaPBalances" in request.POST:
@@ -266,7 +238,7 @@ def creditCards(request):
         elif "boaPRewards" in request.POST:
             claimBoARewards(driver, BoA_P.name)
         elif "boaJMain" in request.POST:
-            runBoA(driver, BoA_J, writeBook)
+            runBoA(driver, BoA_J, jointBook)
         elif "boaJLogin" in request.POST:
             locateBoAWindowAndOpenAccount(driver, BoA_J.name)
         elif "boaJBalances" in request.POST:
@@ -274,7 +246,7 @@ def creditCards(request):
         elif "boaJRewards" in request.POST:
             claimBoARewards(driver, BoA_J.name)
         elif "chaseMain" in request.POST:
-            runChase(driver, Chase, writeBook)
+            runChase(driver, Chase, personalBook)
         elif "chaseLogin" in request.POST:
             locateChaseWindow(driver)
         elif "chaseBalances" in request.POST:
@@ -282,7 +254,7 @@ def creditCards(request):
         elif "chaseRewards" in request.POST:
             claimChaseRewards(driver)
         elif "discoverMain" in request.POST:
-            runDiscover(driver, Discover, writeBook)
+            runDiscover(driver, Discover, personalBook)
         elif "discoverLogin" in request.POST:
             locateDiscoverWindow(driver)
         elif "discoverBalances" in request.POST:
@@ -291,50 +263,41 @@ def creditCards(request):
             claimDiscoverRewards(driver)               
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/barclays"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'Amex': Amex, 'Barclays': Barclays, 'Chase': Chase, 'Discover': Discover, 'BoA_P': BoA_P, 'BoA_J': BoA_J}
-    personalReadBook.close()
-    jointReadBook.close()
+    personalBook.closeBook()
+    jointBook.closeBook()
     return render(request,"scripts/creditCards.html", context)
 
 def daily(request):
-    personalReadBook = openGnuCashBook('Finance', True, True)
-    jointReadBook = openGnuCashBook('Home', True, True)
-    mrAccounts = getDailyAccounts('MR', personalReadBook)
-    bankAccounts = getDailyAccounts('Bank', personalReadBook, jointReadBook)
-    GME = getPriceInGnucash('GME', personalReadBook, datetime.today().date())
+    personalBook = GnuCash('Finance')
+    jointBook = GnuCash('Home') 
+    mrAccounts = getDailyAccounts('MR', personalBook)
+    bankAccounts = getDailyAccounts('Bank', personalBook, jointBook)
+    GME = personalBook.getPriceInGnucash('GME', datetime.today().date())
     if request.method == 'POST':
         driver = Driver("Chrome")
-        personalWriteBook = openGnuCashBook('Finance', False, False)
-        if "bank" in request.POST or "ally" in request.POST:
-            jointWriteBook = openGnuCashBook('Home', False, False)
-            if "bank" in request.POST:
-                GME = runDailyBank(bankAccounts, personalWriteBook, jointWriteBook)
-            elif "allyMain" in request.POST:
-                runAlly(driver, bankAccounts['Ally'], jointWriteBook)
-            elif "allyLogin" in request.POST:
-                locateAllyWindow(driver)
-            elif "allyLogout" in request.POST:
-                allyLogout(driver)        
-            elif "allyBalance" in request.POST:
-                Ally.setBalance(getAllyBalance(driver))
-            if not jointWriteBook.is_saved:
-                jointWriteBook.save()
-            jointWriteBook.close()
+        if "bank" in request.POST:
+            GME = runDailyBank(bankAccounts, personalBook, jointBook)
+        elif "allyMain" in request.POST:
+            runAlly(driver, bankAccounts['Ally'], jointBook)
+        elif "allyLogin" in request.POST:
+            locateAllyWindow(driver)
+        elif "allyLogout" in request.POST:
+            allyLogout(driver)        
+        elif "allyBalance" in request.POST:
+            Ally.setBalance(getAllyBalance(driver))
         elif "paypal" in request.POST:
             runPaypal(driver)
         elif "tearDown" in request.POST:
             tearDown(driver)
         elif "crypto" in request.POST:
-            updateCryptoPrices(driver, personalWriteBook)
-            bankAccounts['CryptoPortfolio'].updateGnuBalance(personalWriteBook)
+            updateCryptoPrices(driver, personalBook)
+            bankAccounts['CryptoPortfolio'].updateGnuBalance(personalBook.getBalance(bankAccounts['CryptoPortfolio'].gnuAccount))
         elif "GME" in request.POST:
             GME = getStockPrice(driver, 'GME')
-            updatePriceInGnucash('GME', GME, personalWriteBook)
+            personalBook.updatePriceInGnucash('GME', GME)
         elif "MR" in request.POST:
-            runDailyMR(mrAccounts, personalWriteBook)
+            runDailyMR(mrAccounts, personalBook)
         elif "sofiMain" in request.POST:
             runSofi(driver, accounts)
         elif "sofiLogin" in request.POST:
@@ -347,23 +310,23 @@ def daily(request):
         elif "amazonMain" in request.POST:
             confirmAmazonGCBalance(driver, mrAccounts['AmazonGC'])
         elif "bingMain" in request.POST:
-            runBing(driver, mrAccounts['Bing'], personalWriteBook)
+            runBing(driver, mrAccounts['Bing'], personalBook)
         elif "bingLogin" in request.POST:
             locateBingWindow(driver)
         elif "bingActivities" in request.POST:
             bingActivities(driver)
         elif "bingBalance" in request.POST:
             mrAccounts['Bing'].setBalance(getBingBalance(driver))
-            mrAccounts['Bing'].updateMRBalance(personalWriteBook)
+            personalBook.updateMRBalance(mrAccounts['Bing'])
         elif "bingRewards" in request.POST:
             claimBingRewards(driver)
         elif "pineconeMain" in request.POST:
-            runPinecone(driver, mrAccounts['Pinecone'], personalWriteBook)
+            runPinecone(driver, mrAccounts['Pinecone'], personalBook)
         elif "pineconeLogin" in request.POST:
             locatePineconeWindow(driver)
         elif "pineconeBalance" in request.POST:
             mrAccounts['Pinecone'].setBalance(getPineConeBalance(driver))
-            mrAccounts['Pinecone'].updateMRBalance(personalWriteBook)
+            personalBook.updateMRBalance(mrAccounts['Pinecone'])
         elif "pineconeRewards" in request.POST:
             claimPineConeRewards(driver)
         elif "presearchMain" in request.POST:
@@ -375,16 +338,16 @@ def daily(request):
         elif "presearchSearch" in request.POST:
             searchUsingPresearch(driver)
         elif "presearchRewards" in request.POST:
-            presearchRewardsRedemptionAndBalanceUpdates(driver, bankAccounts['Presearch'], personalWriteBook)
+            presearchRewardsRedemptionAndBalanceUpdates(driver, bankAccounts['Presearch'], personalBook)
         elif "swagbucksMain" in request.POST:
-            runSwagbucks(driver, True, mrAccounts['Swagbucks'], personalWriteBook) if "Run Alu" in request.POST else runSwagbucks(driver, False, mrAccounts['Swagbucks'], personalWriteBook)
+            runSwagbucks(driver, True, mrAccounts['Swagbucks'], personalBook) if "Run Alu" in request.POST else runSwagbucks(driver, False, mrAccounts['Swagbucks'], personalBook)
         elif "swagbucksLogin" in request.POST:
             locateSwagBucksWindow(driver)
         elif "swagbucksAlu" in request.POST:
             runAlusRevenge(driver.webDriver)
         elif 'swagbucksBalance' in request.POST:
             mrAccounts['Swagbucks'].setBalance(getSwagBucksBalance(driver))
-            mrAccounts['Swagbucks'].updateMRBalance(personalWriteBook)
+            personalBook.updateMRBalance(mrAccounts['Swagbucks'])
         elif "swagbucksContent" in request.POST:
             swagBuckscontentDiscovery(driver)
         elif "swabucksSearch" in request.POST:
@@ -394,14 +357,14 @@ def daily(request):
         elif "swagbucksInbox" in request.POST:
             swagbucksInbox(driver)
         elif "tellwutMain" in request.POST:
-            runTellwut(driver, mrAccounts['Tellwut'], personalWriteBook)
+            runTellwut(driver, mrAccounts['Tellwut'], personalBook)
         elif "tellwutLogin" in request.POST:
             locateTellWutWindow(driver)
         elif "tellwutSurveys" in request.POST:
             completeTellWutSurveys(driver)            
         elif "tellwutBalance" in request.POST:
             mrAccounts['Tellwut'].setBalance(getTellWutBalance(driver))
-            mrAccounts['Tellwut'].updateMRBalance(personalWriteBook)            
+            personalBook.updateMRBalance(mrAccounts['Tellwut'])            
         elif "tellwutRewards" in request.POST:
             redeemTellWutRewards(driver)
         elif "paidviewpointMain" in request.POST:
@@ -412,27 +375,21 @@ def daily(request):
             paidviewpointLogin(driver)        
         elif "paidviewpointBalance" in request.POST:
             mrAccounts['Paidviewpoint'].setBalance(getPaidviewpointBalance(driver))
-            mrAccounts['Paidviewpoint'].overwriteBalance(personalWriteBook)            
+            personalBook.overwriteBalance(mrAccounts['Paidviewpoint'])            
         elif "paidviewpointRewards" in request.POST:
             redeemPaidviewpointRewards(driver)            
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/daily"))
-        if not personalWriteBook.is_saved:
-            personalWriteBook.save()
-        personalWriteBook.close()
-        if "MR" in request.POST: # run after book is saved/closed in case of failure
-            swagbucksSearch(driver)
     context = {'mrAccounts': mrAccounts, 'bankAccounts': bankAccounts, 'GME': "%.2f" % GME}
-    personalReadBook.close()
-    jointReadBook.close()
+    personalBook.closeBook()
+    jointBook.closeBook()
     return render(request,"scripts/daily.html", context)
 
 def discover(request):
-    readBook = openGnuCashBook('Finance', True, True)
-    Discover = USD("Discover", readBook)
+    book = GnuCash('Finance')
+    Discover = USD("Discover", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Finance', False, False)        
         if "main" in request.POST:
             runDiscover(driver, Discover)
         elif "login" in request.POST:
@@ -443,21 +400,15 @@ def discover(request):
             claimDiscoverRewards(driver)   
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/discover"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
-    context = {
-        'account': Discover
-    }
-    readBook.close()
+    context = {'account': Discover}
+    book.closeBook()
     return render(request,"scripts/discover.html", context)
 
 def eternl(request):
-    readBook = openGnuCashBook('Finance', True, True)    
-    Cardano = Crypto("Cardano", readBook, 'ADA-Eternl')
+    book = GnuCash('Finance')
+    Cardano = Crypto("Cardano", book, 'ADA-Eternl')
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Finance', False, False)        
         if "main" in request.POST:
             runEternl(driver, Cardano)
         elif "balance" in request.POST:
@@ -466,33 +417,26 @@ def eternl(request):
             locateEternlWindow(driver)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/eternl"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'account': Cardano}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/eternl.html", context)
 
 def exodus(request):
-    readBook = openGnuCashBook('Finance', True, True)        
-    Cosmos = Crypto("Cosmos", readBook)
+    book = GnuCash('Finance')
+    Cosmos = Crypto("Cosmos", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Finance', False, False)        
         if "main" in request.POST:
             runExodus(Cosmos)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/exodus"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'account': Cosmos}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/exodus.html", context)
 
 def fidelity(request):
-    readBook = openGnuCashBook('Finance', True, True)    
-    Fidelity = USD("Fidelity", readBook)    
+    book = GnuCash('Finance')
+    Fidelity = USD("Fidelity", book)    
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
@@ -504,18 +448,17 @@ def fidelity(request):
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/fidelity"))
     context = {'account': Fidelity}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/fidelity.html", context)            
     
 def healthEquity(request):
-    readBook = openGnuCashBook('Finance', True, True)
-    HealthEquity = USD("HSA", readBook)
-    Vanguard = USD("Vanguard401k", readBook)
+    book = GnuCash('Finance')
+    HealthEquity = USD("HSA", book)
+    Vanguard = USD("Vanguard401k", book)
     HEaccounts = {'HealthEquity': HealthEquity, 'Vanguard': Vanguard}
     HSA_dividends = ''
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Finance', False, False)        
         if "main" in request.POST:
             HSA_dividends = runHealthEquity(driver, HEaccounts)
         elif "login" in request.POST:
@@ -524,36 +467,28 @@ def healthEquity(request):
             getHealthEquityBalances(driver, HEaccounts)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/healthEquity"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'HEaccounts': HEaccounts, 'HSA_dividends': HSA_dividends}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/healthEquity.html", context)
 
 def ioPay(request):
-    readBook = openGnuCashBook('Finance', True, True)
-    IoTex = Crypto("IoTex", readBook)
+    book = GnuCash('Finance')
+    IoTex = Crypto("IoTex", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Finance', False, False)        
         if "main" in request.POST:
             runIoPay(driver, IoTex)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/iopay"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'account': IoTex}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/iopay.html", context)
 
 def kraken(request):
-    readBook = openGnuCashBook('Finance', True, True)    
-    Ethereum2 = Crypto("Ethereum2", readBook)
+    book = GnuCash('Finance')
+    Ethereum2 = Crypto("Ethereum2", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Finance', False, False)
         if "main" in request.POST:
             runKraken(driver, Ethereum2)
         elif "balance" in request.POST:
@@ -562,45 +497,37 @@ def kraken(request):
             locateKrakenWindow(driver)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/kraken"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'account': Ethereum2}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/kraken.html", context)        
 
 def ledger(request):
-    readBook = openGnuCashBook('Finance', True, True)    
-    coinList = getLedgerAccounts(readBook)
+    book = GnuCash('Finance')
+    coinList = getLedgerAccounts(book)
     if request.method == 'POST':
         if "main" in request.POST:
-            writeBook = openGnuCashBook('Finance', False, False)
             runLedger(coinList)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/ledger"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'coinList': coinList}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/ledger.html", context)
 
 def monthly(request):
-    readBook = openGnuCashBook('Finance', True, True)
-    usdAccounts = getMonthlyAccounts('USD', readBook)
-    cryptoAccounts = getMonthlyAccounts('Crypto', readBook)
+    book = GnuCash('Finance')
+    usdAccounts = getMonthlyAccounts('USD', book)
+    cryptoAccounts = getMonthlyAccounts('Crypto', book)
     HSA_dividends = ''
     if request.method == 'POST':
         driver = Driver("Chrome")
         today = datetime.today()
-        writeBook = openGnuCashBook('Finance', False, False)
         if "USD" in request.POST:
-            runUSD(driver, today, usdAccounts, writeBook)
+            runUSD(driver, today, usdAccounts, book)
         elif "prices" in request.POST:
             Home = USD("Home")
             updateInvestmentPrices(driver, Home)
         elif "Crypto" in request.POST:
-            runCrypto(driver, today, cryptoAccounts, writeBook)
+            runCrypto(driver, today, cryptoAccounts, book)
         elif "fidelityMain" in request.POST:
             runFidelity(driver, Fidelity)
         elif "fidelityBalance" in request.POST:
@@ -622,36 +549,33 @@ def monthly(request):
         elif "worthyLogin" in request.POST:
             locateWorthyWindow(driver)
         elif "coinbaseMain" in request.POST:
-            runCoinbase(driver, [cryptoAccounts['Loopring']], writeBook)
+            runCoinbase(driver, [cryptoAccounts['Loopring']], book)
         elif "coinbaseLogin" in request.POST:
             locateCoinbaseWindow(driver)
         elif "coinbaseBalance" in request.POST:
             getCoinbaseBalances(driver, [cryptoAccounts['Loopring']])
         elif "eternlMain" in request.POST:
-            runEternl(driver, cryptoAccounts['Cardano'], writeBook)
+            runEternl(driver, cryptoAccounts['Cardano'], book)
         elif "eternlBalance" in request.POST:
             cryptoAccounts['Cardano'].setBalance(getEternlBalance(driver))
         elif "eternlLogin" in request.POST:
             locateEternlWindow(driver)
         elif "exodusMain" in request.POST:
-            runExodus(cryptoAccounts['Cosmos'], writeBook)
+            runExodus(cryptoAccounts['Cosmos'], book)
         elif "ioPayMain" in request.POST:
             runIoPay(driver, cryptoAccounts['IoTex'])
         elif "krakenMain" in request.POST:
-            runKraken(driver, cryptoAccounts['Ethereum2'], writeBook)
+            runKraken(driver, cryptoAccounts['Ethereum2'], book)
         elif "krakenBalance" in request.POST:
             cryptoAccounts['Ethereum2'].setBalance(getKrakenBalance(driver))
         elif "krakenLogin" in request.POST:
             locateKrakenWindow(driver)
         elif "ledgerMain" in request.POST:
-            runLedger(cryptoAccounts['ledgerAccounts'], writeBook)            
+            runLedger(cryptoAccounts['ledgerAccounts'], book)            
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/monthly"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'usdAccounts': usdAccounts, 'cryptoAccounts': cryptoAccounts, 'HSA_dividends': HSA_dividends}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/monthly.html", context)
 
 def myConstant(request):
@@ -673,29 +597,25 @@ def myConstant(request):
     return render(request,"scripts/myconstant.html")
 
 def paidviewpoint(request):
-    readBook = openGnuCashBook('Finance', True, True)
-    Paidviewpoint = USD("Paidviewpoint", readBook)
+    book = GnuCash('Finance')
+    Paidviewpoint = USD("Paidviewpoint", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Finance', False, False)
         if "main" in request.POST:
-            runPaidviewpoint(driver, Paidviewpoint, writeBook)
+            runPaidviewpoint(driver, Paidviewpoint, book)
         if "survey" in request.POST:
             completePaidviewpointSurvey(driver)
         elif "login" in request.POST:
             paidviewpointLogin(driver)        
         elif "balance" in request.POST:
             Paidviewpoint.setBalance(getPaidviewpointBalance(driver))
-            Paidviewpoint.overwriteBalance(writeBook)
+            Paidviewpoint.overwriteBalance(book)
         elif "rewards" in request.POST:
             redeemPaidviewpointRewards(driver)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/paidviewpoint"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'Paidviewpoint': Paidviewpoint}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/paidviewpoint.html", context)
 
 def paypal(request):
@@ -710,35 +630,30 @@ def paypal(request):
     return render(request,"scripts/paypal.html")
 
 def pinecone(request):
-    readBook = openGnuCashBook('Finance', True, True)    
-    Pinecone = Crypto("Pinecone", readBook)
+    book = GnuCash('Finance')
+    Pinecone = Crypto("Pinecone", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Finance', False, False)        
         if "main" in request.POST:
-            runPinecone(driver, Pinecone, writeBook)
+            runPinecone(driver, Pinecone, book)
         elif "login" in request.POST:
             locatePineconeWindow(driver)
         elif "balance" in request.POST:
             Pinecone.setBalance(getPineConeBalance(driver))
-            Pinecone.updateMRBalance(writeBook)    
+            book.updateMRBalance(Pinecone)
         elif "rewards" in request.POST:
             claimPineConeRewards(driver)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/pinecone"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'Pinecone': Pinecone}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/pinecone.html", context)
 
 def presearch(request):
-    readBook = openGnuCashBook('Finance', True, True)    
-    Presearch = Crypto("Presearch", readBook)
+    book = GnuCash('Finance')
+    Presearch = Crypto("Presearch", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Finance', False, False)        
         if "main" in request.POST:
             presearchRewardsRedemptionAndBalanceUpdates(driver)
         elif "login" in request.POST:
@@ -751,11 +666,8 @@ def presearch(request):
             presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/presearch"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'account': Presearch}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/presearch.html", context)
 
 def psCoupons(request):
@@ -770,13 +682,12 @@ def psCoupons(request):
     return render(request,"scripts/pscoupons.html")
 
 def sofi(request):
-    readBook = openGnuCashBook('Finance', True, True)    
-    Checking = USD("Sofi Checking", readBook)
-    Savings = USD("Sofi Savings", readBook)
+    book = GnuCash('Finance')
+    Checking = USD("Sofi Checking", book)
+    Savings = USD("Sofi Savings", book)
     accounts = [Checking, Savings]    
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Finance', False, False)        
         if "main" in request.POST:
             runSofi(driver, accounts)
         elif "login" in request.POST:
@@ -788,28 +699,24 @@ def sofi(request):
             getSofiBalanceAndOrientPage(driver, Savings)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/sofi"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'Checking': Checking, 'Savings': Savings}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/sofi.html", context)
 
 def swagbucks(request):
-    readBook = openGnuCashBook('Finance', True, True)    
-    Swagbucks = Crypto("Swagbucks", readBook)
+    book = GnuCash('Finance')
+    Swagbucks = Crypto("Swagbucks", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Finance', False, False)        
         if "main" in request.POST:
-            runSwagbucks(driver, True, Swagbucks, writeBook) if "Run Alu" in request.POST else runSwagbucks(driver, False, Swagbucks, writeBook)
+            runSwagbucks(driver, True, Swagbucks, book) if "Run Alu" in request.POST else runSwagbucks(driver, False, Swagbucks, book)
         elif "login" in request.POST:
             locateSwagBucksWindow(driver)
         elif "alu" in request.POST:
             runAlusRevenge(driver.webDriver)
         elif 'balance' in request.POST:
             Swagbucks.setBalance(getSwagBucksBalance(driver))
-            Swagbucks.updateMRBalance(writeBook)            
+            book.updateMRBalance(Swagbucks)            
         elif "content" in request.POST:
             swagBuckscontentDiscovery(driver)
         elif "search" in request.POST:
@@ -820,19 +727,15 @@ def swagbucks(request):
             swagbucksInbox(driver)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/swagbucks"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'account': Swagbucks}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/swagbucks.html", context)
 
 def tellwut(request):
-    readBook = openGnuCashBook('Finance', True, True)
-    Tellwut = Crypto("Tellwut", readBook)    
+    book = GnuCash('Finance')
+    Tellwut = Crypto("Tellwut", book)    
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Finance', False, False)        
         if "main" in request.POST:
             runTellwut(driver, Tellwut)
         elif "login" in request.POST:
@@ -842,16 +745,13 @@ def tellwut(request):
             completeTellWutSurveys(driver)
         elif "balance" in request.POST:
             Tellwut.setBalance(getTellWutBalance(driver))
-            Tellwut.updateMRBalance(writeBook)
+            book.updateMRBalance(Tellwut)
         elif "rewards" in request.POST:
             redeemTellWutRewards(driver)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/tellwut"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'Tellwut': Tellwut}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/tellwut.html", context)
 
 def updateGoals(request):
@@ -867,15 +767,14 @@ def updateGoals(request):
     return render(request,"scripts/updateGoals.html")
 
 def vanguard(request):
-    readBook = openGnuCashBook('Finance', True, True)    
-    Pension = USD("VanguardPension", readBook)
-    V401k = USD("Vanguard401k", readBook)
+    book = GnuCash('Finance')
+    Pension = USD("VanguardPension", book)
+    V401k = USD("Vanguard401k", book)
     accounts = [Pension, V401k]
     pensionInterest = ""
     pensionContributions = ""
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Finance', False, False)
         if "main" in request.POST:
             interestAndEmployerContribution = runVanguard(driver, accounts)
             pensionInterest = str(interestAndEmployerContribution['interest'])
@@ -886,28 +785,21 @@ def vanguard(request):
             getVanguardBalanceAndInterestYTD(driver, accounts)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/vanguard"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'Pension': Pension, 'PensionInterest': pensionInterest, 'PensionContributions': pensionContributions, 'V401k': V401k}
-    readBook.close()        
+    book.closeBook()        
     return render(request,"scripts/vanguard.html", context)
 
 def worthy(request):
-    readBook = openGnuCashBook('Finance', True, True)
-    Worthy = USD("Worthy", readBook)    
+    book = GnuCash('Finance')
+    Worthy = USD("Worthy", book)    
     if request.method == 'POST':
         driver = Driver("Chrome")
-        writeBook = openGnuCashBook('Finance', False, False)
         if "balance" in request.POST:
             getWorthyBalance(driver, Worthy)
         elif "login" in request.POST:
             locateWorthyWindow(driver)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/worthy"))
-        if not writeBook.is_saved:
-            writeBook.save()
-        writeBook.close()
     context = {'account': Worthy}
-    readBook.close()
+    book.closeBook()
     return render(request,"scripts/worthy.html", context)

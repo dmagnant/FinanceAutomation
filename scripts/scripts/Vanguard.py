@@ -8,18 +8,17 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Vanguard":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
+    from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getPassword,
                                             getStartAndEndOfDateRange,
                                             getUsername, showMessage)
-    from Functions.GnuCashFunctions import openGnuCashBook, writeGnuTransaction, openGnuCashUI
     from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
 else:
     from .Classes.Asset import USD
+    from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import (getPassword,
                                              getStartAndEndOfDateRange,
                                              getUsername, showMessage)
-    from .Functions.GnuCashFunctions import (openGnuCashBook,
-                                             writeGnuTransaction, openGnuCashUI)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
     
 def locateVanguardWindow(driver):
@@ -57,14 +56,13 @@ def getVanguardBalanceAndInterestYTD(driver, accounts):
     interestYTD = driver.webDriver.find_element(By.XPATH, "/html/body/div[3]/div/app-personalized-dashboard-root/app-assets-details/app-balance-details/div/div[3]/div[4]/div/app-details-card/div/div/div[1]/div[3]/h4").text.strip('$').replace(',', '')
     return interestYTD
 
-def importGnuTransactions(myBook, today, account, interestYTD):
+def importGnuTransactions(book, today, account, interestYTD):
     lastMonth = getStartAndEndOfDateRange(today, "month")
     interestAmount = 0
-    transactions = [tr for tr in myBook.transactions
+    transactions = [tr for tr in book.readBook.transactions
                     if str(tr.post_date.strftime('%Y')) == str(lastMonth['startDate'].year)
                     for spl in tr.splits
-                    if spl.account.fullname == account.gnuAccount
-                    ]
+                    if spl.account.fullname == account.gnuAccount]
     for tr in transactions:
         for spl in tr.splits:
             if spl.account.fullname == "Income:Investments:Interest":
@@ -72,24 +70,11 @@ def importGnuTransactions(myBook, today, account, interestYTD):
     accountChange = Decimal(account.balance) - account.gnuBalance
     interest = Decimal(interestYTD) - interestAmount
     employerContribution = accountChange - interest
-    amount = {
-        'interest': -interest,
-        'employerContribution': -employerContribution,
-        'accountChange': accountChange
-    }
-    transactionVariables = {
-        'postDate': lastMonth['endDate'],
-        'description': "Contribution + Interest",
-        'amount': amount,
-        'fromAccount': account.gnuAccount,
-    }
+    amount = {'interest': -interest, 'employerContribution': -employerContribution, 'accountChange': accountChange}
+    transactionVariables = {'postDate': lastMonth['endDate'], 'description': "Contribution + Interest", 'amount': amount, 'fromAccount': account.gnuAccount}
     # writeGnuTransaction(myBook, "Contribution + Interest", lastMonth.endDate, [-interest, -employerContribution, accountChange], account.gnuAccount)
-    writeGnuTransaction(myBook, transactionVariables)
-    book.close()
-    return {
-        "interest": interest,
-        "employerContribution": employerContribution
-    }
+    book.writeGnuTransaction(transactionVariables)
+    return {"interest": interest, "employerContribution": employerContribution}
     
 def runVanguard(driver, accounts, book):
     today = datetime.today().date()
@@ -99,12 +84,12 @@ def runVanguard(driver, accounts, book):
     accounts[0].updateGnuBalance(book)
     openSpreadsheet(driver, 'Asset Allocation', '2022')
     updateSpreadsheet('Asset Allocation', today.year, 'VanguardPension', today.month, float(accounts[0].balance))
-    openGnuCashUI('Finances')
+    book.openGnuCashUI()
     return pensionInfo
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = openGnuCashBook('Finance', False, False)
+    book = GnuCash('Finance')
     Pension = USD("VanguardPension", book)
     V401k = USD("Vanguard401k", book)
     accounts = [Pension, V401k]
@@ -113,6 +98,4 @@ if __name__ == '__main__':
         a.getData()
     print('  Interested Earned: ' + str(pensionInfo.interest))
     print('total contributions: ' + str(pensionInfo.employerContributions))
-    if not book.is_saved:
-        book.save()
-    book.close()
+    book.closeBook()

@@ -1,11 +1,11 @@
 if __name__ == '__main__' or __name__ == "Exodus":
     from Classes.Asset import Crypto
+    from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import showMessage    
-    from Functions.GnuCashFunctions import openGnuCashBook       
 else:
     from .Classes.Asset import Crypto
+    from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import showMessage
-    from .Functions.GnuCashFunctions import openGnuCashBook
     
 def runExodus(account, book):
     showMessage('Cosmos (ATOM) balance via Exodus',"Open Exodus Desktop \n"
@@ -19,10 +19,8 @@ def runExodus(account, book):
     account.updateSpreadsheetAndGnuCash(book)
 
 if __name__ == '__main__':
-    book = openGnuCashBook('Finance', False, False)
+    book = GnuCash('Finance')    
     Cosmos = Crypto("Cosmos", book)
     runExodus(Cosmos, book)
     Cosmos.getData()
-    if not book.is_saved:
-        book.save()
-    book.close()
+    book.closeBook()

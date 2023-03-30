@@ -8,11 +8,11 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Bing":
     from Classes.Asset import Crypto
     from Classes.WebDriver import Driver
-    from Functions.GnuCashFunctions import openGnuCashBook
+    from Classes.GnuCash import GnuCash
 else:
     from .Classes.Asset import Crypto 
     from .Classes.WebDriver import Driver
-    from .Functions.GnuCashFunctions import openGnuCashBook
+    from .Classes.GnuCash import GnuCash
  
 def locateBingWindow(driver):
     found = driver.findWindowByUrl("rewards.bing.com")
@@ -94,17 +94,23 @@ def runBing(driver, account, book):
     locateBingWindow(driver)
     bingActivities(driver)
     account.setBalance(getBingBalance(driver))
-    account.updateMRBalance(book)
+    book.updateMRBalance(account)
     if int(account.balance) >= 5250:
         claimBingRewards(driver)
 
 if __name__ == '__main__':
+    book = GnuCash('Finance')
     driver = Driver("Chrome")
-    book = openGnuCashBook('Finance', False, False)
     Bing = Crypto("Bing", book)
     runBing(driver, Bing, book)
     Bing.getData()
-    if not book.is_saved:
-        book.save()
-    book.close()
-    
+    book.closeBook()
+
+    # # book = openGnuCashBook('Finance', False, False)
+    # F = GnuCash('Finance')
+    # Bing = Crypto("Bing", F)
+    # Bing.getData()
+    # Bing.setBalance(69)
+    # Bing.getData()
+    # F.updateMRBalance(Bing)
+    # Bing.getData()

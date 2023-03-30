@@ -3,15 +3,15 @@ import gspread
 
 if __name__ == '__main__' or __name__ == "UpdateGoals":
     from Classes.WebDriver import Driver
+    from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                             setDirectory, showMessage)
-    from Functions.GnuCashFunctions import openGnuCashBook
     from Functions.SpreadsheetFunctions import openSpreadsheet
 else:
     from .Classes.WebDriver import Driver
+    from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                              setDirectory, showMessage)
-    from .Functions.GnuCashFunctions import openGnuCashBook
     from .Functions.SpreadsheetFunctions import openSpreadsheet
 
 def getTransactionTotal(dateRange, gnuAccount, mybook):
@@ -164,14 +164,13 @@ def updateSpreadsheet(account, month, value, accounts='Personal'):
     cell = getCell(account, month, accounts)
     worksheet.update(cell, value)
 
-def runUpdateGoals(accounts, timeframe):
+def runUpdateGoals(accounts, timeframe, book):
     driver = Driver("Chrome")
     if accounts == "Personal":
         openSpreadsheet(driver, 'Asset Allocation', 'Goals')
     elif accounts == "Joint":
         openSpreadsheet(driver, 'Home', 'Finances')
     dateRange = getStartAndEndOfDateRange(datetime.today().date(), timeframe)
-    mybook = openGnuCashBook('Finance', True, True) if accounts == 'Personal' else openGnuCashBook('Home', False, False)
     
     incomeAccounts = []
     expenseAccounts = []
@@ -201,10 +200,12 @@ def runUpdateGoals(accounts, timeframe):
     expenseAccounts.extend(expenseQuarterlyAccounts)
     expenseAccounts.sort()
     
-    getTotalForEachAccount(incomeAccounts, mybook, dateRange, timeframe, dateRange['endDate'].month, accounts)
-    getTotalForEachAccount(expenseAccounts, mybook, dateRange, timeframe, dateRange['endDate'].month, accounts)
+    getTotalForEachAccount(incomeAccounts, book, dateRange, timeframe, dateRange['endDate'].month, accounts)
+    getTotalForEachAccount(expenseAccounts, book, dateRange, timeframe, dateRange['endDate'].month, accounts)
 
 if __name__ == '__main__':
     accounts = 'Personal' # Personal or Joint
     timeframe = "YTD" # Month or YTD
-    runUpdateGoals(accounts, timeframe)
+    book = GnuCash('Finance') if accounts == 'Personal' else GnuCash('Home')
+    runUpdateGoals(accounts, timeframe, book)
+    book.closeBook()

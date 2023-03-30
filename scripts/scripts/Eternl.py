@@ -5,10 +5,10 @@ from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "Eternl":
     from Classes.Asset import Crypto
     from Classes.WebDriver import Driver
-    from Functions.GnuCashFunctions import openGnuCashBook
+    from Classes.GnuCash import GnuCash
 else:
     from .Classes.Asset import Crypto
-    from .Functions.GnuCashFunctions import openGnuCashBook
+    from .Classes.GnuCash import GnuCash
 
 def locateEternlWindow(driver):
     found = driver.findWindowByUrl("eternl.io/app/mainnet")
@@ -34,11 +34,9 @@ def runEternl(driver, account, book):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = openGnuCashBook('Finance', False, False)
+    book = GnuCash('Finance')
     Cardano = Crypto("Cardano", book , 'ADA-Eternl')    
     runEternl(driver, Cardano, book)
     Cardano.getData()
-    if not book.is_saved:
-        book.save()
-    book.close()
+    book.closeBook()
     
