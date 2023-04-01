@@ -57,10 +57,6 @@ def runDailyBank(accounts, personalBook, jointBook):
     updateCryptoPrices(driver, personalBook)
     accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getBalance(accounts['CryptoPortfolio'].gnuAccount))
     openSpreadsheet(driver, 'Home', '2023 Balance')
-    if accounts['Checking'].reviewTransactions or accounts['Savings'].reviewTransactions:
-        personalBook.openGnuCashUI()
-    if accounts['Ally'].reviewTransactions:
-        jointBook.openGnuCashUI()
     GMEprice = getStockPrice(driver, 'GME')
     personalBook.updatePriceInGnucash('GME', GMEprice)
     personalBook.purgeOldGnucashFiles()

@@ -109,7 +109,7 @@ def runAlusRevenge(driver):
     driver.find_element(By.XPATH,"/html/body").send_keys(Keys.DOWN)
     driver.find_element(By.XPATH,"/html/body").send_keys(Keys.UP)
     redeemed = 0
-    while redeemed < 2:
+    while redeemed < 3:
         game_over_text = ""
         num = 0
         # click Play Now

@@ -86,15 +86,6 @@
                 &ensp;&thinsp;gnuBalance: {{cryptoAccounts.Cardano.gnuBalance}}<br>
             </div>
             <div style="width: 16%; display:table-cell">
-                <b><a href="{% url 'Exodus' %}" target="_blank">Exodus</a></b><br><br>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="exodusMain">Main</button>
-                </form><br><br>
-                ATOM Balance: <b>{{cryptoAccounts.Cosmos.balance}}</b><br>
-                &emsp;&ensp;gnuBalance: {{cryptoAccounts.Cosmos.gnuBalance}}<br>
-            </div>
-            <div style="width: 16%; display:table-cell">
                 <b><a href="{% url 'IoPay' %}" target="_blank">IoPay</a></b><br><br>
                 <form method="post">
                     {% csrf_token %}

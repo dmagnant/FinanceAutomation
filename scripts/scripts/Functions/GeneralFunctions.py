@@ -103,8 +103,8 @@ def getStartAndEndOfDateRange(today, timeSpan):
         if timeSpan == "YTD":
             startDate = startDate.replace(month=1, day=1)
     return {
-        'startDate': startDate,
-        'endDate': endDate
+        'startDate': startDate.date(),
+        'endDate': endDate.date()
     }
 
 def getCryptocurrencyPrice(coinList):

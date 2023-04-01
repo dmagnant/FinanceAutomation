@@ -383,6 +383,10 @@ def daily(request):
     context = {'mrAccounts': mrAccounts, 'bankAccounts': bankAccounts, 'GME': "%.2f" % GME}
     personalBook.closeBook()
     jointBook.closeBook()
+    if bankAccounts['Checking'].reviewTransactions or bankAccounts['Savings'].reviewTransactions:
+        personalBook.openGnuCashUI()
+    if bankAccounts['Ally'].reviewTransactions:
+        jointBook.openGnuCashUI()
     return render(request,"scripts/daily.html", context)
 
 def discover(request):
@@ -514,20 +518,20 @@ def ledger(request):
     return render(request,"scripts/ledger.html", context)
 
 def monthly(request):
-    book = GnuCash('Finance')
-    usdAccounts = getMonthlyAccounts('USD', book)
-    cryptoAccounts = getMonthlyAccounts('Crypto', book)
+    personalBook = GnuCash('Finance')
+    jointBook = GnuCash('Home')
+    usdAccounts = getMonthlyAccounts('USD', personalBook, jointBook)
+    cryptoAccounts = getMonthlyAccounts('Crypto', personalBook, jointBook)
     HSA_dividends = ''
     if request.method == 'POST':
         driver = Driver("Chrome")
         today = datetime.today()
         if "USD" in request.POST:
-            runUSD(driver, today, usdAccounts, book)
+            runUSD(driver, today, usdAccounts, personalBook)
         elif "prices" in request.POST:
-            Home = USD("Home")
-            updateInvestmentPrices(driver, Home)
+            updateInvestmentPrices(driver, usdAccounts['Home'])
         elif "Crypto" in request.POST:
-            runCrypto(driver, today, cryptoAccounts, book)
+            runCrypto(driver, today, cryptoAccounts, personalBook)
         elif "fidelityMain" in request.POST:
             runFidelity(driver, Fidelity)
         elif "fidelityBalance" in request.POST:
@@ -549,7 +553,7 @@ def monthly(request):
         elif "worthyLogin" in request.POST:
             locateWorthyWindow(driver)
         elif "coinbaseMain" in request.POST:
-            runCoinbase(driver, [cryptoAccounts['Loopring']], book)
+            runCoinbase(driver, [cryptoAccounts['Loopring']], personalBook)
         elif "coinbaseLogin" in request.POST:
             locateCoinbaseWindow(driver)
         elif "coinbaseBalance" in request.POST:
@@ -560,22 +564,21 @@ def monthly(request):
             cryptoAccounts['Cardano'].setBalance(getEternlBalance(driver))
         elif "eternlLogin" in request.POST:
             locateEternlWindow(driver)
-        elif "exodusMain" in request.POST:
-            runExodus(cryptoAccounts['Cosmos'], book)
         elif "ioPayMain" in request.POST:
             runIoPay(driver, cryptoAccounts['IoTex'])
         elif "krakenMain" in request.POST:
-            runKraken(driver, cryptoAccounts['Ethereum2'], book)
+            runKraken(driver, cryptoAccounts['Ethereum2'], personalBook)
         elif "krakenBalance" in request.POST:
             cryptoAccounts['Ethereum2'].setBalance(getKrakenBalance(driver))
         elif "krakenLogin" in request.POST:
             locateKrakenWindow(driver)
         elif "ledgerMain" in request.POST:
-            runLedger(cryptoAccounts['ledgerAccounts'], book)            
+            runLedger(cryptoAccounts['ledgerAccounts'], personalBook)            
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/monthly"))
     context = {'usdAccounts': usdAccounts, 'cryptoAccounts': cryptoAccounts, 'HSA_dividends': HSA_dividends}
-    book.closeBook()
+    personalBook.closeBook()
+    jointBook.closeBook()
     return render(request,"scripts/monthly.html", context)
 
 def myConstant(request):

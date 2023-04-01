@@ -50,7 +50,7 @@ def getHealthEquityBalances(driver, accounts):
     HE_hsa_invest_bal = driver.find_element(By.XPATH, "//*[@id='21895515-020']/div/hqy-hsa-tab/div/div[2]/span[2]/span[1]").text.strip('$').replace(',','')
     accounts['HealthEquity'].setBalance(float(HE_hsa_avail_bal) + float(HE_hsa_invest_bal))
     vanguard401kbalance = driver.find_element(By.XPATH, "//*[@id='retirementAccounts']/li/a/div/ul/li/span[2]").text.strip('$').replace(',','')
-    accounts['Vanguard'].setBalance(float(vanguard401kbalance))
+    accounts['V401k'].setBalance(float(vanguard401kbalance))
 
 def getHealthEquityDividends(driver):
     lastMonth = getStartAndEndOfDateRange(datetime.today(), "month")
@@ -81,11 +81,11 @@ if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')    
     HealthEquity = USD("HSA", book)
-    Vanguard = USD("Vanguard401k", book)
-    HEaccounts = {'HealthEquity': HealthEquity, 'Vanguard': Vanguard}
+    V401k = USD("Vanguard401k", book)
+    HEaccounts = {'HealthEquity': HealthEquity, 'Vanguard': V401k}
     HSA_dividends = runHealthEquity(driver, HEaccounts)
     HealthEquity.getData()
-    Vanguard.getData()
+    V401k.getData()
     print("HSA Dividends: " + str(HSA_dividends))
     book.closeBook()
     

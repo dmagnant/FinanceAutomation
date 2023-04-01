@@ -32,22 +32,25 @@ else:
     from .MyConstant import runMyConstant
     from .Worthy import getWorthyBalance
 
-def getMonthlyAccounts(type, readBook):
+def getMonthlyAccounts(type, personalBook, jointBook):
     if type == 'USD':
-        Fidelity = USD("Fidelity", readBook)
-        HealthEquity = USD("HSA", readBook)
-        V401k = USD("Vanguard401k", readBook)
-        Pension = USD("VanguardPension", readBook)
-        Worthy = USD("Worthy", readBook)
-        accounts = {'Fidelity': Fidelity, 'HealthEquity': HealthEquity, 'V401k': V401k, 'Worthy': Worthy, 'Pension': Pension}
+        Fidelity = USD("Fidelity", personalBook)
+        HealthEquity = USD("HSA", personalBook)
+        V401k = USD("Vanguard401k", personalBook)
+        Pension = USD("VanguardPension", personalBook)
+        Worthy = USD("Worthy", personalBook)
+        Home = USD('Home', jointBook)
+        LiquidAssets = USD("Liquid Assets", personalBook)
+        Bonds = USD("Bonds", personalBook)
+        accounts = {'Fidelity': Fidelity, 'HealthEquity': HealthEquity, 'V401k': V401k, 'Worthy': Worthy, 'Pension': Pension, 'Home': Home, 'LiquidAssets': LiquidAssets, 'Bonds': Bonds}
     elif type == 'Crypto':
-        CryptoPortfolio = USD("Crypto", readBook),
-        Cardano = Crypto("Cardano", readBook, 'ADA-Eternl')
-        Cosmos = Crypto("Cosmos", readBook)
-        Loopring = Crypto("Loopring", readBook)
-        IoTex = Crypto("IoTex", readBook)
-        Ethereum2 = Crypto("Ethereum2", readBook)
-        ledgerAccounts = getLedgerAccounts(readBook)
+        CryptoPortfolio = USD("Crypto", personalBook)
+        Cardano = Crypto("Cardano", personalBook, 'ADA-Eternl')
+        Cosmos = Crypto("Cosmos", personalBook)
+        Loopring = Crypto("Loopring", personalBook)
+        IoTex = Crypto("IoTex", personalBook)
+        Ethereum2 = Crypto("Ethereum2", personalBook)
+        ledgerAccounts = getLedgerAccounts(personalBook)
         accounts = {'CryptoPortfolio': CryptoPortfolio, 'Cardano': Cardano, 'Cosmos': Cosmos, 'Loopring': Loopring, 'IoTex': IoTex, 'Ethereum2': Ethereum2, 'ledgerAccounts': ledgerAccounts}
     return accounts
 
@@ -55,62 +58,65 @@ def monthlyRoundUp(account, myBook, date, HSADividends):
     change = Decimal(account.balance - float(account.gnuBalance))
     change = round(change, 2)
     if account.name == "MyConstant" or account.name == "Worthy":
-        transactionVariables = {'postDate': date, 'description': "Interest", 'amount': -change, 'fromAccount': account.gnuAccount}
-        # writeGnuTransaction(myBook, "Interest", date, -change, "Income:Investments:Interest", account.gnuAccount)
+        transactionVariables = {'postDate': date, 'description': "Interest", 'amount': -change, 'fromAccount': "Income:Investments:Interest"}
     elif account.name == "HSA":
         HEHSAMarketChange = round(Decimal(change - HSADividends), 2)
         amount = {'change': change, 'HSADividends': -HSADividends, 'HEHSAMarketChange': -HEHSAMarketChange}
         transactionVariables = {'postDate': date, 'description': "HSA Statement", 'amount': amount, 'fromAccount': "Income:Investments:Market Change"}
-        # writeGnuTransaction(myBook, "HSA Statement", date, [change, -HSADividends, -HEHSAMarketChange], ["Income:Investments:Dividends", "Income:Investments:Market Change"], "Assets:Non-Liquid Assets:HSA:NM HSA")
-    myBook.writeGnuTransaction(transactionVariables, "Assets:Non-Liquid Assets:HSA:NM HSA")
-
-def runUSD(driver, today, accounts, book):
+    myBook.writeGnuTransaction(transactionVariables, account.gnuAccount)
+    account.updateGnuBalance(myBook.getBalance(account.gnuAccount))
+    
+def runUSD(driver, today, accounts, personalBook):
     year = today.year
     month = today.month
     lastMonth = getStartAndEndOfDateRange(today, "month")
-    # MyConstant = runMyConstant(driver, "USD")
     getWorthyBalance(driver, accounts['Worthy'])
-    HEaccounts = {'HealthEquity': accounts['HealthEquity'], 'Vanguard': accounts['Vanguard']}
+    HEaccounts = {'HealthEquity': accounts['HealthEquity'], 'V401k': accounts['V401k']}
     HSA_dividends = runHealthEquity(driver, HEaccounts)
-    monthlyRoundUp(accounts['Worthy'], book, lastMonth['endDate'], HSA_dividends)
-    monthlyRoundUp(accounts['HealthEquity'], book, lastMonth['endDate'], HSA_dividends)
-    LiquidAssets = USD("Liquid Assets")
-    Bonds = USD("Bonds")
+    monthlyRoundUp(accounts['Worthy'], personalBook, lastMonth['endDate'], HSA_dividends)
+    monthlyRoundUp(accounts['HealthEquity'], personalBook, lastMonth['endDate'], HSA_dividends)
+    accounts['LiquidAssets'].updateGnuBalance(personalBook.getBalance(accounts['LiquidAssets'].gnuAccount))
+    accounts['Bonds'].updateGnuBalance(personalBook.getBalance(accounts['Bonds'].gnuAccount))
     openSpreadsheet(driver, 'Asset Allocation', '2022')
-    updateSpreadsheet('Asset Allocation', year, Bonds.name, month, float(Bonds.gnuBalance), 'Liquid Assets')
-    updateSpreadsheet('Asset Allocation', year, LiquidAssets.name, month, float(LiquidAssets.gnuBalance), 'Liquid Assets')
+    updateSpreadsheet('Asset Allocation', year, accounts['Bonds'].name, month, float(accounts['Bonds'].gnuBalance), 'Liquid Assets')
+    updateSpreadsheet('Asset Allocation', year, accounts['LiquidAssets'].name, month, float(accounts['LiquidAssets'].gnuBalance), 'Liquid Assets')
     updateSpreadsheet('Asset Allocation', year, accounts['V401k'].name, month, accounts['V401k'].balance, '401k')
-    updateInvestmentPrices(driver)
+    updateInvestmentPrices(driver, accounts['Home'])
 
-def runCrypto(driver, today, accounts, myBook):
+def runCrypto(driver, today, accounts, personalBook):
     year = today.year
     month = today.month
     openSpreadsheet(driver, 'Asset Allocation', 'Cryptocurrency')
-    runEternl(driver, accounts['Cardano'], myBook)
-    runKraken(driver, accounts['Ethereum2'], myBook)
-    runIoPay(driver, accounts['IoTex'], myBook)
-    runLedger(accounts['ledgerAccounts'], myBook)
-    runCoinbase(driver, accounts['Loopring'], myBook)
-    accounts.CryptoPortfolio.updateGnuBalance(myBook)
+    runEternl(driver, accounts['Cardano'], personalBook)
+    accounts['Cardano'].updateGnuBalance(personalBook.getBalance(accounts['Cardano'].gnuAccount))
+    runKraken(driver, accounts['Ethereum2'], personalBook)
+    accounts['Ethereum2'].updateGnuBalance(personalBook.getBalance(accounts['Ethereum2'].gnuAccount))
+    runIoPay(driver, accounts['IoTex'], personalBook)
+    accounts['IoTex'].updateGnuBalance(personalBook.getBalance(accounts['IoTex'].gnuAccount))
+    # runLedger(accounts['ledgerAccounts'], personalBook)
+    # runCoinbase(driver, accounts['Loopring'], personalBook)
+    accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getBalance(accounts['CryptoPortfolio'].gnuAccount))
     updateSpreadsheet('Asset Allocation', year, accounts['CryptoPortfolio'].name, month, float(round(accounts['CryptoPortfolio'].gnuBalance, 2)), accounts['CryptoPortfolio'].name)
 
-def runMonthlyBank(book):
+def runMonthlyBank(personalBook, jointBook):
     today = datetime.today().date()
     driver = Driver("Chrome")
-    usdAccounts = getMonthlyAccounts('USD', book)
-    cryptoAccounts = getMonthlyAccounts('Crypto', book)
-    runUSD(driver, today, usdAccounts, book)
-    runCrypto(driver, today, cryptoAccounts, book)
+    usdAccounts = getMonthlyAccounts('USD', personalBook, jointBook)
+    cryptoAccounts = getMonthlyAccounts('Crypto', personalBook)
+    runUSD(driver, today, usdAccounts, personalBook, jointBook)
+    runCrypto(driver, today, cryptoAccounts, personalBook)
 
 if __name__ == '__main__':
-    book = GnuCash('Finance')
-    runMonthlyBank(book)
-    book.closeBook()
+    personalBook = GnuCash('Finance')
+    jointBook = GnuCash('Home')
+    runMonthlyBank(personalBook, jointBook)
+    personalBook.closeBook()
+    jointBook.closeBook()
+
 
     # myBook = openGnuCashBook('Finance', True, True)
     # getTotalOfAutomatedMRAccounts(myBook)
     
     # driver = Driver("Chrome")
-    # # Home = USD("Home")
     # # updateInvestmentPrices(driver, Home)
 

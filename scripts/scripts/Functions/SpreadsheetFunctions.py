@@ -162,7 +162,7 @@ def updateInvestmentPrices(driver, Home):
                     price = getStockPrice(driver, coinSymbol)
                     driver.webDriver.switch_to.window(spreadsheetWindow)
                 worksheet.update((priceColumn + str(row)), float(price))
-                row += 1
+            row += 1
         else:
             stillCoins = False
 

@@ -155,7 +155,7 @@ class GnuCash:
         swagbucks = 0
         tellwut = 0
         bing = 0
-        schlesinger = 0
+        sago = 0
         pinecone = 0
         paidviewpoint = 0
         knowledgePanel = 0
@@ -177,8 +177,8 @@ class GnuCash:
                             tellwut += -spl.value
                         elif 'bing' in transaction.description.lower():
                             bing += -spl.value
-                        elif 'schlesinger' in transaction.description.lower():
-                            schlesinger += -spl.value
+                        elif 'sago' in transaction.description.lower():
+                            sago += -spl.value
                         elif 'pinecone' in transaction.description.lower():
                             pinecone += -spl.value
                         elif 'paidviewpoint' in transaction.description.lower():
@@ -201,9 +201,9 @@ class GnuCash:
                         if spl.value > 0:
                             amazonGC += spl.value
                             
-        accountedTotal = swagbucks + tellwut + bing + schlesinger + pinecone + paidviewpoint + knowledgePanel + paypal + appen + reckner + check + promo + antidote
+        accountedTotal = swagbucks + tellwut + bing + sago + pinecone + paidviewpoint + knowledgePanel + paypal + appen + reckner + check + promo + antidote
 
-        print('     schlesinger: ' + str(schlesinger))                        
+        print('     schlesinger: ' + str(sago))                        
         print('           promo: ' + str(promo))
         print('           appen: ' + str(appen))
         print('           misc.: ' + str(mrTotal - accountedTotal))
@@ -319,8 +319,6 @@ class GnuCash:
                         toAccount = "Liabilities:BoA Credit Card"
                     elif "Sofi" in account:
                         toAccount = "Liabilities:Credit Cards:BankAmericard Cash Rewards"        
-            elif "ARCADIA" in description:
-                toAccount = ""
             elif "Interest earned" in description:
                 toAccount = "Income:Investments:Interest"
             elif "Savings Transfer" in description:
@@ -505,70 +503,6 @@ class GnuCash:
             return {'postDate': postDate.date(), 'description': description, 'amount': amount, 'skipTransaction': skipTransaction, 'fromAccount': fromAccount, 'reviewTransPath': reviewTransPath}
         def getEnergyBillAmounts(driver, amount, energyBillNum):
             if energyBillNum == 1:
-                driver.openNewWindow('https://login.arcadia.com/email')
-                driver.webDriver.implicitly_wait(5)
-                num = 1
-                while num <3: # get around bot-prevention by logging in twice
-                    try:
-                        driver.webDriver.find_element(By.XPATH, "/html/body/div/main/div[1]/div/div/div[1]/div/a").click() # sign in with email
-                        time.sleep(1)
-                    except NoSuchElementException:
-                        exception = "sign in page loaded already"
-                    try:
-                        driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/main/div[1]/div[2]/form/div[1]/div[1]/div/input").send_keys(getUsername('Arcadia Power'))
-                        time.sleep(1)
-                        driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/main/div[1]/div[2]/form/div[1]/div[2]/div/input").send_keys(getPassword('Arcadia Power'))
-                        time.sleep(1)
-                        driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/main/div[1]/div[2]/form/div[2]/button").click() # sign in
-                        time.sleep(1)
-                        driver.webDriver.get("https://home.arcadia.com/dashboard/2072648/billing")
-                    except NoSuchElementException:
-                        exception = "already signed in"
-                    try: 
-                        driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/div/div[1]/h1')
-                        num = 4
-                    except NoSuchElementException:
-                        num += 1
-                if num == 3:
-                    showMessage("Login Check", 'Confirm Login to Arcadia, (manually if necessary) \n' 'Then click OK \n')
-            else:
-                driver.switchToLastWindow()
-                driver.webDriver.get("https://home.arcadia.com/dashboard/2072648/billing")
-            statementRow = 1
-            statementFound = "no"                     
-            while statementFound == "no":
-                arcadiaBalance = driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div/div[2]/div[2]/div/div[2]/li[" + str(statementRow) + "]/div[2]/div[2]/div[1]/div/p")
-                formattedAmount = "{:.2f}".format(abs(amount))
-                if arcadiaBalance.text.strip('$') == formattedAmount:
-                    arcadiaBalance.click() # to view statement
-                    statementFound = "yes"
-                else:
-                    statementRow += 1
-            # comb through lines of Arcadia Statement for Arcadia Membership (and Free trial rebate), Community Solar lines (3)
-            arcadiaStatementLinesLeft = True
-            statementRow = 1
-            solarAmount = 0
-            arcadiaMembership = 0
-            while arcadiaStatementLinesLeft:
-                try:
-                    # read the header to get transaction description
-                    statementTrans = driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/div[5]/ul/li[" + str(statementRow) + "]/div/h2").text
-                    if statementTrans == "Arcadia Membership":
-                        arcadiaMembership = Decimal(driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/div[5]/ul/li[" + str(statementRow) + "]/div/p").text.strip('$'))
-                        arcadia = Decimal(arcadiaMembership)
-                    elif statementTrans == "Free Trial":
-                        arcadiaMembership = arcadiaMembership + Decimal(driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/div[5]/ul/li[" + str(statementRow) + "]/div/p").text.strip('$'))
-                    elif statementTrans == "Community Solar":
-                        solarAmount = solarAmount + Decimal(driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/div[5]/ul/li[" + str(statementRow) + "]/div/p").text.replace('$',''))
-                    elif statementTrans == "WE Energies Utility":
-                        weBill = driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/div[5]/ul/li[" + str(statementRow) + "]/div/p").text
-                    statementRow += 1
-                except NoSuchElementException:
-                    arcadiaStatementLinesLeft = False
-            arcadia = Decimal(arcadiaMembership)
-            solar = Decimal(solarAmount)
-            # Get balances from WE Energies
-            if energyBillNum == 1:
                 driver.openNewWindow('https://www.we-energies.com/secure/auth/l/acct/summary_accounts.aspx')
                 try:
                     driver.webDriver.find_element(By.XPATH, "//*[@id='signInName']").send_keys(getUsername('WE-Energies (Home)'))
@@ -587,7 +521,7 @@ class GnuCash:
                 # capture date
                 weBillPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span/span"
                 weBillAmount = driver.webDriver.find_element(By.XPATH, weBillPath).text
-                if weBill == weBillAmount:
+                if str(amount) == weBillAmount:
                     billFound = "yes"
                 else:
                     billRow += 1
@@ -599,7 +533,7 @@ class GnuCash:
             billColumn -= 2
             weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
             electricity = Decimal(driver.webDriver.find_element(By.XPATH, weAmountPath).text.strip('$'))
-            return {'arcadia': arcadia, 'solar': solar, 'electricity': electricity, 'gas': gas, 'total': amount}
+            return {'electricity': electricity, 'gas': gas, 'total': amount}
 
         rowCount = 0
         lineCount = 0
@@ -614,7 +548,7 @@ class GnuCash:
                     continue
                 else:
                     toAccount = setToAccount(account.name, transactionVariables['description'])
-                    if 'ARCADIA' in transactionVariables['description'].upper():
+                    if 'WE ENERGIES' in transactionVariables['description'].upper():
                         energyBillNum += 1
                         transactionVariables['amount'] = getEnergyBillAmounts(driver, transactionVariables['amount'], energyBillNum)
                     elif 'NM PAYCHECK' in transactionVariables['description'].upper() or "CRYPTO PURCHASE" in transactionVariables['description'].upper() or toAccount == "Expenses:Other":
@@ -636,10 +570,8 @@ class GnuCash:
             else:
                 split = [Split(value=transactionVariables['amount']['change'], account=myBook.accounts(fullname=toAccount)),
                         Split(value=transactionVariables['amount']['HEHSAMarketChange'], account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
-        elif "ARCADIA" in transactionVariables['description']:
-            split=[Split(value=transactionVariables['amount']['arcadia'], memo="Arcadia Membership Fee", account=myBook.accounts(fullname="Expenses:Utilities:Arcadia Membership")),
-                    Split(value=transactionVariables['amount']['solar'], memo="Solar Rebate", account=myBook.accounts(fullname="Expenses:Utilities:Arcadia Membership")),
-                    Split(value=transactionVariables['amount']['electricity'], account=myBook.accounts(fullname="Expenses:Utilities:Electricity")),
+        elif "WE ENERGIES" in transactionVariables['description'].upper():
+            split=[Split(value=transactionVariables['amount']['electricity'], account=myBook.accounts(fullname="Expenses:Utilities:Electricity")),
                     Split(value=transactionVariables['amount']['gas'], account=myBook.accounts(fullname="Expenses:Utilities:Gas")),
                     Split(value=transactionVariables['amount']['total'], account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
         elif "NM Paycheck" in transactionVariables['description']:

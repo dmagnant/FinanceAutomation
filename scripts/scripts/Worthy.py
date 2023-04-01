@@ -22,31 +22,21 @@ def locateWorthyWindow(driver):
         driver.webDriver.switch_to.window(found)
 
 def worthyLogin(driver):
-    driver.openNewWindow('https://worthy.capital/start')
+    driver.openNewWindow('https://worthy.capital/auth/login/')
     driver = driver.webDriver
     time.sleep(1)
     try:
-        # click Login button
-        driver.find_element(By.XPATH, "//*[@id='q-app']/div/div[1]/div/div[2]/div/button[2]/span[2]/span").click()
-        time.sleep(1)
-        # click Login button (again)
-        driver.find_element(By.XPATH, "//*[@id='auth0-lock-container-1']/div/div[2]/form/div/div/div/button").click()
-        try:
-            driver.find_element(By.XPATH, "//*[@id='auth0-lock-error-msg-email']/div")
-            # enter credentials
-            driver.find_element(By.ID, "1-email").send_keys(getUsername('Worthy'))
-            driver.find_element(By.XPATH, "//*[@id='auth0-lock-container-1']/div/div[2]/form/div/div/div/div/div[2]/div[2]/span/div/div/div/div/div/div/div/div/div[2]/div/div[2]/div/div/input").send_keys(getPassword('Worthy'))
-            # click Login button (again)
-            driver.find_element(By.XPATH, "//*[@id='auth0-lock-container-1']/div/div[2]/form/div/div/div/button").click()
-        except NoSuchElementException:
-            exception = "credentials were auto-entered"
+        # enter credentials
+        driver.find_element(By.ID, "email").send_keys(getUsername('Worthy'))
+        driver.find_element(By.ID, "password").send_keys(getPassword('Worthy'))
+        driver.find_element(By.XPATH, "//*[@id='__next']/div/div/main/div/form/div[3]/button").click() # sign in
     except NoSuchElementException:
         exception = "already logged in"
     time.sleep(3)
 
 def getWorthyBalance(driver, account):
     locateWorthyWindow(driver)
-    worthy1Balance = driver.webDriver.find_element(By.XPATH, "//*[@id='q-app']/div/div[1]/main/div/div/div[2]/div/div[2]/div/div/div[3]/div/h4/span[3]").text.strip('$').replace(',','')
+    worthy1Balance = driver.webDriver.find_element(By.XPATH, "//*[@id='__next']/div/div/main/div/div/div[1]/div/div/p/strong").text.strip('$').replace(',','').replace('*', '')
     account.setBalance(float(Decimal(worthy1Balance)))
 
 if __name__ == '__main__':
