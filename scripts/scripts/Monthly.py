@@ -16,6 +16,8 @@ if __name__ == '__main__' or __name__ == "Monthly":
     from Kraken import runKraken
     from MyConstant import runMyConstant
     from Worthy import getWorthyBalance 
+    from Sofi import setMonthlySpendTarget
+    from Vanguard import getVanguardPrices
 else:
     from .Classes.Asset import USD, Crypto
     from .Classes.WebDriver import Driver
@@ -31,6 +33,8 @@ else:
     from .Kraken import runKraken
     from .MyConstant import runMyConstant
     from .Worthy import getWorthyBalance
+    from .Sofi import setMonthlySpendTarget
+    from .Vanguard import getVanguardPrices
 
 def getMonthlyAccounts(type, personalBook, jointBook):
     if type == 'USD':
@@ -70,6 +74,7 @@ def runUSD(driver, today, accounts, personalBook):
     year = today.year
     month = today.month
     lastMonth = getStartAndEndOfDateRange(today, "month")
+    setMonthlySpendTarget(driver)
     getWorthyBalance(driver, accounts['Worthy'])
     HEaccounts = {'HealthEquity': accounts['HealthEquity'], 'V401k': accounts['V401k']}
     HSA_dividends = runHealthEquity(driver, HEaccounts)
@@ -81,18 +86,16 @@ def runUSD(driver, today, accounts, personalBook):
     updateSpreadsheet('Asset Allocation', year, accounts['Bonds'].name, month, float(accounts['Bonds'].gnuBalance), 'Liquid Assets')
     updateSpreadsheet('Asset Allocation', year, accounts['LiquidAssets'].name, month, float(accounts['LiquidAssets'].gnuBalance), 'Liquid Assets')
     updateSpreadsheet('Asset Allocation', year, accounts['V401k'].name, month, accounts['V401k'].balance, '401k')
-    updateInvestmentPrices(driver, accounts['Home'])
+    vanguardPrices = getVanguardPrices(driver)
+    updateInvestmentPrices(driver, accounts['Home'], vanguardPrices)
 
 def runCrypto(driver, today, accounts, personalBook):
     year = today.year
     month = today.month
     openSpreadsheet(driver, 'Asset Allocation', 'Cryptocurrency')
     runEternl(driver, accounts['Cardano'], personalBook)
-    accounts['Cardano'].updateGnuBalance(personalBook.getBalance(accounts['Cardano'].gnuAccount))
     runKraken(driver, accounts['Ethereum2'], personalBook)
-    accounts['Ethereum2'].updateGnuBalance(personalBook.getBalance(accounts['Ethereum2'].gnuAccount))
     runIoPay(driver, accounts['IoTex'], personalBook)
-    accounts['IoTex'].updateGnuBalance(personalBook.getBalance(accounts['IoTex'].gnuAccount))
     # runLedger(accounts['ledgerAccounts'], personalBook)
     # runCoinbase(driver, accounts['Loopring'], personalBook)
     accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getBalance(accounts['CryptoPortfolio'].gnuAccount))

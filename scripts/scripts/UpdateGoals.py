@@ -16,8 +16,9 @@ else:
 
 def getTransactionTotal(dateRange, gnuAccount, mybook):
     total = 0
+    
     # retrieve transactions from GnuCash
-    transactions = [tr for tr in mybook.transactions
+    transactions = [tr for tr in mybook.readBook.transactions
                     if tr.post_date >= dateRange['startDate'] and tr.post_date <= dateRange['endDate']
                     for spl in tr.splits
                     if spl.account.fullname == gnuAccount]
@@ -107,7 +108,8 @@ def compileGnuTransactions(account, mybook, dateRange):
     gnuAccount = matchAccount()
     
     total = 0
-    accountChildren = mybook.accounts(fullname=gnuAccount).children
+    writeBook = mybook.getWriteBook()
+    accountChildren = writeBook.accounts(fullname=gnuAccount).children
     total += getTransactionTotal(dateRange, gnuAccount, mybook)
     if len(accountChildren) > 0:
         for account in accountChildren:

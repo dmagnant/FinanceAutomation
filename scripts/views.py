@@ -285,7 +285,7 @@ def daily(request):
         elif "allyLogout" in request.POST:
             allyLogout(driver)        
         elif "allyBalance" in request.POST:
-            Ally.setBalance(getAllyBalance(driver))
+            bankAccounts['Ally'].setBalance(getAllyBalance(driver))
         elif "paypal" in request.POST:
             runPaypal(driver)
         elif "tearDown" in request.POST:
@@ -375,7 +375,7 @@ def daily(request):
             paidviewpointLogin(driver)        
         elif "paidviewpointBalance" in request.POST:
             mrAccounts['Paidviewpoint'].setBalance(getPaidviewpointBalance(driver))
-            personalBook.overwriteBalance(mrAccounts['Paidviewpoint'])            
+            personalBook.overwriteBalance(mrAccounts['Paidviewpoint'])
         elif "paidviewpointRewards" in request.POST:
             redeemPaidviewpointRewards(driver)            
         elif "close windows" in request.POST:
@@ -764,7 +764,8 @@ def updateGoals(request):
         if "main" in request.POST:
             account = body.get("accounts")
             timeframe = body.get("TimeFrame")
-            runUpdateGoals(account, timeframe)
+            book = GnuCash('Finance') if account == 'Personal' else GnuCash('Home')
+            runUpdateGoals(account, timeframe, book)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/updateGoals"))      
     return render(request,"scripts/updateGoals.html")
@@ -779,7 +780,7 @@ def vanguard(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
-            interestAndEmployerContribution = runVanguard(driver, accounts)
+            interestAndEmployerContribution = runVanguard(driver, accounts, book)
             pensionInterest = str(interestAndEmployerContribution['interest'])
             pensionContributions = str(interestAndEmployerContribution['employerContribution'])
         elif "login" in request.POST:

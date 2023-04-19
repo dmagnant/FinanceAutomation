@@ -93,7 +93,8 @@ class GnuCash:
                 Split(value=Decimal(account.balance), memo="scripted", account=myBook.accounts(fullname=account.gnuAccount))]
         Transaction(post_date=today, currency=myBook.currencies(mnemonic="USD"), description=account.name + ' account balance', splits=split)
         myBook.flush()
-        account.updateGnuBalance(self)
+        account.updateGnuBalance(self.getBalance(account.gnuAccount))
+
     
     def purgeOldGnucashFiles(self):
         dateRange = getStartAndEndOfDateRange(datetime.today().date(), 14)
@@ -369,6 +370,8 @@ class GnuCash:
                 toAccount = "Income:Credit Card Rewards"        
             elif "Discover CC" in description:
                 toAccount = "Liabilities:Credit Cards:Discover It"
+            elif "Amex CC Rewards" in description:
+                toAccount = "Income:Credit Card Rewards"
             elif "Amex CC" in description:
                 toAccount = "Liabilities:Credit Cards:Amex BlueCash Everyday"
             elif "Barclays CC Rewards" in description:
@@ -575,17 +578,17 @@ class GnuCash:
                     Split(value=transactionVariables['amount']['gas'], account=myBook.accounts(fullname="Expenses:Utilities:Gas")),
                     Split(value=transactionVariables['amount']['total'], account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
         elif "NM Paycheck" in transactionVariables['description']:
-            split = [Split(value=round(Decimal(2037.85), 2), memo="scripted",account=myBook.accounts(fullname=transactionVariables['fromAccount'])),
-                    Split(value=round(Decimal(412.00), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:401k")),
+            split = [Split(value=round(Decimal(2029.41), 2), memo="scripted",account=myBook.accounts(fullname=transactionVariables['fromAccount'])),
+                    Split(value=round(Decimal(693.60), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:401k")),
                     Split(value=round(Decimal(5.49), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Dental")),
                     Split(value=round(Decimal(35.47), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Health")),
                     Split(value=round(Decimal(2.93), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Vision")),
-                    Split(value=round(Decimal(201.78), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Social Security")),
-                    Split(value=round(Decimal(47.19), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Medicare")),
-                    Split(value=round(Decimal(392.49), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Federal Tax")),
-                    Split(value=round(Decimal(158.55), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:State Tax")),
+                    Split(value=round(Decimal(227.86), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Social Security")),
+                    Split(value=round(Decimal(53.29), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Medicare")),
+                    Split(value=round(Decimal(484.89), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Federal Tax")),
+                    Split(value=round(Decimal(180.81), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:State Tax")),
                     Split(value=round(Decimal(139.58), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:HSA:NM HSA")),
-                    Split(value=-round(Decimal(3433.33), 2), memo="scripted",account=myBook.accounts(fullname=toAccount))]
+                    Split(value=-round(Decimal(3853.33), 2), memo="scripted",account=myBook.accounts(fullname=toAccount))]
         else:
             split = [Split(value=-transactionVariables['amount'], memo="scripted", account=myBook.accounts(fullname=toAccount)),
                     Split(value=transactionVariables['amount'], memo="scripted", account=myBook.accounts(fullname=transactionVariables['fromAccount']))]

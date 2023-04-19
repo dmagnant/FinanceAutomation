@@ -62,6 +62,7 @@ def claimChaseRewards(driver):
     locateChaseWindow(driver)
     time.sleep(1)
     driver.webDriver.get("https://ultimaterewardspoints.chase.com/cash-back?lang=en")
+    time.sleep(2)
     # points balance
     balance = driver.webDriver.find_element(By.XPATH,"//*[@id='pointsBalanceId']/div/span[1]").text
     if float(balance) > 0:

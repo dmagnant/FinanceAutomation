@@ -31,6 +31,7 @@ def runEternl(driver, account, book):
     account.setBalance(getEternlBalance(driver))
     account.setPrice(account.getPriceFromCoinGecko())
     account.updateSpreadsheetAndGnuCash(book)
+    
 
 if __name__ == '__main__':
     driver = Driver("Chrome")

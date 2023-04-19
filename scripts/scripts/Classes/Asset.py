@@ -120,6 +120,7 @@ class Crypto(Asset):
         updateSpreadsheet('Asset Allocation', 'Cryptocurrency', account, 1, self.balance, self.symbol)
         updateSpreadsheet('Asset Allocation', 'Cryptocurrency', account, 2, self.price, self.symbol)
         updateCoinQuantityFromStakingInGnuCash(self, book)
+        self.updateGnuBalance(book.getBalance(self.gnuAccount))
 
     def updateBalanceInSpreadSheet(self, account=None):
         account = self.symbol if account == None else account

@@ -53,7 +53,7 @@ def getHealthEquityBalances(driver, accounts):
     accounts['V401k'].setBalance(float(vanguard401kbalance))
 
 def getHealthEquityDividends(driver):
-    lastMonth = getStartAndEndOfDateRange(datetime.today(), "month")
+    lastMonth = getStartAndEndOfDateRange(datetime.today().date(), "month")
     driver = driver.webDriver
     driver.find_element(By.XPATH, "//*[@id='hsaInvestment']/div/div/a").click() # Manage HSA Investments
     time.sleep(1)

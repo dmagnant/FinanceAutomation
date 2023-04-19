@@ -1,5 +1,6 @@
 import time
 from statistics import mode
+import random
 
 from random_words import RandomWords
 from selenium.common.exceptions import (NoSuchElementException,
@@ -61,17 +62,20 @@ def presearchLogin(driver):
 
 def searchUsingPresearch(driver):
     locatePresearchWindow(driver)
-    search_prefix = "https://presearch.com/search?q="
-    search_term = None
-    while search_term is None:
-        search_term = RandomWords().random_word()
-    time.sleep(1)
-    search_path = search_prefix + search_term
-    try:
-        driver.webDriver.get(search_path)
-    except WebDriverException:
-        showMessage('check issue', f'target frame detached error when trying to attempt {search_path}')
-    time.sleep(1)
+    num = 1
+    while num < 3:
+        search_prefix = "https://presearch.com/search?q="
+        search_term = None
+        while search_term is None:
+            search_term = RandomWords().random_word()
+        time.sleep(1)
+        search_path = search_prefix + search_term
+        try:
+            driver.webDriver.get(search_path)
+        except WebDriverException:
+            showMessage('check issue', f'target frame detached error when trying to attempt {search_path}')
+        time.sleep(random.choice([2, 3, 4]))
+        num+=1
 
 def claimPresearchRewards(driver):
     locatePresearchWindow(driver)

@@ -103,8 +103,8 @@ def getStartAndEndOfDateRange(today, timeSpan):
         if timeSpan == "YTD":
             startDate = startDate.replace(month=1, day=1)
     return {
-        'startDate': startDate.date(),
-        'endDate': endDate.date()
+        'startDate': startDate,
+        'endDate': endDate
     }
 
 def getCryptocurrencyPrice(coinList):
@@ -158,6 +158,8 @@ def modifyTransactionDescription(description, amount="0.00"):
         description = "Alliant Transfer"        
     elif "AMEX EPAYMENT" in description.upper():
         description = "Amex CC"
+    elif "YOUR CASH REWARD/REFUND IS" in description.upper():
+        description = "Amex CC Rewards"
     elif "SPECTRUM" in description.upper():
         description = "Internet Bill"
     elif "COINBASE" in description.upper():

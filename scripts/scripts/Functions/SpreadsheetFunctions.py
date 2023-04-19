@@ -134,7 +134,7 @@ def updateCryptoPrices(driver, book):
         book.updatePriceInGnucash(symbol, price)
         worksheet.update((priceColumn + str(i + 2)), float(price))
 
-def updateInvestmentPrices(driver, Home):
+def updateInvestmentPrices(driver, Home, vanguardPrices):
     print('updating investment prices')
     url = "edit#gid=361024172"
     spreadsheetWindow = driver.findWindowByUrl(url)
@@ -143,7 +143,7 @@ def updateInvestmentPrices(driver, Home):
         spreadsheetWindow = driver.webDriver.current_window_handle
     else:
         driver.webDriver.switch_to.window(spreadsheetWindow)
-    row = 14
+    row = 14  # first row after crypto investments
     symbolColumn = 'B'
     sheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Asset Allocation')
     worksheet = sheet.worksheet('Investments')
@@ -152,16 +152,17 @@ def updateInvestmentPrices(driver, Home):
         priceColumn = 'E'
         coinSymbol = worksheet.acell(symbolColumn+str(row)).value
         if coinSymbol != None:
-            if coinSymbol == 'VSMPX' or coinSymbol == 'VTMGX':
-                showMessage(f'get ${coinSymbol} price from Vanguard', 'Write code to fetch from Vanguard')
-            else:
-                if coinSymbol == 'HOME':
-                    price = (250000 - Home.gnuBalance) / 2
-                    priceColumn = 'F'
-                else :
-                    price = getStockPrice(driver, coinSymbol)
-                    driver.webDriver.switch_to.window(spreadsheetWindow)
-                worksheet.update((priceColumn + str(row)), float(price))
+            if coinSymbol == 'HOME':
+                price = (250000 - Home.gnuBalance) / 2
+                priceColumn = 'F'
+            elif coinSymbol == '8188':
+                price = vanguardPrices['price8188']
+            elif coinSymbol == '8585':
+                price = vanguardPrices['price8585']
+            else :
+                price = getStockPrice(driver, coinSymbol)
+                driver.webDriver.switch_to.window(spreadsheetWindow)
+            worksheet.update((priceColumn + str(row)), float(price))
             row += 1
         else:
             stillCoins = False

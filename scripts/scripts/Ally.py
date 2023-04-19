@@ -31,20 +31,21 @@ def allyLogin(driver):
     driver.webDriver.implicitly_wait(10)
     loggedIn = False
     while not loggedIn:
+        print('logging in')
         driver.openNewWindow('https://ally.com/')
-        time.sleep(1)
+        time.sleep(2)
         driver.webDriver.find_element(By.ID,"login").click() # login
-        time.sleep(1)
-        # enter Password (username already filled in)
-        # driver.webDriver.find_element(By.ID,"allysf-login-v2-password-367761b575af35f6ccb5b53e96b2fa2d").send_keys(getPassword('Ally Bank')) # autofilled right now
+        time.sleep(2)
+        driver.webDriver.find_element(By.ID,"allysf-login-v2-password-367761b575af35f6ccb5b53e96b2fa2d").send_keys(getPassword('Ally Bank'))
         driver.webDriver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button").click() # login
         time.sleep(5)
         try: # check if login button is still seen
-            driver.webDriver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div/div[1]/form/div[3]/button/span")
-            loggedIn = False
-            driver.webDriver.close()
-            driver.getLastWindow()
+            driver.webDriver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div/div[2]/form/div[3]/button/span").click()
+            loggedIn = True
+            # driver.webDriver.close()
+            # driver.switchToLastWindow()
         except NoSuchElementException:
+            print('not found')
             loggedIn = True
     driver.webDriver.find_element(By.PARTIAL_LINK_TEXT, "Joint Checking").click()
     time.sleep(5)
@@ -103,11 +104,16 @@ def runAlly(driver, account, book):
     book.importUniqueTransactionsToGnuCash(account, allyActivity, driver.webDriver, dateRange, 0)
     
 if __name__ == '__main__':
-    driver = Driver("Chrome")
-    book = GnuCash('Home')
-    Ally = USD("Ally", book)
-    runAlly(driver, Ally, book)
-    Ally.getData()
-    allyLogout(driver)
-    book.closeBook()
+    # driver = Driver("Chrome")
+    # book = GnuCash('Home')
+    # Ally = USD("Ally", book)
+    # runAlly(driver, Ally, book)
+    # Ally.getData()
+    # allyLogout(driver)
+    # book.closeBook()
+    
+    today = datetime.today().date()
+    timeSpan = 7
+    
+    dateRange = getStartAndEndOfDateRange(today, timeSpan)
     
