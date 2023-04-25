@@ -226,7 +226,6 @@ def swagbucksSearch(driver):
     locateSwagBucksWindow(driver)
     driver = driver.webDriver
     driver.implicitly_wait(3)
-    delay = [1, 2, 3]
     searches = 0
     num = 0
     while num < 1:
@@ -255,7 +254,7 @@ def swagbucksSearch(driver):
                 search_term2 = RandomWords().random_word()
             search_term = search_term1 + " " + search_term2
             driver.find_element(By.ID, "sbGlobalNavSearchInputWeb").send_keys(search_term + Keys.ENTER)
-            time.sleep(random.choice(delay))
+            time.sleep(random.choice([2, 3, 4]))
         except NoSuchWindowException:
             num = 3
         except WebDriverException:

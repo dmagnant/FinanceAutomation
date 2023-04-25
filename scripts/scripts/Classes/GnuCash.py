@@ -507,9 +507,10 @@ class GnuCash:
         def getEnergyBillAmounts(driver, amount, energyBillNum):
             if energyBillNum == 1:
                 driver.openNewWindow('https://www.we-energies.com/secure/auth/l/acct/summary_accounts.aspx')
+                time.sleep(2)
                 try:
-                    driver.webDriver.find_element(By.XPATH, "//*[@id='signInName']").send_keys(getUsername('WE-Energies (Home)'))
-                    driver.webDriver.find_element(By.XPATH, "//*[@id='password']").send_keys(getPassword('WE-Energies (Home)'))
+                    # driver.webDriver.find_element(By.XPATH, "//*[@id='signInName']").send_keys(getUsername('WE-Energies (Home)'))
+                    # driver.webDriver.find_element(By.XPATH, "//*[@id='password']").send_keys(getPassword('WE-Energies (Home)'))
                     driver.webDriver.find_element(By.XPATH, "//*[@id='next']").click() # login
                     time.sleep(4)
                     driver.webDriver.find_element(By.XPATH, "//*[@id='notInterested']/a").click # close out of app notice
@@ -521,18 +522,15 @@ class GnuCash:
             billColumn = 7
             billFound = "no"
             while billFound == "no": # find bill based on comparing amount from Arcadia (weBill)
-                # capture date
                 weBillPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span/span"
-                weBillAmount = driver.webDriver.find_element(By.XPATH, weBillPath).text
-                if str(amount) == weBillAmount:
+                weBillAmount = driver.webDriver.find_element(By.XPATH, weBillPath).text.replace('$', '')
+                if str(abs(amount)) == weBillAmount:
                     billFound = "yes"
                 else:
                     billRow += 1
-            # capture gas charges
             billColumn -= 2
             weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
             gas = Decimal(driver.webDriver.find_element(By.XPATH, weAmountPath).text.strip('$'))
-            # capture electricity charges
             billColumn -= 2
             weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
             electricity = Decimal(driver.webDriver.find_element(By.XPATH, weAmountPath).text.strip('$'))

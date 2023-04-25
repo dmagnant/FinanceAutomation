@@ -88,6 +88,7 @@ def runUSD(driver, today, accounts, personalBook):
     updateSpreadsheet('Asset Allocation', year, accounts['V401k'].name, month, accounts['V401k'].balance, '401k')
     vanguardPrices = getVanguardPrices(driver)
     updateInvestmentPrices(driver, accounts['Home'], vanguardPrices)
+    driver.findWindowByUrl("/scripts/monthly")
 
 def runCrypto(driver, today, accounts, personalBook):
     year = today.year
@@ -100,6 +101,7 @@ def runCrypto(driver, today, accounts, personalBook):
     # runCoinbase(driver, accounts['Loopring'], personalBook)
     accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getBalance(accounts['CryptoPortfolio'].gnuAccount))
     updateSpreadsheet('Asset Allocation', year, accounts['CryptoPortfolio'].name, month, float(round(accounts['CryptoPortfolio'].gnuBalance, 2)), accounts['CryptoPortfolio'].name)
+    driver.findWindowByUrl("/scripts/monthly")
 
 def runMonthlyBank(personalBook, jointBook):
     today = datetime.today().date()

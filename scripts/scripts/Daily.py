@@ -61,6 +61,7 @@ def runDailyBank(accounts, personalBook, jointBook):
     personalBook.updatePriceInGnucash('GME', GMEprice)
     personalBook.purgeOldGnucashFiles()
     jointBook.purgeOldGnucashFiles()
+    driver.findWindowByUrl("/scripts/daily")
     return GMEprice
 
 def tearDown(driver):
@@ -77,6 +78,7 @@ def runDailyMR(accounts, book):
     runPinecone(driver, accounts['Pinecone'], book)
     searchUsingPresearch(driver)
     runSwagbucks(driver, True, accounts['Swagbucks'], book)
+    driver.findWindowByUrl("/scripts/daily")
  
 if __name__ == '__main__': # Bank
     personalBook = GnuCash('Finance')
@@ -84,7 +86,7 @@ if __name__ == '__main__': # Bank
     accounts = getDailyAccounts('Bank', personalBook, jointBook)
     GME = runDailyBank(accounts, personalBook, jointBook)
     personalBook.closeBook()
-    jointBook.closeBook()    
+    jointBook.closeBook()
 # if __name__ == '__main__': # MR
     # personalBook = GnuCash('Finance')
     # # accounts = getDailyAccounts('MR', personalBook)

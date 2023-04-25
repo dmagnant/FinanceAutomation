@@ -74,16 +74,16 @@ def captureAllyTransactions(driver, dateRange):
     insideDateRange = True
     while insideDateRange:
         try:
-            date = datetime.strptime(driver.find_element(By.XPATH, element + "span").text, '%b %d, %Y').date()
+            date = datetime.strptime(driver.webDriver.find_element(By.XPATH, element + "span").text, '%b %d, %Y').date()
             if date < dateRange['startDate'] or date > dateRange['endDate']:
                 insideDateRange = False
             else:
                 column += 1
                 element = setAllyTransactionElementRoot(row, column)
-                description = driver.find_element(By.XPATH, element + "div/button/span").text
+                description = driver.webDriver.find_element(By.XPATH, element + "div/button/span").text
                 column += 1
                 element = setAllyTransactionElementRoot(row, column)
-                amount = driver.find_element(By.XPATH, element + "span").text.replace('$', '').replace(',', '')
+                amount = driver.webDriver.find_element(By.XPATH, element + "span").text.replace('$', '').replace(',', '')
                 if not amount[0].isnumeric():
                     amount = -Decimal(amount.replace(amount[0], ''))
                 description = modifyTransactionDescription(description)
@@ -100,8 +100,8 @@ def runAlly(driver, account, book):
     dateRange = getStartAndEndOfDateRange(datetime.today().date(), 7)
     locateAllyWindow(driver)
     account.setBalance(getAllyBalance(driver))
-    allyActivity = captureAllyTransactions(driver.webDriver, dateRange)
-    book.importUniqueTransactionsToGnuCash(account, allyActivity, driver.webDriver, dateRange, 0)
+    allyActivity = captureAllyTransactions(driver, dateRange)
+    book.importUniqueTransactionsToGnuCash(account, allyActivity, driver, dateRange, 0)
     
 if __name__ == '__main__':
     # driver = Driver("Chrome")
@@ -112,8 +112,19 @@ if __name__ == '__main__':
     # allyLogout(driver)
     # book.closeBook()
     
-    today = datetime.today().date()
-    timeSpan = 7
+    # today = datetime.today().date()
+    # timeSpan = 7
     
-    dateRange = getStartAndEndOfDateRange(today, timeSpan)
+    # dateRange = getStartAndEndOfDateRange(today, timeSpan)
     
+    driver = Driver("Chrome")
+    found = driver.findWindowByUrl("we-energies.com")
+    driver.webDriver.switch_to.window(found)
+    time.sleep(1)
+    billRow = 2
+    billColumn = 7
+    billFound = "no"
+    # capture date
+    weBillPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span/span"
+    weBillAmount = driver.webDriver.find_element(By.XPATH, weBillPath).text
+    print(weBillAmount)

@@ -129,7 +129,7 @@ def getPresearchBalance(driver):
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
-    searchRewards = float(driver.webDriver.find_element(By.XPATH, '/html/body/div[1]/header/div[2]/div[2]/div/div[1]/div/div[1]/div/span[1]').text.strip(' PRE'))
+    searchRewards = float(driver.webDriver.find_element(By.XPATH, '/html/body/div[1]/header/div[2]/div[2]/div/div[1]/div/div[1]/div/span[1]').text.strip(' PRE').replace(',', ''))
     stakedTokens = float(driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[1]/div/h2').text.strip(' PRE').replace(',', ''))
     balance = searchRewards + stakedTokens
     return balance
