@@ -53,9 +53,8 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         Cosmos = Crypto("Cosmos", personalBook)
         Loopring = Crypto("Loopring", personalBook)
         IoTex = Crypto("IoTex", personalBook)
-        Ethereum2 = Crypto("Ethereum2", personalBook)
         ledgerAccounts = getLedgerAccounts(personalBook)
-        accounts = {'CryptoPortfolio': CryptoPortfolio, 'Cardano': Cardano, 'Cosmos': Cosmos, 'Loopring': Loopring, 'IoTex': IoTex, 'Ethereum2': Ethereum2, 'ledgerAccounts': ledgerAccounts}
+        accounts = {'CryptoPortfolio': CryptoPortfolio, 'Cardano': Cardano, 'Cosmos': Cosmos, 'Loopring': Loopring, 'IoTex': IoTex, 'ledgerAccounts': ledgerAccounts}
     return accounts
 
 def monthlyRoundUp(account, myBook, date, HSADividends):

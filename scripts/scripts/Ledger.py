@@ -11,7 +11,7 @@ else:
 
 def getLedgerAccounts(readBook):
     Bitcoin = Crypto("Bitcoin", readBook)
-    Ethereum = Crypto("Ethereum", readBook, "ETH-Ledger")
+    Ethereum = Crypto("Ethereum", readBook)
     Cosmos = Crypto("Cosmos", readBook)
     Polkadot = Crypto("Polkadot", readBook)
     Algorand = Crypto("Algorand", readBook)

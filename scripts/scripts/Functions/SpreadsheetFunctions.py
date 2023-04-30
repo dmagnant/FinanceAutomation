@@ -116,9 +116,6 @@ def updateCryptoPrices(driver, book):
         if coinName != None:
             coinName = coinName.lower()
             coinSymbol = worksheet.acell(symbolColumn+str(row)).value
-            if coinName == 'eth2':
-                coinName = 'ethereum'
-                coinSymbol = 'ETH'
             coinNames.append(coinName)
             coinSymbols.append(coinSymbol)
             row += 1
@@ -143,7 +140,7 @@ def updateInvestmentPrices(driver, Home, vanguardPrices):
         spreadsheetWindow = driver.webDriver.current_window_handle
     else:
         driver.webDriver.switch_to.window(spreadsheetWindow)
-    row = 14  # first row after crypto investments
+    row = 12  # first row after crypto investments
     symbolColumn = 'B'
     sheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Asset Allocation')
     worksheet = sheet.worksheet('Investments')

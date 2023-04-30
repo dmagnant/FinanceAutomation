@@ -26,9 +26,8 @@ def worthyLogin(driver):
     driver = driver.webDriver
     time.sleep(1)
     try:
-        # enter credentials
-        driver.find_element(By.ID, "email").send_keys(getUsername('Worthy'))
-        driver.find_element(By.ID, "password").send_keys(getPassword('Worthy'))
+        # driver.find_element(By.ID, "email").send_keys(getUsername('Worthy'))
+        # driver.find_element(By.ID, "password").send_keys(getPassword('Worthy'))
         driver.find_element(By.XPATH, "//*[@id='__next']/div/div/main/div/form/div[3]/button").click() # sign in
     except NoSuchElementException:
         exception = "already logged in"
