@@ -44,20 +44,16 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
                     return ['H5', 'J5']
                 case 'ATOM':
                     return ['H6', 'J6']
-                case 'ETH-Ledger':
+                case 'ETH':
                     return ['H7', 'J7']
-                case 'ETH-Kraken':                
-                    return ['H8', 'J8']
-                case 'ETH2':
-                    return ['H9', 'J9']
                 case 'IOTX':
-                    return ['H10', 'J10']
+                    return ['H8', 'J8']
                 case 'LRC':
-                    return ['H11', 'J11']
+                    return ['H9', 'J9']
                 case 'DOT':
-                    return ['H12', 'J12']
+                    return ['H10', 'J10']
                 case 'PRE':
-                    return ['H13', 'J13']
+                    return ['H11', 'J11']
                 case _:
                     print(f'account: {account} not found in "updateSpreadsheet" function')
         cell = (getCellArray(account))[month - 1]
@@ -150,12 +146,12 @@ def updateInvestmentPrices(driver, Home, vanguardPrices):
         coinSymbol = worksheet.acell(symbolColumn+str(row)).value
         if coinSymbol != None:
             if coinSymbol == 'HOME':
-                price = (250000 - Home.gnuBalance) / 2
+                price = (250000 - Home.getBalance('Liabilities:Mortgage Loan')) / 2
                 priceColumn = 'F'
             elif coinSymbol == '8188':
-                price = vanguardPrices['price8188']
+                price = vanguardPrices['8188']
             elif coinSymbol == '8585':
-                price = vanguardPrices['price8585']
+                price = vanguardPrices['8585']
             else :
                 price = getStockPrice(driver, coinSymbol)
                 driver.webDriver.switch_to.window(spreadsheetWindow)

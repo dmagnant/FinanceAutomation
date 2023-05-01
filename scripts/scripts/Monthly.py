@@ -85,8 +85,8 @@ def runUSD(driver, today, accounts, personalBook):
     updateSpreadsheet('Asset Allocation', year, accounts['Bonds'].name, month, float(accounts['Bonds'].gnuBalance), 'Liquid Assets')
     updateSpreadsheet('Asset Allocation', year, accounts['LiquidAssets'].name, month, float(accounts['LiquidAssets'].gnuBalance), 'Liquid Assets')
     updateSpreadsheet('Asset Allocation', year, accounts['V401k'].name, month, accounts['V401k'].balance, '401k')
-    vanguardPrices = getVanguardPrices(driver)
-    updateInvestmentPrices(driver, accounts['Home'], vanguardPrices)
+    # vanguardPrices = getVanguardPrices(driver)
+    # updateInvestmentPrices(driver, accounts['Home'], vanguardPrices)
     driver.findWindowByUrl("/scripts/monthly")
 
 def runCrypto(driver, today, accounts, personalBook):
@@ -94,10 +94,8 @@ def runCrypto(driver, today, accounts, personalBook):
     month = today.month
     openSpreadsheet(driver, 'Asset Allocation', 'Cryptocurrency')
     runEternl(driver, accounts['Cardano'], personalBook)
-    runKraken(driver, accounts['Ethereum2'], personalBook)
     runIoPay(driver, accounts['IoTex'], personalBook)
     # runLedger(accounts['ledgerAccounts'], personalBook)
-    # runCoinbase(driver, accounts['Loopring'], personalBook)
     accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getBalance(accounts['CryptoPortfolio'].gnuAccount))
     updateSpreadsheet('Asset Allocation', year, accounts['CryptoPortfolio'].name, month, float(round(accounts['CryptoPortfolio'].gnuBalance, 2)), accounts['CryptoPortfolio'].name)
     driver.findWindowByUrl("/scripts/monthly")
@@ -118,9 +116,10 @@ if __name__ == '__main__':
     jointBook.closeBook()
 
 
-    # myBook = openGnuCashBook('Finance', True, True)
-    # getTotalOfAutomatedMRAccounts(myBook)
+    # # myBook = openGnuCashBook('Finance', True, True)
+    # # getTotalOfAutomatedMRAccounts(myBook)
     
     # driver = Driver("Chrome")
-    # # updateInvestmentPrices(driver, Home)
+    # vprices = getVanguardPrices(driver)
+    # updateInvestmentPrices(driver, jointBook, vprices)
 

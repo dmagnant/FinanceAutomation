@@ -30,8 +30,8 @@ def runIoPay(driver, account, book):
     locateIoPayWindow(driver)
     showMessage('Open Ledger Wallet - IoPay App', 'Once Open, click OK')
     try:
-        driver.webDriver.find_element(By.XPATH,"//*[@id='__next']/section/nav/div/div[2]/div/div/button[1]").click() # wallet connect
-        driver.webDriver.find_element(By.XPATH,"//*[@id='chakra-modal--body-1']/div/div[3]").click() # ledger
+        driver.webDriver.find_element(By.XPATH,"//*[@id='__next']/section/nav/div/div[2]/div/div/button[1]").click() # connect wallet
+        driver.webDriver.find_element(By.XPATH,"//*[@id='chakra-modal--body-1']/div/div[2]").click() # ledger
     except NoSuchElementException:
         exception = "wallet already connected"
     time.sleep(1)

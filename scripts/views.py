@@ -525,7 +525,7 @@ def monthly(request):
     HSA_dividends = ''
     if request.method == 'POST':
         driver = Driver("Chrome")
-        today = datetime.today()
+        today = datetime.today().date()
         if "USD" in request.POST:
             runUSD(driver, today, usdAccounts, personalBook)
         elif "prices" in request.POST:

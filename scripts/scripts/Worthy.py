@@ -35,6 +35,7 @@ def worthyLogin(driver):
 
 def getWorthyBalance(driver, account):
     locateWorthyWindow(driver)
+    time.sleep(1)
     worthy1Balance = driver.webDriver.find_element(By.XPATH, "//*[@id='__next']/div/div/main/div/div/div[1]/div/div/p/strong").text.strip('$').replace(',','').replace('*', '')
     account.setBalance(float(Decimal(worthy1Balance)))
 
