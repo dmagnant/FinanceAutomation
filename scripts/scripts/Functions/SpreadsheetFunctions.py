@@ -9,15 +9,15 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
             match account:
                 ## Asset Allocation Spreadsheet
                 case 'Liquid Assets':
-                    return ['B6', 'I6', 'P6', 'B28', 'I28', 'P28', 'B50', 'I50', 'P50', 'B72', 'I72', 'P72']
+                    return ['B6', 'I6', 'P6', 'B26', 'I26', 'P26', 'B46', 'I46', 'P46', 'B66', 'I66', 'P66']
                 case 'Bonds':
-                    return ['F6', 'M6', 'T6', 'F28', 'M28', 'T28', 'F50', 'M50', 'T50', 'F72', 'M72', 'T72']
+                    return ['F6', 'M6', 'T6', 'F26', 'M26', 'T26', 'F46', 'M46', 'T46', 'F66', 'M66', 'T66']
                 case 'Vanguard401k':
-                    return ['B8', 'I8', 'P8', 'B30', 'I30', 'P30', 'B52', 'I52', 'P52', 'B74', 'I74', 'P74']
+                    return ['B8', 'I8', 'P8', 'B28', 'I28', 'P28', 'B48', 'I48', 'P48', 'B68', 'I68', 'P68']
                 case 'VanguardPension':
-                    return ['B10', 'I10', 'P10', 'B32', 'I32', 'P32', 'B54', 'I54', 'P54', 'B76', 'I76', 'P76']
+                    return ['B10', 'I10', 'P10', 'B30', 'I30', 'P30', 'B50', 'I50', 'P50', 'B70', 'I70', 'P70']
                 case 'Crypto':
-                    return ['B12', 'I12', 'P12', 'B34', 'I34', 'P34', 'B56', 'I56', 'P56', 'B78', 'I78', 'P78']
+                    return ['B12', 'I12', 'P12', 'B32', 'I32', 'P32', 'B52', 'I52', 'P52', 'B72', 'I72', 'P72']
                 ## Checking Balance Spreadsheet(s)
                 #Personal
                 case 'BoA':
