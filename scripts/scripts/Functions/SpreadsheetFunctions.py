@@ -127,7 +127,7 @@ def updateCryptoPrices(driver, book):
         book.updatePriceInGnucash(symbol, price)
         worksheet.update((priceColumn + str(i + 2)), float(price))
 
-def updateInvestmentPrices(driver, Home, vanguardPrices):
+def updateInvestmentPrices(driver, Home, vanguardPrice):
     print('updating investment prices')
     url = "edit#gid=361024172"
     spreadsheetWindow = driver.findWindowByUrl(url)
@@ -148,10 +148,8 @@ def updateInvestmentPrices(driver, Home, vanguardPrices):
             if coinSymbol == 'HOME':
                 price = (250000 - Home.getBalance('Liabilities:Mortgage Loan')) / 2
                 priceColumn = 'F'
-            elif coinSymbol == '8188':
-                price = vanguardPrices['8188']
             elif coinSymbol == '8585':
-                price = vanguardPrices['8585']
+                price = vanguardPrice
             else :
                 price = getStockPrice(driver, coinSymbol)
                 driver.webDriver.switch_to.window(spreadsheetWindow)

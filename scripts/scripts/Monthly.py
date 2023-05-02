@@ -34,7 +34,7 @@ else:
     from .MyConstant import runMyConstant
     from .Worthy import getWorthyBalance
     from .Sofi import setMonthlySpendTarget
-    from .Vanguard import getVanguardPrices
+    from .Vanguard import getVanguardPrice
 
 def getMonthlyAccounts(type, personalBook, jointBook):
     if type == 'USD':
@@ -85,8 +85,8 @@ def runUSD(driver, today, accounts, personalBook):
     updateSpreadsheet('Asset Allocation', year, accounts['Bonds'].name, month, float(accounts['Bonds'].gnuBalance), 'Liquid Assets')
     updateSpreadsheet('Asset Allocation', year, accounts['LiquidAssets'].name, month, float(accounts['LiquidAssets'].gnuBalance), 'Liquid Assets')
     updateSpreadsheet('Asset Allocation', year, accounts['V401k'].name, month, accounts['V401k'].balance, '401k')
-    # vanguardPrices = getVanguardPrices(driver)
-    # updateInvestmentPrices(driver, accounts['Home'], vanguardPrices)
+    vanguardPrice = getVanguardPrice(driver)
+    updateInvestmentPrices(driver, accounts['Home'], vanguardPrice)
     driver.findWindowByUrl("/scripts/monthly")
 
 def runCrypto(driver, today, accounts, personalBook):
