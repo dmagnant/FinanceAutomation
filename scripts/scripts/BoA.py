@@ -87,51 +87,50 @@ def exportBoATransactions(driver, account, today):
 
 def claimBoARewards(driver, account):
     locateBoAWindowAndOpenAccount(driver, account)
-    driver = driver.webDriver
-    driver.implicitly_wait(10)
+    driver.webDriver.implicitly_wait(10)
     if 'joint' in account: # may need to address minimum of 2500 points restriction
-        driver.find_element(By.XPATH,"/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[2]/a").click() # view/redeem
-        driver.find_element(By.ID,"redeemButton").click() # redeem points
-        driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
-        driver.find_element(By.XPATH,"/html/body/main/div/div[2]/div[1]/div[1]/div/div[2]/div/div[1]/div[3]/a").click() # redeem
-        availablePoints = driver.find_element(By.ID,"summary_availablepoints").text.replace(',','')
+        driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[2]/a").click() # view/redeem
+        driver.webDriver.find_element(By.ID,"redeemButton").click() # redeem points
+        driver.switchToLastWindow()
+        driver.webDriver.find_element(By.XPATH,"/html/body/main/div/div[2]/div[1]/div[1]/div/div[2]/div/div[1]/div[3]/a").click() # redeem
+        availablePoints = driver.webDriver.find_element(By.ID,"summary_availablepoints").text.replace(',','')
         if int(availablePoints) >= 2500:
             remainingPoints = availablePoints
             num = 4
             if int(availablePoints) > 0:
                 while remainingPoints:
-                    driver.find_element(By.XPATH,"/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[6]/label/input").click() # select to redeem
-                    remainingPoints = driver.find_element(By.ID,"remainingpoints").text.replace(',','')
+                    driver.webDriver.find_element(By.XPATH,"/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[6]/label/input").click() # select to redeem
+                    remainingPoints = driver.webDriver.find_element(By.ID,"remainingpoints").text.replace(',','')
                     if remainingPoints == '':
                         break
                     num += 2
                     availablePoints = remainingPoints
-                driver.find_element(By.XPATH,"/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[7]/div/input[2]").click() # "enter points to redeem"
+                driver.webDriver.find_element(By.XPATH,"/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[7]/div/input[2]").click() # "enter points to redeem"
                 backspaces = 8
                 while backspaces > 0:
-                    driver.find_element(By.XPATH, "/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[7]/div/input[2]").send_keys(Keys.BACKSPACE)
+                    driver.webDriver.find_element(By.XPATH, "/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[7]/div/input[2]").send_keys(Keys.BACKSPACE)
                     backspaces -= 1
-                driver.find_element(By.XPATH,"/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[7]/div/input[2]").send_keys(availablePoints)
-                driver.find_element(By.XPATH,"/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[7]/div/input[3]").click() # update
-                driver.find_element(By.XPATH,"/html/body/main/div/div[2]/div/div[1]/div/div[2]/table/tbody/tr[7]/td/div/input").click() # request travel credit
-                driver.find_element(By.XPATH,"/html/body/div[2]/div[2]/div[1]/div[1]/div[4]/input[1]").click() # complete redemption
+                driver.webDriver.find_element(By.XPATH,"/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[7]/div/input[2]").send_keys(availablePoints)
+                driver.webDriver.find_element(By.XPATH,"/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[7]/div/input[3]").click() # update
+                driver.webDriver.find_element(By.XPATH,"/html/body/main/div/div[2]/div/div[1]/div/div[2]/table/tbody/tr[7]/td/div/input").click() # request travel credit
+                driver.webDriver.find_element(By.XPATH,"/html/body/div[2]/div[2]/div[1]/div[1]/div[4]/input[1]").click() # complete redemption
     else:
-        driver.find_element(By.XPATH, "/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[3]/a").click() # View/Redeem menu
+        driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[3]/a").click() # View/Redeem menu
         time.sleep(5)
-        driver.execute_script("window.scrollTo(0, 300)")
+        driver.webDriver.execute_script("window.scrollTo(0, 300)")
         time.sleep(3)
-        driver.find_element(By.ID, "rewardsRedeembtn").click() # redeem cash rewards
+        driver.webDriver.find_element(By.ID, "rewardsRedeembtn").click() # redeem cash rewards
         driver.switchToLastWindow()
         try: # catch pop-up
-            driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div/button").click()
+            driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div/button").click()
         except NoSuchElementException:
             exception = "caught"
-        driver.find_element(By.ID, "redemption_option").click() # redemption option
+        driver.webDriver.find_element(By.ID, "redemption_option").click() # redemption option
         try: # redeem if balance
-            driver.find_element(By.ID, "redemption_option").send_keys("v") # for visa statement credit
-            driver.find_element(By.ID, "redemption_option").send_keys(Keys.ENTER)
-            driver.find_element(By.ID, "redeem-all").click() # redeem all
-            driver.find_element(By.ID, "complete-otr-confirm").click() # compltete redemption
+            driver.webDriver.find_element(By.ID, "redemption_option").send_keys("v") # for visa statement credit
+            driver.webDriver.find_element(By.ID, "redemption_option").send_keys(Keys.ENTER)
+            driver.webDriver.find_element(By.ID, "redeem-all").click() # redeem all
+            driver.webDriver.find_element(By.ID, "complete-otr-confirm").click() # compltete redemption
         except ElementNotInteractableException:
             exception = "caught"
 
