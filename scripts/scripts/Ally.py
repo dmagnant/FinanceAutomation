@@ -31,12 +31,12 @@ def allyLogin(driver):
     driver.webDriver.implicitly_wait(10)
     loggedIn = False
     while not loggedIn:
-        print('logging in')
         driver.openNewWindow('https://ally.com/')
         time.sleep(2)
         driver.webDriver.find_element(By.ID,"login").click() # login
         time.sleep(2)
-        driver.webDriver.find_element(By.ID,"allysf-login-v2-password-367761b575af35f6ccb5b53e96b2fa2d").send_keys(getPassword('Ally Bank'))
+        # driver.webDriver.find_element(By.ID,"allysf-login-v2-password-367761b575af35f6ccb5b53e96b2fa2d").send_keys(getPassword('Ally Bank'))
+        time.sleep(2)
         driver.webDriver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button").click() # login
         time.sleep(5)
         try: # check if login button is still seen

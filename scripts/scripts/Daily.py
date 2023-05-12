@@ -50,7 +50,7 @@ def getDailyAccounts(type, personalReadBook, jointReadBook=''):
 def runDailyBank(accounts, personalBook, jointBook):
     driver = Driver("Chrome")
     runSofi(driver, [accounts['Checking'], accounts['Savings']], personalBook)
-    # runAlly(driver, accounts['Ally'], jointBook)
+    runAlly(driver, accounts['Ally'], jointBook)
     presearchRewardsRedemptionAndBalanceUpdates(driver, accounts['Presearch'], personalBook)
     openSpreadsheet(driver, 'Checking Balance', '2023')
     openSpreadsheet(driver, 'Asset Allocation', 'Cryptocurrency')
