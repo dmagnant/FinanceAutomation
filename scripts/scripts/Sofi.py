@@ -33,7 +33,7 @@ def sofiLogin(driver):
     driver.openNewWindow('https://login.sofi.com/u/login?state=hKFo2SBrOGMtTVZSUHZPalVPbEUyZmJyWXhyV3pYMU9lSzhEUKFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIGptNWpvQnRQQlFtSHFJT216N0dfLU1aZFBUbWFqVXl6o2NpZNkgNkxuc0xDc2ZGRUVMbDlTQzBDaWNPdkdlb2JvZXFab2I')
     driver = driver.webDriver
     time.sleep(2)
-    driver.find_element(By.XPATH, "//*[@id='widget_block']/div/div[2]/div/div/main/section/div/div/div/form/div[2]/button").click() # login
+    driver.find_element(By.XPATH, "//*[@id='widget_block']/div/div[2]/div/div/main/section/div/div/div/form/div[3]/button").click() # login
     # driver.find_element(By.ID,"error-3") # look for email is required error
     # driver.find_element(By.ID, "username").send_keys(getUsername('Sofi'))
     # time.sleep(1)

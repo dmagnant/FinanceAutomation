@@ -28,8 +28,8 @@ def locateBoAWindowAndOpenAccount(driver, account):
 def boALogin(driver, account):
     driver.openNewWindow('https://www.bankofamerica.com/')
     driver = driver.webDriver
-    driver.find_element(By.ID, "onlineId1").send_keys(getUsername('BoA CC'))
-    driver.find_element(By.ID, "passcode1").send_keys(getPassword('BoA CC'))
+    # driver.find_element(By.ID, "onlineId1").send_keys(getUsername('BoA CC'))
+    # driver.find_element(By.ID, "passcode1").send_keys(getPassword('BoA CC'))
     driver.find_element(By.XPATH, "//*[@id='signIn']").click()
     try:     # handle ID verification
         driver.find_element(By.XPATH, "//*[@id='btnARContinue']/span[1]").click()
