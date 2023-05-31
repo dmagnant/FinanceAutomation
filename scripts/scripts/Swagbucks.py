@@ -1,6 +1,5 @@
 import random
 import time
-import threading
 
 import pyautogui
 import pygetwindow
@@ -54,9 +53,7 @@ def swagBucksLogin(driver):
         exception = "caught"
         
 def swagBuckscontentDiscovery(driver):
-    driver.openNewWindow("https://www.swagbucks.com/discover/explore")
-    driver.webDriver.find_element(By.ID,"sbShopSort").click()     # filter min to max
-    driver.webDriver.find_element(By.XPATH,"//*[@id='sbShopSort']/option[4]").click() # filter min to max
+    driver.openNewWindow("https://www.swagbucks.com/discover/alloffers?sort=2")
     cardNum = 1
     closePopUps(driver)
     while True:
