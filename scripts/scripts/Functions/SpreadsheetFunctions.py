@@ -146,7 +146,7 @@ def updateInvestmentPrices(driver, Home, vanguardPrice):
         coinSymbol = worksheet.acell(symbolColumn+str(row)).value
         if coinSymbol != None:
             if coinSymbol == 'HOME':
-                price = (250000 - Home.getBalance('Liabilities:Mortgage Loan')) / 2
+                price = (250000 - Home.getGnuBalance()) / 2
                 priceColumn = 'F'
             elif coinSymbol == '8585':
                 price = vanguardPrice

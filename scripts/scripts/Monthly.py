@@ -17,7 +17,7 @@ if __name__ == '__main__' or __name__ == "Monthly":
     from MyConstant import runMyConstant
     from Worthy import getWorthyBalance 
     from Sofi import setMonthlySpendTarget
-    from Vanguard import getVanguardPrices
+    from Vanguard import getVanguardPrice
 else:
     from .Classes.Asset import USD, Crypto
     from .Classes.WebDriver import Driver
@@ -109,11 +109,11 @@ def runMonthlyBank(personalBook, jointBook):
     runCrypto(driver, today, cryptoAccounts, personalBook)
 
 if __name__ == '__main__':
-    personalBook = GnuCash('Finance')
+    # personalBook = GnuCash('Finance')
     jointBook = GnuCash('Home')
-    runMonthlyBank(personalBook, jointBook)
-    personalBook.closeBook()
-    jointBook.closeBook()
+    # runMonthlyBank(personalBook, jointBook)
+    # personalBook.closeBook()
+    # jointBook.closeBook()
 
 
     # # myBook = openGnuCashBook('Finance', True, True)
@@ -122,4 +122,7 @@ if __name__ == '__main__':
     # driver = Driver("Chrome")
     # vprices = getVanguardPrices(driver)
     # updateInvestmentPrices(driver, jointBook, vprices)
-
+    
+    Home = USD('Home', jointBook)
+    price = (250000 - Home.getGnuBalance()) / 2
+    print(price)
