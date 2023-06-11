@@ -23,7 +23,7 @@ else:
     from .Functions.GeneralFunctions import showMessage
 
 def getSwagbucksBasePath():
-    return '/html/body/div[2]/div[' 
+    return '/html/body/div[1]/div[' 
     
 def closePopUps(driver):
     driver.webDriver.implicitly_wait(2)
@@ -61,13 +61,17 @@ def swagBuckscontentDiscovery(driver):
         try:
             try:
                 earnings = driver.webDriver.find_element(By.XPATH, contentPath + "/p/span/span[3]").text
+                print(earnings)
             except NoSuchElementException:
-                if cardNum <=2:
-                    cardNum+=1
-                    continue
-                else:
-                    break
+                cardNum += 1
+                continue
+                # if cardNum <=2:
+                #     cardNum+=1
+                #     continue
+                # else:
+                #     break
             description = driver.webDriver.find_element(By.XPATH, contentPath + "/button").text
+            print(description)
             if "1 sb" in earnings.lower() or "discover daily interests" == description.lower():
                 clickAmt = 1
                 while clickAmt < 5:
@@ -201,7 +205,7 @@ def swagbucksInbox(driver):
     while True:
         closePopUps(driver)
         try: 
-            contentPath = getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div/div[2]/div/div[3]/div[1]/a/div[2]/span"
+            contentPath = getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div/div[2]/div/div[3]/div/a/div[2]/span"                                 
             driver.webDriver.find_element(By.XPATH, contentPath).click()
             description = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/div[1]/div[1]/main/h1").text
             if "Earn Every" in description:
@@ -217,6 +221,7 @@ def swagbucksInbox(driver):
             alert.accept()
         except NoSuchElementException:
             exception = "no element found in inbox"
+            print('not found')
             break
 
 def swagbucksSearch(driver):
