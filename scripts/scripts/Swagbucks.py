@@ -23,7 +23,7 @@ else:
     from .Functions.GeneralFunctions import showMessage
 
 def getSwagbucksBasePath():
-    return '/html/body/div[1]/div[' 
+    return '/html/body/div[2]/div[' 
     
 def closePopUps(driver):
     driver.webDriver.implicitly_wait(2)
@@ -163,7 +163,7 @@ def toDoList(driver):
     closePopUps(driver)
     while list_item_num <= 8:
         try:  # look for Daily Bonus header 
-            driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "1]/header/nav/div[3]/div/div/div/div[1]/h4") 
+            driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "1]/header/nav/div[3]/div/div/div/div[1]/h4")
         except NoSuchElementException:
             try: # if not visible, click to show To Do List
                 driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "1]/header/nav/div[3]/button").click()

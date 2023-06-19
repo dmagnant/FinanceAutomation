@@ -47,7 +47,7 @@ def exportAmexTransactions(driver):
         driver.find_element(By.XPATH, "//*[@id='root']/div[1]/div/div[2]/div/div/div[4]/div/div[3]/div/div/div/div/div/div/div[2]/div/div/div[5]/div/div[2]/div/div[2]/a/span").click() # view activity
     except NoSuchElementException:
         exception = "caught"
-    time.sleep(5)
+    time.sleep(6)
     driver.find_element(By.XPATH, getAmexBasePath() + "table/thead/div/tr[1]/td[2]/div/div[2]/button/button").click() # download arrow
     driver.find_element(By.XPATH, getAmexBasePath() + "div[2]/div/div/div/div/div/div[1]/div/div/div[1]/div/fieldset/div[2]/label").click() # CSV Option
     try: # delete old csv file

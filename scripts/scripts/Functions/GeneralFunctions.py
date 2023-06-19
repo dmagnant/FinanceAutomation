@@ -124,7 +124,7 @@ def getStockPrice(driver, symbol):
     return round(Decimal(price), 2)
 
 def modifyTransactionDescription(description, amount="0.00"):
-    if "INTERNET TRANSFER FROM ONLINE SAVINGS ACCOUNT XXXXXX9703" in description.upper():
+    if "SAVINGS ACCOUNT XXXXXX9703" in description.upper():
         description = "Tessa Deposit"
     elif "INTEREST EARNED" in description.upper():
         description = "Interest earned"
