@@ -10,14 +10,15 @@ if __name__ == '__main__' or __name__ == "Monthly":
     from Exodus import runExodus
     from Ledger import runLedger
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange)
-    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPrices
-    from HealthEquity import runHealthEquity
+    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPrices, updateInvestmentShares
+    from HealthEquity import runHealthEquity, getHealthEquityDividendsAndShares
     from IoPay import runIoPay
     from Kraken import runKraken
     from MyConstant import runMyConstant
     from Worthy import getWorthyBalance 
     from Sofi import setMonthlySpendTarget
-    from Vanguard import getVanguardPrice
+    from Vanguard import getVanguardPriceAndShares
+    from Fidelity import getFidelityShares
 else:
     from .Classes.Asset import USD, Crypto
     from .Classes.WebDriver import Driver
@@ -27,14 +28,15 @@ else:
     from .Exodus import runExodus
     from .Ledger import runLedger, getLedgerAccounts
     from .Functions.GeneralFunctions import (getStartAndEndOfDateRange)
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPrices
-    from .HealthEquity import runHealthEquity
+    from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPrices, updateInvestmentShares
+    from .HealthEquity import runHealthEquity, getHealthEquityDividendsAndShares
     from .IoPay import runIoPay
     from .Kraken import runKraken
     from .MyConstant import runMyConstant
     from .Worthy import getWorthyBalance
     from .Sofi import setMonthlySpendTarget
-    from .Vanguard import getVanguardPrice
+    from .Vanguard import getVanguardPriceAndShares
+    from .Fidelity import getFidelityShares
 
 def getMonthlyAccounts(type, personalBook, jointBook):
     if type == 'USD':
@@ -81,12 +83,14 @@ def runUSD(driver, today, accounts, personalBook):
     monthlyRoundUp(accounts['HealthEquity'], personalBook, lastMonth['endDate'], HSA_dividends)
     accounts['LiquidAssets'].updateGnuBalance(personalBook.getBalance(accounts['LiquidAssets'].gnuAccount))
     accounts['Bonds'].updateGnuBalance(personalBook.getBalance(accounts['Bonds'].gnuAccount))
-    openSpreadsheet(driver, 'Asset Allocation', '2022')
+    openSpreadsheet(driver, 'Asset Allocation', str(year))
     updateSpreadsheet('Asset Allocation', year, accounts['Bonds'].name, month, float(accounts['Bonds'].gnuBalance), 'Liquid Assets')
     updateSpreadsheet('Asset Allocation', year, accounts['LiquidAssets'].name, month, float(accounts['LiquidAssets'].gnuBalance), 'Liquid Assets')
     updateSpreadsheet('Asset Allocation', year, accounts['V401k'].name, month, accounts['V401k'].balance, '401k')
-    vanguardPrice = getVanguardPrice(driver)
-    updateInvestmentPrices(driver, accounts['Home'], vanguardPrice)
+    vanguardInfo = getVanguardPriceAndShares(driver)
+    updateInvestmentPrices(driver, accounts['Home'], vanguardInfo['price8585'])
+    fidelity = getFidelityShares(driver)
+    updateInvestmentShares(driver, accounts['HealthEquity'], vanguardInfo, fidelity)
     driver.findWindowByUrl("/scripts/monthly")
 
 def runCrypto(driver, today, accounts, personalBook):
@@ -109,11 +113,11 @@ def runMonthlyBank(personalBook, jointBook):
     runCrypto(driver, today, cryptoAccounts, personalBook)
 
 if __name__ == '__main__':
-    # personalBook = GnuCash('Finance')
+    personalBook = GnuCash('Finance')
     jointBook = GnuCash('Home')
-    # runMonthlyBank(personalBook, jointBook)
-    # personalBook.closeBook()
-    # jointBook.closeBook()
+    runMonthlyBank(personalBook, jointBook)
+    personalBook.closeBook()
+    jointBook.closeBook()
 
 
     # # myBook = openGnuCashBook('Finance', True, True)
@@ -123,6 +127,11 @@ if __name__ == '__main__':
     # vprices = getVanguardPrices(driver)
     # updateInvestmentPrices(driver, jointBook, vprices)
     
-    Home = USD('Home', jointBook)
-    price = (250000 - Home.getGnuBalance()) / 2
-    print(price)
+    # driver = Driver("Chrome")
+    # personalBook = GnuCash('Finance')
+    # HealthEquity = USD("HSA", personalBook)
+    # healthEquity = getHealthEquityDividendsAndShares(driver, HealthEquity)
+    # vanguardInfo = getVanguardPriceAndShares(driver)
+    # fidelity = getFidelityShares(driver)
+    # updateInvestmentShares(driver, HealthEquity, vanguardInfo, fidelity)
+    

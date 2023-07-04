@@ -127,6 +127,43 @@ def updateCryptoPrices(driver, book):
         book.updatePriceInGnucash(symbol, price)
         worksheet.update((priceColumn + str(i + 2)), float(price))
 
+def updateInvestmentShares(driver, HEaccount, vanguardInfo, fidelity):
+    print('updating investment shares')
+    url = "edit#gid=361024172"
+    spreadsheetWindow = driver.findWindowByUrl(url)
+    if not spreadsheetWindow:
+        openSpreadsheet(driver, 'Asset Allocation', 'Investments')
+        spreadsheetWindow = driver.webDriver.current_window_handle
+    else:
+        driver.webDriver.switch_to.window(spreadsheetWindow)
+    row = 12  # first row after crypto investments
+    symbolColumn = 'B'
+    accountColumn = 'C'
+    sharesColumn = 'D'
+    sheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Asset Allocation')
+    worksheet = sheet.worksheet('Investments')
+    stillCoins = True
+    while stillCoins:
+        account = worksheet.acell(accountColumn+str(row)).value
+        if account == 'HSA-HE':
+            worksheet.update((sharesColumn + str(row)), float(HEaccount.units))
+        elif account == 'HSA-TD':
+            row+=1
+            continue
+        elif account == '401k':
+            symbol = worksheet.acell(symbolColumn+str(row)).value
+            if symbol == '8585':
+                worksheet.update((sharesColumn + str(row)), float(vanguardInfo['shares8585']))
+            else:
+                worksheet.update((sharesColumn + str(row)), float(vanguardInfo['shares3123']))
+        elif account == 'IRA':
+            symbol = worksheet.acell(symbolColumn+str(row)).value
+            if symbol != 'GME':
+                worksheet.update((sharesColumn + str(row)), float(fidelity[symbol]))
+        else:
+            stillCoins = False
+        row+=1
+
 def updateInvestmentPrices(driver, Home, vanguardPrice):
     print('updating investment prices')
     url = "edit#gid=361024172"

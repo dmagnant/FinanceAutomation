@@ -159,6 +159,7 @@ class USD(Asset):
     def __init__(self, name, book):
         self.name = name
         self.balance = ""
+        self.units = 0
         self.currency = 'USD'
         self.reviewTransactions = []
         self.account = None

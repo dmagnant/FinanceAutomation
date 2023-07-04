@@ -530,6 +530,11 @@ def monthly(request):
             runUSD(driver, today, usdAccounts, personalBook)
         elif "prices" in request.POST:
             updateInvestmentPrices(driver, usdAccounts['Home'])
+        elif "shares" in request.POST:
+            healthEquity = getHealthEquityDividendsAndShares(driver, usdAccounts['HealthEquity'])
+            vanguardInfo = getVanguardPriceAndShares(driver)
+            fidelity = getFidelityShares(driver)
+            updateInvestmentShares(driver, healthEquity, vanguardInfo, fidelity)
         elif "Crypto" in request.POST:
             runCrypto(driver, today, cryptoAccounts, personalBook)
         elif "fidelityMain" in request.POST:

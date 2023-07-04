@@ -52,11 +52,13 @@ def getHealthEquityBalances(driver, accounts):
     vanguard401kbalance = driver.find_element(By.XPATH, "//*[@id='retirementAccounts']/li/a/div/ul/li/span[2]").text.strip('$').replace(',','')
     accounts['V401k'].setBalance(float(vanguard401kbalance))
 
-def getHealthEquityDividends(driver):
+def getHealthEquityDividendsAndShares(driver, account):
+    locateHealthEquityWindow(driver)
     lastMonth = getStartAndEndOfDateRange(datetime.today().date(), "month")
     driver = driver.webDriver
     driver.find_element(By.XPATH, "//*[@id='hsaInvestment']/div/div/a").click() # Manage HSA Investments
-    time.sleep(1)
+    time.sleep(2)
+    account.units = driver.find_element(By.ID, "desktopSharesHeld0").text
     driver.find_element(By.ID, "EditPortfolioTab").click() # Portfolio performance
     time.sleep(4)
     num = 0
@@ -75,14 +77,14 @@ def getHealthEquityDividends(driver):
 def runHealthEquity(driver, accounts):
     locateHealthEquityWindow(driver)
     getHealthEquityBalances(driver, accounts)
-    return getHealthEquityDividends(driver)
+    return getHealthEquityDividendsAndShares(driver, accounts['HealthEquity'])
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')    
     HealthEquity = USD("HSA", book)
     V401k = USD("Vanguard401k", book)
-    HEaccounts = {'HealthEquity': HealthEquity, 'Vanguard': V401k}
+    HEaccounts = {'HealthEquity': HealthEquity, 'V401k': V401k}
     HSA_dividends = runHealthEquity(driver, HEaccounts)
     HealthEquity.getData()
     V401k.getData()

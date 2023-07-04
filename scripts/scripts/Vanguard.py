@@ -21,18 +21,19 @@ else:
                                              getUsername, showMessage)
     from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
     
-def getVanguardPrice(driver):
+def getVanguardPriceAndShares(driver):
     locateVanguardWindow(driver)
     driver.openNewWindow('https://retirementplans.vanguard.com/VGApp/pe/faces/Investments.xhtml?SelectedPlanId=095895')
-    price8585 = 0
     num = 2
-    while price8585 == 0:
-        fundNumber = driver.webDriver.find_element(By.XPATH, '/html/body/div[2]/div[7]/span[2]/form/div[2]/div/div/div[2]/div/div/span[1]/div/span/span[1]/table/tbody/tr[' + str(num) + ']/td[1]').text
-        price = driver.webDriver.find_element(By.XPATH, '/html/body/div[2]/div[7]/span[2]/form/div[2]/div/div/div[2]/div/div/span[1]/div/span/span[1]/table/tbody/tr[' + str(num) + ']/td[4]').text.replace('$', '')
+    while num <=3:
+        fundNumber = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[1]").text        
         if fundNumber == str(8585):
-            price8585 = price
+            shares8585 = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[3]").text
+            price8585 = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[4]").text.replace('$', '')
+        else:
+            shares3123 = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[3]").text
         num+=1
-    return price8585
+    return {'price8585': price8585, 'shares8585': shares8585, 'shares3123': shares3123}
     
 def locateVanguardWindow(driver):
     found = driver.findWindowByUrl("ownyourfuture.vanguard.com/main")
@@ -85,7 +86,6 @@ def importGnuTransactions(book, today, account, interestYTD):
     employerContribution = accountChange - interest
     amount = {'interest': -interest, 'employerContribution': -employerContribution, 'accountChange': accountChange}
     transactionVariables = {'postDate': lastMonth['endDate'], 'description': "Contribution + Interest", 'amount': amount, 'fromAccount': account.gnuAccount}
-    # writeGnuTransaction(myBook, "Contribution + Interest", lastMonth.endDate, [-interest, -employerContribution, accountChange], account.gnuAccount)
     book.writeGnuTransaction(transactionVariables)
     return {"interest": interest, "employerContribution": employerContribution}
     
@@ -116,5 +116,5 @@ if __name__ == '__main__':
 
 
     driver = Driver("Chrome")
-    object = getVanguardPrice(driver)
+    object = getVanguardPriceAndShares(driver)
     print(object)

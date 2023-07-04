@@ -5,7 +5,8 @@
     <form method="post">
         {% csrf_token %}
         <button type="submit" name="USD">USD</button>
-        <button type="submit" name="prices">price update</button><br><br>
+        <button type="submit" name="prices">price update</button>
+        <button type="submit" name="shares">share update</button><br><br>
     </form>
     <div style="width: 100%; display: table;">
         <div style="display: table-row;">
@@ -31,6 +32,9 @@
                 &emsp;&ensp;&thinsp;balance: <b>${{usdAccounts.HealthEquity.balance}}</b><br>
                 gnuBalance: <b>${{usdAccounts.HealthEquity.gnuBalance}}</b><br>
                 &emsp;Dividends: <b>${{HSA_dividends}}</b><br>
+                <br>
+                <a href="https://my.healthequity.com/Member/MonthlyStatement.aspx?1" target="_blank">(capture fees/interest manually)</a> &emsp;
+                
             </div>
             <div style="width: 25%; display:table-cell">
                 <b><a href="{% url 'Vanguard' %}" target="_blank">Vanguard</a></b><br><br>

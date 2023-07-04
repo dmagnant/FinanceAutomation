@@ -1,6 +1,7 @@
 import time
 
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
 
 if __name__ == '__main__' or __name__ == "Fidelity":
     from Classes.Asset import USD
@@ -33,7 +34,22 @@ def getFidelityBalance(driver):
 def runFidelity(driver, account):
     locateFidelityWindow(driver)
     account.setBalance(getFidelityBalance(driver))
-
+    
+def getFidelityShares(driver):
+    locateFidelityWindow(driver)
+    if "/portfolio/positions" not in driver.webDriver.current_url:
+        driver.webDriver.get("https://digital.fidelity.com/ftgw/digital/portfolio/positions")
+    sharesDict = {}
+    row = 2
+    while True:
+        try:
+            symbol = driver.webDriver.find_element(By.XPATH, "//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[1]/div[" + str(row) + "]/div/div/span/div/div[2]/div/button").text.replace('*', '')
+            quantity = driver.webDriver.find_element(By.XPATH, "//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[2]/div/div/div[" + str(row) + "]/div[6]/div/span").text.replace(',','')
+            sharesDict[symbol] = quantity
+            row += 1
+        except NoSuchElementException:
+            return sharesDict
+    
 if __name__ == '__main__':
     driver = Driver("Chrome")
     Fidelity = USD("Fidelity")
