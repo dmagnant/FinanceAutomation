@@ -5,11 +5,11 @@ from selenium.common.exceptions import ElementClickInterceptedException
 
 
 if __name__ == '__main__' or __name__ == "Pinecone":
-    from Classes.Asset import Crypto
+    from Classes.Asset import Security
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
 else:
-    from .Classes.Asset import Crypto
+    from .Classes.Asset import Security
     from .Classes.WebDriver import Driver
     from .Classes.GnuCash import GnuCash
 
@@ -63,7 +63,7 @@ def runPinecone(driver, account, book):
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
-    Pinecone = Crypto("Pinecone", book)
+    Pinecone = Security("Pinecone", book)
     runPinecone(driver, Pinecone, book)
     Pinecone.getData()
     book.closeBook()

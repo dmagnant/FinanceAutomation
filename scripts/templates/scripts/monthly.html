@@ -29,12 +29,12 @@
                     <button type="submit" name="HELogin">Login</button>&emsp;
                     <button type="submit" name="HEBalances">Balances</button>&emsp;
                 </form><br>
-                &emsp;&ensp;&thinsp;balance: <b>${{usdAccounts.HealthEquity.balance}}</b><br>
-                gnuBalance: <b>${{usdAccounts.HealthEquity.gnuBalance}}</b><br>
-                &emsp;Dividends: <b>${{HSA_dividends}}</b><br>
-                <br>
-                <a href="https://my.healthequity.com/Member/MonthlyStatement.aspx?1" target="_blank">(capture fees/interest manually)</a> &emsp;
-                
+                &emsp;&emsp;HSA Cash balance: <b>${{usdAccounts.HECash.balance}}</b><br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&thinsp;gnuBalance: <b>${{usdAccounts.HECash.gnuBalance}}</b><br><br>
+                HSA Investment shares: <b>{{usdAccounts.HEInvestment.balance}} {{usdAccounts.HEInvestment.symbol}}</b><br>
+                &emsp;&ensp;&thinsp;&thinsp;gnuBalance shares: <b>{{usdAccounts.HEInvestment.gnuBalance}} {{usdAccounts.HEInvestment.symbol}}</b><br>
+                &ensp;HSA Investment Value: <b>${{usdAccounts.HEInvestment.value}}</b><br>
+                price(${{usdAccounts.HEInvestment.price}}) x shares: <b>${{usdAccounts.HEInvestment.gnuValue}}</b><br><br>                
             </div>
             <div style="width: 25%; display:table-cell">
                 <b><a href="{% url 'Vanguard' %}" target="_blank">Vanguard</a></b><br><br>

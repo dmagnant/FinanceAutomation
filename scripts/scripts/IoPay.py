@@ -5,12 +5,12 @@ from selenium.common.exceptions import NoSuchElementException
 import math
 
 if __name__ == '__main__' or __name__ == "IoPay":
-    from Classes.Asset import Crypto
+    from Classes.Asset import Security
     from Functions.GeneralFunctions import showMessage
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
 else:
-    from .Classes.Asset import Crypto
+    from .Classes.Asset import Security
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import showMessage
 
@@ -57,7 +57,7 @@ def runIoPay(driver, account, book):
 if __name__ == '__main__':                                                                  
     driver = Driver("Chrome")
     book = GnuCash('Finance')    
-    IoTex = Crypto("IoTex", book)
+    IoTex = Security("IoTex", book)
     runIoPay(driver, IoTex, book)
     IoTex.getData()
     book.closeBook()

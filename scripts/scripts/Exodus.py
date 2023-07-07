@@ -1,9 +1,9 @@
 if __name__ == '__main__' or __name__ == "Exodus":
-    from Classes.Asset import Crypto
+    from Classes.Asset import Security
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import showMessage    
 else:
-    from .Classes.Asset import Crypto
+    from .Classes.Asset import Security
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import showMessage
     
@@ -20,7 +20,7 @@ def runExodus(account, book):
 
 if __name__ == '__main__':
     book = GnuCash('Finance')    
-    Cosmos = Crypto("Cosmos", book)
+    Cosmos = Security("Cosmos", book)
     runExodus(Cosmos, book)
     Cosmos.getData()
     book.closeBook()

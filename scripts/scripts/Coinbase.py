@@ -4,13 +4,13 @@ from selenium.common.exceptions import (NoSuchElementException)
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Coinbase":
-    from Classes.Asset import Crypto
+    from Classes.Asset import Security
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash    
     from Functions.GeneralFunctions import (getCryptocurrencyPrice, getOTP,
                                             getPassword, getUsername)  
 else:
-    from .Classes.Asset import Crypto
+    from .Classes.Asset import Security
     from .Classes.GnuCash import GnuCash    
     from .Functions.GeneralFunctions import (getCryptocurrencyPrice, getOTP,
                                              getPassword, getUsername)
@@ -65,7 +65,7 @@ def runCoinbase(driver, account, book):
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
-    Loopring = Crypto("Loopring", book)
+    Loopring = Security("Loopring", book)
     runCoinbase(driver, Loopring, book)
     Loopring.getData()
     book.closeBook()

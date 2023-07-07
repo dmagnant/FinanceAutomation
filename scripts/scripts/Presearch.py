@@ -9,12 +9,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Presearch":
-    from Classes.Asset import Crypto
+    from Classes.Asset import Security
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import showMessage
 else:
-    from .Classes.Asset import Crypto
+    from .Classes.Asset import Security
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import showMessage
 
@@ -148,7 +148,7 @@ if __name__ == '__main__':
     book = GnuCash('Finance')
     locatePresearchWindow(driver)
     searchUsingPresearch(driver)
-    Presearch = Crypto("Presearch", book)
+    Presearch = Security("Presearch", book)
     presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book)
     Presearch.getData()
     book.closeBook()

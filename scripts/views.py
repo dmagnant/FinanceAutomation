@@ -32,7 +32,7 @@ from scripts.scripts.UpdateGoals import *
 from scripts.scripts.Vanguard import *
 from scripts.scripts.Worthy import *
 from scripts.scripts.Classes.WebDriver import Driver
-from scripts.scripts.Classes.Asset import USD, Crypto
+from scripts.scripts.Classes.Asset import USD, Security
 from scripts.scripts.Classes.GnuCash import GnuCash
 
 def scripts(request):
@@ -120,7 +120,7 @@ def barclays(request):
 
 def bing(request):
     book = GnuCash('Finance')
-    Bing = Crypto("Bing", book)
+    Bing = Security("Bing", book)
     Bing.getData()
     if request.method == 'POST':
         driver = Driver("Chrome")
@@ -186,7 +186,7 @@ def chase(request):
 
 def coinbase(request):
     book = GnuCash('Finance')
-    Loopring = Crypto("Loopring", book)
+    Loopring = Security("Loopring", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
@@ -410,7 +410,7 @@ def discover(request):
 
 def eternl(request):
     book = GnuCash('Finance')
-    Cardano = Crypto("Cardano", book, 'ADA-Eternl')
+    Cardano = Security("Cardano", book, 'ADA-Eternl')
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
@@ -427,7 +427,7 @@ def eternl(request):
 
 def exodus(request):
     book = GnuCash('Finance')
-    Cosmos = Crypto("Cosmos", book)
+    Cosmos = Security("Cosmos", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
@@ -457,27 +457,27 @@ def fidelity(request):
     
 def healthEquity(request):
     book = GnuCash('Finance')
-    HealthEquity = USD("HSA", book)
-    Vanguard = USD("Vanguard401k", book)
-    HEaccounts = {'HealthEquity': HealthEquity, 'Vanguard': Vanguard}
-    HSA_dividends = ''
+    HEInvestment = Security("HSA Investment", book)
+    HECash = USD("HSA Cash", book)
+    V401k = USD("Vanguard401k", book)
+    HEaccounts = {'HEInvestment': HEInvestment, 'HECash': HECash, 'V401k': V401k}
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
-            HSA_dividends = runHealthEquity(driver, HEaccounts)
+            runHealthEquity(driver, HEaccounts)
         elif "login" in request.POST:
             locateHealthEquityWindow(driver)
         elif "balance" in request.POST:
             getHealthEquityBalances(driver, HEaccounts)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/healthEquity"))
-    context = {'HEaccounts': HEaccounts, 'HSA_dividends': HSA_dividends}
+    context = {'HEaccounts': HEaccounts}
     book.closeBook()
     return render(request,"scripts/healthEquity.html", context)
 
 def ioPay(request):
     book = GnuCash('Finance')
-    IoTex = Crypto("IoTex", book)
+    IoTex = Security("IoTex", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
@@ -490,7 +490,7 @@ def ioPay(request):
 
 def kraken(request):
     book = GnuCash('Finance')
-    Ethereum2 = Crypto("Ethereum2", book)
+    Ethereum2 = Security("Ethereum2", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
@@ -522,7 +522,6 @@ def monthly(request):
     jointBook = GnuCash('Home')
     usdAccounts = getMonthlyAccounts('USD', personalBook, jointBook)
     cryptoAccounts = getMonthlyAccounts('Crypto', personalBook, jointBook)
-    HSA_dividends = ''
     if request.method == 'POST':
         driver = Driver("Chrome")
         today = datetime.today().date()
@@ -531,7 +530,6 @@ def monthly(request):
         elif "prices" in request.POST:
             updateInvestmentPrices(driver, usdAccounts['Home'])
         elif "shares" in request.POST:
-            healthEquity = getHealthEquityDividendsAndShares(driver, usdAccounts['HealthEquity'])
             vanguardInfo = getVanguardPriceAndShares(driver)
             fidelity = getFidelityShares(driver)
             updateInvestmentShares(driver, healthEquity, vanguardInfo, fidelity)
@@ -544,11 +542,11 @@ def monthly(request):
         elif "fidelityLogin" in request.POST:
             locateFidelityWindow(driver)
         elif "HEMain" in request.POST:
-            HSA_dividends = runHealthEquity(driver, {'HealthEquity': usdAccounts['HealthEquity'], 'Vanguard': usdAccounts['V401k']})
+            runHealthEquity(driver, {'HEInvestment': usdAccounts['HEInvestment'], 'HECash': usdAccounts['HECash'], 'V401k': usdAccounts['V401k']})
         elif "HELogin" in request.POST:
             locateHealthEquityWindow(driver)
         elif "HEBalances" in request.POST:
-            getHealthEquityBalances(driver, {'HealthEquity': usdAccounts['HealthEquity'], 'Vanguard': usdAccounts['V401k']})
+            getHealthEquityBalances(driver, {'HEInvestment': usdAccounts['HEInvestment'], 'HECash': usdAccounts['HECash'], 'V401k': usdAccounts['V401k']})
         elif "vanguardLogin" in request.POST:
             locateVanguardWindow(driver)
         elif "vanguardBalances" in request.POST:
@@ -581,7 +579,7 @@ def monthly(request):
             runLedger(cryptoAccounts['ledgerAccounts'], personalBook)            
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/monthly"))
-    context = {'usdAccounts': usdAccounts, 'cryptoAccounts': cryptoAccounts, 'HSA_dividends': HSA_dividends}
+    context = {'usdAccounts': usdAccounts, 'cryptoAccounts': cryptoAccounts}
     personalBook.closeBook()
     jointBook.closeBook()
     return render(request,"scripts/monthly.html", context)
@@ -639,7 +637,7 @@ def paypal(request):
 
 def pinecone(request):
     book = GnuCash('Finance')
-    Pinecone = Crypto("Pinecone", book)
+    Pinecone = Security("Pinecone", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
@@ -659,7 +657,7 @@ def pinecone(request):
 
 def presearch(request):
     book = GnuCash('Finance')
-    Presearch = Crypto("Presearch", book)
+    Presearch = Security("Presearch", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
@@ -713,7 +711,7 @@ def sofi(request):
 
 def swagbucks(request):
     book = GnuCash('Finance')
-    Swagbucks = Crypto("Swagbucks", book)
+    Swagbucks = Security("Swagbucks", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
@@ -741,7 +739,7 @@ def swagbucks(request):
 
 def tellwut(request):
     book = GnuCash('Finance')
-    Tellwut = Crypto("Tellwut", book)    
+    Tellwut = Security("Tellwut", book)    
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:

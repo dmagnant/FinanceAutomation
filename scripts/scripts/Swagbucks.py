@@ -14,11 +14,11 @@ from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Swagbucks":
     from Classes.WebDriver import Driver
-    from Classes.Asset import Crypto
+    from Classes.Asset import Security
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import showMessage
 else:
-    from .Classes.Asset import Crypto
+    from .Classes.Asset import Security
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import showMessage
 
@@ -302,7 +302,7 @@ def runSwagbucks(driver, runAlu, account, book):
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
-    Swagbucks = Crypto("Swagbucks", book)
+    Swagbucks = Security("Swagbucks", book)
     runSwagbucks(driver, False, Swagbucks, book)
     book.closeBook()
     

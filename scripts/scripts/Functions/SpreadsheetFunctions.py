@@ -127,7 +127,7 @@ def updateCryptoPrices(driver, book):
         book.updatePriceInGnucash(symbol, price)
         worksheet.update((priceColumn + str(i + 2)), float(price))
 
-def updateInvestmentShares(driver, HEaccount, vanguardInfo, fidelity):
+def updateInvestmentShares(driver, vanguardInfo, fidelity):
     print('updating investment shares')
     url = "edit#gid=361024172"
     spreadsheetWindow = driver.findWindowByUrl(url)
@@ -145,11 +145,11 @@ def updateInvestmentShares(driver, HEaccount, vanguardInfo, fidelity):
     stillCoins = True
     while stillCoins:
         account = worksheet.acell(accountColumn+str(row)).value
-        if account == 'HSA-HE':
-            worksheet.update((sharesColumn + str(row)), float(HEaccount.units))
-        elif account == 'HSA-TD':
+        if account == 'HSA-TD':
             row+=1
             continue
+        # elif account == 'HSA-HE':
+        #     worksheet.update((sharesColumn + str(row)), float(HEaccount.units))
         elif account == '401k':
             symbol = worksheet.acell(symbolColumn+str(row)).value
             if symbol == '8585':

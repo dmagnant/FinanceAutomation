@@ -6,11 +6,11 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Bing":
-    from Classes.Asset import Crypto
+    from Classes.Asset import Security
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
 else:
-    from .Classes.Asset import Crypto 
+    from .Classes.Asset import Security 
     from .Classes.WebDriver import Driver
     from .Classes.GnuCash import GnuCash
  
@@ -101,7 +101,7 @@ def runBing(driver, account, book):
 if __name__ == '__main__':
     book = GnuCash('Finance')
     driver = Driver("Chrome")
-    Bing = Crypto("Bing", book)
+    Bing = Security("Bing", book)
     runBing(driver, Bing, book)
     Bing.getData()
     book.closeBook()

@@ -1,6 +1,6 @@
 if __name__ == '__main__' or __name__ == "Daily":
     from Ally import allyLogout, runAlly
-    from Classes.Asset import USD, Crypto
+    from Classes.Asset import USD, Security
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import getStockPrice 
@@ -15,7 +15,7 @@ if __name__ == '__main__' or __name__ == "Daily":
     from Tellwut import runTellwut
 else:
     from .Ally import allyLogout, runAlly
-    from .Classes.Asset import USD, Crypto
+    from .Classes.Asset import USD, Security
     from .Classes.WebDriver import Driver
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import getStockPrice
@@ -35,14 +35,14 @@ def getDailyAccounts(type, personalReadBook, jointReadBook=''):
         Checking = USD("Sofi Checking", personalReadBook)
         Savings = USD("Sofi Savings", personalReadBook)
         Ally = USD("Ally", jointReadBook)
-        Presearch = Crypto("Presearch", personalReadBook)
+        Presearch = Security("Presearch", personalReadBook)
         accounts = {'CryptoPortfolio': CryptoPortfolio, 'Checking': Checking, 'Savings': Savings, 'Ally': Ally, 'Presearch': Presearch}
     elif type == 'MR':
         AmazonGC = USD("AmazonGC", personalReadBook)
-        Bing = Crypto("Bing", personalReadBook)
-        Pinecone = Crypto("Pinecone", personalReadBook)
-        Swagbucks = Crypto("Swagbucks", personalReadBook)
-        Tellwut = Crypto("Tellwut", personalReadBook)
+        Bing = Security("Bing", personalReadBook)
+        Pinecone = Security("Pinecone", personalReadBook)
+        Swagbucks = Security("Swagbucks", personalReadBook)
+        Tellwut = Security("Tellwut", personalReadBook)
         Paidviewpoint = USD("Paidviewpoint", personalReadBook)
         accounts = {'AmazonGC': AmazonGC, 'Bing': Bing, 'Pinecone': Pinecone, 'Swagbucks': Swagbucks, 'Tellwut': Tellwut, 'Paidviewpoint': Paidviewpoint}
     return accounts
@@ -71,7 +71,7 @@ def tearDown(driver):
 
 def runDailyMR(accounts, book):
     driver = Driver("Chrome")
-    runBing(driver, accounts['Bing'], book)
+    # runBing(driver, accounts['Bing'], book)
     searchUsingPresearch(driver)
     runTellwut(driver, accounts['Tellwut'], book)
     confirmAmazonGCBalance(driver, accounts['AmazonGC'])

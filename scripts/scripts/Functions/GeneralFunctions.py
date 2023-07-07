@@ -126,10 +126,10 @@ def getStockPrice(driver, symbol):
 def modifyTransactionDescription(description, amount="0.00"):
     if "SAVINGS ACCOUNT XXXXXX9703" in description.upper():
         description = "Tessa Deposit"
-    elif "INTEREST EARNED" in description.upper():
-        description = "Interest earned"
-    elif "SOFI REWARDS REDEMPTION" in description.upper():
-        description = "Interest earned"
+    elif "INTEREST EARNED" in description.upper() or "SOFI REWARDS REDEMPTION" in description.upper() or "Interest for " in description:
+        description = "Interest Earned"
+    elif "VIIIX: Buy" in description or "VIIIX: Dividend" in description:
+        description = "HSA Investment"
     elif "JONATHON MAGNANT" in description.upper():
         description = "Jonny payment"
     elif "SAVINGS - 3467" in description.upper():
@@ -232,8 +232,10 @@ def getAccountPath(account):
             return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum2"
         case 'Fidelity':
             return "Assets:Non-Liquid Assets:IRA:Fidelity"
-        case 'HSA':
-            return "Assets:Non-Liquid Assets:HSA:NM HSA"
+        case 'HSA Cash':
+            return "Assets:Non-Liquid Assets:HSA:NM HSA Cash"
+        case 'HSA Investment':
+            return "Assets:Non-Liquid Assets:HSA:NM HSA Investment"           
         case 'Home':
             return "Liabilities:Mortgage Loan"
         case 'IoTex':

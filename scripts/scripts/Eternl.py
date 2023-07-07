@@ -3,11 +3,11 @@ import time
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Eternl":
-    from Classes.Asset import Crypto
+    from Classes.Asset import Security
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
 else:
-    from .Classes.Asset import Crypto
+    from .Classes.Asset import Security
     from .Classes.GnuCash import GnuCash
 
 def locateEternlWindow(driver):
@@ -36,7 +36,7 @@ def runEternl(driver, account, book):
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
-    Cardano = Crypto("Cardano", book , 'ADA-Eternl')    
+    Cardano = Security("Cardano", book , 'ADA-Eternl')    
     runEternl(driver, Cardano, book)
     Cardano.getData()
     book.closeBook()

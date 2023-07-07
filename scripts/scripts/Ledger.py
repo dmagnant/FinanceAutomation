@@ -1,20 +1,20 @@
 import os
 
 if __name__ == '__main__' or __name__ == "Ledger":
-    from Classes.Asset import Crypto
+    from Classes.Asset import Security
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import showMessage, isProcessRunning
 else:
-    from .Classes.Asset import Crypto
+    from .Classes.Asset import Security
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import showMessage, isProcessRunning
 
 def getLedgerAccounts(readBook):
-    Bitcoin = Crypto("Bitcoin", readBook)
-    Ethereum = Crypto("Ethereum", readBook)
-    Cosmos = Crypto("Cosmos", readBook)
-    Polkadot = Crypto("Polkadot", readBook)
-    Algorand = Crypto("Algorand", readBook)
+    Bitcoin = Security("Bitcoin", readBook)
+    Ethereum = Security("Ethereum", readBook)
+    Cosmos = Security("Cosmos", readBook)
+    Polkadot = Security("Polkadot", readBook)
+    Algorand = Security("Algorand", readBook)
     return [Bitcoin, Ethereum, Cosmos, Polkadot, Algorand]
 
 def updateCoin(coin, book):

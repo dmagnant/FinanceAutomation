@@ -8,12 +8,12 @@ from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Tellwut":
     from Classes.WebDriver import Driver
-    from Classes.Asset import Crypto
+    from Classes.Asset import Security
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import showMessage
 else:
     from .Functions.GeneralFunctions import showMessage
-    from .Classes.Asset import Crypto
+    from .Classes.Asset import Security
     from .Classes.GnuCash import GnuCash
 
 def locateTellWutWindow(driver):
@@ -107,7 +107,7 @@ def runTellwut(driver, account, book):
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
-    Tellwut = Crypto("Tellwut", book)
+    Tellwut = Security("Tellwut", book)
     runTellwut(driver, Tellwut, book)
     Tellwut.getData()
     book.closeBook()

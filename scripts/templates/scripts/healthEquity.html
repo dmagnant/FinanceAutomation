@@ -13,13 +13,14 @@
                 </form>
             </div>
             <div style="width: 80%; display:table-cell">
-                &ensp;&thinsp;&thinsp;HSA balance: <b>${{HEaccounts.HealthEquity.balance}}</b><br>
-                &emsp;&thinsp;&thinsp;gnuBalance: <b>${{HEaccounts.HealthEquity.gnuBalance}}</b><br>
-                HSA Dividends: <b>${{HSA_dividends}}</b><br><br>
-                &ensp;&thinsp;401k balance: <b>${{HEaccounts.Vanguard.balance}}</b><br>
-                &emsp;&thinsp;&thinsp;gnuBalance: <b>${{HEaccounts.Vanguard.gnuBalance}}</b><br>
-                <br>
-                <a href="https://my.healthequity.com/Member/MonthlyStatement.aspx?1" target="_blank">(capture fees/interest manually)</a> &emsp;
+                &emsp;&emsp;HSA Cash balance: <b>${{HEaccounts.HECash.balance}}</b><br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&thinsp;gnuBalance: <b>${{HEaccounts.HECash.gnuBalance}}</b><br><br>
+                HSA Investment shares: <b>{{HEaccounts.HEInvestment.balance}} {{HEaccounts.HEInvestment.symbol}}</b><br>
+                &emsp;&ensp;&thinsp;&thinsp;gnuBalance shares: <b>{{HEaccounts.HEInvestment.gnuBalance}} {{HEaccounts.HEInvestment.symbol}}</b><br>
+                &ensp;HSA Investment Value: <b>${{HEaccounts.HEInvestment.value}}</b><br>
+                price(${{HEaccounts.HEInvestment.price}}) x shares: <b>${{HEaccounts.HEInvestment.gnuValue}}</b><br><br>
+                &emsp;&emsp;&emsp;&emsp;&ensp;401k balance: <b>${{HEaccounts.V401k.balance}}</b><br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&thinsp;gnuBalance: <b>${{HEaccounts.V401k.gnuBalance}}</b><br>
             </div>
         </div>
     </div>&emsp;&emsp;&emsp;&emsp;&ensp;

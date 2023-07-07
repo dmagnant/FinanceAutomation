@@ -6,11 +6,11 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "MyConstant":
-    from Classes.Asset import USD, Crypto
+    from Classes.Asset import USD, Security
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import (getOTP, getPassword, getUsername, showMessage)
 else:
-    from .Classes.Asset import USD, Crypto
+    from .Classes.Asset import USD, Security
     from .Functions.GeneralFunctions import (getOTP, getPassword, getUsername, showMessage)
 
 def locateMyConstantWindow(driver):
@@ -71,8 +71,8 @@ def getMyConstantBalances(driver, type):
         driver.webDriver.get('https://www.myconstant.com/lend-crypto-to-earn-interest')
         pyautogui.moveTo(1700, 145)
         time.sleep(2)
-        Bitcoin = Crypto("Bitcoin")
-        Ethereum = Crypto("Ethereum")
+        Bitcoin = Security("Bitcoin")
+        Ethereum = Security("Ethereum")
         coinList = [Bitcoin, Ethereum]
         # get coin balances
         for coin in coinList:
