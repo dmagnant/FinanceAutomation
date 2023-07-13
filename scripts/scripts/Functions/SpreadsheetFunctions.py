@@ -127,7 +127,7 @@ def updateCryptoPrices(driver, book):
         book.updatePriceInGnucash(symbol, price)
         worksheet.update((priceColumn + str(i + 2)), float(price))
 
-def updateInvestmentShares(driver, vanguardInfo, fidelity):
+def updateInvestmentShares(driver, fidelity):
     print('updating investment shares')
     url = "edit#gid=361024172"
     spreadsheetWindow = driver.findWindowByUrl(url)
@@ -148,14 +148,6 @@ def updateInvestmentShares(driver, vanguardInfo, fidelity):
         if account == 'HSA-TD':
             row+=1
             continue
-        # elif account == 'HSA-HE':
-        #     worksheet.update((sharesColumn + str(row)), float(HEaccount.units))
-        elif account == '401k':
-            symbol = worksheet.acell(symbolColumn+str(row)).value
-            if symbol == '8585':
-                worksheet.update((sharesColumn + str(row)), float(vanguardInfo['shares8585']))
-            else:
-                worksheet.update((sharesColumn + str(row)), float(vanguardInfo['shares3123']))
         elif account == 'IRA':
             symbol = worksheet.acell(symbolColumn+str(row)).value
             if symbol != 'GME':
@@ -164,7 +156,7 @@ def updateInvestmentShares(driver, vanguardInfo, fidelity):
             stillCoins = False
         row+=1
 
-def updateInvestmentPrices(driver, Home, vanguardPrice):
+def updateInvestmentPrices(driver, Home):
     print('updating investment prices')
     url = "edit#gid=361024172"
     spreadsheetWindow = driver.findWindowByUrl(url)
@@ -185,8 +177,6 @@ def updateInvestmentPrices(driver, Home, vanguardPrice):
             if coinSymbol == 'HOME':
                 price = (250000 - Home.getGnuBalance()) / 2
                 priceColumn = 'F'
-            elif coinSymbol == '8585':
-                price = vanguardPrice
             else :
                 price = getStockPrice(driver, coinSymbol)
                 driver.webDriver.switch_to.window(spreadsheetWindow)

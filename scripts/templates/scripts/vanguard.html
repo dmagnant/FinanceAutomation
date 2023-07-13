@@ -13,12 +13,18 @@
                 </form>
             </div>
             <div style="width: 80%; display:table-cell">
-                Pension Balance: <b>${{Pension.balance}}</b><br>
-                &emsp;&emsp;&thinsp;gnuBalance: <b>${{Pension.gnuBalance}}</b><br>
-                &emsp;&emsp;&emsp;&emsp;Interest: <b>${{PensionInterest}}</b><br>
-                &emsp;&ensp;Contributions: <b>${{PensionContributions}}</b><br><br>
-                &emsp;&ensp;401k Balance: <b>${{V401k.balance}}</b><br>
-                &emsp;&emsp;&thinsp;gnuBalance: <b>${{V401k.gnuBalance}}</b><br>
+                Pension Balance: <b>${{accounts.Pension.balance}}</b><br>
+                &emsp;&emsp;&thinsp;gnuBalance: <b>${{accounts.Pension.gnuBalance}}</b><br><br>
+                &emsp;&ensp;401k Balance: <b>${{accounts.V401k.balance}}</b><br>
+                &emsp;&emsp;&thinsp;gnuBalance: <b>${{accounts.V401k.gnuBalance}}</b><br><br>
+                &emsp;&emsp;&emsp;REIF shares: <b>{{accounts.REIF401k.balance}} ({{accounts.REIF401k.symbol}})</b><br>
+                gnuBalance shares: <b>{{accounts.REIF401k.gnuBalance}} ({{accounts.REIF401k.symbol}})</b><br>
+                &emsp;&emsp;&emsp;&ensp;REIF Value: <b>${{accounts.REIF401k.value}}</b><br>
+                &emsp;&ensp;${{accounts.REIF401k.price}} x shares: <b>${{accounts.REIF401k.gnuValue}}</b><br><br>
+                &emsp;&emsp;&emsp;&thinsp;TSM shares: <b>{{accounts.TSM401k.balance}} ({{accounts.TSM401k.symbol}})</b><br>
+                gnuBalance shares: <b>{{accounts.TSM401k.gnuBalance}} ({{accounts.TSM401k.symbol}})</b><br>
+                &emsp;&emsp;&emsp;&ensp;&thinsp;TSM Value: <b>${{accounts.TSM401k.value}}</b><br>
+                &emsp;${{accounts.TSM401k.price}} x shares: <b>${{accounts.TSM401k.gnuValue}}</b><br><br>
             </div>
         </div>
     </div>

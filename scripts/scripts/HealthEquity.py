@@ -52,7 +52,7 @@ def getHealthEquityBalances(driver, accounts):
     vanguard401kbalance = float(driver.webDriver.find_element(By.XPATH, "//*[@id='retirementAccounts']/li/a/div/ul/li/span[2]").text.strip('$').replace(',',''))
     accounts['V401k'].setBalance(vanguard401kbalance)
     driver.webDriver.find_element(By.XPATH, "//*[@id='hsaInvestment']/div/div/a").click() # Manage HSA Investments
-    time.sleep(2)
+    time.sleep(5)
     accounts['HEInvestment'].setBalance(driver.webDriver.find_element(By.ID,'desktopSharesHeld0').text)
     driver.webDriver.find_element(By.XPATH,"//*[@id='topmenu']/div[2]/a/span").click() # Home Button
 
@@ -61,6 +61,7 @@ def captureHealthEquityInvestmentTransactions(driver, accounts):
     lastMonth = getStartAndEndOfDateRange(datetime.today().date(), "month")
     investmentActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\hsainvestment.csv"
     open(investmentActivity, 'w', newline='').truncate()
+    time.sleep(5)
     driver.webDriver.find_element(By.XPATH, "//*[@id='hsaInvestment']/div/div/a").click() # Manage HSA Investments
     time.sleep(2)
     driver.webDriver.find_element(By.ID, "EditPortfolioTab").click() # Portfolio performance
@@ -91,11 +92,10 @@ def captureHealthEquityInvestmentTransactions(driver, accounts):
     while True:
         description = driver.webDriver.find_element(By.ID, "desktopDescription" + str(row)).text
         if 'Buy' in description or 'Dividend' in description:
-            date = driver.webDriver.find_element(By.ID, "desktopDate" + str(row)).text
-            price = driver.webDriver.find_element(By.ID, "desktopPrice" + str(row)).text.strip('$')
+            date = datetime.strptime(driver.webDriver.find_element(By.ID, "desktopDate" + str(row)).text, '%m/%d/%Y').date()
             amount = driver.webDriver.find_element(By.ID, "desktopAmount" + str(row)).text.strip('$')
             shares = driver.webDriver.find_element(By.ID, "desktopSharesPurchased" + str(row)).text
-            transaction = date, description, price, amount, shares
+            transaction = date, description, amount, shares
             csv.writer(open(investmentActivity, 'a', newline='', encoding="utf-8")).writerow(transaction)
             row+=1
         elif 'Ending Balance' in description:
@@ -123,7 +123,7 @@ def captureHealthEquityCashTransactions(driver):
             if 'Investment Admin Fee' in description or 'Interest' in description:
                 column+=1
                 amount = driver.webDriver.find_element(By.XPATH, "//*[@id='ctl00_modulePageContent_MemberTransactionsStyled_gvTransferLines']/tbody/tr[" + str(row) + "]/td[" + str(column) + "]").text.replace('(','').replace('$','').replace(')','')
-                transaction = dateString, description, amount
+                transaction = postDate, description, amount
                 csv.writer(open(cashActivity, 'a', newline='', encoding="utf-8")).writerow(transaction)
         elif postDate.month > lastMonth['endDate'].month:
             continue
@@ -148,4 +148,3 @@ if __name__ == '__main__':
     HEaccounts = {'HEInvestment': HEInvestment, 'HECash': HECash, 'V401k': V401k}
     runHealthEquity(driver, HEaccounts, book)
     book.closeBook()
-    

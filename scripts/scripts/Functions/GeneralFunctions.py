@@ -128,8 +128,22 @@ def modifyTransactionDescription(description, amount="0.00"):
         description = "Tessa Deposit"
     elif "INTEREST EARNED" in description.upper() or "SOFI REWARDS REDEMPTION" in description.upper() or "Interest for " in description:
         description = "Interest Earned"
-    elif "VIIIX: Buy" in description or "VIIIX: Dividend" in description:
+    elif "VIIIX: Buy" in description:
         description = "HSA Investment"
+    elif "VIIIX: Dividend" in description:
+        description = "HSA Dividend"
+    elif "Plan Contribution" in description:
+        description = "401k Investment"
+    elif "Dividends on Equity Investments" in description:
+        description = "401k Dividend"
+    elif "DIVIDEND RECEIVED" in description:
+        description = "IRA Dividend"
+    elif "YOU BOUGHT" in description:
+        description = "IRA Investment"
+    elif "YOU SOLD" in description or "CASH CONTRIBUTION" in description:
+        description = "IRA Contribution"
+    elif "Fee Real Estate" in description or "Fee Instl Tot Stk" in description:
+        description = "401k Fee"
     elif "JONATHON MAGNANT" in description.upper():
         description = "Jonny payment"
     elif "SAVINGS - 3467" in description.upper():
@@ -268,5 +282,11 @@ def getAccountPath(account):
             return "Assets:Liquid Assets:MR:Swagbucks"
         case 'Tellwut':
             return "Assets:Liquid Assets:MR:Tellwut"
+        case 'Real Estate Index Fund':
+            return "Assets:Non-Liquid Assets:401k:Real Estate Index Fund"
+        case 'Total Stock Market(401k)':
+            return "Assets:Non-Liquid Assets:401k:Total Stock Market"
+        case 'Total Stock Market(IRA)':
+            return "Assets:Non-Liquid Assets:IRA:Fidelity:Total Stock Market" 
         case _:
             print(f'account: {accountName} not found in "getAccountPath" function')

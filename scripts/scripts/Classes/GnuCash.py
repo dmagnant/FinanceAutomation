@@ -73,8 +73,8 @@ class GnuCash:
             if tr.post_date.year == today.year
             for spl in tr.splits
             if spl.account.fullname == account.gnuAccount]
-        book.delete(transactions[0])
         value = int(account.balance) * account.price
+        book.delete(transactions[0])
         split = [Split(value=-value, memo="scripted", account=book.accounts(fullname='Income:Market Research')),
                 Split(value=value, quantity=Decimal(account.balance), memo="scripted", account=book.accounts(fullname=account.gnuAccount))]
         Transaction(post_date=today, currency=book.currencies(mnemonic="USD"), description=account.name + ' account balance', splits=split)
@@ -112,8 +112,6 @@ class GnuCash:
     
     def getPriceInGnucash(self, symbol, date=''):
         myBook = self.getWriteBook() if (self.writeBook and not self.writeBook.is_saved) else self.readBook
-        if symbol == "ETH2":
-            symbol = 'ETH'
         if date:
             price = ''
             while not price:
@@ -125,20 +123,20 @@ class GnuCash:
         else:
             return myBook.prices(commodity=myBook.commodities(mnemonic=symbol), currency=myBook.currencies(mnemonic="USD")).value 
         
-    def updatePriceInGnucash(self, symbol, coinPrice):
+    def updatePriceInGnucash(self, symbol, price):
         myBook = self.getWriteBook()
         try: 
             gnuCashPrice = myBook.prices(commodity=myBook.commodities(mnemonic=symbol), currency=myBook.currencies(mnemonic="USD"), date=datetime.today().date())  # raise a KeyError if Price does not exist
-            gnuCashPrice.value = coinPrice
+            gnuCashPrice.value = price
         except KeyError:
-            p = Price(myBook.commodities(mnemonic=symbol), myBook.currencies(mnemonic="USD"), datetime.today().date(), coinPrice, "last")
+            p = Price(myBook.commodities(mnemonic=symbol), myBook.currencies(mnemonic="USD"), datetime.today().date(), price, "last")
         myBook.flush()
            
     def writeCryptoTransaction(self):
         myBook = self.getWriteBook()
         from_account = 'Assets:Liquid Assets:Sofi:Checking'
         to_account = 'Assets:Non-Liquid Assets:CryptoCurrency:Cardano'
-        fee_account = 'Expenses:Bank Fees:Coinbase Fee'
+        fee_account = 'Expenses:Bank Fees'
         amount = Decimal(50.00)
         description = 'ADA purchase'
         today = datetime.today()
@@ -262,20 +260,20 @@ class GnuCash:
                     myBook.delete(spl)
         myBook.flush()
 
-    def getDollarsInvestedPerCoin(self, coin):
-        # get dollars invested balance (must be run per coin)
+    def getDollarsInvestedPerSecurity(self, security):
+        # get dollars invested balance (must be run per security)
         mybook = self.readBook
         total = 0
         # retrieve transactions from GnuCash
         transactions = [tr for tr in mybook.transactions
                         for spl in tr.splits
-                        if spl.account.fullname == coin.gnuAccount]
+                        if spl.account.fullname == security.gnuAccount]
         for tr in transactions:
             for spl in tr.splits:
                 amount = format(spl.value, ".2f")
-                if spl.account.fullname == coin.gnuAccount:
+                if spl.account.fullname == security.gnuAccount:
                     total += abs(float(amount))
-        print(f'total $ invested in {coin.name}: ' + str(total))
+        print(f'total $ invested in {security.name}: ' + str(total))
         return total
     
     def importUniqueTransactionsToGnuCash(self, account, transactionsCSV, driver, dateRange, lineStart=1):
@@ -319,12 +317,20 @@ class GnuCash:
                     if account == 'Ally':
                         toAccount = "Liabilities:BoA Credit Card"
                     elif "Sofi" in account:
-                        toAccount = "Liabilities:Credit Cards:BankAmericard Cash Rewards"        
+                        toAccount = "Liabilities:Credit Cards:BankAmericard Cash Rewards"
             elif "Interest Earned" in description:
                 toAccount = "Income:Investments:Interest"
             elif 'HSA Investment' in description:
                 toAccount = 'Assets:Non-Liquid Assets:HSA:NM HSA Cash'
-            elif "Investment Admin Fee " in description:
+            elif 'IRA Contribution' in description:
+                toAccount = 'Assets:Non-Liquid Assets:IRA:Fidelity'
+            elif 'IRA Investment' in description:
+                toAccount = 'Assets:Non-Liquid Assets:IRA:Fidelity:Govt Money Market'
+            elif 'HSA Dividend' in description or '401k Dividend' in description or 'IRA Dividend' in description:
+                toAccount = 'Income:Investments:Dividends'
+            elif '401k Investment' in description:
+                toAccount = 'Assets:Non-Liquid Assets:401k'
+            elif "Investment Admin Fee " in description or '401k Fee' in description:
                 toAccount = "Expenses:Bank Fees"
             elif "Savings Transfer" in description:
                 toAccount = "Assets:Liquid Assets:Sofi:Savings"        
@@ -439,13 +445,13 @@ class GnuCash:
         def formatTransactionVariables(account, row):
             skipTransaction = False
             if account.name == 'Ally':
-                postDate = datetime.strptime(row[0], '%Y-%m-%d')
+                postDate = datetime.strptime(row[0], '%Y-%m-%d').date()
                 description = row[1]
                 amount = Decimal(row[2])
                 fromAccount = account.gnuAccount
                 reviewTransPath = row[0] + ", " + row[1] + ", " + row[2]
             elif account.name == 'Amex':
-                postDate = datetime.strptime(row[0], '%m/%d/%Y')
+                postDate = datetime.strptime(row[0], '%m/%d/%Y').date()
                 description = row[1]
                 amount = -Decimal(row[2])
                 if "AUTOPAY PAYMENT" in description.upper():
@@ -453,7 +459,7 @@ class GnuCash:
                 fromAccount = account.gnuAccount
                 reviewTransPath = row[0] + ", " + row[1] + ", " + row[2]
             elif account.name == 'Barclays':
-                postDate = datetime.strptime(row[0], '%m/%d/%Y')
+                postDate = datetime.strptime(row[0], '%m/%d/%Y').date()
                 description = row[1]
                 amount = Decimal(row[3])
                 if "PAYMENT RECEIVED" in description.upper():
@@ -461,7 +467,7 @@ class GnuCash:
                 fromAccount = account.gnuAccount
                 reviewTransPath = row[0] + ", " + row[1] + ", " + row[3]
             elif account.name == 'BoA':
-                postDate = datetime.strptime(row[0], '%m/%d/%Y')
+                postDate = datetime.strptime(row[0], '%m/%d/%Y').date()
                 description = row[2]
                 amount = Decimal(row[4])
                 if "BA ELECTRONIC PAYMENT" in description.upper():
@@ -469,7 +475,7 @@ class GnuCash:
                 fromAccount = account.gnuAccount
                 reviewTransPath = row[0] + ", " + row[2] + ", " + row[4]
             elif account.name == 'BoA-joint':
-                postDate = datetime.strptime(row[0], '%m/%d/%Y')
+                postDate = datetime.strptime(row[0], '%m/%d/%Y').date()
                 description = row[2]
                 amount = Decimal(row[4])
                 if "BA ELECTRONIC PAYMENT" in description.upper():
@@ -477,7 +483,7 @@ class GnuCash:
                 fromAccount = account.gnuAccount
                 reviewTransPath = row[0] + ", " + row[2] + ", " + row[4]
             elif account.name == 'Chase':
-                postDate = datetime.strptime(row[1], '%m/%d/%Y')
+                postDate = datetime.strptime(row[1], '%m/%d/%Y').date()
                 description = row[2]
                 amount = Decimal(row[5])
                 if "AUTOMATIC PAYMENT" in description.upper():
@@ -485,7 +491,7 @@ class GnuCash:
                 fromAccount = account.gnuAccount
                 reviewTransPath = row[1] + ", " + row[2] + ", " + row[5]
             elif account.name == 'Discover':
-                postDate = datetime.strptime(row[1], '%m/%d/%Y')
+                postDate = datetime.strptime(row[1], '%m/%d/%Y').date()
                 description = row[2]
                 amount = -Decimal(row[3])
                 if "DIRECTPAY FULL BALANCE" in description.upper():
@@ -493,37 +499,63 @@ class GnuCash:
                 fromAccount = account.gnuAccount
                 reviewTransPath = row[1] + ", " + row[2] + ", " + row[3]
             elif account.name == 'Sofi Checking':
-                postDate = datetime.strptime(row[0], '%Y-%m-%d')
+                postDate = datetime.strptime(row[0], '%Y-%m-%d').date()
                 description = row[1]
                 amount = Decimal(row[2])
                 fromAccount = account.gnuAccount
                 reviewTransPath = row[0] + ", " + row[1] + ", " + row[2]
             elif account.name == 'Sofi Savings':
-                postDate = datetime.strptime(row[0], '%Y-%m-%d')
+                postDate = datetime.strptime(row[0], '%Y-%m-%d').date()
                 description = row[1]
                 if "CHECKING - 6915" in description.upper():
                     skipTransaction = True
                 amount = Decimal(row[2])
                 fromAccount = account.gnuAccount
                 reviewTransPath = row[0] + ", " + row[1] + ", " + row[2]
-            elif account.name == 'HSA Investment': 
-                postDate = datetime.strptime(row[0], '%m/%d/%Y')
-                description = row[1]
-                amount = Decimal(row[3])
-                fromAccount = account.gnuAccount
-                price = Decimal(row[2])
-                shares = float(row[4])
-                reviewTransPath = row[0] + ", " + row[1] + ", " + row[3]
-                description = modifyTransactionDescription(description)
-                return {'postDate': postDate.date(), 'description': description, 'amount': amount, 'skipTransaction': skipTransaction, 'fromAccount': fromAccount, 'reviewTransPath': reviewTransPath, 'price': price, 'shares': shares}
             elif account.name == 'HSA Cash':
-                postDate = datetime.strptime(row[0], '%m/%d/%Y')
+                postDate = datetime.strptime(row[0], '%Y-%m-%d').date()
                 description = row[1]
                 amount = Decimal(row[2])
                 fromAccount = account.gnuAccount
+                reviewTransPath = row[0] + ", " + row[1] + ", " + row[2]                
+            elif account.name == 'HSA Investment': 
+                postDate = datetime.strptime(row[0], '%Y-%m-%d').date()
+                description = modifyTransactionDescription(row[1])
+                amount = Decimal(row[2])
+                fromAccount = account.gnuAccount
+                shares = float(row[3])
                 reviewTransPath = row[0] + ", " + row[1] + ", " + row[2]
+                return {'postDate': postDate, 'description': description, 'amount': amount, 'skipTransaction': skipTransaction, 'fromAccount': fromAccount, 'reviewTransPath': reviewTransPath, 'shares': shares}
+            elif account.name == 'Fidelity':
+                postDate = datetime.strptime(row[0], '%Y-%m-%d').date()
+                amount = Decimal(row[2])
+                fromAccount = account.gnuAccount
+                description = row[1]
+                if "TOTAL INTERNATIONAL STOCK" in description and "DIVIDEND" not in description:
+                    fromAccount += ":Total Intl Stock"
+                elif "TOTAL STK MKT ETF" in description and "DIVIDEND" not in description:
+                    fromAccount += ":Total Stock Market"
+                elif "DIVIDEND" in description or 'CASH CONTRIBUTION' in description:
+                    fromAccount += ":Govt Money Market"
+                description = modifyTransactionDescription(description)
+                shares = float(row[3])
+                reviewTransPath = row[0] + ", " + row[1] + ", " + row[2]
+                return {'postDate': postDate, 'description': description, 'amount': amount, 'skipTransaction': skipTransaction, 'fromAccount': fromAccount, 'reviewTransPath': reviewTransPath, 'shares': shares}
+            elif account.name == 'Vanguard401k':
+                postDate = datetime.strptime(row[0], '%Y-%m-%d').date()
+                amount = Decimal(row[3])
+                description = row[1]
+                fromAccount = account.gnuAccount
+                if "Real Estate Index" in description:
+                    fromAccount += ":Real Estate Index Fund"
+                elif "Instl Tot Stk Mkt" in description:
+                    fromAccount += ":Total Stock Market"
+                shares = float(row[2])
+                description = modifyTransactionDescription(row[1])
+                reviewTransPath = row[0] + ", " + row[1] + ", " + row[3]
+                return {'postDate': postDate, 'description': description, 'amount': amount, 'skipTransaction': skipTransaction, 'fromAccount': fromAccount, 'reviewTransPath': reviewTransPath, 'shares': shares}
             description = modifyTransactionDescription(description)
-            return {'postDate': postDate.date(), 'description': description, 'amount': amount, 'skipTransaction': skipTransaction, 'fromAccount': fromAccount, 'reviewTransPath': reviewTransPath}
+            return {'postDate': postDate, 'description': description, 'amount': amount, 'skipTransaction': skipTransaction, 'fromAccount': fromAccount, 'reviewTransPath': reviewTransPath}
         def getEnergyBillAmounts(driver, amount, energyBillNum):
             if energyBillNum == 1:
                 driver.openNewWindow('https://www.we-energies.com/secure/auth/l/acct/summary_accounts.aspx')
@@ -583,8 +615,14 @@ class GnuCash:
             split = [Split(value=transactionVariables['amount']['interest'], memo="scripted", account=myBook.accounts(fullname="Income:Investments:Interest")),
                     Split(value=transactionVariables['amount']['employerContribution'], memo="scripted",account=myBook.accounts(fullname="Income:Employer Contributions:Pension Contributions")),
                     Split(value=transactionVariables['amount']['accountChange'], memo="scripted",account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
-        elif "HSA Investment" in transactionVariables['description']:
+        elif "HSA Investment" in transactionVariables['description'] or "HSA Dividend" in transactionVariables['description'] or '401k' in transactionVariables['description'] or 'IRA Contribution' in transactionVariables['description'] or 'IRA Dividend' in transactionVariables['description']:
             split = [Split(value=-transactionVariables['amount'], memo="scripted", account=myBook.accounts(fullname=toAccount)),
+                    Split(value=transactionVariables['amount'], quantity=round(Decimal(transactionVariables['shares']), 3), memo="scripted", account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
+        elif "Fidelity IRA Transfer" in transactionVariables['description']:
+            split = [Split(value=-transactionVariables['amount'], memo="scripted", account=myBook.accounts(fullname=toAccount)),
+                    Split(value=transactionVariables['amount'], quantity=round(Decimal(transactionVariables['amount']), 2), memo="scripted", account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
+        elif 'IRA Investment' in transactionVariables['description']:
+            split = [Split(value=-transactionVariables['amount'], quantity=-round(Decimal(transactionVariables['amount']), 2), memo="scripted", account=myBook.accounts(fullname=toAccount)),
                     Split(value=transactionVariables['amount'], quantity=round(Decimal(transactionVariables['shares']), 3), memo="scripted", account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
         elif "WE ENERGIES" in transactionVariables['description'].upper():
             split=[Split(value=transactionVariables['amount']['electricity'], account=myBook.accounts(fullname="Expenses:Utilities:Electricity")),

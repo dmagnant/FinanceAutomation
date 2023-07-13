@@ -530,7 +530,7 @@ def monthly(request):
         elif "prices" in request.POST:
             updateInvestmentPrices(driver, usdAccounts['Home'])
         elif "shares" in request.POST:
-            vanguardInfo = getVanguardPriceAndShares(driver)
+            vanguardInfo = getVanguard401kPriceAndShares(driver)
             fidelity = getFidelityShares(driver)
             updateInvestmentShares(driver, healthEquity, vanguardInfo, fidelity)
         elif "Crypto" in request.POST:
@@ -550,7 +550,7 @@ def monthly(request):
         elif "vanguardLogin" in request.POST:
             locateVanguardWindow(driver)
         elif "vanguardBalances" in request.POST:
-            getVanguardBalanceAndInterestYTD(driver, [usdAccounts['Pension'], usdAccounts['V401k']])
+            getVanguardBalancesAndPensionInterestYTD(driver, [usdAccounts['Pension'], usdAccounts['V401k']])
         elif "worthyBalance" in request.POST:
             getWorthyBalance(driver, usdAccounts['Worthy'])
         elif "worthyLogin" in request.POST:
@@ -777,22 +777,20 @@ def vanguard(request):
     book = GnuCash('Finance')
     Pension = USD("VanguardPension", book)
     V401k = USD("Vanguard401k", book)
-    accounts = [Pension, V401k]
-    pensionInterest = ""
-    pensionContributions = ""
+    REIF401k = Security("Real Estate Index Fund", book)
+    TSM401k = Security("Total Stock Market(401k)", book)
+    accounts = {'Pension': Pension, 'V401k': V401k, 'REIF401k': REIF401k, 'TSM401k': TSM401k}
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
-            interestAndEmployerContribution = runVanguard(driver, accounts, book)
-            pensionInterest = str(interestAndEmployerContribution['interest'])
-            pensionContributions = str(interestAndEmployerContribution['employerContribution'])
+            runVanguard(driver, accounts, book)
         elif "login" in request.POST:
             locateVanguardWindow(driver)
         elif "balance" in request.POST:
-            getVanguardBalanceAndInterestYTD(driver, accounts)
+            getVanguardBalancesAndPensionInterestYTD(driver, accounts)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/vanguard"))
-    context = {'Pension': Pension, 'PensionInterest': pensionInterest, 'PensionContributions': pensionContributions, 'V401k': V401k}
+    context = {'accounts': accounts}
     book.closeBook()        
     return render(request,"scripts/vanguard.html", context)
 

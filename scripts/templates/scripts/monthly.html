@@ -34,7 +34,7 @@
                 HSA Investment shares: <b>{{usdAccounts.HEInvestment.balance}} {{usdAccounts.HEInvestment.symbol}}</b><br>
                 &emsp;&ensp;&thinsp;&thinsp;gnuBalance shares: <b>{{usdAccounts.HEInvestment.gnuBalance}} {{usdAccounts.HEInvestment.symbol}}</b><br>
                 &ensp;HSA Investment Value: <b>${{usdAccounts.HEInvestment.value}}</b><br>
-                price(${{usdAccounts.HEInvestment.price}}) x shares: <b>${{usdAccounts.HEInvestment.gnuValue}}</b><br><br>                
+                &emsp;&emsp;&ensp;&thinsp;&thinsp;${{usdAccounts.HEInvestment.price}} x shares: <b>${{usdAccounts.HEInvestment.gnuValue}}</b><br><br>
             </div>
             <div style="width: 25%; display:table-cell">
                 <b><a href="{% url 'Vanguard' %}" target="_blank">Vanguard</a></b><br><br>
@@ -46,7 +46,15 @@
                 Pension Balance: <b>${{usdAccounts.Pension.balance}}</b><br>
                 &emsp;&emsp;&thinsp;gnuBalance: <b>${{usdAccounts.Pension.gnuBalance}}</b><br><br>
                 &emsp;&ensp;401k Balance: <b>${{usdAccounts.V401k.balance}}</b><br>
-                &emsp;&emsp;&thinsp;gnuBalance: <b>${{usdAccounts.V401k.gnuBalance}}</b><br>
+                &emsp;&emsp;&thinsp;gnuBalance: <b>${{usdAccounts.V401k.gnuBalance}}</b><br><br>
+                &emsp;&emsp;&emsp;REIF shares: <b>{{usdAccounts.REIF401k.balance}} ({{usdAccounts.REIF401k.symbol}})</b><br>
+                gnuBalance shares: <b>{{usdAccounts.REIF401k.gnuBalance}} ({{usdAccounts.REIF401k.symbol}})</b><br>
+                &emsp;&emsp;&emsp;&ensp;REIF Value: <b>${{usdAccounts.REIF401k.value}}</b><br>
+                &emsp;&ensp;${{usdAccounts.REIF401k.price}} x shares: <b>${{usdAccounts.REIF401k.gnuValue}}</b><br><br>
+                &emsp;&emsp;&emsp;&thinsp;TSM shares: <b>{{usdAccounts.TSM401k.balance}} ({{usdAccounts.TSM401k.symbol}})</b><br>
+                gnuBalance shares: <b>{{usdAccounts.TSM401k.gnuBalance}} ({{usdAccounts.TSM401k.symbol}})</b><br>
+                &emsp;&emsp;&emsp;&ensp;&thinsp;TSM Value: <b>${{usdAccounts.TSM401k.value}}</b><br>
+                &emsp;${{usdAccounts.TSM401k.price}} x shares: <b>${{usdAccounts.TSM401k.gnuValue}}</b><br><br>
             </div>
             <div style="width: 25%; display:table-cell">
                 <b><a href="{% url 'Worthy' %}" target="_blank">Worthy</a></b><br><br>

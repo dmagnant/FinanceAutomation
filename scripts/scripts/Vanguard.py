@@ -1,4 +1,4 @@
-import time
+import time, csv
 from datetime import datetime
 from decimal import Decimal
 
@@ -6,42 +6,18 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Vanguard":
-    from Classes.Asset import USD
+    from Classes.Asset import USD, Security
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getPassword,
                                             getStartAndEndOfDateRange,
-                                            getUsername, showMessage)
-    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
+                                            getUsername, showMessage, setDirectory)
 else:
-    from .Classes.Asset import USD
+    from .Classes.Asset import USD, Security
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import (getPassword,
                                              getStartAndEndOfDateRange,
-                                             getUsername, showMessage)
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
-    
-def getVanguardPriceAndShares(driver):
-    locateVanguardWindow(driver)
-    driver.openNewWindow('https://retirementplans.vanguard.com/VGApp/pe/faces/Investments.xhtml?SelectedPlanId=095895')
-    num = 2
-    while num <=3:
-        fundNumber = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[1]").text        
-        if fundNumber == str(8585):
-            shares8585 = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[3]").text
-            price8585 = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[4]").text.replace('$', '')
-        else:
-            shares3123 = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[3]").text
-        num+=1
-    return {'price8585': price8585, 'shares8585': shares8585, 'shares3123': shares3123}
-    
-def locateVanguardWindow(driver):
-    found = driver.findWindowByUrl("ownyourfuture.vanguard.com/main")
-    if not found:
-        vanguardLogin(driver)
-    else:
-        driver.webDriver.switch_to.window(found)
-        time.sleep(1)
+                                             getUsername, showMessage, setDirectory)
 
 def vanguardLogin(driver):
     driver.openNewWindow('https://ownyourfuture.vanguard.com/login#/')
@@ -58,19 +34,78 @@ def vanguardLogin(driver):
         driver.find_element(By.XPATH, "//*[@id='security-code-submit-btn']/button/span/span").click() # verify
     except NoSuchElementException:
         exception = "caught"
+    driver.get('https://ownyourfuture.vanguard.com/main/dashboard')
 
-def getVanguardBalanceAndInterestYTD(driver, accounts):
-    locateVanguardWindow(driver)    
-    driver.webDriver.get('https://ownyourfuture.vanguard.com/main/dashboard/assets-details')
+def locateVanguardWindow(driver):
+    found = driver.findWindowByUrl("ownyourfuture.vanguard.com/main")
+    if not found:
+        vanguardLogin(driver)
+    else:
+        driver.webDriver.switch_to.window(found)
+        time.sleep(1)
+    
+def getVanguard401kPriceAndShares(driver, accounts):
+    locateVanguardWindow(driver)
+    driver.openNewWindow('https://retirementplans.vanguard.com/VGApp/pe/faces/Investments.xhtml?SelectedPlanId=095895')
+    num = 2
+    while num <=3:
+        fundNumber = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[1]").text        
+        if fundNumber == str(8585):
+            accounts['TSM401k'].balance = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[3]").text
+            accounts['TSM401k'].price = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[4]").text.replace('$', '')
+            accounts['TSM401k'].value = driver.webDriver.find_element(By.XPATH,"//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[5]").text.replace('$','')
+        else:
+            accounts['REIF401k'].balance = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[3]").text
+            accounts['REIF401k'].value = driver.webDriver.find_element(By.XPATH,"//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[5]").text.replace('$','')
+        num+=1
+    
+def captureVanguard401kTransactions(driver):
+    locateVanguardWindow(driver)
+    driver.openNewWindow('https://retirementplans.vanguard.com/VGApp/pe/faces/TransactionHistory.xhtml?SelectedPlanId=095895')
+    lastMonth = getStartAndEndOfDateRange(datetime.today().date(), "month")
+    v401kActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\401k.csv"
+    open(v401kActivity, 'w', newline='').truncate()
+    driver.webDriver.find_element(By.ID,"TransactionHistoryTabBox:transHistoryForm:viewByDate_main").click() # View history from: option
+    driver.webDriver.find_element(By.ID,"TransactionHistoryTabBox:transHistoryForm:viewByDate:historyItemLabel2").click() # View last 3 months to ensure all transactions are visible
+    time.sleep(1)
+    row = 1
+    transactionTable = "//*[@id='TransactionHistoryTabBox:transHistoryForm:transactionHistoryDataTabletbody0']/tr["
+    while True:
+        column=1
+        row+=1
+        date = datetime.strptime(driver.webDriver.find_element(By.XPATH,(transactionTable + str(row) + "]/td[" + str(column) + "]")).text, '%m/%d/%Y').date()
+        description = ''
+        if date.month == lastMonth['endDate'].month:
+            column+=1
+            description = driver.webDriver.find_element(By.XPATH,transactionTable + str(row) + "]/td[" + str(column) + "]").text
+            column+=1
+            description +=" "+ driver.webDriver.find_element(By.XPATH,transactionTable + str(row) + "]/td[" + str(column) + "]").text
+            column+=1
+            shares = driver.webDriver.find_element(By.XPATH,transactionTable + str(row) + "]/td[" + str(column) + "]").text
+            column+=2
+            amount = driver.webDriver.find_element(By.XPATH,transactionTable + str(row) + "]/td[" + str(column) + "]").text.replace('$','')
+            amount = -float(amount) if "Fee" in description else amount
+            shares = -float(shares) if "Fee" in description else shares
+            transaction = date, description, shares, amount
+            csv.writer(open(v401kActivity, 'a', newline='', encoding="utf-8")).writerow(transaction)
+        elif date.month > lastMonth['endDate'].month:
+            continue
+        else:
+            break
+    return v401kActivity
+    
+def getVanguardBalancesAndPensionInterestYTD(driver, accounts):
+    locateVanguardWindow(driver)
+    driver.openNewWindow('https://ownyourfuture.vanguard.com/main/dashboard/assets-details')
     time.sleep(2)
     pensionBalance = driver.webDriver.find_element(By.XPATH, "/html/body/div[3]/div/app-personalized-dashboard-root/app-assets-details/app-balance-details/div/div[3]/div[3]/div/app-details-card/div/div/div[1]/div[3]/h4").text.strip('$').replace(',', '')
     v401kBalance = driver.webDriver.find_element(By.XPATH,"/html/body/div[3]/div/app-personalized-dashboard-root/app-assets-details/app-balance-details/div/div[3]/app-details-card/div/div/div[1]/div[3]/h4").text.strip('$').replace(',', '')                                                  
-    accounts[0].setBalance(pensionBalance)
-    accounts[1].setBalance(v401kBalance)
+    accounts['Pension'].setBalance(pensionBalance)
+    accounts['V401k'].setBalance(v401kBalance)
     interestYTD = driver.webDriver.find_element(By.XPATH, "/html/body/div[3]/div/app-personalized-dashboard-root/app-assets-details/app-balance-details/div/div[3]/div[4]/div/app-details-card/div/div/div[1]/div[3]/h4").text.strip('$').replace(',', '')
     return interestYTD
 
-def importGnuTransactions(book, today, account, interestYTD):
+def calculatePensionTransactions(book, today, account, interestYTD):
     lastMonth = getStartAndEndOfDateRange(today, "month")
     interestAmount = 0
     transactions = [tr for tr in book.readBook.transactions
@@ -85,36 +120,27 @@ def importGnuTransactions(book, today, account, interestYTD):
     interest = Decimal(interestYTD) - interestAmount
     employerContribution = accountChange - interest
     amount = {'interest': -interest, 'employerContribution': -employerContribution, 'accountChange': accountChange}
-    transactionVariables = {'postDate': lastMonth['endDate'], 'description': "Contribution + Interest", 'amount': amount, 'fromAccount': account.gnuAccount}
-    book.writeGnuTransaction(transactionVariables)
-    return {"interest": interest, "employerContribution": employerContribution}
+    return {'postDate': lastMonth['endDate'], 'description': "Contribution + Interest", 'amount': amount, 'fromAccount': account.gnuAccount}
     
 def runVanguard(driver, accounts, book):
     today = datetime.today().date()
     locateVanguardWindow(driver)
-    interestYTD = getVanguardBalanceAndInterestYTD(driver, accounts)
-    pensionInfo = importGnuTransactions(book, today, accounts[0], interestYTD)
-    accounts[0].updateGnuBalance(book.getBalance(accounts[0].gnuAccount))
-
-    openSpreadsheet(driver, 'Asset Allocation', '2022')
-    updateSpreadsheet('Asset Allocation', today.year, 'VanguardPension', today.month, float(accounts[0].balance))
-    book.openGnuCashUI()
-    return pensionInfo
+    getVanguard401kPriceAndShares(driver, accounts)
+    v401kActivity = captureVanguard401kTransactions(driver)
+    book.importGnuTransaction(accounts['V401k'], v401kActivity, driver, 0)
+    interestYTD = getVanguardBalancesAndPensionInterestYTD(driver, accounts)
+    book.writeGnuTransaction(calculatePensionTransactions(book, today, accounts['Pension'], interestYTD))
+    accounts['Pension'].updateGnuBalance(book.getBalance(accounts['Pension'].gnuAccount))
 
 if __name__ == '__main__':
-    # driver = Driver("Chrome")
-    # book = GnuCash('Finance')
-    # Pension = USD("VanguardPension", book)
-    # V401k = USD("Vanguard401k", book)
-    # accounts = [Pension, V401k]
-    # pensionInfo = runVanguard(driver, accounts, book)
-    # for a in accounts:
-    #     a.getData()
-    # print('  Interested Earned: ' + str(pensionInfo.interest))
-    # print('total contributions: ' + str(pensionInfo.employerContributions))
-    # book.closeBook()
-
-
     driver = Driver("Chrome")
-    object = getVanguardPriceAndShares(driver)
-    print(object)
+    book = GnuCash('Finance')
+    Pension = USD("VanguardPension", book)
+    V401k = USD("Vanguard401k", book)
+    REIF401k = Security("Real Estate Index Fund", book)
+    TSM401k = Security("Total Stock Market(401k)", book)
+    accounts = {'Pension': Pension, 'V401k': V401k, 'REIF401k': REIF401k, 'TSM401k': TSM401k}
+    runVanguard(driver, accounts, book)
+    Pension.getData()
+    V401k.getData()
+    book.closeBook()

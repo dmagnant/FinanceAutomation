@@ -108,7 +108,7 @@ if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
     Tellwut = Security("Tellwut", book)
-    runTellwut(driver, Tellwut, book)
     Tellwut.getData()
+    runTellwut(driver, Tellwut, book)
     book.closeBook()
     

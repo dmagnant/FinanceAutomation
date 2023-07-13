@@ -47,6 +47,16 @@ def getSymbolByName(self):
             return 'TWT'
         case "swagbucks":
             return 'SB'
+        case 'real estate index fund':
+            return 'VGSNX'
+        case 'total stock market(401k)':
+            return '8585'
+        case 'total stock market(ira)':
+            return 'VTI'
+        case 'total intl stock market':
+            return 'VXUS'
+        case 'govt money market':
+            return 'SPAXX'
         case _:
             print(f'Security: {self.name} not found in "getSymbolByName" function')
                 
@@ -87,17 +97,16 @@ class Asset:
     def updateGnuBalance(self, balance):
         self.gnuBalance = round(Decimal(balance), 2)
         
-class Security(Asset):
-    "this is a class for tracking security information"
+class Security(Asset):    # this is a class for tracking security information
     def __init__(self, name, book, account=None):
         self.name = name
         self.balance = ''
         self.value = ''
         self.account = account
         self.symbol = getSymbolByName(self)
-        self.price = round(book.getPriceInGnucash(self.symbol), 2)
+        self.price = book.getPriceInGnucash(self.symbol, datetime.today().date())
         self.gnuAccount = getAccountPath(self)
-        self.gnuBalance = book.getBalance(self.gnuAccount)
+        self.gnuBalance = Decimal(book.getBalance(self.gnuAccount))
         self.gnuValue = round(self.gnuBalance * self.price, 2) if float(self.gnuBalance * self.price)>0 else 0
                 
     def getData(self):
