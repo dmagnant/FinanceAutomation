@@ -288,5 +288,9 @@ def getAccountPath(account):
             return "Assets:Non-Liquid Assets:401k:Total Stock Market"
         case 'Total Stock Market(IRA)':
             return "Assets:Non-Liquid Assets:IRA:Fidelity:Total Stock Market" 
+        case 'Total Intl Stock Market':
+            return "Assets:Non-Liquid Assets:IRA:Fidelity:Total Intl Stock Market"
+        case 'Govt Money Market':
+            return "Assets:Non-Liquid Assets:IRA:Fidelity:Govt Money Market"
         case _:
             print(f'account: {accountName} not found in "getAccountPath" function')

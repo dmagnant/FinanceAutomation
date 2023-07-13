@@ -75,38 +75,16 @@ def runFidelity(driver, accounts, book):
     accounts['Fidelity'].setBalance(getFidelityBalance(driver))
     iraActivity = captureFidelityTransactions(driver)
     book.importGnuTransaction(accounts['Fidelity'], iraActivity, driver, 0)
-
-def getFidelityShares(driver):
-    locateFidelityWindow(driver)
-    if "/portfolio/positions" not in driver.webDriver.current_url:
-        driver.webDriver.get("https://digital.fidelity.com/ftgw/digital/portfolio/positions")
-    sharesDict = {}
-    row = 2
-    while True:
-        try:
-            symbol = driver.webDriver.find_element(By.XPATH, "//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[1]/div[" + str(row) + "]/div/div/span/div/div[2]/div/button").text.replace('*', '')
-            quantity = driver.webDriver.find_element(By.XPATH, "//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[2]/div/div/div[" + str(row) + "]/div[6]/div/span").text.replace(',','')
-            sharesDict[symbol] = quantity
-            row += 1
-        except NoSuchElementException:
-            return sharesDict
     
 if __name__ == '__main__':
-    # driver = Driver("Chrome")
-    # book = GnuCash('Finance')
-    # VXUS = Security("Total Intl Stock Market", book)
-    # VTI = Security("Total Stock Market(IRA)", book)
-    # SPAXX = Security("Govt Money Market", book)
-    # accounts = {'Fidelity': Fidelity,'VXUS': VXUS,'VTI': VTI,'SPAXX': SPAXX}
-    # runFidelity(driver, accounts, book)
-    # Fidelity.getData()
-    
-    # driver = Driver("Chrome")
-    # captureFidelityTransactions(driver)
-    
     driver = Driver("Chrome")
     book = GnuCash('Finance')
     Fidelity = USD("Fidelity", book)
-    iraActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\ira.csv"
-    book.importGnuTransaction(Fidelity, iraActivity, driver, 0)
-    book.closeBook()
+    VXUS = Security('Total Intl Stock Market', book)
+    VTI = Security('Total Stock Market(IRA)', book)
+    SPAXX = Security('Govt Money Market', book)
+    accounts = {'Fidelity': Fidelity,'VXUS': VXUS,'VTI': VTI,'SPAXX': SPAXX}
+    # runFidelity(driver, accounts, book)
+    # Fidelity.getData()
+    
+    VXUS.getData()

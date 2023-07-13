@@ -13,8 +13,21 @@
                 </form>
             </div>
             <div style="width: 80%; display:table-cell">
-                <b>&emsp;&emsp;&emsp;&emsp;&ensp;balance: ${{account.balance}}</b><br>
-                <b>gnuCash balance: ${{account.gnuBalance}}</b><br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;balance: <b>${{accounts.Fidelity.balance}}</b><br>
+                &emsp;&emsp;&emsp;&thinsp;gnuBalance: <b>${{accounts.Fidelity.gnuBalance}}</b><br><br>
+                
+                &emsp;&thinsp;{{accounts.SPAXX.symbol}} balance: <b>${{accounts.SPAXX.balance}}</b><br>
+                &emsp;&emsp;&emsp;gnuBalance: <b>${{accounts.SPAXX.gnuBalance}}</b><br><br>
+                
+                &emsp;&emsp;&emsp;&emsp;&emsp;&ensp;{{accounts.VTI.symbol}} shares: <b>{{accounts.VTI.balance}} {{accounts.VTI.symbol}}</b><br>
+                &emsp;&ensp;&thinsp;gnuBalance shares: <b>{{accounts.VTI.gnuBalance}} {{accounts.VTI.symbol}}</b><br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;{{accounts.VTI.symbol}} value: <b>${{accounts.VTI.value}}</b><br>
+                &emsp;&emsp;&ensp;${{accounts.VTI.price}} x shares: <b>${{accounts.VTI.gnuValue}}</b><br><br>
+
+                &emsp;&emsp;&emsp;&emsp;{{accounts.VXUS.symbol}} shares: <b>{{accounts.VXUS.balance}} {{accounts.VXUS.symbol}}</b><br>
+                &emsp;&ensp;gnuBalance shares: <b>{{accounts.VXUS.gnuBalance}} {{accounts.VXUS.symbol}}</b><br>
+                &emsp;&emsp;&emsp;&emsp;&ensp;&thinsp;{{accounts.VXUS.symbol}} value: <b>${{accounts.TSMVXUS401k.value}}</b><br>
+                &emsp;&emsp;&emsp;&ensp;${{accounts.VXUS.price}} x shares: <b>${{accounts.VXUS.gnuValue}}</b><br><br>
             </div>
         </div>
     </div>

@@ -18,7 +18,7 @@ if __name__ == '__main__' or __name__ == "Monthly":
     from Worthy import getWorthyBalance 
     from Sofi import setMonthlySpendTarget
     from Vanguard import runVanguard
-    from Fidelity import getFidelityShares
+    from Fidelity import runFidelity
 else:
     from .Classes.Asset import USD, Security
     from .Classes.WebDriver import Driver
@@ -36,7 +36,7 @@ else:
     from .Worthy import getWorthyBalance
     from .Sofi import setMonthlySpendTarget
     from .Vanguard import runVanguard
-    from .Fidelity import getFidelityShares
+    from .Fidelity import runFidelity
 
 def getMonthlyAccounts(type, personalBook, jointBook):
     if type == 'USD':
@@ -47,11 +47,14 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         Pension = USD("VanguardPension", personalBook)
         REIF401k = Security("Real Estate Index Fund", personalBook)
         TSM401k = Security("Total Stock Market(401k)", personalBook)
+        VXUS = Security('Total Intl Stock Market', personalBook)
+        VTI = Security('Total Stock Market(IRA)', personalBook)
+        SPAXX = Security('Govt Money Market', personalBook)
         Worthy = USD("Worthy", personalBook)
         Home = USD('Home', jointBook)
         LiquidAssets = USD("Liquid Assets", personalBook)
         Bonds = USD("Bonds", personalBook)
-        accounts = {'Fidelity': Fidelity, 'HEInvestment': HEInvestment, 'HECash': HECash, 'V401k': V401k,'REIF401k': REIF401k,'TSM401k':TSM401k,'Worthy': Worthy, 'Pension': Pension, 'Home': Home, 'LiquidAssets': LiquidAssets, 'Bonds': Bonds}
+        accounts = {'Fidelity':Fidelity,'VXUS':VXUS,'VTI':VTI,'SPAXX':SPAXX,'HEInvestment':HEInvestment,'HECash':HECash,'V401k':V401k,'REIF401k':REIF401k,'TSM401k':TSM401k,'Worthy': Worthy,'Pension':Pension,'Home':Home,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
     elif type == 'Crypto':
         CryptoPortfolio = USD("Crypto", personalBook)
         Cardano = Security("Cardano", personalBook, 'ADA-Eternl')
@@ -81,14 +84,13 @@ def runUSD(driver, today, accounts, personalBook):
     accounts['LiquidAssets'].updateGnuBalance(personalBook.getBalance(accounts['LiquidAssets'].gnuAccount))
     accounts['Bonds'].updateGnuBalance(personalBook.getBalance(accounts['Bonds'].gnuAccount))
     runVanguard(driver, accounts, personalBook)
+    runFidelity(driver, accounts, personalBook)
     openSpreadsheet(driver, 'Asset Allocation', str(year))
     updateSpreadsheet('Asset Allocation', year, accounts['Bonds'].name, month, float(accounts['Bonds'].gnuBalance), 'Liquid Assets')
     updateSpreadsheet('Asset Allocation', year, accounts['LiquidAssets'].name, month, float(accounts['LiquidAssets'].gnuBalance), 'Liquid Assets')
     updateSpreadsheet('Asset Allocation', year, accounts['V401k'].name, month, float(accounts['V401k'].balance), '401k')
     updateSpreadsheet('Asset Allocation', today.year, accounts['Pension'].name, today.month, float(accounts['Pension'].gnuBalance), 'Pension')
     updateInvestmentPrices(driver, accounts['Home'])
-    fidelity = getFidelityShares(driver)
-    updateInvestmentShares(driver, fidelity)
     driver.findWindowByUrl("/scripts/monthly")
 
 def runCrypto(driver, today, accounts, personalBook):
@@ -130,6 +132,5 @@ if __name__ == '__main__':
     # HealthEquity = USD("HSA", personalBook)
     # healthEquity = getHealthEquityDividendsAndShares(driver, HealthEquity)
     # vanguardInfo = getVanguardPriceAndShares(driver)
-    # fidelity = getFidelityShares(driver)
     # updateInvestmentShares(driver, HealthEquity, vanguardInfo, fidelity)
     

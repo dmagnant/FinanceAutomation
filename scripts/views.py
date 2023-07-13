@@ -440,19 +440,23 @@ def exodus(request):
 
 def fidelity(request):
     book = GnuCash('Finance')
-    Fidelity = USD("Fidelity", book)    
+    Fidelity = USD("Fidelity", book)
+    VXUS = Security('Total Intl Stock Market', book)
+    VTI = Security('Total Stock Market(IRA)', book)
+    SPAXX = Security('Govt Money Market', book)
+    accounts = {'Fidelity': Fidelity,'VXUS': VXUS,'VTI': VTI,'SPAXX': SPAXX}
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
-            runFidelity(driver, Fidelity)
+            runFidelity(driver, accounts, book)
         elif "balance" in request.POST:
             Fidelity.setBalance(getFidelityBalance(driver))
         elif "login" in request.POST:
             locateFidelityWindow(driver)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/fidelity"))
-    context = {'account': Fidelity}
     book.closeBook()
+    context = {'accounts': accounts}
     return render(request,"scripts/fidelity.html", context)            
     
 def healthEquity(request):
@@ -529,14 +533,10 @@ def monthly(request):
             runUSD(driver, today, usdAccounts, personalBook)
         elif "prices" in request.POST:
             updateInvestmentPrices(driver, usdAccounts['Home'])
-        elif "shares" in request.POST:
-            vanguardInfo = getVanguard401kPriceAndShares(driver)
-            fidelity = getFidelityShares(driver)
-            updateInvestmentShares(driver, healthEquity, vanguardInfo, fidelity)
         elif "Crypto" in request.POST:
             runCrypto(driver, today, cryptoAccounts, personalBook)
         elif "fidelityMain" in request.POST:
-            runFidelity(driver, Fidelity)
+            runFidelity(driver, usdAccounts, personalBook)
         elif "fidelityBalance" in request.POST:
             usdAccounts['Fidelity'].setBalance(getFidelityBalance(driver))
         elif "fidelityLogin" in request.POST:
@@ -547,6 +547,8 @@ def monthly(request):
             locateHealthEquityWindow(driver)
         elif "HEBalances" in request.POST:
             getHealthEquityBalances(driver, {'HEInvestment': usdAccounts['HEInvestment'], 'HECash': usdAccounts['HECash'], 'V401k': usdAccounts['V401k']})
+        elif "vanguardMain" in request.POST:
+            runVanguard(driver, usdAccounts, personalBook)
         elif "vanguardLogin" in request.POST:
             locateVanguardWindow(driver)
         elif "vanguardBalances" in request.POST:

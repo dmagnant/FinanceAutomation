@@ -18,8 +18,21 @@
                     <button type="submit" name="fidelityLogin">Login</button>&emsp;
                     <button type="submit" name="fidelityBalance">Balance</button>&emsp;
                 </form><br>
-                &emsp;&ensp;&thinsp;balance: <b>${{usdAccounts.Fidelity.balance}}</b><br>
-                gnuBalance: <b>${{usdAccounts.Fidelity.gnuBalance}}</b><br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;balance: <b>${{usdAccounts.Fidelity.balance}}</b><br>
+                &emsp;&emsp;&emsp;&thinsp;gnuBalance: <b>${{usdAccounts.Fidelity.gnuBalance}}</b><br><br>
+                
+                &emsp;&thinsp;{{usdAccounts.SPAXX.symbol}} balance: <b>${{usdAccounts.SPAXX.balance}}</b><br>
+                &emsp;&emsp;&emsp;gnuBalance: <b>${{usdAccounts.SPAXX.gnuBalance}}</b><br><br>
+                
+                &emsp;&emsp;&emsp;&emsp;&emsp;&ensp;{{usdAccounts.VTI.symbol}} shares: <b>{{usdAccounts.VTI.balance}} {{usdAccounts.VTI.symbol}}</b><br>
+                &emsp;&ensp;&thinsp;gnuBalance shares: <b>{{usdAccounts.VTI.gnuBalance}} {{usdAccounts.VTI.symbol}}</b><br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;{{usdAccounts.VTI.symbol}} value: <b>${{usdAccounts.VTI.value}}</b><br>
+                &emsp;&emsp;&ensp;${{usdAccounts.VTI.price}} x shares: <b>${{usdAccounts.VTI.gnuValue}}</b><br><br>
+
+                &emsp;&emsp;&emsp;&emsp;{{usdAccounts.VXUS.symbol}} shares: <b>{{usdAccounts.VXUS.balance}} {{usdAccounts.VXUS.symbol}}</b><br>
+                &emsp;&ensp;gnuBalance shares: <b>{{usdAccounts.VXUS.gnuBalance}} {{usdAccounts.VXUS.symbol}}</b><br>
+                &emsp;&emsp;&emsp;&emsp;&ensp;&thinsp;{{usdAccounts.VXUS.symbol}} value: <b>${{usdAccounts.TSMVXUS401k.value}}</b><br>
+                &emsp;&emsp;&emsp;&ensp;${{usdAccounts.VXUS.price}} x shares: <b>${{usdAccounts.VXUS.gnuValue}}</b><br><br>
             </div>
             <div style="width: 25%; display:table-cell">
                 <b><a href="{% url 'HealthEquity' %}" target="_blank">Health Equity</a></b><br><br>
@@ -40,6 +53,7 @@
                 <b><a href="{% url 'Vanguard' %}" target="_blank">Vanguard</a></b><br><br>
                 <form method="post">
                     {% csrf_token %}
+                    <button type="submit" name="vanguardMain">Main</button>&emsp;
                     <button type="submit" name="vanguardLogin">Login</button>&emsp;
                     <button type="submit" name="vanguardBalances">Balances</button>&emsp;
                 </form><br>
