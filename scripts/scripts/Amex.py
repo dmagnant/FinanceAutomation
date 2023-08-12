@@ -26,8 +26,7 @@ def locateAmexWindow(driver):
         time.sleep(1) 
         
 def amexLogin(driver):
-    driver.openNewWindow('https://www.americanexpress.com/')
-    driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div/div/header/div[2]/div[1]/div[3]/div/div[5]/ul/li[3]/span/a[1]").click()
+    driver.openNewWindow('https://www.americanexpress.com/en-us/account/login?inav=iNavLnkLog')
     driver.webDriver.find_element(By.ID, "eliloUserID").send_keys(getUsername('Amex'))
     driver.webDriver.find_element(By.ID, "eliloPassword").send_keys(getPassword('Amex'))
     driver.webDriver.find_element(By.ID, "loginSubmit").click()
@@ -48,8 +47,8 @@ def exportAmexTransactions(driver):
     except NoSuchElementException:
         exception = "caught"
     time.sleep(6)
-    driver.find_element(By.XPATH, getAmexBasePath() + "table/thead/div/tr[1]/td[2]/div/div[2]/button/button").click() # download arrow
-    driver.find_element(By.XPATH, getAmexBasePath() + "div[2]/div/div/div/div/div/div[1]/div/div/div[1]/div/fieldset/div[2]/label").click() # CSV Option
+    driver.find_element(By.XPATH, getAmexBasePath() + "div[2]/div[1]/div[1]/div[1]/div[2]/div/div[2]/button/i").click() # download arrow
+    driver.find_element(By.XPATH, getAmexBasePath() + "div[2]/div/div/div/div/div/div[1]/div/div/div[1]/div/fieldset/div[1]/label").click() # CSV Option
     try: # delete old csv file
         os.remove(r"C:\Users\dmagn\Downloads\activity.csv")
     except FileNotFoundError:

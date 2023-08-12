@@ -35,15 +35,12 @@ def allyLogin(driver):
         time.sleep(2)
         driver.webDriver.find_element(By.ID,"login").click() # login
         time.sleep(2)
-        # driver.webDriver.find_element(By.ID,"allysf-login-v2-password-367761b575af35f6ccb5b53e96b2fa2d").send_keys(getPassword('Ally Bank'))
         time.sleep(2)
         driver.webDriver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button").click() # login
         time.sleep(5)
         try: # check if login button is still seen
             driver.webDriver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div/div[2]/form/div[3]/button/span").click()
             loggedIn = True
-            # driver.webDriver.close()
-            # driver.switchToLastWindow()
         except NoSuchElementException:
             print('not found')
             loggedIn = True
@@ -104,27 +101,10 @@ def runAlly(driver, account, book):
     book.importUniqueTransactionsToGnuCash(account, allyActivity, driver, dateRange, 0)
     
 if __name__ == '__main__':
-    # driver = Driver("Chrome")
-    # book = GnuCash('Home')
-    # Ally = USD("Ally", book)
-    # runAlly(driver, Ally, book)
-    # Ally.getData()
-    # allyLogout(driver)
-    # book.closeBook()
-    
-    # today = datetime.today().date()
-    # timeSpan = 7
-    
-    # dateRange = getStartAndEndOfDateRange(today, timeSpan)
-    
     driver = Driver("Chrome")
-    found = driver.findWindowByUrl("we-energies.com")
-    driver.webDriver.switch_to.window(found)
-    time.sleep(1)
-    billRow = 2
-    billColumn = 7
-    billFound = "no"
-    # capture date
-    weBillPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span/span"
-    weBillAmount = driver.webDriver.find_element(By.XPATH, weBillPath).text
-    print(weBillAmount)
+    book = GnuCash('Home')
+    Ally = USD("Ally", book)
+    runAlly(driver, Ally, book)
+    Ally.getData()
+    allyLogout(driver)
+    book.closeBook()

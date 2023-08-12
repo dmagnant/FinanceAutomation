@@ -461,10 +461,10 @@ def fidelity(request):
     
 def healthEquity(request):
     book = GnuCash('Finance')
-    HEInvestment = Security("HSA Investment", book)
+    VIIIX = Security("HSA Investment", book)
     HECash = USD("HSA Cash", book)
     V401k = USD("Vanguard401k", book)
-    HEaccounts = {'HEInvestment': HEInvestment, 'HECash': HECash, 'V401k': V401k}
+    HEaccounts = {'VIIIX': VIIIX, 'HECash': HECash, 'V401k': V401k}
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
@@ -532,7 +532,7 @@ def monthly(request):
         if "USD" in request.POST:
             runUSD(driver, today, usdAccounts, personalBook)
         elif "prices" in request.POST:
-            updateInvestmentPrices(driver, usdAccounts['Home'])
+            updateInvestmentPrices(driver, {"Home":usdAccounts["Home"],"8585":usdAccounts['TSM401k'],"REIF":usdAccounts['REIF401k']}, personalBook)
         elif "Crypto" in request.POST:
             runCrypto(driver, today, cryptoAccounts, personalBook)
         elif "fidelityMain" in request.POST:
@@ -542,11 +542,11 @@ def monthly(request):
         elif "fidelityLogin" in request.POST:
             locateFidelityWindow(driver)
         elif "HEMain" in request.POST:
-            runHealthEquity(driver, {'HEInvestment': usdAccounts['HEInvestment'], 'HECash': usdAccounts['HECash'], 'V401k': usdAccounts['V401k']})
+            runHealthEquity(driver, {'VIIIX': usdAccounts['VIIIX'], 'HECash': usdAccounts['HECash'], 'V401k': usdAccounts['V401k']}, personalBook)
         elif "HELogin" in request.POST:
             locateHealthEquityWindow(driver)
         elif "HEBalances" in request.POST:
-            getHealthEquityBalances(driver, {'HEInvestment': usdAccounts['HEInvestment'], 'HECash': usdAccounts['HECash'], 'V401k': usdAccounts['V401k']})
+            getHealthEquityBalances(driver, {'VIIIX': usdAccounts['VIIIX'], 'HECash': usdAccounts['HECash'], 'V401k': usdAccounts['V401k']})
         elif "vanguardMain" in request.POST:
             runVanguard(driver, usdAccounts, personalBook)
         elif "vanguardLogin" in request.POST:
@@ -564,7 +564,7 @@ def monthly(request):
         elif "coinbaseBalance" in request.POST:
             getCoinbaseBalances(driver, [cryptoAccounts['Loopring']])
         elif "eternlMain" in request.POST:
-            runEternl(driver, cryptoAccounts['Cardano'], book)
+            runEternl(driver, cryptoAccounts['Cardano'], personalBook)
         elif "eternlBalance" in request.POST:
             cryptoAccounts['Cardano'].setBalance(getEternlBalance(driver))
         elif "eternlLogin" in request.POST:

@@ -152,5 +152,15 @@ if __name__ == '__main__':
     # sofiLogout(driver)
     # book.closeBook()
     
+    # driver = Driver("Chrome")
+    # setMonthlySpendTarget(driver)
+    
     driver = Driver("Chrome")
-    setMonthlySpendTarget(driver)
+    book = GnuCash('Finance')
+    Checking = USD("Sofi Checking", book)
+    today = datetime.today().date()
+    dateRange = getStartAndEndOfDateRange(today, 7)
+    sofiActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\sofi.csv"
+    open(sofiActivity, 'a', newline='')
+    book.importUniqueTransactionsToGnuCash(Checking, sofiActivity, driver, dateRange, 0)
+    book.closeBook()

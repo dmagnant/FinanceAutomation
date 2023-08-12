@@ -31,7 +31,7 @@ def openGnuCashBook(type, readOnly):
     try:
         myBook = piecash.open_book(book, readonly=readOnly, open_if_lock=readOnly, check_same_thread=False)
     except GnucashException:
-        showMessage("Gnucash file open", f'Close Gnucash file then click OK \n')
+        showMessage("Gnucash file open", "Close Gnucash file then click OK")
         myBook = piecash.open_book(book, readonly=readOnly, open_if_lock=readOnly, check_same_thread=False)
     return myBook
 
@@ -125,11 +125,11 @@ class GnuCash:
         
     def updatePriceInGnucash(self, symbol, price):
         myBook = self.getWriteBook()
-        try: 
+        try:
             gnuCashPrice = myBook.prices(commodity=myBook.commodities(mnemonic=symbol), currency=myBook.currencies(mnemonic="USD"), date=datetime.today().date())  # raise a KeyError if Price does not exist
-            gnuCashPrice.value = price
+            gnuCashPrice.value = Decimal(price)
         except KeyError:
-            p = Price(myBook.commodities(mnemonic=symbol), myBook.currencies(mnemonic="USD"), datetime.today().date(), price, "last")
+            p = Price(myBook.commodities(mnemonic=symbol), myBook.currencies(mnemonic="USD"), datetime.today().date(), Decimal(price), "last")
         myBook.flush()
            
     def writeCryptoTransaction(self):
@@ -322,7 +322,7 @@ class GnuCash:
                 toAccount = "Income:Investments:Interest"
             elif 'HSA Investment' in description:
                 toAccount = 'Assets:Non-Liquid Assets:HSA:NM HSA Cash'
-            elif 'IRA Contribution' in description:
+            elif 'IRA Contribution' in description or 'IRA sale of stock' in description:
                 toAccount = 'Assets:Non-Liquid Assets:IRA:Fidelity'
             elif 'IRA Investment' in description:
                 toAccount = 'Assets:Non-Liquid Assets:IRA:Fidelity:Govt Money Market'
@@ -354,6 +354,8 @@ class GnuCash:
                 toAccount = "Expenses:Utilities:Phone"
             elif "Alliant Transfer" in description:
                 toAccount = "Assets:Liquid Assets:Promos:Alliant"
+            elif 'HSA Employer Contribution' in description:
+                toAccount = "Income:Employer Contributions:HSA Contributions"
             elif "KAINTH" in description:
                 toAccount = "Expenses:Groceries"
             elif "MINI MARKET MILWAUKEE WI" in description:
@@ -367,7 +369,7 @@ class GnuCash:
             elif "TRAVEL CREDIT" in description:
                 toAccount = "Income:Credit Card Rewards"
             elif "Fidelity IRA Transfer" in description:
-                toAccount = "Assets:Non-Liquid Assets:IRA:Fidelity"
+                toAccount = "Assets:Non-Liquid Assets:IRA:Fidelity:Govt Money Market"
             elif "MILWAUKEE ELECTRIC TO" in description:
                 toAccount = "Expenses:Home Expenses:Maintenance"
             elif "CASH REWARDS STATEMENT CREDIT" in description:
@@ -535,7 +537,7 @@ class GnuCash:
                     fromAccount += ":Total Intl Stock"
                 elif "TOTAL STK MKT ETF" in description and "DIVIDEND" not in description:
                     fromAccount += ":Total Stock Market"
-                elif "DIVIDEND" in description or 'CASH CONTRIBUTION' in description:
+                elif "DIVIDEND" in description or 'YOU SOLD' in description:
                     fromAccount += ":Govt Money Market"
                 description = modifyTransactionDescription(description)
                 shares = float(row[3])

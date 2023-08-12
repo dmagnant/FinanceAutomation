@@ -28,12 +28,10 @@ def getSwagbucksBasePath():
 def closePopUps(driver):
     driver.webDriver.implicitly_wait(2)
     try:
-        # click Yay for me
-        driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/section/section/aside/button[2]").click()
+        driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/section/section/aside/button[2]").click() # Yay for me
     except NoSuchElementException:
         try:
-            # Exit Generic Pop-up Box
-            driver.webDriver.find_element(By.ID, "lightboxExit").click()
+            driver.webDriver.find_element(By.ID, "lightboxExit").click() # to exit pop-up
         except NoSuchElementException:
             exception = "caught"
 
@@ -61,26 +59,17 @@ def swagBuckscontentDiscovery(driver):
         try:
             try:
                 earnings = driver.webDriver.find_element(By.XPATH, contentPath + "/p/span/span[3]").text
-                print(earnings)
             except NoSuchElementException:
                 cardNum += 1
                 continue
-                # if cardNum <=2:
-                #     cardNum+=1
-                #     continue
-                # else:
-                #     break
             description = driver.webDriver.find_element(By.XPATH, contentPath + "/button").text
-            print(description)
             if "1 sb" in earnings.lower() or "discover daily interests" == description.lower():
                 clickAmt = 1
                 while clickAmt < 5:
                     driver.webDriver.find_element(By.XPATH, contentPath).click()
-                    # click get SB
-                    driver.webDriver.find_element(By.XPATH, "/html/body/aside[2]/div/div[1]/div[2]/div[2]/div/div[2]/a").click()
+                    driver.webDriver.find_element(By.XPATH, "/html/body/aside[2]/div/div[1]/div[2]/div[2]/div/div[2]/a").click() # get SB
                     time.sleep(1)
-                    # click X to close
-                    driver.webDriver.find_element(By.XPATH, "/html/body/aside[2]/div/button").click()
+                    driver.webDriver.find_element(By.XPATH, "/html/body/aside[2]/div/button").click() # X to close
                     clickAmt += 1
                     if "discover daily interests" != description.lower():
                         break
@@ -105,10 +94,11 @@ def runAlusRevenge(driver):
     driver.implicitly_wait(20)
     driver.find_element(By.ID, "gamesItemBtn").click() # Play for Free
     time.sleep(3)
-    driver.find_element(By.XPATH,"/html/body").send_keys(Keys.DOWN)
-    driver.find_element(By.XPATH,"/html/body").send_keys(Keys.DOWN)
-    driver.find_element(By.XPATH,"/html/body").send_keys(Keys.DOWN)
-    driver.find_element(By.XPATH,"/html/body").send_keys(Keys.UP)
+    element = driver.find_element(By.XPATH,"/html/body")
+    element.send_keys(Keys.DOWN)
+    element.send_keys(Keys.DOWN)
+    element.send_keys(Keys.DOWN)
+    element.send_keys(Keys.UP)
     redeemed = 0
     while redeemed < 3:
         game_over_text = ""
@@ -228,7 +218,6 @@ def swagbucksSearch(driver):
     locateSwagBucksWindow(driver)
     driver = driver.webDriver
     driver.implicitly_wait(3)
-    searches = 0
     num = 0
     while num < 1:
         search_term1 = None
@@ -249,7 +238,6 @@ def swagbucksSearch(driver):
                 closePopUps(driver)
                 driver.find_element(By.ID, "sbLogoLink").click()
             time.sleep(1)
-            searches += 1
             while search_term1 is None:
                 search_term1 = RandomWords().random_word()
             while search_term2 is None:

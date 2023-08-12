@@ -132,6 +132,8 @@ def modifyTransactionDescription(description, amount="0.00"):
         description = "HSA Investment"
     elif "VIIIX: Dividend" in description:
         description = "HSA Dividend"
+    elif "Employer Contribution" in description:
+        description = 'HSA Employer Contribution'
     elif "Plan Contribution" in description:
         description = "401k Investment"
     elif "Dividends on Equity Investments" in description:
@@ -140,8 +142,8 @@ def modifyTransactionDescription(description, amount="0.00"):
         description = "IRA Dividend"
     elif "YOU BOUGHT" in description:
         description = "IRA Investment"
-    elif "YOU SOLD" in description or "CASH CONTRIBUTION" in description:
-        description = "IRA Contribution"
+    elif "YOU SOLD" in description:
+        description = "IRA sale of stock"
     elif "Fee Real Estate" in description or "Fee Instl Tot Stk" in description:
         description = "401k Fee"
     elif "JONATHON MAGNANT" in description.upper():

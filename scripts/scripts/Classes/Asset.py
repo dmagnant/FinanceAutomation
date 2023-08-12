@@ -59,7 +59,7 @@ def getSymbolByName(self):
             return 'SPAXX'
         case _:
             print(f'Security: {self.name} not found in "getSymbolByName" function')
-                
+
 def updateCoinQuantityFromStakingInGnuCash(self, myBook):
     myBook = myBook.getWriteBook()
     coinDifference = Decimal(self.balance) - Decimal(self.gnuBalance)
@@ -73,6 +73,8 @@ def updateCoinQuantityFromStakingInGnuCash(self, myBook):
         f'minus gnuCash balance of {self.gnuBalance} '
         f'leaves unexpected coin difference of {coinDifference} '
         f'is it rounding issue?')                
+
+
 
 class Asset:
     "this is a class for tracking asset information"
@@ -88,14 +90,13 @@ class Asset:
     def getGnuAccount(self):
         return self.gnuAccount
 
-    def setGnuAccount(self, book):
+    def setGnuAccount(self):
         self.gnuAccount = getAccountPath(self)
     
     def getGnuBalance(self):
         return self.gnuBalance
     
-    def updateGnuBalance(self, balance):
-        self.gnuBalance = round(Decimal(balance), 2)
+
         
 class Security(Asset):    # this is a class for tracking security information
     def __init__(self, name, book, account=None):
@@ -107,8 +108,16 @@ class Security(Asset):    # this is a class for tracking security information
         self.price = book.getPriceInGnucash(self.symbol, datetime.today().date())
         self.gnuAccount = getAccountPath(self)
         self.gnuBalance = Decimal(book.getBalance(self.gnuAccount))
-        self.gnuValue = round(self.gnuBalance * self.price, 2) if float(self.gnuBalance * self.price)>0 else 0
-                
+        self.gnuValue = self.getGnuValue()
+    
+    def getGnuValue(self):
+        price = Decimal(self.price)
+        return round(self.gnuBalance * price, 2) if float(self.gnuBalance * price)>0 else 0
+    
+    def updateGnuBalanceAndValue(self, balance):
+        self.gnuBalance = Decimal(balance)
+        self.gnuValue = self.getGnuValue()
+    
     def getData(self):
         print(  f'name: {self.name} \n'
                 f'symbol: {self.symbol} \n'
@@ -123,7 +132,7 @@ class Security(Asset):    # this is a class for tracking security information
         return getCryptocurrencyPrice(self.name)[self.name.lower()]['usd']
         
     def setPrice(self, price):
-        self.price = price
+        self.price = Decimal(price)
         
     def getSymbol(self):
         return self.symbol
@@ -131,7 +140,7 @@ class Security(Asset):    # this is a class for tracking security information
     def updateSpreadsheetAndGnuCash(self, book):
         account = self.symbol if self.account == None else self.account
         updateSpreadsheet('Asset Allocation', 'Cryptocurrency', account, 1, self.balance, self.symbol)
-        updateSpreadsheet('Asset Allocation', 'Cryptocurrency', account, 2, self.price, self.symbol)
+        updateSpreadsheet('Asset Allocation', 'Cryptocurrency', account, 2, float(self.price), self.symbol)
         updateCoinQuantityFromStakingInGnuCash(self, book)
         self.updateGnuBalance(book.getBalance(self.gnuAccount))
 
@@ -163,6 +172,9 @@ class Security(Asset):    # this is a class for tracking security information
         book.flush()
         self.updateGnuBalance(myBook)
 
+    def updateGnuBalance(self, balance):
+        self.gnuBalance = Decimal(balance)
+
 class USD(Asset):
     "this is a class for tracking USD information"
     def __init__(self, name, book):
@@ -175,6 +187,9 @@ class USD(Asset):
         self.gnuAccount = getAccountPath(self)
         balance = book.getBalance(self.gnuAccount)
         self.gnuBalance = round(balance, 2) if float(balance)>0 else 0
+    
+    def updateGnuBalance(self, balance):
+        self.gnuBalance = round(Decimal(balance), 2)
     
     def getData(self):
         print(  f'name: {self.name} \n'

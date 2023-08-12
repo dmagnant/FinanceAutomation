@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 
 import gspread
 from .GeneralFunctions import getCryptocurrencyPrice, setDirectory, showMessage, getStockPrice
@@ -127,36 +128,49 @@ def updateCryptoPrices(driver, book):
         book.updatePriceInGnucash(symbol, price)
         worksheet.update((priceColumn + str(i + 2)), float(price))
 
-def updateInvestmentShares(driver, fidelity):
-    print('updating investment shares')
-    url = "edit#gid=361024172"
-    spreadsheetWindow = driver.findWindowByUrl(url)
-    if not spreadsheetWindow:
-        openSpreadsheet(driver, 'Asset Allocation', 'Investments')
-        spreadsheetWindow = driver.webDriver.current_window_handle
-    else:
-        driver.webDriver.switch_to.window(spreadsheetWindow)
-    row = 12  # first row after crypto investments
-    symbolColumn = 'B'
-    accountColumn = 'C'
-    sharesColumn = 'D'
-    sheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Asset Allocation')
-    worksheet = sheet.worksheet('Investments')
-    stillCoins = True
-    while stillCoins:
-        account = worksheet.acell(accountColumn+str(row)).value
-        if account == 'HSA-TD':
-            row+=1
-            continue
-        elif account == 'IRA':
-            symbol = worksheet.acell(symbolColumn+str(row)).value
-            if symbol != 'GME':
-                worksheet.update((sharesColumn + str(row)), float(fidelity[symbol]))
-        else:
-            stillCoins = False
-        row+=1
+# def updateInvestmentShares(driver, accounts):
+#     print('updating investment shares')
+#     url = "edit#gid=361024172"
+#     spreadsheetWindow = driver.findWindowByUrl(url)
+#     if not spreadsheetWindow:
+#         openSpreadsheet(driver, 'Asset Allocation', 'Investments')
+#     else:
+#         driver.webDriver.switch_to.window(spreadsheetWindow)
+#     row = 12  # first row after crypto investments
+#     symbolColumn = 'B'
+#     accountColumn = 'C'
+#     sharesColumn = 'D'
+#     sheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Asset Allocation')
+#     worksheet = sheet.worksheet('Investments')
+#     stillCoins = True
+#     while stillCoins:
+#         account = worksheet.acell(accountColumn+str(row)).value
+#         if account == 'HSA-TD':
+#             row+=1
+#             continue
+#         elif account == 'HSA-HE':
+#             worksheet.update(sharesColumn + str(row), float(accounts['VIIIX'].balance))
+#         elif account == 'IRA' or account == '401k':
+#             symbol = worksheet.acell(symbolColumn+str(row)).value
+#             if symbol not in ['VXUS', 'VTI', 'SPAXX']:
+#                 row+=1
+#                 continue
+#             elif symbol == 'VTI':
+#                 worksheet.update(sharesColumn + str(row), float(accounts['VTI'].balance))
+#             elif symbol == 'VXUS':
+#                 worksheet.update(sharesColumn + str(row), float(accounts['VXUS'].balance))
+#             elif symbol == 'SPAXX':
+#                 worksheet.update(sharesColumn + str(row), float(accounts['SPAXX'].balance))
+#             elif symbol == 'VGSNX':
+#                 worksheet.update(sharesColumn + str(row), float(accounts['REIF401k'].balance))
+#             elif symbol == '8585':
+#                 worksheet.update(sharesColumn + str(row), float(accounts['TSM401k'].balance))
+#         else:
+#             stillCoins = False
+#         row+=1
 
-def updateInvestmentPrices(driver, Home):
+def updateInvestmentPricesAndShares(driver, accounts, book):
+    today = datetime.today().date()
     print('updating investment prices')
     url = "edit#gid=361024172"
     spreadsheetWindow = driver.findWindowByUrl(url)
@@ -167,19 +181,41 @@ def updateInvestmentPrices(driver, Home):
         driver.webDriver.switch_to.window(spreadsheetWindow)
     row = 12  # first row after crypto investments
     symbolColumn = 'B'
+    sharesColumn = 'D'
     sheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Asset Allocation')
     worksheet = sheet.worksheet('Investments')
     stillCoins = True
     while stillCoins:
         priceColumn = 'E'
         coinSymbol = worksheet.acell(symbolColumn+str(row)).value
+        shares = 0
         if coinSymbol != None:
-            if coinSymbol == 'HOME':
-                price = (250000 - Home.getGnuBalance()) / 2
+            if coinSymbol == '8585': 
+                price = book.getPriceInGnucash(accounts['TSM401k'].symbol, today)
+                shares = float(accounts['TSM401k'].balance)
+            elif coinSymbol in ['VGSNX', 'VIIIX', 'VXUS', 'VTI']:
+                price = book.getPriceInGnucash(coinSymbol, today)
+                if coinSymbol == 'VTI':
+                    shares = float(accounts['VTI'].balance)
+                elif coinSymbol == 'VIIIX':
+                    shares = float(accounts['VIIIX'].balance)
+                elif coinSymbol == 'VXUS':
+                    shares = float(accounts['VXUS'].balance)
+                elif coinSymbol == 'VGSNX':
+                    shares = float(accounts['REIF401k'].balance)
+            elif coinSymbol == 'SPAXX':
+                shares = float(accounts['SPAXX'].balance)
+                worksheet.update(sharesColumn + str(row), shares)
+                row+=1
+                continue
+            elif coinSymbol == 'HOME':
+                price = (250000 - accounts['Home'].getGnuBalance()) / 2
                 priceColumn = 'F'
-            else :
+            else:
                 price = getStockPrice(driver, coinSymbol)
                 driver.webDriver.switch_to.window(spreadsheetWindow)
+            if shares > 0:
+                worksheet.update(sharesColumn + str(row), shares)
             worksheet.update((priceColumn + str(row)), float(price))
             row += 1
         else:

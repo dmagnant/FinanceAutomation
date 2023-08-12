@@ -10,14 +10,14 @@ if __name__ == '__main__' or __name__ == "Monthly":
     from Exodus import runExodus
     from Ledger import runLedger
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange)
-    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPrices, updateInvestmentShares
+    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPricesAndShares
     from HealthEquity import runHealthEquity
     from IoPay import runIoPay
     from Kraken import runKraken
     from MyConstant import runMyConstant
     from Worthy import getWorthyBalance 
     from Sofi import setMonthlySpendTarget
-    from Vanguard import runVanguard
+    from Vanguard import runVanguard401k
     from Fidelity import runFidelity
 else:
     from .Classes.Asset import USD, Security
@@ -28,20 +28,20 @@ else:
     from .Exodus import runExodus
     from .Ledger import runLedger, getLedgerAccounts
     from .Functions.GeneralFunctions import (getStartAndEndOfDateRange)
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPrices, updateInvestmentShares
+    from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPricesAndShares
     from .HealthEquity import runHealthEquity
     from .IoPay import runIoPay
     from .Kraken import runKraken
     from .MyConstant import runMyConstant
     from .Worthy import getWorthyBalance
     from .Sofi import setMonthlySpendTarget
-    from .Vanguard import runVanguard
+    from .Vanguard import runVanguard401k
     from .Fidelity import runFidelity
 
 def getMonthlyAccounts(type, personalBook, jointBook):
     if type == 'USD':
         Fidelity = USD("Fidelity", personalBook)
-        HEInvestment = Security("HSA Investment", personalBook)
+        VIIIX = Security("HSA Investment", personalBook)
         HECash = USD("HSA Cash", personalBook)
         V401k = USD("Vanguard401k", personalBook)
         Pension = USD("VanguardPension", personalBook)
@@ -54,7 +54,7 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         Home = USD('Home', jointBook)
         LiquidAssets = USD("Liquid Assets", personalBook)
         Bonds = USD("Bonds", personalBook)
-        accounts = {'Fidelity':Fidelity,'VXUS':VXUS,'VTI':VTI,'SPAXX':SPAXX,'HEInvestment':HEInvestment,'HECash':HECash,'V401k':V401k,'REIF401k':REIF401k,'TSM401k':TSM401k,'Worthy': Worthy,'Pension':Pension,'Home':Home,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
+        accounts = {'Fidelity':Fidelity,'VXUS':VXUS,'VTI':VTI,'SPAXX':SPAXX,'VIIIX':VIIIX,'HECash':HECash,'V401k':V401k,'REIF401k':REIF401k,'TSM401k':TSM401k,'Worthy': Worthy,'Pension':Pension,'Home':Home,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
     elif type == 'Crypto':
         CryptoPortfolio = USD("Crypto", personalBook)
         Cardano = Security("Cardano", personalBook, 'ADA-Eternl')
@@ -79,18 +79,13 @@ def runUSD(driver, today, accounts, personalBook):
     lastMonth = getStartAndEndOfDateRange(today, "month")
     setMonthlySpendTarget(driver)
     getWorthyBalance(driver, accounts['Worthy'])
-    runHealthEquity(driver, {'HEInvestment': accounts['HEInvestment'], 'HECash': accounts['HECash'],'V401k': accounts['V401k']})
+    runHealthEquity(driver, {'VIIIX': accounts['VIIIX'], 'HECash': accounts['HECash'],'V401k': accounts['V401k']}, personalBook)
     monthlyRoundUp(accounts['Worthy'], personalBook, lastMonth['endDate'])
     accounts['LiquidAssets'].updateGnuBalance(personalBook.getBalance(accounts['LiquidAssets'].gnuAccount))
     accounts['Bonds'].updateGnuBalance(personalBook.getBalance(accounts['Bonds'].gnuAccount))
-    runVanguard(driver, accounts, personalBook)
+    runVanguard401k(driver, accounts, personalBook)
     runFidelity(driver, accounts, personalBook)
-    openSpreadsheet(driver, 'Asset Allocation', str(year))
-    updateSpreadsheet('Asset Allocation', year, accounts['Bonds'].name, month, float(accounts['Bonds'].gnuBalance), 'Liquid Assets')
-    updateSpreadsheet('Asset Allocation', year, accounts['LiquidAssets'].name, month, float(accounts['LiquidAssets'].gnuBalance), 'Liquid Assets')
-    updateSpreadsheet('Asset Allocation', year, accounts['V401k'].name, month, float(accounts['V401k'].balance), '401k')
-    updateSpreadsheet('Asset Allocation', today.year, accounts['Pension'].name, today.month, float(accounts['Pension'].gnuBalance), 'Pension')
-    updateInvestmentPrices(driver, accounts['Home'])
+    updateInvestmentPricesAndShares(driver, accounts, personalBook)
     driver.findWindowByUrl("/scripts/monthly")
 
 def runCrypto(driver, today, accounts, personalBook):
@@ -108,8 +103,8 @@ def runMonthlyBank(personalBook, jointBook):
     today = datetime.today().date()
     driver = Driver("Chrome")
     usdAccounts = getMonthlyAccounts('USD', personalBook, jointBook)
-    cryptoAccounts = getMonthlyAccounts('Crypto', personalBook)
-    runUSD(driver, today, usdAccounts, personalBook, jointBook)
+    cryptoAccounts = getMonthlyAccounts('Crypto', personalBook, jointBook)
+    runUSD(driver, today, usdAccounts, personalBook)
     runCrypto(driver, today, cryptoAccounts, personalBook)
 
 if __name__ == '__main__':
@@ -133,4 +128,3 @@ if __name__ == '__main__':
     # healthEquity = getHealthEquityDividendsAndShares(driver, HealthEquity)
     # vanguardInfo = getVanguardPriceAndShares(driver)
     # updateInvestmentShares(driver, HealthEquity, vanguardInfo, fidelity)
-    
