@@ -46,8 +46,8 @@ def allyLogin(driver):
             loggedIn = True
     driver.webDriver.find_element(By.PARTIAL_LINK_TEXT, "Joint Checking").click()
     time.sleep(5)
-    driver.webDriver.find_element(By.XPATH,'/html/body/div/div[1]/main/div/div/div/div[1]/div/div/span/div[1]/button[1]/span').click()
-    time.sleep(1)
+    # driver.webDriver.find_element(By.XPATH,'/html/body/div/div[1]/main/div/div/div/div[1]/div/div/span/div[1]/button[1]/span').click()
+    # time.sleep(1)
     
 def allyLogout(driver):
     locateAllyWindow(driver)
@@ -101,10 +101,19 @@ def runAlly(driver, account, book):
     book.importUniqueTransactionsToGnuCash(account, allyActivity, driver, dateRange, 0)
     
 if __name__ == '__main__':
+    # driver = Driver("Chrome")
+    # book = GnuCash('Home')
+    # Ally = USD("Ally", book)
+    # runAlly(driver, Ally, book)
+    # Ally.getData()
+    # allyLogout(driver)
+    # book.closeBook()
+    
+    
     driver = Driver("Chrome")
     book = GnuCash('Home')
     Ally = USD("Ally", book)
-    runAlly(driver, Ally, book)
+    getAllyBalance(driver)
     Ally.getData()
     allyLogout(driver)
     book.closeBook()

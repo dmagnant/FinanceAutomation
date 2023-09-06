@@ -96,7 +96,6 @@ def runCrypto(driver, today, accounts, personalBook):
     runIoPay(driver, accounts['IoTex'], personalBook)
     # runLedger(accounts['ledgerAccounts'], personalBook)
     accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getBalance(accounts['CryptoPortfolio'].gnuAccount))
-    updateSpreadsheet('Asset Allocation', year, accounts['CryptoPortfolio'].name, month, float(round(accounts['CryptoPortfolio'].gnuBalance, 2)), accounts['CryptoPortfolio'].name)
     driver.findWindowByUrl("/scripts/monthly")
 
 def runMonthlyBank(personalBook, jointBook):

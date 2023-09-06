@@ -117,6 +117,8 @@ class GnuCash:
             while not price:
                 try:
                     price =  myBook.prices(commodity=myBook.commodities(mnemonic=symbol), currency=myBook.currencies(mnemonic="USD"), date=date).value
+                    if price == 0:
+                        print('price for ' + symbol + ' is 0, will cause loop')
                 except KeyError:
                     date = date - timedelta(days=1)
             return price
@@ -534,7 +536,7 @@ class GnuCash:
                 fromAccount = account.gnuAccount
                 description = row[1]
                 if "TOTAL INTERNATIONAL STOCK" in description and "DIVIDEND" not in description:
-                    fromAccount += ":Total Intl Stock"
+                    fromAccount += ":Total Intl Stock Market"
                 elif "TOTAL STK MKT ETF" in description and "DIVIDEND" not in description:
                     fromAccount += ":Total Stock Market"
                 elif "DIVIDEND" in description or 'YOU SOLD' in description:

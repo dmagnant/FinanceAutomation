@@ -138,7 +138,7 @@ def runVanguardPension(driver, accounts, book):
     accounts['Pension'].updateGnuBalance(book.getBalance(accounts['Pension'].gnuAccount))
 
 if __name__ == '__main__':
-    # driver = Driver("Chrome")
+    driver = Driver("Chrome")
     book = GnuCash('Finance')
     Pension = USD("VanguardPension", book)
     V401k = USD("Vanguard401k", book)
@@ -146,10 +146,10 @@ if __name__ == '__main__':
     TSM401k = Security("Total Stock Market(401k)", book)
     accounts = {'Pension': Pension, 'V401k': V401k, 'REIF401k': REIF401k, 'TSM401k': TSM401k}
     # runVanguard401k(driver, accounts, book)
-    # runVanguardPension(driver,accounts,book)
-    # Pension.getData()
-    # V401k.getData()
-    # book.closeBook()
+    runVanguardPension(driver,accounts,book)
+    Pension.getData()
+    V401k.getData()
+    book.closeBook()
     
     # REIF401k = Security("Real Estate Index Fund", book)
     # TSM401k = Security("Total Stock Market(401k)", book)
@@ -160,10 +160,10 @@ if __name__ == '__main__':
     # print(REIF401k.gnuValue)
 
 
-    price = book.getPriceInGnucash(accounts['TSM401k'].symbol)
-    print(price)
+    # price = book.getPriceInGnucash(accounts['TSM401k'].symbol)
+    # print(price)
     
-    book.updatePriceInGnucash(accounts['TSM401k'].symbol, round(Decimal(118.30), 2))
-    today = datetime.today().date()
-    price1 = book.getPriceInGnucash(accounts['TSM401k'].symbol, today)
-    print(price1)
+    # book.updatePriceInGnucash(accounts['TSM401k'].symbol, round(Decimal(118.30), 2))
+    # today = datetime.today().date()
+    # price1 = book.getPriceInGnucash(accounts['TSM401k'].symbol, today)
+    # print(price1)

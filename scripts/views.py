@@ -330,7 +330,7 @@ def daily(request):
         elif "pineconeRewards" in request.POST:
             claimPineConeRewards(driver)
         elif "presearchMain" in request.POST:
-            presearchRewardsRedemptionAndBalanceUpdates(driver)
+            presearchRewardsRedemptionAndBalanceUpdates(driver, bankAccounts['Presearch'], personalBook)
         elif "presearchLogin" in request.POST:
             locatePresearchWindow(driver)          
         elif "presearchBalance" in request.POST:
@@ -531,8 +531,6 @@ def monthly(request):
         today = datetime.today().date()
         if "USD" in request.POST:
             runUSD(driver, today, usdAccounts, personalBook)
-        elif "prices" in request.POST:
-            updateInvestmentPrices(driver, {"Home":usdAccounts["Home"],"8585":usdAccounts['TSM401k'],"REIF":usdAccounts['REIF401k']}, personalBook)
         elif "Crypto" in request.POST:
             runCrypto(driver, today, cryptoAccounts, personalBook)
         elif "fidelityMain" in request.POST:
@@ -547,8 +545,8 @@ def monthly(request):
             locateHealthEquityWindow(driver)
         elif "HEBalances" in request.POST:
             getHealthEquityBalances(driver, {'VIIIX': usdAccounts['VIIIX'], 'HECash': usdAccounts['HECash'], 'V401k': usdAccounts['V401k']})
-        elif "vanguardMain" in request.POST:
-            runVanguard(driver, usdAccounts, personalBook)
+        # elif "vanguardMain" in request.POST:
+        #     runVanguard(driver, usdAccounts, personalBook)
         elif "vanguardLogin" in request.POST:
             locateVanguardWindow(driver)
         elif "vanguardBalances" in request.POST:
@@ -784,9 +782,9 @@ def vanguard(request):
     accounts = {'Pension': Pension, 'V401k': V401k, 'REIF401k': REIF401k, 'TSM401k': TSM401k}
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "main" in request.POST:
-            runVanguard(driver, accounts, book)
-        elif "login" in request.POST:
+        # if "main" in request.POST:
+        #     runVanguard(driver, accounts, book)
+        if "login" in request.POST:
             locateVanguardWindow(driver)
         elif "balance" in request.POST:
             getVanguardBalancesAndPensionInterestYTD(driver, accounts)

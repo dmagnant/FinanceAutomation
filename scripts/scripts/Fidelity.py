@@ -63,31 +63,37 @@ def getFidelityPricesAndShares(driver, accounts, book):
 def captureFidelityTransactions(driver):
     locateFidelityWindow(driver)
     driver.webDriver.find_element(By.XPATH, "//*[@id='portsum-tab-activity']/a/span").click() # Activity & Orders
-    time.sleep(1)
+    time.sleep(2)
+    driver.webDriver.find_element(By.XPATH, "//*[@id='accountDetails']/div/div[2]/div/new-tab-group/new-tab-group-ui/div[2]/activity-orders-panel/div/div/div/account-activity-container/div/div[1]/div[2]/pvd3-field-group/s-root/div/div/s-slot/s-assigned-wrapper/div/core-filter-button[2]/pvd3-button/s-root/button").click() # History
     driver.webDriver.find_element(By.XPATH, "//*[@id='timeperiod-select-button']/span[1]").click() # Timeframe
     driver.webDriver.find_element(By.XPATH, "//*[@id='60']/s-root/div/label").click() # past 60 days
-    time.sleep(1)
     driver.webDriver.find_element(By.XPATH, "//*[@id='timeperiod-select-container']/div/div/pvd3-button/s-root/button").click() # Apply
-    driver.webDriver.find_element(By.XPATH, "//*[@id='accountDetails']/div/div[2]/div/new-tab-group/new-tab-group-ui/div[2]/activity-orders-panel/div/div/orders-grid-container/div/div[3]/activity-order-grid[2]/div/div[2]/activity-common-grid/div/pvd3-button/s-root/button/div/span/s-slot/s-assigned-wrapper").click()
+    time.sleep(3)
     iraActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\ira.csv"
     open(iraActivity, 'w', newline='').truncate()
     lastMonth = getStartAndEndOfDateRange(datetime.today().date(), "month")
-    row = 0
-    table = 1 if driver.webDriver.find_element(By.XPATH, "//*[@id='accountDetails']/div/div[2]/div/new-tab-group/new-tab-group-ui/div[2]/activity-orders-panel/div/div/orders-grid-container/div/div[3]/activity-order-grid[1]/div/div[1]").text != "Pending" else 2
-    elementPath = "//*[@id='accountDetails']/div/div[2]/div/new-tab-group/new-tab-group-ui/div[2]/activity-orders-panel/div/div/orders-grid-container/div/div[3]/activity-order-grid["
+    row = 2
+    table = 2
+    elementPath = "//*[@id='accountDetails']/div/div[2]/div/new-tab-group/new-tab-group-ui/div[2]/activity-orders-panel/div/div/div/account-activity-container/div/div[3]/activity-list["
     while True:
         row+=1
         column=1
-        date = datetime.strptime(driver.webDriver.find_element(By.XPATH,elementPath+str(table)+']/div/div[2]/activity-common-grid/div/table/tbody['+str(row)+']/tr/td['+str(column)+']/div').text, '%b-%d-%Y').date()
+        dateElement = driver.webDriver.find_element(By.XPATH,elementPath+str(table)+']/div/div['+str(row)+']/div/div['+str(column)+']')
+        if dateElement.text == 'Load more results':
+            break
+        date = datetime.strptime(dateElement.text, '%b-%d-%Y').date()
         if date.month == lastMonth['endDate'].month:
             column+=1
-            descriptionElement = driver.webDriver.find_element(By.XPATH,elementPath+str(table)+']/div/div[2]/activity-common-grid/div/table/tbody['+str(row)+']/tr/td['+str(column)+']/div')
+            descriptionElement = driver.webDriver.find_element(By.XPATH,elementPath+str(table)+']/div/div['+str(row)+']/div/div['+str(column)+']/div/div')
             description = descriptionElement.text
-            column+=2
-            amount = driver.webDriver.find_element(By.XPATH,elementPath+str(table)+']/div/div[2]/activity-common-grid/div/table/tbody['+str(row)+']/tr/td['+str(column)+']/div[2]/span[1]').text.replace('$','').replace(',','').replace('-','').replace('+','')
+            column+=1
+            amount = driver.webDriver.find_element(By.XPATH,elementPath+str(table)+']/div/div['+str(row)+']/div/div['+str(column)+']').text.replace('$','').replace(',','').replace('-','').replace('+','')
+            if not amount:
+                continue
             if "YOU BOUGHT" in description.upper():
                 descriptionElement.click()
-                shares = driver.webDriver.find_element(By.XPATH,elementPath+str(table)+']/div/div[2]/activity-common-grid/div/table/tbody['+str(row)+']/tr[2]/td/activity-order-detail-panel/div/div/div[10]').text.replace('-','').replace('+','')
+                shares = driver.webDriver.find_element(By.XPATH,elementPath+str(table)+']/div/div['+str(row)+']/div[2]/div/activity-order-detail-panel/div/div/div[10]').text.replace('-','').replace('+','')
+                descriptionElement.click()
             elif "CASH CONTRIBUTION" in description.upper():
                 continue
             else:
@@ -104,12 +110,11 @@ def runFidelity(driver, accounts, book):
     locateFidelityWindow(driver)
     accounts['Fidelity'].setBalance(getFidelityBalance(driver))
     getFidelityPricesAndShares(driver, accounts, book)
-    iraActivity = captureFidelityTransactions(driver)
-    book.importGnuTransaction(accounts['Fidelity'], iraActivity, driver, 0)
-    accounts['VXUS'].updateGnuBalanceAndValue(book.getBalance(accounts['VXUS'].gnuAccount))
-    accounts['VTI'].updateGnuBalanceAndValue(book.getBalance(accounts['VTI'].gnuAccount))
-    print(accounts['VTI'].balance)
-    accounts['SPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['SPAXX'].gnuAccount))
+    # iraActivity = captureFidelityTransactions(driver)
+    # book.importGnuTransaction(accounts['Fidelity'], iraActivity, driver, 0)
+    # accounts['VXUS'].updateGnuBalanceAndValue(book.getBalance(accounts['VXUS'].gnuAccount))
+    # accounts['VTI'].updateGnuBalanceAndValue(book.getBalance(accounts['VTI'].gnuAccount))
+    # accounts['SPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['SPAXX'].gnuAccount))
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
@@ -120,3 +125,4 @@ if __name__ == '__main__':
     SPAXX = Security('Govt Money Market', book)
     accounts = {'Fidelity': Fidelity,'VXUS': VXUS,'VTI': VTI,'SPAXX': SPAXX}
     runFidelity(driver, accounts, book)
+    book.closeBook()

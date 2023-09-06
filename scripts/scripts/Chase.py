@@ -3,6 +3,7 @@ from datetime import datetime
 
 import pyautogui
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Chase":
     from Classes.Asset import USD
@@ -26,8 +27,13 @@ def chaseLogin(driver):
     time.sleep(5)
     pyautogui.press('tab')
     pyautogui.press('tab')
+    time.sleep(1)
+    pyautogui.press('tab')
+    pyautogui.press('tab')              
+    time.sleep(1)
     pyautogui.press('tab')
     pyautogui.press('tab')
+    time.sleep(1)
     pyautogui.press('enter')
 
 def getChaseBalance(driver):

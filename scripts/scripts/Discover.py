@@ -46,14 +46,10 @@ def getDiscoverBalance(driver):
     return driver.webDriver.find_element(By.ID, "new-balance").text.strip('$')
 
 def exportDiscoverTransactions(driver, today):
-    # Click on Download
-    driver.find_element(By.XPATH, "//*[@id='current-statement']/div[1]/div/a[2]").click()
-    # CLick on CSV
-    driver.find_element(By.ID, "radio4").click()
-    # CLick Download
-    driver.find_element(By.ID, "submitDownload").click()
-    # Click Close
-    driver.find_element(By.XPATH, "/html/body/div[1]/main/div[5]/div/form/div/div[4]/a[1]").click()
+    driver.find_element(By.XPATH, "//*[@id='current-statement']/div[1]/div/a[2]").click() # download
+    driver.find_element(By.ID, "radio4").click() # csv
+    driver.find_element(By.ID, "submitDownload").click() # download
+    driver.find_element(By.XPATH, "//*[@id='downloadForm']/div/div[4]/a[1]/i").click() # x to close
     year = today.year
     stmtYear = str(year)
     stmtMonth = today.strftime('%m')
