@@ -545,8 +545,8 @@ def monthly(request):
             locateHealthEquityWindow(driver)
         elif "HEBalances" in request.POST:
             getHealthEquityBalances(driver, {'VIIIX': usdAccounts['VIIIX'], 'HECash': usdAccounts['HECash'], 'V401k': usdAccounts['V401k']})
-        # elif "vanguardMain" in request.POST:
-        #     runVanguard(driver, usdAccounts, personalBook)
+        elif "vanguard401k" in request.POST:
+            runVanguard401k(driver, usdAccounts, personalBook)
         elif "vanguardLogin" in request.POST:
             locateVanguardWindow(driver)
         elif "vanguardBalances" in request.POST:
@@ -782,9 +782,11 @@ def vanguard(request):
     accounts = {'Pension': Pension, 'V401k': V401k, 'REIF401k': REIF401k, 'TSM401k': TSM401k}
     if request.method == 'POST':
         driver = Driver("Chrome")
-        # if "main" in request.POST:
-        #     runVanguard(driver, accounts, book)
-        if "login" in request.POST:
+        if "401k" in request.POST:
+            runVanguard401k(driver, accounts, book)
+        elif "Pension" in request.POST:
+            runVanguardPension(driver, accounts, book)
+        elif "login" in request.POST:
             locateVanguardWindow(driver)
         elif "balance" in request.POST:
             getVanguardBalancesAndPensionInterestYTD(driver, accounts)

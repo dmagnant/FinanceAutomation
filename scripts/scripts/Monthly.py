@@ -74,8 +74,6 @@ def monthlyRoundUp(account, myBook, date):
     account.updateGnuBalance(myBook.getBalance(account.gnuAccount))
     
 def runUSD(driver, today, accounts, personalBook):
-    year = today.year
-    month = today.month
     lastMonth = getStartAndEndOfDateRange(today, "month")
     setMonthlySpendTarget(driver)
     getWorthyBalance(driver, accounts['Worthy'])

@@ -33,8 +33,8 @@ class Node(object):
             stakeAmount = availToStake
         while stakeAmount > 0:
             driver.webDriver.find_element(By.ID, 'stake_amount').send_keys(Keys.ARROW_UP)
-            stakeAmount -= 1
-        driver.webDriver.find_element(By.XPATH, "//*[@id='editNodeForm']/div[8]/button").click() # update
+            stakeAmount -= 1        
+        driver.webDriver.find_element(By.XPATH, "//*[@id='editNodeForm']/div[9]/button").click() # update
         time.sleep(1)
         # try:
         #     driver.webDriver.find_element(By.XPATH, "/html/body/div[2]/div[2]/div[2]/div/div/div[2]/div[2]").click() # continue
@@ -43,8 +43,8 @@ class Node(object):
         #     exception = "No Continue button, minimum PRE met"
         driver.webDriver.get('https://nodes.presearch.org/dashboard')
     
-    def checkme(self):
-        print(str(self.num) + '\n' + self.name + '\n' + str(self.reliabilityScore))
+    # def checkme(self):
+    #     print(str(self.num) + '\n' + self.name + '\n' + str(self.reliabilityScore))
     
 def getPresearchBasePath():
     return '/html/body/div[2]/div[2]/div[5]/div[' 

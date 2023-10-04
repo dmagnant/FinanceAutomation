@@ -50,20 +50,25 @@ def getFidelityPricesAndShares(driver, accounts, book):
             account = accounts['VXUS']
         elif symbol == 'VTI':
             account = accounts['VTI']
-        elif symbol == 'SPAXX**':
+        elif symbol == 'Cash':
             account = accounts['SPAXX']
         else:
             continue
-        if symbol != 'SPAXX':
+
+        if symbol != 'Cash':
             account.price = Decimal(driver.webDriver.find_element(By.XPATH, "//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[2]/div/div/div[" + str(row) + "]/div[1]/div/span").text.replace('$', ''))
             book.updatePriceInGnucash(account.symbol, account.price)
-        account.setBalance(driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[2]/div/div/div[" + str(row) + "]/div[9]/div/span").text.replace('$', '').replace(',',''))
-        account.value = driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[2]/div/div/div[" + str(row) + "]/div[7]/div/span").text.replace('$', '').replace(',','')
-        
+            account.setBalance(driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[2]/div/div/div[" + str(row) + "]/div[9]/div/span").text.replace('$', '').replace(',',''))
+            account.value = driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[2]/div/div/div[" + str(row) + "]/div[7]/div/span").text.replace('$', '').replace(',','')
+        else:
+            account.setBalance(driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[2]/div/div/div[" + str(row) + "]/div[7]/div/span").text.replace('$', '').replace(',',''))
+    
 def captureFidelityTransactions(driver):
     locateFidelityWindow(driver)
     driver.webDriver.find_element(By.XPATH, "//*[@id='portsum-tab-activity']/a/span").click() # Activity & Orders
     time.sleep(2)
+    driver.webDriver.find_element(By.XPATH, "//*[@id='245173114']/span/s-slot/s-assigned-wrapper/div/div").click() # Roth IRA account
+    time.sleep(1)
     driver.webDriver.find_element(By.XPATH, "//*[@id='accountDetails']/div/div[2]/div/new-tab-group/new-tab-group-ui/div[2]/activity-orders-panel/div/div/div/account-activity-container/div/div[1]/div[2]/pvd3-field-group/s-root/div/div/s-slot/s-assigned-wrapper/div/core-filter-button[2]/pvd3-button/s-root/button").click() # History
     driver.webDriver.find_element(By.XPATH, "//*[@id='timeperiod-select-button']/span[1]").click() # Timeframe
     driver.webDriver.find_element(By.XPATH, "//*[@id='60']/s-root/div/label").click() # past 60 days
@@ -110,11 +115,11 @@ def runFidelity(driver, accounts, book):
     locateFidelityWindow(driver)
     accounts['Fidelity'].setBalance(getFidelityBalance(driver))
     getFidelityPricesAndShares(driver, accounts, book)
-    # iraActivity = captureFidelityTransactions(driver)
-    # book.importGnuTransaction(accounts['Fidelity'], iraActivity, driver, 0)
-    # accounts['VXUS'].updateGnuBalanceAndValue(book.getBalance(accounts['VXUS'].gnuAccount))
-    # accounts['VTI'].updateGnuBalanceAndValue(book.getBalance(accounts['VTI'].gnuAccount))
-    # accounts['SPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['SPAXX'].gnuAccount))
+    iraActivity = captureFidelityTransactions(driver)
+    book.importGnuTransaction(accounts['Fidelity'], iraActivity, driver, 0)
+    accounts['VXUS'].updateGnuBalanceAndValue(book.getBalance(accounts['VXUS'].gnuAccount))
+    accounts['VTI'].updateGnuBalanceAndValue(book.getBalance(accounts['VTI'].gnuAccount))
+    accounts['SPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['SPAXX'].gnuAccount))
     
 if __name__ == '__main__':
     driver = Driver("Chrome")

@@ -204,6 +204,7 @@ def updateInvestmentPricesAndShares(driver, accounts, book):
                 elif coinSymbol == 'VGSNX':
                     shares = float(accounts['REIF401k'].balance)
             elif coinSymbol == 'SPAXX':
+                print(accounts['SPAXX'].balance)
                 shares = float(accounts['SPAXX'].balance)
                 worksheet.update(sharesColumn + str(row), shares)
                 row+=1

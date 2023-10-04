@@ -3,7 +3,7 @@ import time
 from datetime import datetime
 from decimal import Decimal
 
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Ally":
@@ -33,10 +33,16 @@ def allyLogin(driver):
     while not loggedIn:
         driver.openNewWindow('https://ally.com/')
         time.sleep(2)
-        driver.webDriver.find_element(By.ID,"login").click() # login
+        driver.webDriver.find_element(By.XPATH,"/html/body/header/section[1]/div/nav/ul/li[5]/button").click() # login
         time.sleep(2)
-        time.sleep(2)
-        driver.webDriver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button").click() # login
+        try:
+            driver.webDriver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button").click() # login
+        except ElementNotInteractableException:
+            driver.webDriver.refresh()
+            time.sleep(1)
+            driver.webDriver.find_element(By.XPATH,"/html/body/header/section[1]/div/nav/ul/li[5]/button").click() # login
+            time.sleep(2)
+            driver.webDriver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button").click() # login
         time.sleep(5)
         try: # check if login button is still seen
             driver.webDriver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div/div[2]/form/div[3]/button/span").click()
@@ -60,8 +66,8 @@ def getAllyBalance(driver):
 
 def captureAllyTransactions(driver, dateRange):
     def setAllyTransactionElementRoot(row, column):
-        return "/html/body/div/div[1]/main/div/div/div/div[1]/div/div/span/div[3]/section[2]/div[2]/div/table/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/div/"
-    
+        return "/html/body/div[1]/div[1]/main/div/div/div/div[1]/div/div/div[2]/section[2]/div[2]/div/table/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/div/"
+
     allyActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\ally.csv"
     open(allyActivity, 'w', newline='').truncate()
     row = 1
@@ -109,11 +115,11 @@ if __name__ == '__main__':
     # allyLogout(driver)
     # book.closeBook()
     
-    
+    dateRange = getStartAndEndOfDateRange(datetime.today().date(), 7)
     driver = Driver("Chrome")
     book = GnuCash('Home')
     Ally = USD("Ally", book)
-    getAllyBalance(driver)
+    captureAllyTransactions(driver, dateRange)    
     Ally.getData()
-    allyLogout(driver)
+    # allyLogout(driver)
     book.closeBook()

@@ -165,11 +165,14 @@ def toDoList(driver):
             list_item.click()
             time.sleep(2)
             while button_not_clicked:
-                try:
-                    driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/div[3]/div[1]/main/div/div[2]/div[2]/div[2]/div/div/a[" + str(button_num) +"]/div[2]/button[1]").click()
+                button = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "2]/div[2]/div[2]/main/reset-styles/div/div/div[2]/div[1]/div[4]/ul/li[" + str(button_num) +"]/div/a/div[2]/button")
+                if button.text == 'Add to List':
+                    button.click()
                     button_not_clicked = False
-                except ElementNotInteractableException:
-                    button_num += 1
+                else:
+                    button_num+=1
+            driver.webDriver.get('https://www.swagbucks.com/')
+            time.sleep(2)
         elif list_item.text == "Deal of the Day":
             window_num_before = len(driver.webDriver.window_handles)
             list_item.click()
@@ -211,7 +214,6 @@ def swagbucksInbox(driver):
             alert.accept()
         except NoSuchElementException:
             exception = "no element found in inbox"
-            print('not found')
             break
 
 def swagbucksSearch(driver):
@@ -260,16 +262,11 @@ def claimSwagBucksRewards(driver):
     # Paypal $10 rewards page
     driver.get("https://www.swagbucks.com/p/prize/28353/PayPal-10")
     time.sleep(4)
-    # Claim Reward
-    driver.find_element(By.ID,"redeemBtnHolder").click()
-    # Claim a Gift Card
-    driver.find_element(By.ID,"redeemBtn").click()
-    # Confirm (order details)
-    driver.find_element(By.ID,"confirmOrderCta").click()
-    # enter childhood nickname
-    driver.find_element(By.ID,"securityQuestionInput").send_keys("Tiger")
-    # click Submit
-    driver.find_element(By.ID,"verifyViaSecurityQuestionCta").click()
+    driver.find_element(By.ID,"redeemBtnHolder").click() # Claim Reward
+    driver.find_element(By.ID,"redeemBtn").click() # Claim a Gift Card
+    driver.find_element(By.ID,"confirmOrderCta").click() # Confirm (order details)
+    driver.find_element(By.ID,"securityQuestionInput").send_keys("Tiger") 
+    driver.find_element(By.ID,"verifyViaSecurityQuestionCta").click() # click Submit
 
 def runSwagbucks(driver, runAlu, account, book):
     # closeExpressVPN()
@@ -285,7 +282,7 @@ def runSwagbucks(driver, runAlu, account, book):
     book.updateMRBalance(account)
     if int(account.balance) > 1000:
         claimSwagBucksRewards(driver)
-    # swagbucksSearch(driver)
+    swagbucksSearch(driver)
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
@@ -293,4 +290,3 @@ if __name__ == '__main__':
     Swagbucks = Security("Swagbucks", book)
     runSwagbucks(driver, False, Swagbucks, book)
     book.closeBook()
-    
