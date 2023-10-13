@@ -20,13 +20,11 @@ def setDirectory():
     return os.environ.get('StorageDirectory')    
 
 def isProcessRunning(processName):
-        # Iterate over the all the running process
         for proc in psutil.process_iter():
             try:
-                # Check if process name contains the given name string.
                 if processName.lower() in proc.name().lower():
                     return True
-            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
         return False
 
@@ -48,12 +46,9 @@ def loginPiHole(driver):
     driver.get("http://192.168.1.144/admin/")
     driver.maximize_window()
     try:
-        #click Login
-        driver.find_element(By.XPATH, "/html/body/div[2]/aside/section/ul/li[3]/a").click()
-        # Enter Password
+        driver.find_element(By.XPATH, "/html/body/div[2]/aside/section/ul/li[3]/a").click() # login
         driver.find_element(By.ID, "loginpw").send_keys(getPassword('Pi hole'))
-        #click Login again
-        driver.find_element(By.XPATH, "//*[@id='loginform']/div[2]/div/button").click()
+        driver.find_element(By.XPATH, "//*[@id='loginform']/div[2]/div/button").click() # login
         time.sleep(1)
     except NoSuchElementException:
         exception = "already logged in"
@@ -65,8 +60,7 @@ def disablePiHole(driver):
     loginPiHole(driver)
     try:
         driver.find_element(By.XPATH, "//*[@id='pihole-disable']/a/span[2]").click()
-        # Click Indefinitely
-        driver.find_element(By.XPATH, "//*[@id='pihole-disable-indefinitely']").click()
+        driver.find_element(By.XPATH, "//*[@id='pihole-disable-indefinitely']").click() # indefinitely 
     except ElementNotInteractableException:
         exception = "already disabled"
 
@@ -184,7 +178,7 @@ def modifyTransactionDescription(description, amount="0.00"):
         description = "Chase CC Rewards"
     elif "CHASE CREDIT CRD" in description.upper() and float(amount) < 0:
         description = "Chase CC"
-    elif "DISCOVER CASH AWARD" in description.upper():
+    elif "AUTOMATIC STATEMENT CREDIT" in description.upper():
         description = "Discover CC Rewards"        
     elif "DISCOVER" in description.upper():
         description = "Discover CC"

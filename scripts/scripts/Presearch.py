@@ -35,7 +35,7 @@ class Node(object):
             driver.webDriver.find_element(By.ID, 'stake_amount').send_keys(Keys.ARROW_UP)
             stakeAmount -= 1        
         driver.webDriver.find_element(By.XPATH, "//*[@id='editNodeForm']/div[9]/button").click() # update
-        time.sleep(1)
+        time.sleep(2)
         # try:
         #     driver.webDriver.find_element(By.XPATH, "/html/body/div[2]/div[2]/div[2]/div/div/div[2]/div[2]").click() # continue
         #     time.sleep(2)
