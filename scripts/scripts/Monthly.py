@@ -66,6 +66,10 @@ def getMonthlyAccounts(type, personalBook, jointBook):
     return accounts
 
 def monthlyRoundUp(account, myBook, date):
+    print(account.balance)
+    print(type(account.balance))
+    print(account.gnuBalance)
+    print(type(account.gnuBalance))
     change = Decimal(account.balance - float(account.gnuBalance))
     change = round(change, 2)
     if account.name == "MyConstant" or account.name == "Worthy":
@@ -77,8 +81,8 @@ def runUSD(driver, today, accounts, personalBook):
     lastMonth = getStartAndEndOfDateRange(today, "month")
     setMonthlySpendTarget(driver)
     getWorthyBalance(driver, accounts['Worthy'])
-    runHealthEquity(driver, {'VIIIX': accounts['VIIIX'], 'HECash': accounts['HECash'],'V401k': accounts['V401k']}, personalBook)
     monthlyRoundUp(accounts['Worthy'], personalBook, lastMonth['endDate'])
+    runHealthEquity(driver, {'VIIIX': accounts['VIIIX'], 'HECash': accounts['HECash'],'V401k': accounts['V401k']}, personalBook)
     accounts['LiquidAssets'].updateGnuBalance(personalBook.getBalance(accounts['LiquidAssets'].gnuAccount))
     accounts['Bonds'].updateGnuBalance(personalBook.getBalance(accounts['Bonds'].gnuAccount))
     runVanguard401k(driver, accounts, personalBook)

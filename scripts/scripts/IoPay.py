@@ -41,7 +41,7 @@ def runIoPay(driver, account, book):
     time.sleep(1)
     walletBalance = Decimal(driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/section/div[1]/main/div/div[5]/div[2]/div[2]/div[3]/div[3]/div[2]/div[2]/p[2]").text.replace(" IOTX", ""))
     if walletBalance > 5:
-        driver.webDriver.find_element(By.XPATH,'/html/body/div[1]/section/div[1]/main/div/div[5]/div[2]/div[2]/div[3]/div[3]/div[1]/div/div/div[2]/div[2]/div[6]/div/button').click() # action
+        driver.webDriver.find_element(By.XPATH,'/html/body/div[1]/section/div[1]/main/div/div[5]/div[2]/div[2]/div[3]/div[3]/div[1]/div/div/div[2]/div[1]/div/div[2]/div[6]/div/button').click() # action
         driver.webDriver.find_element(By.XPATH,'/html/body/div[5]/div/div/button[2]/div[1]').click() # add stake
         driver.webDriver.find_element(By.XPATH,'/html/body/div[5]/div[2]/div[4]/div/section/div/div/div[1]/div/div[1]/div/div[1]/input').send_keys(str(math.floor(walletBalance))) # wallet balance
         driver.webDriver.find_element(By.XPATH, '/html/body/div[5]/div[2]/div[4]/div/section/footer/button[2]').click() # OK

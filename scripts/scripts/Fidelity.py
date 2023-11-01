@@ -29,7 +29,8 @@ def fidelityLogin(driver):
     time.sleep(1)
     # driver.webDriver.find_element(By.ID,'password').send_keys(getPassword('Fidelity')) # pre-filled
     time.sleep(2)
-    driver.webDriver.find_element(By.ID,'fs-login-button').click() # login
+    driver.webDriver.find_element(By.XPATH,"//*[@id='dom-login-button']/div").click() # login
+
 
 def getFidelityBalance(driver):
     locateFidelityWindow(driver)
