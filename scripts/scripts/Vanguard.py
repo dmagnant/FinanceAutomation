@@ -22,9 +22,9 @@ else:
 def vanguardLogin(driver):
     driver.openNewWindow('https://logon.vanguard.com/logon?site=pi')
     driver = driver.webDriver
-    driver.find_element(By.ID, "USER").send_keys(getUsername('Vanguard'))
+    # driver.find_element(By.ID, "USER").send_keys(getUsername('Vanguard'))
     time.sleep(1)
-    driver.find_element(By.ID, "PASSWORD-blocked").send_keys(getPassword('Vanguard'))
+    # driver.find_element(By.ID, "PASSWORD-blocked").send_keys(getPassword('Vanguard'))
     time.sleep(1)
     driver.find_element(By.XPATH, "//*[@id='username-password-submit-btn-1']/span").click() # log in 
     try:     # handle security code

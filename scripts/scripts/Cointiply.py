@@ -262,6 +262,15 @@ def runCointiply(driver, faucetRun=True):
     ptcAds(driver)
     return nextRun(driver)
 
-if __name__ == '__main__':
-    driver = Driver("Chrome")
-    runCointiply(driver, True)
+# if __name__ == '__main__':
+#     driver = Driver("Chrome")
+#     runCointiply(driver, True)
+
+if __name__ == '__main__': # MR
+    from scripts.scripts.DailyBank import runDailyMR, getDailyAccounts
+    from Classes.GnuCash import GnuCash
+    personalBook = GnuCash('Finance')
+    accounts = getDailyAccounts('MR', personalBook)
+    runDailyMR(accounts, personalBook)
+    personalBook.closeBook()
+    

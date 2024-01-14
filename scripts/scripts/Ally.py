@@ -36,7 +36,7 @@ def allyLogin(driver):
         driver.webDriver.find_element(By.XPATH,"/html/body/header/section[1]/div/nav/ul/li[5]/button").click() # login
         time.sleep(2)
         try:
-            driver.webDriver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button").click() # login
+            driver.webDriver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[4]/button").click() # login
         except ElementNotInteractableException:
             driver.webDriver.refresh()
             time.sleep(1)
@@ -48,7 +48,6 @@ def allyLogin(driver):
             driver.webDriver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div/div[2]/form/div[3]/button/span").click()
             loggedIn = True
         except NoSuchElementException:
-            print('not found')
             loggedIn = True
     driver.webDriver.find_element(By.PARTIAL_LINK_TEXT, "Joint Checking").click()
     time.sleep(5)
@@ -107,19 +106,15 @@ def runAlly(driver, account, book):
     book.importUniqueTransactionsToGnuCash(account, allyActivity, driver, dateRange, 0)
     
 if __name__ == '__main__':
-    # driver = Driver("Chrome")
-    # book = GnuCash('Home')
-    # Ally = USD("Ally", book)
-    # runAlly(driver, Ally, book)
-    # Ally.getData()
-    # allyLogout(driver)
-    # book.closeBook()
-    
-    dateRange = getStartAndEndOfDateRange(datetime.today().date(), 7)
     driver = Driver("Chrome")
     book = GnuCash('Home')
     Ally = USD("Ally", book)
-    captureAllyTransactions(driver, dateRange)    
+    runAlly(driver, Ally, book)
     Ally.getData()
     # allyLogout(driver)
     book.closeBook()
+    
+    # dateRange = getStartAndEndOfDateRange(datetime.today().date(), 7)
+    # driver = Driver("Chrome")
+    # book = GnuCash('Home')
+    # locateAllyWindow(driver)

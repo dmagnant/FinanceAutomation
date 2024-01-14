@@ -147,12 +147,12 @@ def runBoA(driver, account, book):
     # startExpressVPN()
 
 if __name__ == '__main__':
-    SET_ACCOUNT_VARIABLE = "Personal" # Personal or BoA-joint
+    SET_ACCOUNT_VARIABLE = "BoA-joint" # Personal or BoA-joint
     bookName = 'Finance' if SET_ACCOUNT_VARIABLE == 'Personal' else 'Home'
-    book = GnuCash('bookName')
+    book = GnuCash(bookName)
     driver = Driver("Chrome", book)
     BoA = USD(SET_ACCOUNT_VARIABLE, book)
-    runBoA(driver, BoA)
+    runBoA(driver, BoA, book)
     BoA.getData()
     book.closeBook()
     

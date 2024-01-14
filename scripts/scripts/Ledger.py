@@ -15,7 +15,8 @@ def getLedgerAccounts(readBook):
     Cosmos = Security("Cosmos", readBook)
     Polkadot = Security("Polkadot", readBook)
     Algorand = Security("Algorand", readBook)
-    return [Bitcoin, Ethereum, Cosmos, Polkadot, Algorand]
+    XRP = Security("Ripple", readBook)
+    return [Bitcoin, Ethereum, Cosmos, Polkadot, Algorand, XRP]
 
 def updateCoin(coin, book):
     balance = float(input(f"Paste {coin.symbol} balance here: "))
@@ -30,11 +31,16 @@ def runLedger(coinList, book):
     for coin in coinList:
         updateCoin(coin, book)
 
+# if __name__ == '__main__':
+#     book = GnuCash('Finance')    
+#     coinList = getLedgerAccounts(book)
+#     runLedger(coinList, book)
+#     for coin in coinList:
+#         coin.getData()
+#     book.closeBook()
+
+
 if __name__ == '__main__':
-    book = GnuCash('Finance')    
-    coinList = getLedgerAccounts(book)
-    runLedger(coinList, book)
-    for coin in coinList:
-        coin.getData()
-    book.closeBook()
-    
+    from datetime import datetime
+    today = datetime.today()
+    print(today)

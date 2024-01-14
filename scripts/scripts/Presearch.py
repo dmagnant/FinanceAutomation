@@ -29,22 +29,15 @@ class Node(object):
     def stakePRE(self, driver, stakeAmount):
         availToStake = float(driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
         driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '6]/div/table/tbody/tr[' + str(self.num) + ']/td[12]/a[1]').click() # stake button
+        time.sleep(1)
         if availToStake < stakeAmount:
             stakeAmount = availToStake
         while stakeAmount > 0:
             driver.webDriver.find_element(By.ID, 'stake_amount').send_keys(Keys.ARROW_UP)
             stakeAmount -= 1        
         driver.webDriver.find_element(By.XPATH, "//*[@id='editNodeForm']/div[9]/button").click() # update
-        time.sleep(2)
-        # try:
-        #     driver.webDriver.find_element(By.XPATH, "/html/body/div[2]/div[2]/div[2]/div/div/div[2]/div[2]").click() # continue
-        #     time.sleep(2)
-        # except NoSuchElementException:
-        #     exception = "No Continue button, minimum PRE met"
+        time.sleep(3)
         driver.webDriver.get('https://nodes.presearch.org/dashboard')
-    
-    # def checkme(self):
-    #     print(str(self.num) + '\n' + self.name + '\n' + str(self.reliabilityScore))
     
 def getPresearchBasePath():
     return '/html/body/div[2]/div[2]/div[5]/div[' 
@@ -89,8 +82,9 @@ def claimPresearchRewards(driver):
     unclaimed = driver.find_element(By.XPATH, getPresearchBasePath() + '2]/div[3]/div[2]/div/div/div[1]/h2').text.strip(' PRE')
     if float(unclaimed) > 0:
         driver.find_element(By.XPATH, getPresearchBasePath() + '2]/div[3]/div[2]/div/div/div[2]/div/a').click() # claim
+        time.sleep(1)
         driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div/div/div/div[2]/div/form/div/button').click() # claim reward
-        time.sleep(4)
+        time.sleep(5)
         driver.refresh()
         time.sleep(1)
     return float(driver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
@@ -129,10 +123,7 @@ def getPresearchBalance(driver):
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
-    searchRewards = float(driver.webDriver.find_element(By.XPATH, '/html/body/div[1]/header/div[2]/div[2]/div/div[1]/div/div[1]/div/span[1]').text.strip(' PRE').replace(',', ''))
-    stakedTokens = float(driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[1]/div/h2').text.strip(' PRE').replace(',', ''))
-    balance = searchRewards + stakedTokens
-    return balance
+    return float(driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[1]/div/h2').text.strip(' PRE').replace(',', ''))
 
 def presearchRewardsRedemptionAndBalanceUpdates(driver, account, book):
     driver.webDriver.implicitly_wait(5)
@@ -144,14 +135,11 @@ def presearchRewardsRedemptionAndBalanceUpdates(driver, account, book):
     account.updateSpreadsheetAndGnuCash(book)
     
 if __name__ == '__main__':
-    # driver = Driver("Chrome")
+    driver = Driver("Chrome")
     book = GnuCash('Finance')
-    # locatePresearchWindow(driver)
+    locatePresearchWindow(driver)
     # searchUsingPresearch(driver)
-    # Presearch = Security("Presearch", book)
-    # presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book)
-    # Presearch.getData()
-    # book.closeBook()
-    
     Presearch = Security("Presearch", book)
+    presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book)
     Presearch.getData()
+    book.closeBook()

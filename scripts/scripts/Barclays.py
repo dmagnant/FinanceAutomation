@@ -99,7 +99,7 @@ def exportBarclaysTransactions(driver, today):
 def claimBarclaysRewards(driver):
     locateBarclaysWindow(driver)
     driver = driver.webDriver
-    driver.get("https://www.barclaycardus.com/servicing/cashBack?__fsk=212242283#!/redeem")
+    driver.get("https://www.barclaycardus.com/servicing/cashBack?__fsk=337615032#!/redeem")
     # click continue
     driver.find_element(By.ID,"redeem-continue").click()
     # click method of rewards

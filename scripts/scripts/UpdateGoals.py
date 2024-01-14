@@ -53,8 +53,6 @@ def compileGnuTransactions(account, mybook, dateRange):
                 return 'Expenses:Bank Fees'     
             case 'Bars & Restaurants':
                 return 'Expenses:Bars & Restaurants'
-            case 'CC Rewards':
-                return 'Income:Credit Card Rewards'
             case 'Clothing/Apparel':
                 return 'Expenses:Clothing/Apparel'            
             case 'Dan':
@@ -117,19 +115,17 @@ def compileGnuTransactions(account, mybook, dateRange):
     return total
 
 def getCell(account, month, accounts='Personal'):
-    rowStart = 46 if accounts == 'Personal' else 25
+    rowStart = 52 if accounts == 'Personal' else 25
     row = str(rowStart + (month - 1))
     match account:
         case 'Amazon':
             return 'C' + row if accounts == 'Personal' else 'B' + row
         case 'Bars & Restaurants':
             return 'D' + row if accounts == 'Personal' else 'C' + row
-        case 'CC Rewards':
-            return 'L' + row
         case 'Dan':
             return 'Q' + row
         case 'Dividends':
-            return 'M' + row
+            return 'L' + row
         case 'Entertainment':
             return 'E' + row if accounts == 'Personal' else 'D' + row
         case 'Groceries':
@@ -141,11 +137,11 @@ def getCell(account, month, accounts='Personal'):
         case 'Home Furnishings':
             return 'H' + row
         case 'Interest':
-            return 'N' + row
+            return 'M' + row
         case 'Joint Expenses':
             return 'F' + row
         case 'Market Research':
-            return 'O' + row
+            return 'N' + row
         case 'Other':
             return 'G' + row if accounts == 'Personal' else 'J' + row
         case 'Pet':
@@ -182,7 +178,7 @@ def runUpdateGoals(accounts, timeframe, book):
     expenseQuarterlyAccounts = []
     commonExpenseAccounts = ['Amazon', 'Bars & Restaurants', 'Entertainment', 'Other', 'Groceries']
     if accounts == 'Personal':
-        specificIncomeAccounts = ['CC Rewards','Dividends','Interest','Market Research']
+        specificIncomeAccounts = ['Dividends','Interest','Market Research']
         specificExpenseAccounts = ['Joint Expenses']
         if timeframe == 'YTD':
             incomeQuarterlyAccounts = ['HSA Contributions', 'Pension Contributions', 'Market Change', 'Salary']
@@ -207,7 +203,7 @@ def runUpdateGoals(accounts, timeframe, book):
 
 if __name__ == '__main__':
     accounts = 'Personal' # Personal or Joint
-    timeframe = "YTD" # Month or YTD
+    timeframe = "Month" # Month or YTD
     book = GnuCash('Finance') if accounts == 'Personal' else GnuCash('Home')
     runUpdateGoals(accounts, timeframe, book)
     book.closeBook()

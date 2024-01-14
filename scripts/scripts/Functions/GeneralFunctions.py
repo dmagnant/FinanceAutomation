@@ -3,13 +3,16 @@ import os
 import time
 from datetime import timedelta
 from decimal import Decimal
+from django.shortcuts import render
+from datetime import datetime
+
 
 import psutil
 import pyotp
 from pycoingecko import CoinGeckoAPI
 from pykeepass import PyKeePass
 from selenium.common.exceptions import (ElementNotInteractableException,
-                                        NoSuchElementException)
+                                        NoSuchElementException, WebDriverException)
 from selenium.webdriver.common.by import By
 
 def showMessage(header, body): 
@@ -20,13 +23,15 @@ def setDirectory():
     return os.environ.get('StorageDirectory')    
 
 def isProcessRunning(processName):
-        for proc in psutil.process_iter():
-            try:
-                if processName.lower() in proc.name().lower():
-                    return True
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
-                pass
-        return False
+    for proc in psutil.process_iter():
+        if (proc.name().lower()==processName):
+            print(processName)
+        try:
+            if processName.lower() in proc.name().lower():
+                return True
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            pass
+    return False
 
 def getUsername(name):
     keepass_file = setDirectory() + r"\Other\KeePass.kdbx"
@@ -112,7 +117,10 @@ def getStockPrice(driver, symbol):
     except NoSuchElementException:
         exception = 'pop-up window not there'
     price = float(driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/div/div/div[1]/div/div[2]/div/div/div[6]/div/div/div/div[3]/div[1]/div/fin-streamer[1]").text.replace('$', ''))
-    driver.webDriver.close()
+    try:
+        driver.webDriver.close()
+    except WebDriverException:
+        print(WebDriverException)
     driver.switchToLastWindow()
     driver.webDriver.implicitly_wait(3)
     return round(Decimal(price), 2)
@@ -152,7 +160,7 @@ def modifyTransactionDescription(description, amount="0.00"):
         description = "Fidelity IRA Transfer"
     elif "CITY OF MILWAUKE B2P*MILWWA" in description.upper():
         description = "Water Bill"
-    elif "DOVENMUEHLE MTG MORTG PYMT" in description.upper():
+    elif "COOPER NSM" in description.upper():
         description = "Mortgage Payment"
     elif "NORTHWESTERN MUT" in description.upper():
         description = "NM Paycheck"
@@ -223,7 +231,7 @@ def getAccountPath(account):
         case 'BoA-joint':
             return "Liabilities:BoA Credit Card"
         case 'Bonds':
-            return "Assets:Liquid Assets:Bonds"
+            return "Liabilities:Bonds"
         case 'Chase':
             return "Liabilities:Credit Cards:Chase Freedom"
         case 'Crypto':
@@ -240,8 +248,10 @@ def getAccountPath(account):
             return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum:ETH-Ledger"
         case 'Ethereum2':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum2"
-        case 'Fidelity':
+        case 'IRA':
             return "Assets:Non-Liquid Assets:IRA:Fidelity"
+        case 'Brokerage':
+            return "Assets:Non-Liquid Assets:Brokerage"
         case 'HSA Cash':
             return "Assets:Non-Liquid Assets:HSA:NM HSA Cash"
         case 'HSA Investment':
@@ -255,9 +265,11 @@ def getAccountPath(account):
         case 'Loopring':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Loopring"              
         case 'MyConstant':
-            return "Assets:Liquid Assets:Bonds:My Constant"
+            return "Liabilities:Bonds:My Constant"
         case 'Presearch':
             return "Assets:Non-Liquid Assets:CryptoCurrency:Presearch"
+        case 'Ripple':
+            return "Assets:Non-Liquid Assets:CryptoCurrency:Ripple"
         case 'Sofi Checking':
             return "Assets:Liquid Assets:Sofi:Checking"
         case 'Sofi Savings':
@@ -267,7 +279,7 @@ def getAccountPath(account):
         case 'VanguardPension':
             return "Assets:Non-Liquid Assets:Pension"  
         case 'Worthy':
-            return "Assets:Liquid Assets:Bonds:Worthy Bonds"
+            return "Liabilities:Bonds:Worthy Bonds"
         case 'Bing':
             return "Assets:Liquid Assets:MR:Bing"
         case 'Paidviewpoint':
@@ -290,3 +302,7 @@ def getAccountPath(account):
             return "Assets:Non-Liquid Assets:IRA:Fidelity:Govt Money Market"
         case _:
             print(f'account: {accountName} not found in "getAccountPath" function')
+
+def returnRender(request, htmlPath, context):
+    context['scriptCompleteTime'] = datetime.today()
+    return render(request, htmlPath, context)

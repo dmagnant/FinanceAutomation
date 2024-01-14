@@ -9,7 +9,7 @@ from scripts.BoA import *
 from scripts.Chase import *
 from scripts.Coinbase import *
 from scripts.Cointiply import *
-from scripts.Daily import *
+from scripts.scripts.DailyBank import *
 from scripts.Discover import *
 from scripts.Eternl import *
 from scripts.Exodus import *

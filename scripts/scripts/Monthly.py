@@ -8,7 +8,7 @@ if __name__ == '__main__' or __name__ == "Monthly":
     from Eternl import runEternl
     from Coinbase import runCoinbase
     from Exodus import runExodus
-    from Ledger import runLedger
+    from Ledger import runLedger, getLedgerAccounts
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange)
     from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPricesAndShares
     from HealthEquity import runHealthEquity
@@ -40,7 +40,7 @@ else:
 
 def getMonthlyAccounts(type, personalBook, jointBook):
     if type == 'USD':
-        Fidelity = USD("Fidelity", personalBook)
+        IRA = USD("IRA", personalBook)
         VIIIX = Security("HSA Investment", personalBook)
         HECash = USD("HSA Cash", personalBook)
         V401k = USD("Vanguard401k", personalBook)
@@ -54,7 +54,7 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         Home = USD('Home', jointBook)
         LiquidAssets = USD("Liquid Assets", personalBook)
         Bonds = USD("Bonds", personalBook)
-        accounts = {'Fidelity':Fidelity,'VXUS':VXUS,'VTI':VTI,'SPAXX':SPAXX,'VIIIX':VIIIX,'HECash':HECash,'V401k':V401k,'REIF401k':REIF401k,'TSM401k':TSM401k,'Worthy': Worthy,'Pension':Pension,'Home':Home,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
+        accounts = {'IRA':IRA,'VXUS':VXUS,'VTI':VTI,'SPAXX':SPAXX,'VIIIX':VIIIX,'HECash':HECash,'V401k':V401k,'REIF401k':REIF401k,'TSM401k':TSM401k,'Worthy': Worthy,'Pension':Pension,'Home':Home,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
     elif type == 'Crypto':
         CryptoPortfolio = USD("Crypto", personalBook)
         Cardano = Security("Cardano", personalBook, 'ADA-Eternl')
@@ -66,10 +66,6 @@ def getMonthlyAccounts(type, personalBook, jointBook):
     return accounts
 
 def monthlyRoundUp(account, myBook, date):
-    print(account.balance)
-    print(type(account.balance))
-    print(account.gnuBalance)
-    print(type(account.gnuBalance))
     change = Decimal(account.balance - float(account.gnuBalance))
     change = round(change, 2)
     if account.name == "MyConstant" or account.name == "Worthy":
@@ -91,8 +87,6 @@ def runUSD(driver, today, accounts, personalBook):
     driver.findWindowByUrl("/scripts/monthly")
 
 def runCrypto(driver, today, accounts, personalBook):
-    year = today.year
-    month = today.month
     openSpreadsheet(driver, 'Asset Allocation', 'Cryptocurrency')
     runEternl(driver, accounts['Cardano'], personalBook)
     runIoPay(driver, accounts['IoTex'], personalBook)
@@ -108,13 +102,25 @@ def runMonthlyBank(personalBook, jointBook):
     runUSD(driver, today, usdAccounts, personalBook)
     runCrypto(driver, today, cryptoAccounts, personalBook)
 
-if __name__ == '__main__':
+if __name__ == '__main__': # USD
+    driver = Driver("Chrome")
+    today = datetime.today().date()
     personalBook = GnuCash('Finance')
     jointBook = GnuCash('Home')
-    runMonthlyBank(personalBook, jointBook)
+    usdAccounts = getMonthlyAccounts('USD', personalBook, jointBook)
+    runUSD(driver, today, usdAccounts, personalBook)
     personalBook.closeBook()
     jointBook.closeBook()
-
+    
+# if __name__ == '__main__': # Crypto
+#     driver = Driver("Chrome")
+#     today = datetime.today().date()
+#     personalBook = GnuCash('Finance')
+#     jointBook = GnuCash('Home')
+#     cryptoAccounts = getMonthlyAccounts('Crypto', personalBook, jointBook)    
+#     runCrypto(driver, today, cryptoAccounts, personalBook)
+#     personalBook.closeBook()
+#     jointBook.closeBook()
 
     # # myBook = openGnuCashBook('Finance', True, True)
     # # getTotalOfAutomatedMRAccounts(myBook)

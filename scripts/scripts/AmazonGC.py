@@ -21,14 +21,21 @@ def locateAmazonWindow(driver):
 
 def confirmAmazonGCBalance(driver, account):
     locateAmazonWindow(driver)
-    account.setBalance(driver.webDriver.find_element(By.ID, "gc-ui-balance-gc-balance-value").text.strip('$'))    
+    balance = driver.webDriver.find_element(By.ID, "gc-ui-balance-gc-balance-value").text.strip('$')
+    if float(balance) == 0:
+        balance = "0"
+    account.setBalance(balance)
     if str(account.gnuBalance) != account.balance:
         showMessage("Amazon GC Mismatch", f'Amazon balance: {account.balance} \n' f'Gnu Cash balance: {account.gnuBalance} \n')
 
+# if __name__ == '__main__':
+#     book = GnuCash('Finance')
+#     driver = Driver("Chrome")
+#     AmazonGC = USD("AmazonGC", book)    
+#     confirmAmazonGCBalance(driver, AmazonGC)
+#     AmazonGC.getData()
+#     book.closeBook()
+
 if __name__ == '__main__':
     book = GnuCash('Finance')
-    driver = Driver("Chrome")
-    AmazonGC = USD("AmazonGC", book)    
-    confirmAmazonGCBalance(driver, AmazonGC)
-    AmazonGC.getData()
-    book.closeBook()
+    book.getTotalOfAutomatedMRAccounts()

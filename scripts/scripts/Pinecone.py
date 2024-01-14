@@ -15,6 +15,7 @@ else:
 
 def locatePineconeWindow(driver):
     found = driver.findWindowByUrl("members.pineconeresearch.com")
+    driver.webDriver.implicitly_wait(3)
     if not found:
         pineConeLogin(driver)
     else:
@@ -33,7 +34,7 @@ def getPineConeBalance(driver):
     balance = ''
     while balance == '':
         balance = driver.webDriver.find_element(By.XPATH, "//*[@id='basic-navbar-nav']/div/form/button/div").text
-    return balance
+    return balance                          
     
 def claimPineConeRewards(driver):
     locatePineconeWindow(driver)    
@@ -64,8 +65,9 @@ if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
     Pinecone = Security("Pinecone", book)
-    # runPinecone(driver, Pinecone, book)
+    runPinecone(driver, Pinecone, book)
     Pinecone.getData()
-    # book.closeBook()
-    # print(type(Pinecone.gnuBalance))
-    # print(type(Pinecone.price))
+    book.closeBook()
+    print(type(Pinecone.gnuBalance))
+    print(type(Pinecone.price))
+

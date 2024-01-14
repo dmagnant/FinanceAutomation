@@ -9,7 +9,8 @@ from scripts.scripts.BoA import *
 from scripts.scripts.Chase import *
 from scripts.scripts.Coinbase import *
 from scripts.scripts.Cointiply import *
-from scripts.scripts.Daily import *
+from scripts.scripts.DailyBank import *
+from scripts.scripts.DailyMR import *
 from scripts.scripts.Discover import *
 from scripts.scripts.Eternl import *
 from scripts.scripts.Exodus import *
@@ -34,6 +35,7 @@ from scripts.scripts.Worthy import *
 from scripts.scripts.Classes.WebDriver import Driver
 from scripts.scripts.Classes.Asset import USD, Security
 from scripts.scripts.Classes.GnuCash import GnuCash
+from scripts.scripts.Functions.GeneralFunctions import returnRender
 
 def scripts(request):
     bank = ['Ally', 'Sofi', 'Fidelity', 'HealthEquity', 'Vanguard', 'Worthy']
@@ -70,15 +72,26 @@ def ally(request):
 def amazon(request):
     book = GnuCash('Finance')
     AmazonGC = USD("AmazonGC", book)
-    if request.method == 'POST':
+    # print(request.POST)
+    # print(request.method)
+    if request.method == 'GET':
+        context = {'account': AmazonGC}
+        book.closeBook()
+        print('done')
+        return render(request,"scripts/amazon.html", context)
+    elif request.method == 'POST':
+        # from selenium import webdriver
+        # from selenium.webdriver.chrome.service import Service
+        # from selenium.webdriver.common.by import By
         driver = Driver("Chrome")
         if "main" in request.POST:
             confirmAmazonGCBalance(driver, AmazonGC)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/amazon"))
-    context = {'AmazonGC': AmazonGC}
-    book.closeBook()
-    return render(request,"scripts/amazon.html", context)
+        context = {'account': AmazonGC}
+        book.closeBook()
+        print('done')
+        return render(request,"scripts/singleAccountPost.html", context)
 
 def amex(request):
     book = GnuCash('Finance')
@@ -268,11 +281,10 @@ def creditCards(request):
     jointBook.closeBook()
     return render(request,"scripts/creditCards.html", context)
 
-def daily(request):
+def dailyBank(request):
     personalBook = GnuCash('Finance')
     jointBook = GnuCash('Home') 
-    mrAccounts = getDailyAccounts('MR', personalBook)
-    bankAccounts = getDailyAccounts('Bank', personalBook, jointBook)
+    bankAccounts = getDailyBankAccounts(personalBook, jointBook)
     GME = personalBook.getPriceInGnucash('GME', datetime.today().date())
     if request.method == 'POST':
         driver = Driver("Chrome")
@@ -296,8 +308,6 @@ def daily(request):
         elif "GME" in request.POST:
             GME = getStockPrice(driver, 'GME')
             personalBook.updatePriceInGnucash('GME', GME)
-        elif "MR" in request.POST:
-            runDailyMR(mrAccounts, personalBook)
         elif "sofiMain" in request.POST:
             runSofi(driver, accounts)
         elif "sofiLogin" in request.POST:
@@ -307,6 +317,28 @@ def daily(request):
         elif "sofiBalances" in request.POST:
             getSofiBalanceAndOrientPage(driver, bankAccounts['Checking'])
             getSofiBalanceAndOrientPage(driver, bankAccounts['Savings'])
+        elif "close windows" in request.POST:
+            driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/daily"))
+    context = {'bankAccounts': bankAccounts, 'GME': "%.2f" % GME}
+    personalBook.closeBook()
+    jointBook.closeBook()
+    if bankAccounts['Checking'].reviewTransactions or bankAccounts['Savings'].reviewTransactions:
+        personalBook.openGnuCashUI()
+    if bankAccounts['Ally'].reviewTransactions:
+        jointBook.openGnuCashUI()
+    return render(request,"scripts/dailyBank.html", context)
+
+def dailyMR(request):
+    personalBook = GnuCash('Finance')
+    mrAccounts = getDailyMRAccounts(personalBook)
+    if request.method == 'POST':
+        isProcessRunning('chromedriver.exe')
+        print('check ended')
+        driver = Driver("Chrome")
+        isProcessRunning('chromedriver.exe')
+        print('check 2 ended')
+        if "MR" in request.POST:
+            runDailyMR(mrAccounts, personalBook)
         elif "amazonMain" in request.POST:
             confirmAmazonGCBalance(driver, mrAccounts['AmazonGC'])
         elif "bingMain" in request.POST:
@@ -330,15 +362,15 @@ def daily(request):
         elif "pineconeRewards" in request.POST:
             claimPineConeRewards(driver)
         elif "presearchMain" in request.POST:
-            presearchRewardsRedemptionAndBalanceUpdates(driver, bankAccounts['Presearch'], personalBook)
+            presearchRewardsRedemptionAndBalanceUpdates(driver, mrAccounts['Presearch'], personalBook)
         elif "presearchLogin" in request.POST:
             locatePresearchWindow(driver)          
         elif "presearchBalance" in request.POST:
-            bankAccounts['Presearch'].setBalance(getPresearchBalance(driver))
+            mrAccounts['Presearch'].setBalance(getPresearchBalance(driver))
         elif "presearchSearch" in request.POST:
             searchUsingPresearch(driver)
         elif "presearchRewards" in request.POST:
-            presearchRewardsRedemptionAndBalanceUpdates(driver, bankAccounts['Presearch'], personalBook)
+            presearchRewardsRedemptionAndBalanceUpdates(driver, mrAccounts['Presearch'], personalBook)
         elif "swagbucksMain" in request.POST:
             runSwagbucks(driver, True, mrAccounts['Swagbucks'], personalBook) if "Run Alu" in request.POST else runSwagbucks(driver, False, mrAccounts['Swagbucks'], personalBook)
         elif "swagbucksLogin" in request.POST:
@@ -379,16 +411,11 @@ def daily(request):
         elif "paidviewpointRewards" in request.POST:
             redeemPaidviewpointRewards(driver)            
         elif "close windows" in request.POST:
-            driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/daily"))
-    context = {'mrAccounts': mrAccounts, 'bankAccounts': bankAccounts, 'GME': "%.2f" % GME}
+            driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/dailyMR"))
+    context = {'mrAccounts': mrAccounts}
     personalBook.closeBook()
-    jointBook.closeBook()
-    if bankAccounts['Checking'].reviewTransactions or bankAccounts['Savings'].reviewTransactions:
-        personalBook.openGnuCashUI()
-    if bankAccounts['Ally'].reviewTransactions:
-        jointBook.openGnuCashUI()
-    return render(request,"scripts/daily.html", context)
-
+    return returnRender(request, "scripts/dailyMR.html", context)
+        
 def discover(request):
     book = GnuCash('Finance')
     Discover = USD("Discover", book)
@@ -440,17 +467,17 @@ def exodus(request):
 
 def fidelity(request):
     book = GnuCash('Finance')
-    Fidelity = USD("Fidelity", book)
+    IRA = USD("IRA", book)
     VXUS = Security('Total Intl Stock Market', book)
     VTI = Security('Total Stock Market(IRA)', book)
     SPAXX = Security('Govt Money Market', book)
-    accounts = {'Fidelity': Fidelity,'VXUS': VXUS,'VTI': VTI,'SPAXX': SPAXX}
+    accounts = {'IRA': IRA,'VXUS': VXUS,'VTI': VTI,'SPAXX': SPAXX}
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
             runFidelity(driver, accounts, book)
         elif "balance" in request.POST:
-            Fidelity.setBalance(getFidelityBalance(driver))
+            IRA.setBalance(getFidelityIRABalance(driver))
         elif "login" in request.POST:
             locateFidelityWindow(driver)
         elif "close windows" in request.POST:
@@ -536,7 +563,7 @@ def monthly(request):
         elif "fidelityMain" in request.POST:
             runFidelity(driver, usdAccounts, personalBook)
         elif "fidelityBalance" in request.POST:
-            usdAccounts['Fidelity'].setBalance(getFidelityBalance(driver))
+            usdAccounts['IRA'].setBalance(getFidelityIRABalance(driver))
         elif "fidelityLogin" in request.POST:
             locateFidelityWindow(driver)
         elif "HEMain" in request.POST:
@@ -743,7 +770,7 @@ def tellwut(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
-            runTellwut(driver, Tellwut)
+            runTellwut(driver, Tellwut, book)
         elif "login" in request.POST:
             print(driver.webDriver.current_window_handle)
             locateTellWutWindow(driver)

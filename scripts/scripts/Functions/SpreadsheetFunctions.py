@@ -118,56 +118,15 @@ def updateCryptoPrices(driver, book):
             row += 1
         else:
             stillCoins = False
-    # get prices from coingecko in a single call
-    coinPrices = getCryptocurrencyPrice(coinNames)
+    coinPrices = getCryptocurrencyPrice(coinNames)     # get prices from coingecko in a single call
     # update coin prices in Gnucash and spreadsheet
     for coin in coinNames:
         i = coinNames.index(coin)
         symbol = coinSymbols[i]
         price = format(coinPrices[coin]["usd"], ".2f")
+        print('updating ' + coin + ' ' + price)
         book.updatePriceInGnucash(symbol, price)
         worksheet.update((priceColumn + str(i + 2)), float(price))
-
-# def updateInvestmentShares(driver, accounts):
-#     print('updating investment shares')
-#     url = "edit#gid=361024172"
-#     spreadsheetWindow = driver.findWindowByUrl(url)
-#     if not spreadsheetWindow:
-#         openSpreadsheet(driver, 'Asset Allocation', 'Investments')
-#     else:
-#         driver.webDriver.switch_to.window(spreadsheetWindow)
-#     row = 12  # first row after crypto investments
-#     symbolColumn = 'B'
-#     accountColumn = 'C'
-#     sharesColumn = 'D'
-#     sheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Asset Allocation')
-#     worksheet = sheet.worksheet('Investments')
-#     stillCoins = True
-#     while stillCoins:
-#         account = worksheet.acell(accountColumn+str(row)).value
-#         if account == 'HSA-TD':
-#             row+=1
-#             continue
-#         elif account == 'HSA-HE':
-#             worksheet.update(sharesColumn + str(row), float(accounts['VIIIX'].balance))
-#         elif account == 'IRA' or account == '401k':
-#             symbol = worksheet.acell(symbolColumn+str(row)).value
-#             if symbol not in ['VXUS', 'VTI', 'SPAXX']:
-#                 row+=1
-#                 continue
-#             elif symbol == 'VTI':
-#                 worksheet.update(sharesColumn + str(row), float(accounts['VTI'].balance))
-#             elif symbol == 'VXUS':
-#                 worksheet.update(sharesColumn + str(row), float(accounts['VXUS'].balance))
-#             elif symbol == 'SPAXX':
-#                 worksheet.update(sharesColumn + str(row), float(accounts['SPAXX'].balance))
-#             elif symbol == 'VGSNX':
-#                 worksheet.update(sharesColumn + str(row), float(accounts['REIF401k'].balance))
-#             elif symbol == '8585':
-#                 worksheet.update(sharesColumn + str(row), float(accounts['TSM401k'].balance))
-#         else:
-#             stillCoins = False
-#         row+=1
 
 def updateInvestmentPricesAndShares(driver, accounts, book):
     today = datetime.today().date()
@@ -179,7 +138,7 @@ def updateInvestmentPricesAndShares(driver, accounts, book):
         spreadsheetWindow = driver.webDriver.current_window_handle
     else:
         driver.webDriver.switch_to.window(spreadsheetWindow)
-    row = 12  # first row after crypto investments
+    row = 13  # first row after crypto investments
     symbolColumn = 'B'
     sharesColumn = 'D'
     sheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Asset Allocation')
@@ -204,7 +163,6 @@ def updateInvestmentPricesAndShares(driver, accounts, book):
                 elif coinSymbol == 'VGSNX':
                     shares = float(accounts['REIF401k'].balance)
             elif coinSymbol == 'SPAXX':
-                print(accounts['SPAXX'].balance)
                 shares = float(accounts['SPAXX'].balance)
                 worksheet.update(sharesColumn + str(row), shares)
                 row+=1
@@ -226,13 +184,11 @@ def openSpreadsheet(driver, sheet, tab=''):
     url = 'https://docs.google.com/spreadsheets/d/'
     if sheet == 'Checking Balance':
         url += '1684fQ-gW5A0uOf7s45p9tC4GiEE5s5_fjO5E7dgVI1s/'
-        if tab == '2023':
-            url += 'edit#gid=1300163920'
+        if tab == '2024':
+            url += 'edit#gid=1934202459'
     elif sheet == 'Asset Allocation':
         url += '1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/'
-        if tab == '2023':
-            url += 'edit#gid=1449745658'
-        elif tab == 'Goals':
+        if tab == 'Goals':
             url += 'edit#gid=1813404638'            
         elif tab == 'Cryptocurrency':
             url += 'edit#gid=623829469'
@@ -240,8 +196,8 @@ def openSpreadsheet(driver, sheet, tab=''):
             url += 'edit#gid=361024172'
     elif sheet == 'Home':
         url += '1oP3U7y8qywvXG9U_zYXgjFfqHrCyPtUDl4zPDftFCdM/'
-        if tab == '2023 Balance':
-            url += 'edit#gid=14744444'            
+        if tab == '2024 Balance':
+            url += 'edit#gid=565871395'            
         elif tab == 'Finances':
             url += 'edit#gid=1436385671'
     driver.openNewWindow(url)

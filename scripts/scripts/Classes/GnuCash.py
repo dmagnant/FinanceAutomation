@@ -74,7 +74,10 @@ class GnuCash:
             for spl in tr.splits
             if spl.account.fullname == account.gnuAccount]
         value = int(account.balance) * account.price
-        book.delete(transactions[0])
+        try:
+            book.delete(transactions[0])
+        except IndexError:
+            exception = 'no prior years transactions to delete'
         split = [Split(value=-value, memo="scripted", account=book.accounts(fullname='Income:Market Research')),
                 Split(value=value, quantity=Decimal(account.balance), memo="scripted", account=book.accounts(fullname=account.gnuAccount))]
         Transaction(post_date=today, currency=book.currencies(mnemonic="USD"), description=account.name + ' account balance', splits=split)
@@ -118,7 +121,7 @@ class GnuCash:
                 try:
                     price =  myBook.prices(commodity=myBook.commodities(mnemonic=symbol), currency=myBook.currencies(mnemonic="USD"), date=date).value
                     if price == 0:
-                        print('price for ' + symbol + ' is 0, will cause loop')
+                        print('price for ' + symbol + ' is 0, remove from price database to prevent loop')
                 except KeyError:
                     date = date - timedelta(days=1)
             return price
@@ -167,10 +170,14 @@ class GnuCash:
         promo = 0
         antidote = 0
         amazonGC = 0
+        ccRewards = 0
+        accelerant = 0
+        kitchenInsiders = 0
+        onlineInsights = 0
         for transaction in myBook.transactions:
-            if transaction.post_date.year == 2022:
+            if transaction.post_date.year == 2023:
                 for spl in transaction.splits:
-                    if spl.account.fullname == 'Income:Market Research':
+                    if 'Income:Market Research' in spl.account.fullname:
                         mrTotal += -spl.value
                         if 'swagbucks' in transaction.description.lower():
                             swagbucks += -spl.value
@@ -198,24 +205,38 @@ class GnuCash:
                             antidote += -spl.value
                         elif 'appen' in transaction.description.lower() or 'mystery shopping' in transaction.description.lower():
                             appen += -spl.value
+                        elif 'cc rewards' in transaction.description.lower():
+                            ccRewards+= -spl.value
+                        elif 'accelerant' in transaction.description.lower():
+                            accelerant+= -spl.value
+                        elif 'kitchen insider' in transaction.description.lower():
+                            kitchenInsiders+= -spl.value
+                        elif 'online insights' in transaction.description.lower():
+                            onlineInsights+= -spl.value                            
+                        else:
+                            print(transaction.description)
                     if spl.account.fullname == 'Assets:Liquid Assets:Amazon GC':
                         if spl.value > 0:
                             amazonGC += spl.value
                             
-        accountedTotal = swagbucks + tellwut + bing + sago + pinecone + paidviewpoint + knowledgePanel + paypal + appen + reckner + check + promo + antidote
+        accountedTotal = swagbucks + tellwut + bing + sago + pinecone + paidviewpoint + knowledgePanel + paypal + appen + reckner + check + promo + antidote + ccRewards + accelerant + kitchenInsiders + onlineInsights
 
-        print('     schlesinger: ' + str(sago))                        
         print('           promo: ' + str(promo))
         print('           appen: ' + str(appen))
-        print('           misc.: ' + str(mrTotal - accountedTotal))
-        print('       swagbucks: ' + str(swagbucks))
-        print('   paidviewpoint: ' + str(paidviewpoint))    
-        print('  knowledgePanel: ' + str(knowledgePanel))
-        print('        antidote: ' + str(antidote))    
         print('         reckner: ' + str(reckner))
-        print('            bing: ' + str(bing))
-        print('         tellwut: ' + str(tellwut))
+        print('       swagbucks: ' + str(swagbucks))
+        print('            sago: ' + str(sago))        
+        print('  knowledgePanel: ' + str(knowledgePanel))        
+        print('   paidviewpoint: ' + str(paidviewpoint))
+        print('        ccRewards: ' + str(ccRewards))             
+        print('         tellwut: ' + str(tellwut))        
         print('        pinecone: ' + str(pinecone))
+        print('        onlineInsights: ' + str(onlineInsights))        
+        print('        antidote: ' + str(antidote))
+        print('           misc.: ' + str(mrTotal - accountedTotal))        
+        print('        kitchenInsiders: ' + str(kitchenInsiders))
+        print('        accelerant: ' + str(accelerant))
+        print('            bing: ' + str(bing))        
         print('           check: ' + str(check))
         print('          paypal: ' + str(paypal))    
         print('        MR total: ' + str(mrTotal))
@@ -225,14 +246,14 @@ class GnuCash:
         myBook = self.getWriteBook()
         today = datetime.today().date()
         transDate = today.replace(month=12, day=31)
-        year = 2007
+        year = 2022
         while year < today.year:
             transDate = transDate.replace(year=year)
             transactions = []
             accounts = []
             totalValues = []
             totalQuantities = []
-            split = []
+            splits = []
             for transaction in myBook.transactions:
                 if transaction.post_date.year == transDate.year:
                     transactions.append(transaction)
@@ -250,10 +271,10 @@ class GnuCash:
             for account in accounts:
                 i = accounts.index(account)
                 if "Staking" in account or "CryptoCurrency" in account:
-                    split.append(Split(value=totalValues[i], quantity=totalQuantities[i], memo="", account=myBook.accounts(fullname=account)))
+                    splits.append(Split(value=totalValues[i], quantity=totalQuantities[i], memo="", account=myBook.accounts(fullname=account)))
                 else:
-                    split.append(Split(value=totalValues[i], memo="", account=myBook.accounts(fullname=account)))
-            Transaction(post_date=transDate, currency=myBook.currencies(mnemonic="USD"), description=str(transDate.year) + ' Totals', splits=split)
+                    splits.append(Split(value=totalValues[i], memo="", account=myBook.accounts(fullname=account)))
+            Transaction(post_date=transDate, currency=myBook.currencies(mnemonic="USD"), description=str(transDate.year) + ' Totals', splits=splits)
             year += 1
             
         for transaction in myBook.transactions:
@@ -271,10 +292,15 @@ class GnuCash:
                         for spl in tr.splits
                         if spl.account.fullname == security.gnuAccount]
         for tr in transactions:
+            amount = 0
+            stakingTrans = False
             for spl in tr.splits:
-                amount = format(spl.value, ".2f")
                 if spl.account.fullname == security.gnuAccount:
-                    total += abs(float(amount))
+                    amount = format(spl.value, ".2f")
+                elif spl.account.fullname == "Income:Investments:Staking":
+                    stakingTrans = True
+            if not stakingTrans:
+                total += abs(float(amount))
         print(f'total $ invested in {security.name}: ' + str(total))
         return total
     
@@ -314,7 +340,7 @@ class GnuCash:
             toAccount = ''
             if "BoA CC" in description:
                 if "Rewards" in description:
-                    toAccount = "Income:Credit Card Rewards"  
+                    toAccount = "Income:Market Research:Credit Card Rewards"  
                 else: 
                     if account == 'Ally':
                         toAccount = "Liabilities:BoA Credit Card"
@@ -349,7 +375,7 @@ class GnuCash:
             elif "Mortgage Payment" in description:
                 toAccount = "Liabilities:Mortgage Loan"
             elif "Swagbucks" in description:
-                toAccount = "Income:Market Research"
+                toAccount = "Income:Market Research:Swagbucks"
             elif "NM Paycheck" in description:
                 toAccount = "Income:Salary"
             elif "GOOGLE FI" in description.upper() or "GOOGLE *FI" in description.upper():
@@ -365,31 +391,31 @@ class GnuCash:
             elif "CRYPTO PURCHASE" in description.upper():
                 toAccount = "Assets:Non-Liquid Assets:CryptoCurrency"
             elif "Pinecone Research" in description:
-                toAccount = "Income:Market Research"
+                toAccount = "Income:Market Research:Pinecone"
             elif "Internet Bill" in description:
                 toAccount = "Expenses:Utilities:Internet"
             elif "TRAVEL CREDIT" in description:
-                toAccount = "Income:Credit Card Rewards"
+                toAccount = "Income:Market Research:Credit Card Rewards"
             elif "Fidelity IRA Transfer" in description:
                 toAccount = "Assets:Non-Liquid Assets:IRA:Fidelity:Govt Money Market"
             elif "MILWAUKEE ELECTRIC TO" in description:
                 toAccount = "Expenses:Home Expenses:Maintenance"
             elif "CASH REWARDS STATEMENT CREDIT" in description:
-                toAccount = "Income:Credit Card Rewards"        
+                toAccount = "Income:Market Research:Credit Card Rewards"        
             elif "Chase CC Rewards" in description:
-                toAccount = "Income:Credit Card Rewards"
+                toAccount = "Income:Market Research:Credit Card Rewards"
             elif "Chase CC" in description:
                 toAccount = "Liabilities:Credit Cards:Chase Freedom"
             elif "Discover CC Rewards" in description:
-                toAccount = "Income:Credit Card Rewards"        
+                toAccount = "Income:Market Research:Credit Card Rewards"        
             elif "Discover CC" in description:
                 toAccount = "Liabilities:Credit Cards:Discover It"
             elif "Amex CC Rewards" in description:
-                toAccount = "Income:Credit Card Rewards"
+                toAccount = "Income:Market Research:Credit Card Rewards"
             elif "Amex CC" in description:
                 toAccount = "Liabilities:Credit Cards:Amex BlueCash Everyday"
             elif "Barclays CC Rewards" in description:
-                toAccount = "Income:Credit Card Rewards"
+                toAccount = "Income:Market Research:Credit Card Rewards"
             elif "Barclays CC" in description:
                 toAccount = "Liabilities:Credit Cards:BarclayCard CashForward"
             elif "Ally Transfer" in description:
@@ -399,7 +425,7 @@ class GnuCash:
             elif "CAT DOCTOR" in description:
                 toAccount = "Expenses:Medical:Vet"
             elif "APPEN" in description:
-                toAccount = "Income:Market Research"
+                toAccount = "Income:Market Research:Appen"
             elif "PARKING" in description or "SPOTHERO" in description.upper():
                 toAccount = "Expenses:Transportation:Parking"
             elif "PROGRESSIVE" in description:
@@ -633,16 +659,16 @@ class GnuCash:
                     Split(value=transactionVariables['amount']['gas'], account=myBook.accounts(fullname="Expenses:Utilities:Gas")),
                     Split(value=transactionVariables['amount']['total'], account=myBook.accounts(fullname=transactionVariables['fromAccount']))]
         elif "NM Paycheck" in transactionVariables['description']:
-            split = [Split(value=round(Decimal(2029.41), 2), memo="scripted",account=myBook.accounts(fullname=transactionVariables['fromAccount'])),
+            split = [Split(value=round(Decimal(2032.62), 2), memo="scripted",account=myBook.accounts(fullname=transactionVariables['fromAccount'])),
                     Split(value=round(Decimal(693.60), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:401k")),
                     Split(value=round(Decimal(5.49), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Dental")),
-                    Split(value=round(Decimal(35.47), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Health")),
+                    Split(value=round(Decimal(44.90), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Health")),
                     Split(value=round(Decimal(2.93), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Vision")),
-                    Split(value=round(Decimal(227.86), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Social Security")),
-                    Split(value=round(Decimal(53.29), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Medicare")),
-                    Split(value=round(Decimal(484.89), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Federal Tax")),
-                    Split(value=round(Decimal(180.81), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:State Tax")),
-                    Split(value=round(Decimal(139.58), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:HSA:NM HSA Cash")),
+                    Split(value=round(Decimal(226.51), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Social Security")),
+                    Split(value=round(Decimal(52.97), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Medicare")),
+                    Split(value=round(Decimal(462.59), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Federal Tax")),
+                    Split(value=round(Decimal(179.64), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:State Tax")),
+                    Split(value=round(Decimal(152.08), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:HSA:NM HSA Cash")),
                     Split(value=-round(Decimal(3853.33), 2), memo="scripted",account=myBook.accounts(fullname=toAccount))]
         else:
             split = [Split(value=-transactionVariables['amount'], memo="scripted", account=myBook.accounts(fullname=toAccount)),

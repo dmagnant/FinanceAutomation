@@ -15,7 +15,8 @@ else:
     from .Functions.GeneralFunctions import (getPassword, getUsername)
 
 def getAmexBasePath():
-    return '/html/body/div[1]/div[2]/div[3]/div/div/div/div/div[2]/div/div[2]/div/div/'
+    return '/html/body/div[1]/div[2]/main/div/div/div/div/div[2]/div/div[2]/div/div/div'
+            
             
 def locateAmexWindow(driver):
     found = driver.findWindowByUrl("americanexpress.com")
@@ -27,8 +28,8 @@ def locateAmexWindow(driver):
         
 def amexLogin(driver):
     driver.openNewWindow('https://www.americanexpress.com/en-us/account/login?inav=iNavLnkLog')
-    driver.webDriver.find_element(By.ID, "eliloUserID").send_keys(getUsername('Amex'))
-    driver.webDriver.find_element(By.ID, "eliloPassword").send_keys(getPassword('Amex'))
+    # driver.webDriver.find_element(By.ID, "eliloUserID").send_keys(getUsername('Amex'))
+    # driver.webDriver.find_element(By.ID, "eliloPassword").send_keys(getPassword('Amex'))
     driver.webDriver.find_element(By.ID, "loginSubmit").click()
     try: # handle pop-up
         driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[5]/div/div/div/div/div/div[2]/div/div/div/div/div[1]/div/a/span/span").click()
@@ -47,14 +48,14 @@ def exportAmexTransactions(driver):
     except NoSuchElementException:
         exception = "caught"
     time.sleep(6)
-    driver.find_element(By.XPATH, getAmexBasePath() + "div[2]/div[1]/div[1]/div[1]/div[2]/div/div[2]/button/i").click() # download arrow
-    driver.find_element(By.XPATH, getAmexBasePath() + "div[2]/div/div/div/div/div/div[1]/div/div/div[1]/div/fieldset/div[1]/label").click() # CSV Option
+    driver.find_element(By.XPATH, getAmexBasePath() + "/div[1]/div[1]/div/div/div[1]/div[2]/div[1]/div/button/div/i").click() # download arrow
+    driver.find_element(By.XPATH, getAmexBasePath() + "[1]/div/div/div/div/div/div[2]/div/div/div[1]/div/fieldset/div[1]/label").click() # CSV Option
     try: # delete old csv file
         os.remove(r"C:\Users\dmagn\Downloads\activity.csv")
     except FileNotFoundError:
         exception = "caught"
     # click on Download
-    driver.find_element(By.XPATH, getAmexBasePath() + "div[2]/div/div/div/div/div/div[2]/div/a").click()
+    driver.find_element(By.XPATH, getAmexBasePath() + "[1]/div/div/div/div/div/div[3]/div/a").click()
     time.sleep(3)
 
 def claimAmexRewards(driver):
