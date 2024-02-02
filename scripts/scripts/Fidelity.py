@@ -36,22 +36,21 @@ def fidelityLogin(driver):
 
 def getFidelityIRABalance(driver):
     locateFidelityWindow(driver)
-    return driver.webDriver.find_element(By.XPATH,"//*[@id='245173114']/span/s-slot/s-assigned-wrapper/div/div/div[2]/div/span[2]").text.replace('$','').replace(',','')
+    return driver.getXPATHElementTextOnceAvailable("//*[@id='245173114']/span/s-slot/s-assigned-wrapper/div/div/div[2]/div/span[2]").replace('$','').replace(',','')
 
 def getFidelityBrokerageBalance(driver):
     locateFidelityWindow(driver)
-    return driver.webDriver.find_element(By.XPATH,"//*[@id='Z29380087']/span/s-slot/s-assigned-wrapper/div/div/div[2]/div/span[2]").text.replace('$','').replace(',','')    
+    return driver.getXPATHElementTextOnceAvailable("//*[@id='Z29380087']/span/s-slot/s-assigned-wrapper/div/div/div[2]/div/span[2]").replace('$','').replace(',','')
                                                    
 def getFidelityIRAPricesAndShares(driver, accounts, book):
     locateFidelityWindow(driver)
-    driver.webDriver.find_element(By.XPATH, "//*[@id='portsum-tab-positions']/a/span").click() # Positions
-    driver.clickElementOnceAvaiable("//*[@id='245173114']/span/s-slot/s-assigned-wrapper/div/div") # Roth IRA
+    driver.webDriver.find_element(By.XPATH,"//*[@id='245173114']/span/s-slot/s-assigned-wrapper/div/div") # Roth IRA
+    driver.clickXPATHElementOnceAvaiable("//*[@id='portsum-tab-positions']/a/span") # Positions
     row = 1
     while True:
         row += 1
         try:
             symbol = driver.webDriver.find_element(By.XPATH, "//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[1]/div[" + str(row) +"]/div/div/span/div/div[2]/div/button").text.replace('$','')
-            print(symbol)
         except NoSuchElementException:
             break
         if symbol == 'VXUS':
@@ -74,7 +73,7 @@ def getFidelityIRAPricesAndShares(driver, accounts, book):
 def captureFidelityIRATransactions(driver):
     locateFidelityWindow(driver)
     driver.webDriver.find_element(By.XPATH, "//*[@id='portsum-tab-activity']/a/span").click() # Activity & Orders
-    driver.clickElementOnceAvaiable("//*[@id='245173114']/span/s-slot/s-assigned-wrapper/div/div") # Roth IRA
+    driver.clickXPATHElementOnceAvaiable("//*[@id='245173114']/span/s-slot/s-assigned-wrapper/div/div") # Roth IRA
     driver.webDriver.find_element(By.XPATH, "//*[@id='accountDetails']/div/div[2]/div/new-tab-group/new-tab-group-ui/div[2]/activity-orders-shell/div/ap143528-portsum-dashboard-activity-orders-home-root/div/div/div/account-activity-container/div/div[1]/div[2]/pvd3-field-group/s-root/div/div/s-slot/s-assigned-wrapper/div/core-filter-button[2]/pvd3-button/s-root/button/div/span/s-slot/s-assigned-wrapper").click() # History
     driver.webDriver.find_element(By.XPATH, "//*[@id='timeperiod-select-button']/span[1]").click() # Timeframe
     driver.webDriver.find_element(By.XPATH, "//*[@id='60']/s-root/div/label").click() # past 60 days
@@ -83,27 +82,29 @@ def captureFidelityIRATransactions(driver):
     iraActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\ira.csv"
     open(iraActivity, 'w', newline='').truncate()
     lastMonth = getStartAndEndOfDateRange(datetime.today().date(), "month")
-    row = 2
-    table = 2
-    elementPath = "//*[@id='accountDetails']/div/div[2]/div/new-tab-group/new-tab-group-ui/div[2]/activity-orders-shell/div/ap143528-portsum-dashboard-activity-orders-home-root/div/div/div/account-activity-container/div/div[3]/activity-list["          
+    row = 0
+    table = 3
+    elementPathRoot = "//*[@id='accountDetails']/div/div[2]/div/new-tab-group/new-tab-group-ui/div[2]/activity-orders-shell/div/ap143528-portsum-dashboard-activity-orders-home-root/div/div/div/account-activity-container/div/div[2]/activity-list[2]/div/div["
+    def setElementPath(eRow, eTable, eColumn):
+        return elementPathRoot + str(eTable)+']/div['+str(eRow)+']/div/div['+str(eColumn) + ']'
     while True:
         row+=1
-        column=1
-        dateElement = driver.webDriver.find_element(By.XPATH,elementPath+str(table)+']/div/div['+str(row)+']/div/div['+str(column)+']')
+        column=2
+        dateElement = driver.webDriver.find_element(By.XPATH,setElementPath(row, table, column))
         if dateElement.text == 'Load more results':
             break
         date = datetime.strptime(dateElement.text, '%b-%d-%Y').date()
         if date.month == lastMonth['endDate'].month:
             column+=1
-            descriptionElement = driver.webDriver.find_element(By.XPATH,elementPath+str(table)+']/div/div['+str(row)+']/div/div['+str(column)+']/div/div')
+            descriptionElement = driver.webDriver.find_element(By.XPATH,setElementPath(row, table, column)+'/div/div')
             description = descriptionElement.text
             column+=1
-            amount = driver.webDriver.find_element(By.XPATH,elementPath+str(table)+']/div/div['+str(row)+']/div/div['+str(column)+']').text.replace('$','').replace(',','').replace('-','').replace('+','')
+            amount = driver.webDriver.find_element(By.XPATH,setElementPath(row, table, column)).text.replace('$','').replace(',','').replace('-','').replace('+','')
             if not amount:
                 continue
             if "YOU BOUGHT" in description.upper():
                 descriptionElement.click()
-                shares = driver.webDriver.find_element(By.XPATH,elementPath+str(table)+']/div/div['+str(row)+']/div[2]/div/activity-order-detail-panel/div/div/div[10]').text.replace('-','').replace('+','')
+                shares = driver.webDriver.find_element(By.XPATH,elementPathRoot+str(table)+']/div/div['+str(row)+']/div[2]/div/activity-order-detail-panel/div/div/div[10]').text.replace('-','').replace('+','')
                 descriptionElement.click()
             elif "CASH CONTRIBUTION" in description.upper():
                 continue
@@ -111,9 +112,7 @@ def captureFidelityIRATransactions(driver):
                 shares = amount
             transaction = date, description, amount, shares
             csv.writer(open(iraActivity, 'a', newline='', encoding="utf-8")).writerow(transaction)
-        elif date.month > lastMonth['endDate'].month:
-            continue
-        else:
+        elif date.month < lastMonth['endDate'].month or date.year < lastMonth['endDate'].year:
             break
     return iraActivity
 
@@ -122,10 +121,10 @@ def runFidelity(driver, accounts, book):
     accounts['IRA'].setBalance(getFidelityIRABalance(driver))
     getFidelityIRAPricesAndShares(driver, accounts, book)
     iraActivity = captureFidelityIRATransactions(driver)
-    book.importGnuTransaction(accounts['IRA'], iraActivity, driver, 0)
-    accounts['VXUS'].updateGnuBalanceAndValue(book.getBalance(accounts['VXUS'].gnuAccount))
-    accounts['VTI'].updateGnuBalanceAndValue(book.getBalance(accounts['VTI'].gnuAccount))
-    accounts['SPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['SPAXX'].gnuAccount))
+    # book.importGnuTransaction(accounts['IRA'], iraActivity, driver, 0)
+    # accounts['VXUS'].updateGnuBalanceAndValue(book.getBalance(accounts['VXUS'].gnuAccount))
+    # accounts['VTI'].updateGnuBalanceAndValue(book.getBalance(accounts['VTI'].gnuAccount))
+    # accounts['SPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['SPAXX'].gnuAccount))
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
@@ -138,3 +137,5 @@ if __name__ == '__main__':
     accounts = {'IRA': IRA,'VXUS': VXUS,'VTI': VTI,'SPAXX': SPAXX, 'Brokerage':Brokerage}
     runFidelity(driver, accounts, book)
     book.closeBook()
+    
+

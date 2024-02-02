@@ -22,6 +22,5 @@ from scripts.views import*
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', welcome, name="welcome"),
-    path('scripts/', include('scripts.urls')),
-    path('accounts/', include('accounts.urls')),
+    path('scripts/', include('scripts.urls'))
 ]

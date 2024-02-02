@@ -2,6 +2,7 @@ import ctypes
 import os
 import time
 from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 from decimal import Decimal
 from django.shortcuts import render
 from datetime import datetime
@@ -92,7 +93,7 @@ def getStartAndEndOfDateRange(today, timeSpan):
             endDate = today.replace(month=12, day=31, year=year - 1)
         elif month == 3:
             startDate = today.replace(month=2, day=1)
-            endDate = today.replace(month=2, day=28)
+            endDate = today.replace(month=2, day=28) if (year % 4)>0 else today.replace(month=2,day=29)
         elif month in [5, 7, 10, 12]:
             startDate = today.replace(month=month - 1, day=1)
             endDate = today.replace(month=month - 1, day=30)
@@ -168,8 +169,8 @@ def modifyTransactionDescription(description, amount="0.00"):
         description = "Swagbucks"  
     elif "PAYPAL" in description.upper():
         description = "Paypal"
-    elif "NIELSEN" in description.upper() and "3.00" in amount:
-        description = "Pinecone Research"
+    elif "PAYPAL" in description.upper() and "3.00" in amount:
+        description = "Pinecone"
     elif "VENMO" in description.upper():
         description = "Venmo"
     elif "ALLIANT CU" in description.upper():
@@ -205,104 +206,173 @@ def getAccountPath(account):
         accountName = account.account
     else:
         accountName = account.name
+    assets = "Assets"
+    liquid = assets + ":Liquid Assets"
+    mr = liquid + ":MR"    
+    nonLiquid = assets + ":Non-Liquid Assets"
+    crypto = nonLiquid + ":CryptoCurrency"
+    v401k = nonLiquid + ":401k"
+    ira = nonLiquid + ":IRA"
+    hsa = nonLiquid + ":HSA"
+    liabilities = "Liabilities"
+    cc = liabilities + ":Credit Cards"
+    bonds = liabilities + ":Bonds"
     match accountName:
-        case 'Cardano':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Cardano"
-        case 'ADA-Eternl':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Cardano:ADA-Eternl"    
-        case 'ADA-Nami':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Cardano:ADA-Nami"    
-        case 'Algorand':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Algorand"
-        case 'Ally':
-            return "Assets:Ally Checking Account"
-        case 'AmazonGC':
-            return "Assets:Liquid Assets:Amazon GC"
-        case 'Amex':
-            return "Liabilities:Credit Cards:Amex BlueCash Everyday"
-        case 'Cosmos':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Cosmos"                  
-        case 'Barclays':
-            return "Liabilities:Credit Cards:BarclayCard CashForward"
-        case 'Bitcoin':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Bitcoin"                               
-        case 'BoA':
-            return "Liabilities:Credit Cards:BankAmericard Cash Rewards"
-        case 'BoA-joint':
-            return "Liabilities:BoA Credit Card"
-        case 'Bonds':
-            return "Liabilities:Bonds"
-        case 'Chase':
-            return "Liabilities:Credit Cards:Chase Freedom"
         case 'Crypto':
-            return "Assets:Non-Liquid Assets:CryptoCurrency"
-        case 'Discover':
-            return "Liabilities:Credit Cards:Discover It"
+            return crypto
+        case 'Cardano':
+            return crypto + ":" + accountName
+        case 'ADA-Eternl':
+            return crypto + ":Cardano:" + accountName
+        case 'ADA-Nami':
+            return crypto + ":Cardano:" + accountName
+        case 'Algorand':
+            return crypto + ":" + accountName
+        case 'Cosmos':
+            return crypto + ":" + accountName
+        case 'Bitcoin':
+            return crypto + ":" + accountName
         case 'Polkadot':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Polkadot"
+            return crypto + ":" + accountName
         case 'Ethereum':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum"
-        case 'ETH-Kraken':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum:ETH-Kraken"
-        case 'ETH-Ledger':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum:ETH-Ledger"
-        case 'Ethereum2':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Ethereum2"
-        case 'IRA':
-            return "Assets:Non-Liquid Assets:IRA:Fidelity"
-        case 'Brokerage':
-            return "Assets:Non-Liquid Assets:Brokerage"
-        case 'HSA Cash':
-            return "Assets:Non-Liquid Assets:HSA:NM HSA Cash"
-        case 'HSA Investment':
-            return "Assets:Non-Liquid Assets:HSA:NM HSA Investment"           
-        case 'Home':
-            return "Liabilities:Mortgage Loan"
+            return crypto + ":" + accountName
         case 'IoTex':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:IoTex"
-        case 'Liquid Assets':
-            return "Assets:Liquid Assets"
-        case 'Loopring':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Loopring"              
-        case 'MyConstant':
-            return "Liabilities:Bonds:My Constant"
+            return crypto + ":" + accountName
         case 'Presearch':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Presearch"
+            return crypto + ":" + accountName
         case 'Ripple':
-            return "Assets:Non-Liquid Assets:CryptoCurrency:Ripple"
+            return crypto + ":" + accountName
+        case 'Loopring':
+            return crypto + ":" + accountName
+        case 'Amex':
+            return cc + ":" + "Amex BlueCash Everyday"
+        case 'Barclays':
+            return cc + ":" + "BarclayCard CashForward"
+        case 'BoA':
+            return cc + ":" + "BankAmericard Cash Rewards"
+        case 'Chase':
+            return cc + ":" + "Chase Freedom"
+        case 'Discover':
+            return cc + ":" + "Discover It"
+        case 'Liquid Assets':
+            return liquid
+        case 'Amazon GC':
+            return liquid + ":" + accountName
         case 'Sofi Checking':
-            return "Assets:Liquid Assets:Sofi:Checking"
+            return liquid + ":Sofi:Checking"
         case 'Sofi Savings':
-            return "Assets:Liquid Assets:Sofi:Savings"
-        case 'Vanguard401k':
-            return "Assets:Non-Liquid Assets:401k"                         
-        case 'VanguardPension':
-            return "Assets:Non-Liquid Assets:Pension"  
-        case 'Worthy':
-            return "Liabilities:Bonds:Worthy Bonds"
+            return liquid + ":Sofi:Savings"
         case 'Bing':
-            return "Assets:Liquid Assets:MR:Bing"
+            return mr + ":" + accountName
         case 'Paidviewpoint':
-            return "Assets:Liquid Assets:MR:Paidviewpoint"        
+            return mr + ":" + accountName  
         case 'Pinecone':
-            return "Assets:Liquid Assets:MR:Pinecone"
+            return mr + ":" + accountName
         case 'Swagbucks':
-            return "Assets:Liquid Assets:MR:Swagbucks"
+            return mr + ":" + accountName
         case 'Tellwut':
-            return "Assets:Liquid Assets:MR:Tellwut"
+            return mr + ":" + accountName
+        case 'Brokerage':
+            return nonLiquid + ":" + accountName
+        case 'HSA Cash':
+            return hsa + ":NM HSA Cash"
+        case 'HSA Investment':
+            return hsa + ":NM HSA Investment"
+        case 'Vanguard401k':
+            return v401k
+        case 'VanguardPension':
+            return nonLiquid + ":Pension"  
         case 'Real Estate Index Fund':
-            return "Assets:Non-Liquid Assets:401k:Real Estate Index Fund"
+            return v401k + ":Real Estate Index Fund"
         case 'Total Stock Market(401k)':
-            return "Assets:Non-Liquid Assets:401k:Total Stock Market"
+            return v401k + ":Total Stock Market"
+        case 'IRA':
+            return ira + ":Fidelity"
         case 'Total Stock Market(IRA)':
-            return "Assets:Non-Liquid Assets:IRA:Fidelity:Total Stock Market" 
+            return ira + ":Fidelity:Total Stock Market" 
         case 'Total Intl Stock Market':
-            return "Assets:Non-Liquid Assets:IRA:Fidelity:Total Intl Stock Market"
+            return ira + ":Fidelity:Total Intl Stock Market"
         case 'Govt Money Market':
-            return "Assets:Non-Liquid Assets:IRA:Fidelity:Govt Money Market"
+            return ira + ":Fidelity:Govt Money Market"
+        case 'Ally':
+            return assets + ":Ally Checking Account"
+        case 'BoA-joint':
+            return liabilities + ":BoA Credit Card"
+        case 'Bonds':
+            return bonds
+        case 'MyConstant':
+            return bonds + ":My Constant"
+        case 'Worthy':
+            return bonds + ":Worthy Bonds"
+        case 'Home':
+            return liabilities + ":Mortgage Loan"
         case _:
             print(f'account: {accountName} not found in "getAccountPath" function')
+            
+def scriptsToRun(date):
+    match date.day:
+        case 1:
+            return ['Monthly USD', 'Monthly Crypto']
+        case 5:
+            return ['Barclays CC']
+        case 6:
+            return ['BoA CC']
+        case 9:
+            return ['Chase CC']        
+        case 12:
+            return ['Amex CC']
+        case 13:
+            scripts = ['Discover CC', 'Vanguard Pension', 'Update Personal Goals-Monthly']
+            if date.month in [1,4,7,10]:
+                scripts.append('Update Personal Goals-YTD')
+            return scripts
+        case 17:
+            scripts = ['BoA-Joint CC', 'Update Joint Goals-Monthly']
+            if date.month in [1,4,7,10]:
+                scripts.append('Update Joint Goals-YTD')                
+            return scripts
+        case _:
+            return []
+
+def getScriptsToRun(context, today):
+    context['scriptsToRunYesterday'] = scriptsToRun(today - timedelta(days=1))
+    context['scriptsToRunToday'] = scriptsToRun(today)
+    context['scriptsToRunTomorrow'] = scriptsToRun(today + timedelta(days=1))
+    
+def eventsHappening(date):
+    events = []
+    monthDates = getStartAndEndOfDateRange(date+relativedelta(months=+1), 'month')
+    if date.day == monthDates['endDate'].day:
+        events.append('Paycheck')
+    match date.day:
+        case 1:
+            events.append('Pay Jon')
+        case 3:
+            events.append('Ally Interest')
+        case 5:
+            events.append('WE Energies')
+        case 12:
+            events.append('Mortgage Bill')
+        case 13:
+            events.append('BoA-Joint CC Bill posts')
+        case 15:
+            events.append('Paycheck')
+        case 17:
+            events.append('Schedule Ally transfer')
+        case 24:
+            events.append('Utility Bill posts')
+        case _:
+            return events
+    return events
+
+def getEventsHappening(context, today):
+    context['eventsYesterday'] = eventsHappening(today - timedelta(days=1))
+    context['eventsToday'] = eventsHappening(today)
+    context['eventsTomorrow'] = eventsHappening(today + timedelta(days=1))
 
 def returnRender(request, htmlPath, context):
-    context['scriptCompleteTime'] = datetime.today()
+    today = datetime.today()
+    context['scriptCompleteTime'] = today
+    getScriptsToRun(context, today)
+    getEventsHappening(context, today)
     return render(request, htmlPath, context)

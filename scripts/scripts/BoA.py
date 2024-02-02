@@ -62,7 +62,7 @@ def boALogin(driver, account):
         driver.find_element(By.XPATH, "//*[@id='sasi-overlay-module-modalClose']/span[1]").click()
     except NoSuchElementException:
         exception = "Caught"
-    partialLink = 'Travel Rewards Visa Signature - 8955' if 'joint' in account else 'Customized Cash Rewards Visa Signature - 8549'
+    partialLink = 'Travel Rewards Visa Signature - 8955' if 'joint' in account else 'Customized Cash Rewards Visa Signature - 5700'
     driver.find_element(By.PARTIAL_LINK_TEXT, partialLink).click()
     time.sleep(3)
 
@@ -82,12 +82,11 @@ def exportBoATransactions(driver, account, today):
     year = today.year
     stmtMonth = today.strftime("%B")
     stmtYear = str(year)
-    accountNum = "_8955.csv" if 'joint' in account else "_8549.csv"
+    accountNum = "_8955.csv" if 'joint' in account else "_5700.csv"
     return os.path.join(r"C:\Users\dmagn\Downloads", stmtMonth + stmtYear + accountNum)
 
 def claimBoARewards(driver, account):
     locateBoAWindowAndOpenAccount(driver, account)
-    driver.webDriver.implicitly_wait(10)
     if 'joint' in account: # may need to address minimum of 2500 points restriction
         driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[2]/a").click() # view/redeem
         driver.webDriver.find_element(By.ID,"redeemButton").click() # redeem points

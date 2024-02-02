@@ -20,7 +20,7 @@ else:
     from .Tellwut import runTellwut
 
 def getDailyMRAccounts(personalReadBook):
-    AmazonGC = USD("AmazonGC", personalReadBook)
+    AmazonGC = USD("Amazon GC", personalReadBook)
     # Bing = Security("Bing", personalReadBook)
     Pinecone = Security("Pinecone", personalReadBook)
     Swagbucks = Security("Swagbucks", personalReadBook)

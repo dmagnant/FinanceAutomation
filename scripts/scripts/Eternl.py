@@ -21,7 +21,6 @@ def locateEternlWindow(driver):
 def eternlLogin(driver):
     driver.openNewWindow('https://eternl.io/app/mainnet/wallet/xpub1wxalshqc32m-ml/summary')
     time.sleep(1)
-    driver.webDriver.implicitly_wait(10)
     
 def getEternlBalance(driver):
     locateEternlWindow(driver)

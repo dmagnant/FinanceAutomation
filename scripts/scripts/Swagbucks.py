@@ -26,7 +26,6 @@ def getSwagbucksBasePath():
     return '/html/body/div[2]/div[' 
     
 def closePopUps(driver):
-    driver.webDriver.implicitly_wait(2)
     try:
         driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/section/section/aside/button[2]").click() # Yay for me
     except NoSuchElementException:
@@ -85,20 +84,18 @@ def swagBuckscontentDiscovery(driver):
 
 def runAlusRevenge(driver):
     # closeExpressVPN()
-    driver.get('https://www.swagbucks.com/games/play/319/alu-s-revenge-2?tid=113')
+    driver.webDriver.get('https://www.swagbucks.com/games/play/319/alu-s-revenge-2?tid=113')
     time.sleep(2)
     Alu = pygetwindow.getWindowsWithTitle("Alu's Revenge 2 - Free Online Games | Swagbucks - Google Chrome")[0] # move window to primary monitor
     Alu.moveTo(10, 10)
     Alu.resizeTo(100, 100)          
     Alu.maximize()
-    driver.implicitly_wait(20)
-    driver.find_element(By.ID, "gamesItemBtn").click() # Play for Free
+    driver.clickIDElementOnceAvaiable('gamesItemBtn', 20) # Play for Free
     time.sleep(3)
-    element = driver.find_element(By.XPATH,"/html/body")
+    element = driver.webDriver.find_element(By.XPATH,"/html/body")
     element.send_keys(Keys.DOWN)
     element.send_keys(Keys.DOWN)
     element.send_keys(Keys.DOWN)
-    element.send_keys(Keys.UP)
     redeemed = 0
     while redeemed < 3:
         game_over_text = ""
@@ -106,7 +103,7 @@ def runAlusRevenge(driver):
         # click Play Now
         pyautogui.leftClick(850, 950)
         pyautogui.leftClick(850, 950)
-        time.sleep(1)
+        time.sleep(2)
         # click Play Now (again)
         pyautogui.leftClick(938, 795)
         pyautogui.leftClick(938, 795)            
@@ -125,13 +122,13 @@ def runAlusRevenge(driver):
         pyautogui.leftClick(1025, 980)
         time.sleep(25)
         while num < 5:
-            if driver.find_element(By.ID, "closeEmbedContainer"): # Game over screen up
+            if driver.webDriver.find_element(By.ID, "closeEmbedContainer"): # Game over screen up
                 time.sleep(5)
-                game_over_text = driver.find_element(By.XPATH, "//*[@id='embedGameOverHdr']/h3").text
+                game_over_text = driver.webDriver.find_element(By.XPATH, "//*[@id='embedGameOverHdr']/h3").text
                 if game_over_text != "":
                     if game_over_text != "No SB this time. Keep trying...":
                         redeemed += 1
-                    driver.find_element(By.ID, "gamePlayAgainBtn").click() # play again
+                    driver.webDriver.find_element(By.ID, "gamePlayAgainBtn").click() # play again
                     time.sleep(3)
                     break
             num += 1
@@ -223,7 +220,6 @@ def swagbucksInbox(driver):
 def swagbucksSearch(driver):
     locateSwagBucksWindow(driver)
     driver = driver.webDriver
-    driver.implicitly_wait(3)
     num = 0
     while num < 1:
         search_term1 = None
@@ -274,10 +270,9 @@ def claimSwagBucksRewards(driver):
 
 def runSwagbucks(driver, runAlu, account, book):
     # closeExpressVPN()
-    driver.webDriver.implicitly_wait(2)
     locateSwagBucksWindow(driver)
     if runAlu:
-        runAlusRevenge(driver.webDriver)
+        runAlusRevenge(driver)
     dailyPoll(driver)
     swagbucksInbox(driver)
     toDoList(driver)
@@ -288,14 +283,15 @@ def runSwagbucks(driver, runAlu, account, book):
         claimSwagBucksRewards(driver)
     swagbucksSearch(driver)
     
-if __name__ == '__main__':
-    driver = Driver("Chrome")
-    book = GnuCash('Finance')
-    Swagbucks = Security("Swagbucks", book)
-    runSwagbucks(driver, False, Swagbucks, book)
-    book.closeBook()
-
 # if __name__ == '__main__':
 #     driver = Driver("Chrome")
-#     swagbucksSearch(driver)
+#     book = GnuCash('Finance')
+#     Swagbucks = Security("Swagbucks", book)
+#     runSwagbucks(driver, False, Swagbucks, book)
+#     book.closeBook()
+
+if __name__ == '__main__':
+    driver = Driver("Chrome")
+    locateSwagBucksWindow(driver)
+    runAlusRevenge(driver)
 

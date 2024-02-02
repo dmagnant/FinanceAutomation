@@ -87,9 +87,7 @@ def captureVanguard401kTransactions(driver):
             shares = -float(shares) if "Fee" in description else shares
             transaction = date, description, shares, amount
             csv.writer(open(v401kActivity, 'a', newline='', encoding="utf-8")).writerow(transaction)
-        elif date.month > lastMonth['endDate'].month:
-            continue
-        else:
+        elif date.month < lastMonth['endDate'].month or date.year < lastMonth['endDate'].year:
             break
     return v401kActivity
     

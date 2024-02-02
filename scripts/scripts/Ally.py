@@ -28,7 +28,6 @@ def locateAllyWindow(driver):
     return True
 
 def allyLogin(driver):
-    driver.webDriver.implicitly_wait(10)
     loggedIn = False
     while not loggedIn:
         driver.openNewWindow('https://ally.com/')

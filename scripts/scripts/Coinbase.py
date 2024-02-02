@@ -45,7 +45,6 @@ def getCoinbaseBalances(driver, account):
     
     locateCoinbaseWindow(driver)
     driver.webDriver.get('https://www.coinbase.com/assets')
-    driver.webDriver.implicitly_wait(10)
     time.sleep(5)
     num = 1
     coinFound = 0

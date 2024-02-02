@@ -26,14 +26,11 @@ def locateBingWindow(driver):
 def bingLogin(driver):
     driver.openNewWindow('https://rewards.bing.com')
     time.sleep(2)
-    driver.webDriver.implicitly_wait(1)
-    time.sleep(1)
     try:
         driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[2]/main/section/div[1]/div[2]/section/div[1]/a[2]").click() # sign in
         time.sleep(1)
         driver.webDriver.find_element(By.ID, "idSIButton9").click() # next
-        time.sleep(1)
-        time.sleep(1)
+        time.sleep(2)
         driver.webDriver.find_element(By.ID, "idSIButton9").click() # sign in
         time.sleep(1)
         driver.webDriver.find_element(By.XPATH, "/html/body/div/form/div/div/div[2]/div[1]/div/div/div/div/div/div[3]/div/div[2]/div/div[3]/div[2]/div/div/div[2]/input").click() # stay signed in

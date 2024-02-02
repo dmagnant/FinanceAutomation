@@ -15,7 +15,6 @@ else:
 
 def locatePineconeWindow(driver):
     found = driver.findWindowByUrl("members.pineconeresearch.com")
-    driver.webDriver.implicitly_wait(3)
     if not found:
         pineConeLogin(driver)
     else:

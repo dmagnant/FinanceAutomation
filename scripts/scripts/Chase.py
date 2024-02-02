@@ -32,7 +32,6 @@ def activateChaseWindow(title):
             w.activate()
 
 def chaseLogin(driver):
-    driver.webDriver.implicitly_wait(5)
     driver.openNewWindow('https://secure.chase.com/web/auth/#/logon/logon/chaseOnline?treatment=chase&lang=en')
     time.sleep(5)
     activateChaseWindow("sign in - chase")

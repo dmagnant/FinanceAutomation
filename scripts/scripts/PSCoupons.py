@@ -68,7 +68,6 @@ def runPSCoupon(driver):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    driver.webDriver.implicitly_wait(3)
     setPSCouponFilters(driver)
     
     # locatePSCouponWindow(driver)

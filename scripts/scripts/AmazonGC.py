@@ -28,14 +28,22 @@ def confirmAmazonGCBalance(driver, account):
     if str(account.gnuBalance) != account.balance:
         showMessage("Amazon GC Mismatch", f'Amazon balance: {account.balance} \n' f'Gnu Cash balance: {account.gnuBalance} \n')
 
-# if __name__ == '__main__':
-#     book = GnuCash('Finance')
-#     driver = Driver("Chrome")
-#     AmazonGC = USD("AmazonGC", book)    
-#     confirmAmazonGCBalance(driver, AmazonGC)
-#     AmazonGC.getData()
-#     book.closeBook()
-
 if __name__ == '__main__':
     book = GnuCash('Finance')
-    book.getTotalOfAutomatedMRAccounts()
+    driver = Driver("Chrome")
+    AmazonGC = USD("Amazon GC", book)    
+    confirmAmazonGCBalance(driver, AmazonGC)
+    AmazonGC.getData()
+    book.closeBook()
+
+# if __name__ == '__main__':
+#     import pyautogui
+#     from datetime import datetime
+#     timeToWaitBetweenClicks = 10
+#     while True:
+#         pyautogui.click(button='right')
+        
+#         time.sleep(1)
+#         pyautogui.press('escape')
+#         print(datetime.now())
+#         time.sleep(timeToWaitBetweenClicks)

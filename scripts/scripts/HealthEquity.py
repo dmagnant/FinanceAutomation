@@ -117,6 +117,7 @@ def captureHealthEquityCashTransactionsAndBalance(driver, accounts):
     open(cashActivity, 'w', newline='').truncate()
     driver.webDriver.find_element(By.XPATH, "/html/body/form/div[3]/div/div/div[1]/div/div[2]/span/div[2]/section/section[2]/div/div[2]/select").click() # Date range drop-down
     driver.webDriver.find_element(By.XPATH, "/html/body/form/div[3]/div/div/div[1]/div/div[2]/span/div[2]/section/section[2]/div/div[2]/select/option[1]").click() # All dates
+    time.sleep(1)
     row = 1
     while True:
         column=1
@@ -140,7 +141,7 @@ def captureHealthEquityCashTransactionsAndBalance(driver, accounts):
             else:
                 showMessage('Unknown Transaction: ' + description, "check Cash transaction list for undefined transaction")
                 break
-        elif postDate.month < lastMonth['endDate'].month and postDate.year == lastMonth['endDate'].year:
+        elif postDate.month < lastMonth['endDate'].month or postDate.year < lastMonth['endDate'].year:
             break
     return cashActivity
     

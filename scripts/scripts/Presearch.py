@@ -126,7 +126,6 @@ def getPresearchBalance(driver):
     return float(driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[1]/div/h2').text.strip(' PRE').replace(',', ''))
 
 def presearchRewardsRedemptionAndBalanceUpdates(driver, account, book):
-    driver.webDriver.implicitly_wait(5)
     preAvailableToStake = claimPresearchRewards(driver)
     if preAvailableToStake:
         stakePresearchRewards(driver, preAvailableToStake)

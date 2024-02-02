@@ -4,7 +4,7 @@ if __name__ == '__main__' or __name__ == "Daily":
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import getStockPrice 
-    from Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet
+    from Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet, updateInvestmentPricesAndShares
     from Paypal import runPaypal
     from Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from Sofi import runSofi, sofiLogout
@@ -14,10 +14,9 @@ else:
     from .Classes.WebDriver import Driver
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import getStockPrice
-    from .Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet
+    from .Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet, updateInvestmentPricesAndShares
     from .Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from .Sofi import runSofi, sofiLogout
-
 
 def getDailyBankAccounts(personalReadBook, jointReadBook=''):
     CryptoPortfolio = USD("Crypto", personalReadBook)

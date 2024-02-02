@@ -110,6 +110,7 @@ class Driver:
     "this is a class for creating webdriver with implicit wait"
     def __init__(self, browser, asUser=True):
         self.webDriver = openWebDriver(browser, asUser)
+        self.webDriver.implicitly_wait(5)
         print('driver initialized')
         
     def findWindowByUrl(self, url):
@@ -148,8 +149,16 @@ class Driver:
     def switchToLastWindow(self):
         self.webDriver.switch_to.window(self.webDriver.window_handles[len(self.webDriver.window_handles)-1])
 
-    def clickElementOnceAvaiable(self, xpath):
-        element = WebDriverWait(self.webDriver, 10).until(EC.element_to_be_clickable((By.XPATH,xpath)))
-        time.sleep(1)
+    def clickXPATHElementOnceAvaiable(self, xpath, wait=10):
+        element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.XPATH,xpath)))
         element.click()
         time.sleep(1)
+        
+    def clickIDElementOnceAvaiable(self, id, wait=10):
+        element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.ID,id)))
+        element.click()
+        time.sleep(1)
+    
+    def getXPATHElementTextOnceAvailable(self, xpath, wait=10):
+        element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.XPATH,xpath)))
+        return element.text

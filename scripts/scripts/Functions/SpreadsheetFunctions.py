@@ -124,15 +124,13 @@ def updateCryptoPrices(driver, book):
         i = coinNames.index(coin)
         symbol = coinSymbols[i]
         price = format(coinPrices[coin]["usd"], ".2f")
-        print('updating ' + coin + ' ' + price)
         book.updatePriceInGnucash(symbol, price)
         worksheet.update((priceColumn + str(i + 2)), float(price))
 
-def updateInvestmentPricesAndShares(driver, accounts, book):
+def updateInvestmentPricesAndShares(driver, book, accounts):
     today = datetime.today().date()
     print('updating investment prices')
-    url = "edit#gid=361024172"
-    spreadsheetWindow = driver.findWindowByUrl(url)
+    spreadsheetWindow = driver.findWindowByUrl("edit#gid=361024172")
     if not spreadsheetWindow:
         openSpreadsheet(driver, 'Asset Allocation', 'Investments')
         spreadsheetWindow = driver.webDriver.current_window_handle
@@ -143,42 +141,45 @@ def updateInvestmentPricesAndShares(driver, accounts, book):
     sharesColumn = 'D'
     sheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Asset Allocation')
     worksheet = sheet.worksheet('Investments')
-    stillCoins = True
-    while stillCoins:
+    stillInvestments = True
+    while stillInvestments:
         priceColumn = 'E'
-        coinSymbol = worksheet.acell(symbolColumn+str(row)).value
+        symbol = worksheet.acell(symbolColumn+str(row)).value
         shares = 0
-        if coinSymbol != None:
-            if coinSymbol == '8585': 
+        if symbol != None:
+            if symbol == '8585': 
                 price = book.getPriceInGnucash(accounts['TSM401k'].symbol, today)
-                shares = float(accounts['TSM401k'].balance)
-            elif coinSymbol in ['VGSNX', 'VIIIX', 'VXUS', 'VTI']:
-                price = book.getPriceInGnucash(coinSymbol, today)
-                if coinSymbol == 'VTI':
-                    shares = float(accounts['VTI'].balance)
-                elif coinSymbol == 'VIIIX':
-                    shares = float(accounts['VIIIX'].balance)
-                elif coinSymbol == 'VXUS':
-                    shares = float(accounts['VXUS'].balance)
-                elif coinSymbol == 'VGSNX':
-                    shares = float(accounts['REIF401k'].balance)
-            elif coinSymbol == 'SPAXX':
-                shares = float(accounts['SPAXX'].balance)
-                worksheet.update(sharesColumn + str(row), shares)
+                if shares:
+                    shares = float(accounts['TSM401k'].balance)
+            elif symbol in ['VGSNX', 'VIIIX', 'VXUS', 'VTI']:
+                price = book.getPriceInGnucash(symbol, today)
+                if shares:
+                    if symbol == 'VTI':
+                        shares = float(accounts['VTI'].balance)
+                    elif symbol == 'VIIIX':
+                        shares = float(accounts['VIIIX'].balance)
+                    elif symbol == 'VXUS':
+                        shares = float(accounts['VXUS'].balance)
+                    elif symbol == 'VGSNX':
+                        shares = float(accounts['REIF401k'].balance)
+            elif symbol == 'SPAXX':
+                if shares:
+                    shares = float(accounts['SPAXX'].balance)
+                    worksheet.update(sharesColumn + str(row), shares)
                 row+=1
                 continue
-            elif coinSymbol == 'HOME':
+            elif symbol == 'HOME':
                 price = (250000 - accounts['Home'].getGnuBalance()) / 2
                 priceColumn = 'F'
             else:
-                price = getStockPrice(driver, coinSymbol)
+                price = getStockPrice(driver, symbol)
                 driver.webDriver.switch_to.window(spreadsheetWindow)
-            if shares > 0:
+            if shares:
                 worksheet.update(sharesColumn + str(row), shares)
             worksheet.update((priceColumn + str(row)), float(price))
             row += 1
         else:
-            stillCoins = False
+            stillInvestments = False
 
 def openSpreadsheet(driver, sheet, tab=''):
     url = 'https://docs.google.com/spreadsheets/d/'

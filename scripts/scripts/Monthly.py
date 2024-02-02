@@ -83,7 +83,7 @@ def runUSD(driver, today, accounts, personalBook):
     accounts['Bonds'].updateGnuBalance(personalBook.getBalance(accounts['Bonds'].gnuAccount))
     runVanguard401k(driver, accounts, personalBook)
     runFidelity(driver, accounts, personalBook)
-    updateInvestmentPricesAndShares(driver, accounts, personalBook)
+    updateInvestmentPricesAndShares(driver,personalBook,accounts)
     driver.findWindowByUrl("/scripts/monthly")
 
 def runCrypto(driver, today, accounts, personalBook):

@@ -390,12 +390,12 @@ class GnuCash:
                 toAccount = "Expenses:Groceries"
             elif "CRYPTO PURCHASE" in description.upper():
                 toAccount = "Assets:Non-Liquid Assets:CryptoCurrency"
-            elif "Pinecone Research" in description:
+            elif "Pinecone" in description:
                 toAccount = "Income:Market Research:Pinecone"
             elif "Internet Bill" in description:
                 toAccount = "Expenses:Utilities:Internet"
             elif "TRAVEL CREDIT" in description:
-                toAccount = "Income:Market Research:Credit Card Rewards"
+                toAccount = "Income:Credit Card Rewards"
             elif "Fidelity IRA Transfer" in description:
                 toAccount = "Assets:Non-Liquid Assets:IRA:Fidelity:Govt Money Market"
             elif "MILWAUKEE ELECTRIC TO" in description:
@@ -556,11 +556,11 @@ class GnuCash:
                 shares = float(row[3])
                 reviewTransPath = row[0] + ", " + row[1] + ", " + row[2]
                 return {'postDate': postDate, 'description': description, 'amount': amount, 'skipTransaction': skipTransaction, 'fromAccount': fromAccount, 'reviewTransPath': reviewTransPath, 'shares': shares}
-            elif account.name == 'Fidelity':
+            elif account.name == 'IRA':
                 postDate = datetime.strptime(row[0], '%Y-%m-%d').date()
+                description = row[1]
                 amount = Decimal(row[2])
                 fromAccount = account.gnuAccount
-                description = row[1]
                 if "TOTAL INTERNATIONAL STOCK" in description and "DIVIDEND" not in description:
                     fromAccount += ":Total Intl Stock Market"
                 elif "TOTAL STK MKT ETF" in description and "DIVIDEND" not in description:
@@ -581,7 +581,7 @@ class GnuCash:
                 elif "Instl Tot Stk Mkt" in description:
                     fromAccount += ":Total Stock Market"
                 shares = float(row[2])
-                description = modifyTransactionDescription(row[1])
+                description = modifyTransactionDescription(description)
                 reviewTransPath = row[0] + ", " + row[1] + ", " + row[3]
                 return {'postDate': postDate, 'description': description, 'amount': amount, 'skipTransaction': skipTransaction, 'fromAccount': fromAccount, 'reviewTransPath': reviewTransPath, 'shares': shares}
             description = modifyTransactionDescription(description)

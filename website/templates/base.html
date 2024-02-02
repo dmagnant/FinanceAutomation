@@ -28,6 +28,20 @@
     <a href="https://docs.google.com/spreadsheets/d/1684fQ-gW5A0uOf7s45p9tC4GiEE5s5_fjO5E7dgVI1s/edit#gid=1300163920" target="_blank">Checking Balance</a> &emsp;
     <a href="https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=1449745658" target="_blank">Asset Allocation</a> &emsp;
     <a href="https://docs.google.com/spreadsheets/d/1oP3U7y8qywvXG9U_zYXgjFfqHrCyPtUDl4zPDftFCdM/edit#gid=14744444" target="_blank">Joint Expenses</a><br><br>
-    Last update on {{scriptCompleteTime}}
+    <b>Last update on</b> {{scriptCompleteTime}} <br><br>
+    <div style="width: 100%; display: table;"><div style="display: table-row;">
+        <div style="width: 33%; display:table-cell"><b>Scripts for Yesterday:</b> <br><br>
+            {% for script in scriptsToRunYesterday %} {{script}}<br>{% endfor %}</div> 
+        <div style="width: 33%; display:table-cell"><b>Scripts for Today:</b> <br><br>
+            {% for script in scriptsToRunToday %} {{script}}<br> {% endfor %}</div>
+        <div style="width: 33%; display:table-cell"><b>Scripts for Tomorrow:</b> <br><br>
+            {% for script in scriptsToRunTomorrow %} {{script}}<br> {% endfor %}</div></div></div><br><br>
+    <div style="width: 100%; display: table;"> <div style="display: table-row;">
+        <div style="width: 33%; display:table-cell"> <b>Events for Yesterday:</b> <br><br>
+            {% for event in eventsYesterday %}{{event}}<br>{% endfor %}</div> 
+        <div style="width: 33%; display:table-cell"><b>Events for Today:</b> <br><br>
+            {% for event in eventsToday %}{{event}}<br>{% endfor %}</div>
+        <div style="width: 33%; display:table-cell"><b>Events for Tomorrow:</b> <br><br>
+            {% for event in eventsTomorrow %} {{event}}<br>{% endfor %}</div></div></div>
 </body>
 </html>
