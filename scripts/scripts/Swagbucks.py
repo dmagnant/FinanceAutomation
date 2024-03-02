@@ -162,7 +162,10 @@ def toDoList(driver):
             driver.webDriver.get("https://www.swagbucks.com/grocery-receipts-merchant?category=-1&merchant-id=53")
             time.sleep(4)
             while button_not_clicked:
-                button = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "2]/div[2]/div[2]/main/reset-styles/div/div/div[2]/div[1]/section[4]/ul/li[" + str(button_num) +"]/div/a/div[2]/button/span")
+                try:
+                    button = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "2]/div[2]/div[2]/main/reset-styles/div/div/div[2]/div[1]/section[4]/ul/li[" + str(button_num) +"]/div/a/div[2]/button/span")
+                except NoSuchElementException:
+                    button = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "2]/div[2]/div[2]/main/reset-styles/div/div/div[2]/div[1]/section[4]/ul/li[" + str(button_num) +"]/div/a/div[3]/button/span")                
                 if button.text == 'Add to List':
                     button.click()
                     button_not_clicked = False
@@ -223,8 +226,8 @@ def swagbucksSearch(driver):
     num = 0
     while num < 1:
         search_term1 = None
-        search_term2 = None
-        search_term = None
+        # search_term2 = None
+        # search_term = None
         try:
             # accept reward
             driver.find_element(By.XPATH, "//*[@id='tblAwardBannerAA']/div[2]/div/div[1]/form/input[2]")
@@ -242,10 +245,10 @@ def swagbucksSearch(driver):
             time.sleep(1)
             while search_term1 is None:
                 search_term1 = RandomWords().random_word()
-            while search_term2 is None:
-                search_term2 = RandomWords().random_word()
-            search_term = search_term1 + " " + search_term2
-            driver.find_element(By.ID, "sbGlobalNavSearchInputWeb").send_keys(search_term + Keys.ENTER)
+            # while search_term2 is None:
+            #     search_term2 = RandomWords().random_word()
+            # search_term = search_term1 + " " + search_term2
+            driver.find_element(By.ID, "sbGlobalNavSearchInputWeb").send_keys(search_term1 + Keys.ENTER)
             time.sleep(random.choice([2, 3, 4]))
         except NoSuchWindowException:
             num = 3

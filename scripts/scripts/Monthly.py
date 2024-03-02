@@ -1,5 +1,9 @@
 from datetime import datetime
 from decimal import Decimal
+import time
+from piecash import Split, Transaction
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Monthly":
     from Classes.Asset import USD, Security
@@ -45,7 +49,6 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         HECash = USD("HSA Cash", personalBook)
         V401k = USD("Vanguard401k", personalBook)
         Pension = USD("VanguardPension", personalBook)
-        REIF401k = Security("Real Estate Index Fund", personalBook)
         TSM401k = Security("Total Stock Market(401k)", personalBook)
         VXUS = Security('Total Intl Stock Market', personalBook)
         VTI = Security('Total Stock Market(IRA)', personalBook)
@@ -54,7 +57,7 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         Home = USD('Home', jointBook)
         LiquidAssets = USD("Liquid Assets", personalBook)
         Bonds = USD("Bonds", personalBook)
-        accounts = {'IRA':IRA,'VXUS':VXUS,'VTI':VTI,'SPAXX':SPAXX,'VIIIX':VIIIX,'HECash':HECash,'V401k':V401k,'REIF401k':REIF401k,'TSM401k':TSM401k,'Worthy': Worthy,'Pension':Pension,'Home':Home,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
+        accounts = {'IRA':IRA,'VXUS':VXUS,'VTI':VTI,'SPAXX':SPAXX,'VIIIX':VIIIX,'HECash':HECash,'V401k':V401k,'TSM401k':TSM401k,'Worthy': Worthy,'Pension':Pension,'Home':Home,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
     elif type == 'Crypto':
         CryptoPortfolio = USD("Crypto", personalBook)
         Cardano = Security("Cardano", personalBook, 'ADA-Eternl')
@@ -72,6 +75,49 @@ def monthlyRoundUp(account, myBook, date):
         transactionVariables = {'postDate': date, 'description': "Interest", 'amount': -change, 'fromAccount': "Income:Investments:Interest"}
     myBook.writeGnuTransaction(transactionVariables, account.gnuAccount)
     account.updateGnuBalance(myBook.getBalance(account.gnuAccount))
+    
+
+def updateEnergyBillAmounts(driver, book, amount):
+    myBook = book.getWriteBook()
+    driver.openNewWindow('https://www.we-energies.com/secure/auth/l/acct/summary_accounts.aspx')
+    time.sleep(2)
+    try:
+        # driver.webDriver.find_element(By.XPATH, "//*[@id='signInName']").send_keys(getUsername('WE-Energies (Home)'))
+        # driver.webDriver.find_element(By.XPATH, "//*[@id='password']").send_keys(getPassword('WE-Energies (Home)'))
+        driver.webDriver.find_element(By.XPATH, "//*[@id='next']").click() # login
+        time.sleep(4)
+        driver.webDriver.find_element(By.XPATH, "//*[@id='notInterested']/a").click # close out of app notice
+    except NoSuchElementException:
+        exception = "caught"
+    driver.webDriver.find_element(By.XPATH, "//*[@id='mainContentCopyInner']/ul/li[2]/a").click() # view bill history
+    time.sleep(4)
+    billRow = 2
+    billColumn = 7
+    billNotFound = True
+    while billNotFound:
+        weBillPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span/span"
+        weBillAmount = driver.webDriver.find_element(By.XPATH, weBillPath).text.replace('$', '')
+        if amount == weBillAmount:
+            billNotFound = False
+        else:
+            billRow += 1
+    billColumn -= 2
+    weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
+    gas = Decimal(driver.webDriver.find_element(By.XPATH, weAmountPath).text.strip('$'))
+    billColumn -= 2
+    weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
+    electricity = Decimal(driver.webDriver.find_element(By.XPATH, weAmountPath).text.strip('$'))
+    split=[Split(value=electricity, account=myBook.accounts(fullname="Expenses:Utilities:Electricity")),
+            Split(value=gas, account=myBook.accounts(fullname="Expenses:Utilities:Gas")),
+            Split(value=-round(Decimal(amount), 2), account=myBook.accounts(fullname="Assets:Ally Checking Account"))]
+    Transaction(post_date=datetime.today().date().replace(day=24), currency=myBook.currencies(mnemonic="USD"), description='WE ENERGIES PAYMENT', splits=split)
+    myBook.flush()
+    print(f'posted transaction: \n' f'date: {str(datetime.today().date())} \n' f'total: {str(amount)} \n' f'electricity: {str(electricity)}\n' f'gas: {str(gas)}')
+    today = datetime.today()
+    updateSpreadsheet('Home', str(today.year) + ' Balance', 'Energy Bill', today.month, -float(amount))
+    openSpreadsheet(driver, 'Home', str(today.year) + ' Balance')
+    driver.findWindowByUrl("/scripts/monthly")
+
     
 def runUSD(driver, today, accounts, personalBook):
     lastMonth = getStartAndEndOfDateRange(today, "month")
@@ -135,3 +181,8 @@ if __name__ == '__main__': # USD
     # healthEquity = getHealthEquityDividendsAndShares(driver, HealthEquity)
     # vanguardInfo = getVanguardPriceAndShares(driver)
     # updateInvestmentShares(driver, HealthEquity, vanguardInfo, fidelity)
+    
+# if __name__ == '__main__':
+#     driver = Driver("Chrome")
+#     getEnergyBillAmounts(driver, 201.32)
+    

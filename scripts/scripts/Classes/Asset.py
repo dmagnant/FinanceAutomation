@@ -4,13 +4,10 @@ from piecash import Split, Transaction
 
 if __name__ == "Classes.Asset":
     from Functions.GeneralFunctions import getCryptocurrencyPrice, getAccountPath
-
-    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
+    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateCheckingBalanceSpreadsheet
 else:
-    from scripts.scripts.Functions.GeneralFunctions import (
-        getCryptocurrencyPrice, getAccountPath
-)
-    from scripts.scripts.Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet
+    from scripts.scripts.Functions.GeneralFunctions import getCryptocurrencyPrice, getAccountPath
+    from scripts.scripts.Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateCheckingBalanceSpreadsheet
 
 def getSymbolByName(self):
     match self.name.lower():
@@ -201,13 +198,12 @@ class USD(Asset):
         if month == 12:
             year = year + 1
         if self.name == 'BoA-joint':
-            openSpreadsheet(driver, 'Home', '2023 Balance')
+            openSpreadsheet(driver, 'Home', str(year) + ' Balance')
             updateSpreadsheet('Home', str(year) + ' Balance', self.name, month, balance, 'BoA CC')
             updateSpreadsheet('Home', str(year) + ' Balance', self.name, month, balance, 'BoA CC', True)
         else:
-            openSpreadsheet(driver, 'Checking Balance', '2023')
-            updateSpreadsheet('Checking Balance', year, self.name, month, balance, self.name + " CC")
-            updateSpreadsheet('Checking Balance', year, self.name, month, balance, self.name + " CC", True)
+            openSpreadsheet(driver, 'Checking Balance', str(year))
+            updateCheckingBalanceSpreadsheet('Checking Balance', year, self.name, month, balance, self.name + " CC")
     
 
             

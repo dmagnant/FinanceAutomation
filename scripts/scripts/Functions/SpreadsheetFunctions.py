@@ -9,31 +9,21 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
         def getCellArray(account):
             match account:
                 ## Asset Allocation Spreadsheet
-                case 'Liquid Assets':
-                    return ['B6', 'I6', 'P6', 'B26', 'I26', 'P26', 'B46', 'I46', 'P46', 'B66', 'I66', 'P66']
-                case 'Bonds':
-                    return ['F6', 'M6', 'T6', 'F26', 'M26', 'T26', 'F46', 'M46', 'T46', 'F66', 'M66', 'T66']
-                case 'Vanguard401k':
-                    return ['B8', 'I8', 'P8', 'B28', 'I28', 'P28', 'B48', 'I48', 'P48', 'B68', 'I68', 'P68']
-                case 'VanguardPension':
-                    return ['B10', 'I10', 'P10', 'B30', 'I30', 'P30', 'B50', 'I50', 'P50', 'B70', 'I70', 'P70']
-                case 'Crypto':
-                    return ['B12', 'I12', 'P12', 'B32', 'I32', 'P32', 'B52', 'I52', 'P52', 'B72', 'I72', 'P72']
-                ## Checking Balance Spreadsheet(s)
-                #Personal
-                case 'BoA':
-                    return ['K5', 'S5', 'C40', 'K40', 'S40', 'C75', 'K75', 'S75', 'C110', 'K110', 'S110', 'C5']
-                case 'Discover':
-                    return ['K6', 'S6', 'C41', 'K41', 'S41', 'C76', 'K76', 'S76', 'C111', 'K111', 'S111', 'C6']             
-                case 'Amex':
-                    return ['K7', 'S7', 'C42', 'K42', 'S42', 'C77', 'K77', 'S77', 'C112', 'K112', 'S112', 'C7']
-                case 'Chase':
-                    return ['F8', 'S8', 'C43', 'K43', 'S43', 'C78', 'K78', 'S78', 'C113', 'K113', 'S113', 'C8']            
-                case 'Barclays':
-                    return ['K4', 'S4', 'C39', 'K39', 'S39', 'C74', 'K74', 'S74', 'C109', 'K109', 'S109', 'C4']
+                # case 'Liquid Assets':
+                #     return ['B6', 'I6', 'P6', 'B26', 'I26', 'P26', 'B46', 'I46', 'P46', 'B66', 'I66', 'P66']
+                # case 'Bonds':
+                #     return ['F6', 'M6', 'T6', 'F26', 'M26', 'T26', 'F46', 'M46', 'T46', 'F66', 'M66', 'T66']
+                # case 'Vanguard401k':
+                #     return ['B8', 'I8', 'P8', 'B28', 'I28', 'P28', 'B48', 'I48', 'P48', 'B68', 'I68', 'P68']
+                # case 'VanguardPension':
+                #     return ['B10', 'I10', 'P10', 'B30', 'I30', 'P30', 'B50', 'I50', 'P50', 'B70', 'I70', 'P70']
+                # case 'Crypto':
+                #     return ['B12', 'I12', 'P12', 'B32', 'I32', 'P32', 'B52', 'I52', 'P52', 'B72', 'I72', 'P72']
                 #Joint
                 case 'BoA-joint':
                     return ['K16', 'S16', 'C52', 'K52', 'S52', 'C88', 'K88', 'S88', 'C124', 'K124', 'S124', 'C16']
+                case 'Energy Bill':
+                    return ['F27', 'N27', 'V27', 'F63', 'N63', 'V63', 'F99', 'N99', 'V99', 'F135', 'N135', 'V135']
                 ## Cryptocurrency Spreadsheet
                 case 'ALGO':
                     return ['H2', 'J2']
@@ -55,6 +45,17 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
                     return ['H10', 'J10']
                 case 'PRE':
                     return ['H11', 'J11']
+                ## Checking Balance Spreadsheet(s)
+                case 'BoA':
+                    return ['K5', 'S5', 'C40', 'K40', 'S40', 'C75', 'K75', 'S75', 'C110', 'K110', 'S110', 'C5']
+                case 'Discover':
+                    return ['K6', 'S6', 'C41', 'K41', 'S41', 'C76', 'K76', 'S76', 'C111', 'K111', 'S111', 'C6']             
+                case 'Amex':
+                    return ['K7', 'S7', 'C42', 'K42', 'S42', 'C77', 'K77', 'S77', 'C112', 'K112', 'S112', 'C7']
+                case 'Chase':
+                    return ['F8', 'S8', 'C43', 'K43', 'S43', 'C78', 'K78', 'S78', 'C113', 'K113', 'S113', 'C8']            
+                case 'Barclays':
+                    return ['K4', 'S4', 'C39', 'K39', 'S39', 'C74', 'K74', 'S74', 'C109', 'K109', 'S109', 'C4']                
                 case _:
                     print(f'account: {account} not found in "updateSpreadsheet" function')
         cell = (getCellArray(account))[month - 1]
@@ -89,6 +90,26 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
         f'the given key: {symbol} does not match the sheet key: {sheetKey} for the cell that is being updated: {cell} \n'
         f'This is likely due to an update on the spreadsheet: {sheetTitle} > {tabTitle} \n'
         f'Check spreadsheet and verify the getCell method is getting the correct Cell')
+
+def updateCheckingBalanceSpreadsheet(sheetTitle, tabTitle, accountName, month, value, symbol="$", modified=False):
+    projectedRows = [4,4,4,39,39,39,74,74,74,109,109,109]
+    projectedColumns = ['B','J','R','B','J','R','B','J','R','B','J','R']
+    row=projectedRows[month-1]
+    column=projectedColumns[month-1]
+    jsonCreds = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
+    sheet = gspread.service_account(filename=jsonCreds).open(sheetTitle)
+    worksheet = sheet.worksheet(str(tabTitle))
+    cellNotFound = True
+    while cellNotFound:
+        description = worksheet.acell(column+str(row)).value
+        if accountName in description:
+            cellNotFound = False
+        else:
+            row+=1
+    cell = chr(ord(column) + 1) + str(row)
+    worksheet.update(cell, value)
+    cell = chr(ord(column) + 4) + str(row)
+    worksheet.update(cell, value)
 
 def updateCryptoPrices(driver, book):
     print('updating coin prices')

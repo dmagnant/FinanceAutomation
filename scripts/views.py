@@ -334,26 +334,11 @@ def dailyMR(request):
     personalBook = GnuCash('Finance')
     mrAccounts = getDailyMRAccounts(personalBook)
     if request.method == 'POST':
-        isProcessRunning('chromedriver.exe')
-        print('check ended')
         driver = Driver("Chrome")
-        isProcessRunning('chromedriver.exe')
-        print('check 2 ended')
         if "MR" in request.POST:
             runDailyMR(mrAccounts, personalBook)
         elif "amazonMain" in request.POST:
             confirmAmazonGCBalance(driver, mrAccounts['AmazonGC'])
-        elif "bingMain" in request.POST:
-            runBing(driver, mrAccounts['Bing'], personalBook)
-        elif "bingLogin" in request.POST:
-            locateBingWindow(driver)
-        elif "bingActivities" in request.POST:
-            bingActivities(driver)
-        elif "bingBalance" in request.POST:
-            mrAccounts['Bing'].setBalance(getBingBalance(driver))
-            personalBook.updateMRBalance(mrAccounts['Bing'])
-        elif "bingRewards" in request.POST:
-            claimBingRewards(driver)
         elif "pineconeMain" in request.POST:
             runPinecone(driver, mrAccounts['Pinecone'], personalBook)
         elif "pineconeLogin" in request.POST:
@@ -443,7 +428,7 @@ def eternl(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
-            runEternl(driver, Cardano)
+            runEternl(driver, Cardano, book)
         elif "balance" in request.POST:
             Cardano.setBalance(getEternlBalance(driver))
         elif "login" in request.POST:
@@ -560,6 +545,8 @@ def monthly(request):
         today = datetime.today().date()
         if "USD" in request.POST:
             runUSD(driver, today, usdAccounts, personalBook)
+        elif "energy" in request.POST:
+            updateEnergyBillAmounts(driver, jointBook, request.POST['energyTotal'])
         elif "Crypto" in request.POST:
             runCrypto(driver, today, cryptoAccounts, personalBook)
         elif "fidelityMain" in request.POST:
@@ -724,7 +711,7 @@ def sofi(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
-            runSofi(driver, accounts)
+            runSofi(driver, accounts, book)
         elif "login" in request.POST:
             locateSofiWindow(driver)
         elif "logout" in request.POST:
@@ -807,9 +794,8 @@ def vanguard(request):
     book = GnuCash('Finance')
     Pension = USD("VanguardPension", book)
     V401k = USD("Vanguard401k", book)
-    REIF401k = Security("Real Estate Index Fund", book)
     TSM401k = Security("Total Stock Market(401k)", book)
-    accounts = {'Pension': Pension, 'V401k': V401k, 'REIF401k': REIF401k, 'TSM401k': TSM401k}
+    accounts = {'Pension': Pension, 'V401k': V401k,'TSM401k': TSM401k}
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "401k" in request.POST:

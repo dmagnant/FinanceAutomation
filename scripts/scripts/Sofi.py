@@ -96,12 +96,12 @@ def getTransactionsFromSofiWebsite(driver, dateRange, today, tableStart, div):
     previousMonth = False
     while insideDateRange:
         try:
-            try:
-                # capture Date in 'Mon Day' format and add year
-                sofiDate = datetime.strptime(driver.find_element(By.XPATH, elementRoot).text, '%b %d').date().replace(year=year)
-            except ValueError:
-                # capture Date in 'M/D/YY' format
-                sofiDate = datetime.strptime(driver.find_element(By.XPATH, elementRoot).text, "%m/%d/%y").date()
+            date = driver.find_element(By.XPATH, elementRoot).text
+            if "/" not in date:
+                month = datetime.strptime(date[:3], "%b").month
+                day = date[4:]
+                date = f'{str(month)}/{day}/{str(year-2000)}'
+            sofiDate = datetime.strptime(date, "%m/%d/%y").date()
             if sofiDate < dateRange['startDate'] or sofiDate > dateRange['endDate']:
                 insideDateRange = False
             else:
@@ -139,7 +139,7 @@ def runSofi(driver, accounts, book):
         runSofiAccount(driver, dateRange, today, account, book)
     driver.webDriver.get("https://www.sofi.com/my/money/account/#/1000028154579/account-detail") # switch back to checking page
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
     # driver = Driver("Chrome")
     # book = GnuCash('Finance')
     # Checking = USD("Sofi Checking", book)
@@ -151,22 +151,23 @@ if __name__ == '__main__':
     # sofiLogout(driver)
     # book.closeBook()
     
-    driver = Driver("Chrome")
-    setMonthlySpendTarget(driver)
+if __name__ == '__main__':    
+    transactionDate = 'Feb 29'
+    month = datetime.strptime(transactionDate[:3], "%b").month
+    day = transactionDate[4:]
+    modifiedDate = str(month) + '/' + day + '/' + str(datetime.today().date().year-2000)
+    print(modifiedDate)
+    modifiedDate = f''
     
-    # driver = Driver("Chrome")
-    # book = GnuCash('Finance')
-    # Checking = USD("Sofi Checking", book)
-    # today = datetime.today().date()
-    # dateRange = getStartAndEndOfDateRange(today, 7)
-    # sofiActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\sofi.csv"
-    # open(sofiActivity, 'a', newline='')
-    # book.importUniqueTransactionsToGnuCash(Checking, sofiActivity, driver, dateRange, 0)
-    # book.closeBook()
     
-    from selenium import webdriver
-    from selenium.webdriver.chrome.service import Service as ChromeService
-    from webdriver_manager.chrome import ChromeDriverManager
+    
+    
+    # sofiDate = datetime.strptime(dateString, '%b %d %Y').date().replace(year=2024)
+    # print(sofiDate)
+    # try:
+    #     sofiDate = datetime.strptime(dateString, '%b %d').date().replace(year=2024)
+    # except ValueError:
+    #     dateString.
+    #     sofiDate = datetime.strptime(dateString, '%b %d').date().replace(year=2024)
 
-    # driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
-    # setMonthlySpendTarget(driver)
+    # print(sofiDate)

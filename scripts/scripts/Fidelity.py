@@ -73,7 +73,7 @@ def getFidelityIRAPricesAndShares(driver, accounts, book):
 def captureFidelityIRATransactions(driver):
     locateFidelityWindow(driver)
     driver.webDriver.find_element(By.XPATH, "//*[@id='portsum-tab-activity']/a/span").click() # Activity & Orders
-    driver.clickXPATHElementOnceAvaiable("//*[@id='245173114']/span/s-slot/s-assigned-wrapper/div/div") # Roth IRA
+    driver.clickXPATHElementOnceAvaiable("//*[@id='245173114']/span/s-slot/s-assigned-wrapper/div") # Roth IRA
     driver.webDriver.find_element(By.XPATH, "//*[@id='accountDetails']/div/div[2]/div/new-tab-group/new-tab-group-ui/div[2]/activity-orders-shell/div/ap143528-portsum-dashboard-activity-orders-home-root/div/div/div/account-activity-container/div/div[1]/div[2]/pvd3-field-group/s-root/div/div/s-slot/s-assigned-wrapper/div/core-filter-button[2]/pvd3-button/s-root/button/div/span/s-slot/s-assigned-wrapper").click() # History
     driver.webDriver.find_element(By.XPATH, "//*[@id='timeperiod-select-button']/span[1]").click() # Timeframe
     driver.webDriver.find_element(By.XPATH, "//*[@id='60']/s-root/div/label").click() # past 60 days
@@ -121,10 +121,10 @@ def runFidelity(driver, accounts, book):
     accounts['IRA'].setBalance(getFidelityIRABalance(driver))
     getFidelityIRAPricesAndShares(driver, accounts, book)
     iraActivity = captureFidelityIRATransactions(driver)
-    # book.importGnuTransaction(accounts['IRA'], iraActivity, driver, 0)
-    # accounts['VXUS'].updateGnuBalanceAndValue(book.getBalance(accounts['VXUS'].gnuAccount))
-    # accounts['VTI'].updateGnuBalanceAndValue(book.getBalance(accounts['VTI'].gnuAccount))
-    # accounts['SPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['SPAXX'].gnuAccount))
+    book.importGnuTransaction(accounts['IRA'], iraActivity, driver, 0)
+    accounts['VXUS'].updateGnuBalanceAndValue(book.getBalance(accounts['VXUS'].gnuAccount))
+    accounts['VTI'].updateGnuBalanceAndValue(book.getBalance(accounts['VTI'].gnuAccount))
+    accounts['SPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['SPAXX'].gnuAccount))
     
 if __name__ == '__main__':
     driver = Driver("Chrome")

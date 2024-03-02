@@ -8,11 +8,11 @@ if __name__ == '__main__' or __name__ == "Amex":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
-    from Functions.GeneralFunctions import (getPassword, getUsername)
+    from Functions.GeneralFunctions import (getPassword, getUsername, getPaycheckDates)
 else:
     from .Classes.Asset import USD
     from .Classes.GnuCash import GnuCash
-    from .Functions.GeneralFunctions import (getPassword, getUsername)
+    from .Functions.GeneralFunctions import (getPassword, getUsername, getPaycheckDates)
 
 def getAmexBasePath():
     return '/html/body/div[1]/div[2]/main/div/div/div/div/div[2]/div/div[2]/div/div/div'
@@ -49,13 +49,12 @@ def exportAmexTransactions(driver):
         exception = "caught"
     time.sleep(6)
     driver.find_element(By.XPATH, getAmexBasePath() + "/div[1]/div[1]/div/div/div[1]/div[2]/div[1]/div/button/div/i").click() # download arrow
-    driver.find_element(By.XPATH, getAmexBasePath() + "[1]/div/div/div/div/div/div[2]/div/div/div[1]/div/fieldset/div[1]/label").click() # CSV Option
+    driver.find_element(By.XPATH, getAmexBasePath() + "[1]/div/div/div/div/div/div[2]/div/div/div[1]/div/fieldset/div[2]/label").click() # CSV Option
     try: # delete old csv file
         os.remove(r"C:\Users\dmagn\Downloads\activity.csv")
     except FileNotFoundError:
         exception = "caught"
-    # click on Download
-    driver.find_element(By.XPATH, getAmexBasePath() + "[1]/div/div/div/div/div/div[3]/div/a").click()
+    driver.find_element(By.XPATH, getAmexBasePath() + "[1]/div/div/div/div/div/div[3]/div/a").click() # Download
     time.sleep(3)
 
 def claimAmexRewards(driver):
@@ -65,7 +64,7 @@ def claimAmexRewards(driver):
     if float(rewardsBalance) > 0:
         driver.webDriver.find_element(By.ID, "rewardsInput").send_keys(rewardsBalance)
         driver.webDriver.find_element(By.ID, "rewardsInput").send_keys(Keys.TAB)
-        driver.webDriver.find_element(By.XPATH, "//*[@id='continue-btn']/span").click()
+        driver.webDriver.find_element(By.ID, "continue-btn").click()
         driver.webDriver.find_element(By.XPATH, "//*[@id='use-dollars-btn']/span").click()
 
 def runAmex(driver, account, book):
@@ -78,10 +77,16 @@ def runAmex(driver, account, book):
     if account.reviewTransactions:
         book.openGnuCashUI()
 
+# if __name__ == '__main__':
+#     driver = Driver("Chrome")
+#     book = GnuCash('Finance')
+#     Amex = USD("Amex", book)    
+#     runAmex(driver, Amex, book)
+#     Amex.getData()
+#     book.closeBook()
+    
 if __name__ == '__main__':
-    driver = Driver("Chrome")
-    book = GnuCash('Finance')
-    Amex = USD("Amex", book)    
-    runAmex(driver, Amex, book)
-    Amex.getData()
-    book.closeBook()
+    from datetime import datetime
+    date = datetime(2024,1,12,00,00).date()
+    dates = getPaycheckDates()
+    print(dates)

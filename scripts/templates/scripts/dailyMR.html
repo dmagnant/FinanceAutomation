@@ -18,19 +18,6 @@
                 gnuBalance: <b>${{mrAccounts.AmazonGC.gnuBalance}}</b><br>
             </div>
             <div style="width: 14%; display:table-cell">
-                <b><a href="{% url 'Bing' %}" target="_blank">Bing</a></b><br><br>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="bingMain">Main</button>
-                    <button type="submit" name="bingLogin">Login</button>
-                    <button type="submit" name="bingActivities">Activities</button><br>
-                    <button type="submit" name="bingBalance">Balance</button>
-                    <button type="submit" name="bingRewards">Rewards</button><br><br>
-                </form>
-                &emsp;&thinsp;Balance: <b>{{mrAccounts.Bing.gnuBalance}}</b><br>
-                Redeem at: 5250<br>
-            </div>
-            <div style="width: 14%; display:table-cell">
                 <b><a href="{% url 'Paidviewpoint' %}" target="_blank">Paidviewpoint</a></b><br><br>
                 <form method="post">
                     {% csrf_token %}
@@ -65,8 +52,8 @@
                     <button type="submit" name="presearchBalance">Balance</button>
                     <button type="submit" name="presearchRewards">Rewards</button><br><br>
                 </form>
-                &emsp;&ensp;Balance: <b>{{bankAccounts.Presearch.balance}}</b> pre<br>
-                gnuBalance: {{bankAccounts.Presearch.gnuBalance}} pre<br>
+                &emsp;&ensp;Balance: <b>{{mrAccounts.Presearch.balance}}</b> pre<br>
+                gnuBalance: {{mrAccounts.Presearch.gnuBalance}} pre<br>
             </div>
             <div style="width: 14%; display:table-cell">
                 <b><a href="{% url 'Swagbucks' %}" target="_blank">Swagbucks</a></b><br><br>

@@ -6,7 +6,12 @@
         {% csrf_token %}
         <button type="submit" name="USD">USD</button>
         <button type="submit" name="prices">price update</button>
-        <button type="submit" name="shares">share update</button><br><br>
+        <button type="submit" name="shares">share update</button><br>
+    </form>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="energyTotal">
+        <button type="submit" name="energy">energy bill</button><br><br>
     </form>
     <div style="width: 100%; display: table;">
         <div style="display: table-row;">
@@ -61,10 +66,6 @@
                 &emsp;&emsp;&thinsp;gnuBalance: <b>${{usdAccounts.Pension.gnuBalance}}</b><br><br>
                 &emsp;&ensp;401k Balance: <b>${{usdAccounts.V401k.balance}}</b><br>
                 &emsp;&emsp;&thinsp;gnuBalance: <b>${{usdAccounts.V401k.gnuBalance}}</b><br><br>
-                &emsp;&emsp;&emsp;REIF shares: <b>{{usdAccounts.REIF401k.balance}} ({{usdAccounts.REIF401k.symbol}})</b><br>
-                gnuBalance shares: <b>{{usdAccounts.REIF401k.gnuBalance}} ({{usdAccounts.REIF401k.symbol}})</b><br>
-                &emsp;&emsp;&emsp;&ensp;REIF Value: <b>${{usdAccounts.REIF401k.value}}</b><br>
-                &emsp;&ensp;${{usdAccounts.REIF401k.price}} x shares: <b>${{usdAccounts.REIF401k.gnuValue}}</b><br><br>
                 &emsp;&emsp;&emsp;&thinsp;TSM shares: <b>{{usdAccounts.TSM401k.balance}} ({{usdAccounts.TSM401k.symbol}})</b><br>
                 gnuBalance shares: <b>{{usdAccounts.TSM401k.gnuBalance}} ({{usdAccounts.TSM401k.symbol}})</b><br>
                 &emsp;&emsp;&emsp;&ensp;&thinsp;TSM Value: <b>${{usdAccounts.TSM401k.value}}</b><br>

@@ -36,14 +36,3 @@ if __name__ == '__main__':
     AmazonGC.getData()
     book.closeBook()
 
-# if __name__ == '__main__':
-#     import pyautogui
-#     from datetime import datetime
-#     timeToWaitBetweenClicks = 10
-#     while True:
-#         pyautogui.click(button='right')
-        
-#         time.sleep(1)
-#         pyautogui.press('escape')
-#         print(datetime.now())
-#         time.sleep(timeToWaitBetweenClicks)

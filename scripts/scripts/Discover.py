@@ -29,7 +29,7 @@ def discoverLogin(driver):
     # login
     # username already entered
     # driver.find_element(By.ID, 'userid-content').send_keys(getUsername('Discover'))
-    driver.webDriver.find_element(By.ID, 'password-content').send_keys(getPassword('Discover'))
+    # driver.webDriver.find_element(By.ID, 'password-content').send_keys(getPassword('Discover'))
     time.sleep(1)
     driver.webDriver.find_element(By.XPATH, '/html/body/div[1]/main/div/div[1]/div/form/input[8]').click()
 

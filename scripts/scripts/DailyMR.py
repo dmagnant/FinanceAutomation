@@ -4,7 +4,6 @@ if __name__ == '__main__' or __name__ == "Daily":
     from Classes.GnuCash import GnuCash
     from Presearch import searchUsingPresearch
     from AmazonGC import confirmAmazonGCBalance
-    from Bing import runBing
     from Pinecone import runPinecone
     from Swagbucks import runSwagbucks
     from Tellwut import runTellwut
@@ -14,14 +13,12 @@ else:
     from .Classes.GnuCash import GnuCash
     from .Presearch import searchUsingPresearch
     from .AmazonGC import confirmAmazonGCBalance
-    from .Bing import runBing
     from .Pinecone import runPinecone
     from .Swagbucks import runSwagbucks
     from .Tellwut import runTellwut
 
 def getDailyMRAccounts(personalReadBook):
     AmazonGC = USD("Amazon GC", personalReadBook)
-    # Bing = Security("Bing", personalReadBook)
     Pinecone = Security("Pinecone", personalReadBook)
     Swagbucks = Security("Swagbucks", personalReadBook)
     Tellwut = Security("Tellwut", personalReadBook)
@@ -31,7 +28,6 @@ def getDailyMRAccounts(personalReadBook):
 
 def runDailyMR(accounts, book):
     driver = Driver("Chrome")
-    # runBing(driver, accounts['Bing'], book)
     searchUsingPresearch(driver)
     runTellwut(driver, accounts['Tellwut'], book)
     confirmAmazonGCBalance(driver, accounts['AmazonGC'])

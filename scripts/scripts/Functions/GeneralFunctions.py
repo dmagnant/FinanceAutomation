@@ -158,19 +158,21 @@ def modifyTransactionDescription(description, amount="0.00"):
     elif "ALLY BANK" in description.upper():
         description = "Ally Transfer"
     elif "FID BKG SVC LLC" in description.upper():
-        description = "Fidelity IRA Transfer"
+        description = "Fidelity Transfer"
     elif "CITY OF MILWAUKE B2P*MILWWA" in description.upper():
         description = "Water Bill"
     elif "COOPER NSM" in description.upper():
         description = "Mortgage Payment"
     elif "NORTHWESTERN MUT" in description.upper():
         description = "NM Paycheck"
+    elif "STATE FARM COS" in description.upper():
+        description = "SF Paycheck"        
     elif "PAYPAL" in description.upper() and "10.00" in amount:
-        description = "Swagbucks"  
+        description = "Swagbucks"
+    elif "PAYPAL" in description.upper() and amount == "3.00":
+        description = "Pinecone"
     elif "PAYPAL" in description.upper():
         description = "Paypal"
-    elif "PAYPAL" in description.upper() and "3.00" in amount:
-        description = "Pinecone"
     elif "VENMO" in description.upper():
         description = "Venmo"
     elif "ALLIANT CU" in description.upper():
@@ -282,8 +284,6 @@ def getAccountPath(account):
             return v401k
         case 'VanguardPension':
             return nonLiquid + ":Pension"  
-        case 'Real Estate Index Fund':
-            return v401k + ":Real Estate Index Fund"
         case 'Total Stock Market(401k)':
             return v401k + ":Total Stock Market"
         case 'IRA':
@@ -339,10 +339,26 @@ def getScriptsToRun(context, today):
     context['scriptsToRunToday'] = scriptsToRun(today)
     context['scriptsToRunTomorrow'] = scriptsToRun(today + timedelta(days=1))
     
+def getPaycheckDates():
+    paycheckDates = []
+    firstPaycheckDate = datetime(2024,1,10,00,00).date()
+    paycheckDates.append(firstPaycheckDate)
+    previousPaycheck = firstPaycheckDate
+    while True:
+        nextPaycheck = previousPaycheck+relativedelta(weeks=2)
+        if nextPaycheck.year != firstPaycheckDate.year:
+            break
+        else:
+            paycheckDates.append(nextPaycheck)
+        previousPaycheck = nextPaycheck
+    return paycheckDates
+    
 def eventsHappening(date):
     events = []
     monthDates = getStartAndEndOfDateRange(date+relativedelta(months=+1), 'month')
     if date.day == monthDates['endDate'].day:
+        events.append('Paycheck')
+    if date in getPaycheckDates():
         events.append('Paycheck')
     match date.day:
         case 1:
@@ -371,7 +387,7 @@ def getEventsHappening(context, today):
     context['eventsTomorrow'] = eventsHappening(today + timedelta(days=1))
 
 def returnRender(request, htmlPath, context):
-    today = datetime.today()
+    today = datetime.today().date()
     context['scriptCompleteTime'] = today
     getScriptsToRun(context, today)
     getEventsHappening(context, today)

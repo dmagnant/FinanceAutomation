@@ -376,7 +376,7 @@ class GnuCash:
                 toAccount = "Liabilities:Mortgage Loan"
             elif "Swagbucks" in description:
                 toAccount = "Income:Market Research:Swagbucks"
-            elif "NM Paycheck" in description:
+            elif "NM Paycheck" in description or "SF Paycheck" in description:
                 toAccount = "Income:Salary"
             elif "GOOGLE FI" in description.upper() or "GOOGLE *FI" in description.upper():
                 toAccount = "Expenses:Utilities:Phone"
@@ -396,8 +396,6 @@ class GnuCash:
                 toAccount = "Expenses:Utilities:Internet"
             elif "TRAVEL CREDIT" in description:
                 toAccount = "Income:Credit Card Rewards"
-            elif "Fidelity IRA Transfer" in description:
-                toAccount = "Assets:Non-Liquid Assets:IRA:Fidelity:Govt Money Market"
             elif "MILWAUKEE ELECTRIC TO" in description:
                 toAccount = "Expenses:Home Expenses:Maintenance"
             elif "CASH REWARDS STATEMENT CREDIT" in description:
@@ -634,7 +632,7 @@ class GnuCash:
                     if 'WE ENERGIES' in transactionVariables['description'].upper():
                         energyBillNum += 1
                         transactionVariables['amount'] = getEnergyBillAmounts(driver, transactionVariables['amount'], energyBillNum)
-                    elif 'NM PAYCHECK' in transactionVariables['description'].upper() or "CRYPTO PURCHASE" in transactionVariables['description'].upper() or toAccount == "Expenses:Other":
+                    elif 'PAYCHECK' in transactionVariables['description'].upper() or "CRYPTO PURCHASE" in transactionVariables['description'].upper() or toAccount == "Expenses:Other":
                         account.setReviewTransactions(transactionVariables['reviewTransPath'])
                     self.writeGnuTransaction(transactionVariables, toAccount)
         account.updateGnuBalance(self.getBalance(account.gnuAccount))
@@ -670,6 +668,18 @@ class GnuCash:
                     Split(value=round(Decimal(179.64), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:State Tax")),
                     Split(value=round(Decimal(152.08), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:HSA:NM HSA Cash")),
                     Split(value=-round(Decimal(3853.33), 2), memo="scripted",account=myBook.accounts(fullname=toAccount))]
+        elif "SF Paycheck" in transactionVariables['description']:
+            split = [Split(value=round(Decimal(2702.46), 2), memo="scripted",account=myBook.accounts(fullname=transactionVariables['fromAccount'])),
+                    # Split(value=round(Decimal(693.60), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:401k")),
+                    # Split(value=round(Decimal(5.49), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Dental")),
+                    # Split(value=round(Decimal(44.90), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Health")),
+                    # Split(value=round(Decimal(2.93), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Medical:Vision")),
+                    Split(value=round(Decimal(226.54), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Social Security")),
+                    Split(value=round(Decimal(52.98), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Medicare")),
+                    Split(value=round(Decimal(490.04), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Federal Tax")),
+                    Split(value=round(Decimal(181.83), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:State Tax")),
+                    # Split(value=round(Decimal(152.08), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:HSA:NM HSA Cash")),
+                    Split(value=-round(Decimal(3653.85), 2), memo="scripted",account=myBook.accounts(fullname=toAccount))]            
         else:
             split = [Split(value=-transactionVariables['amount'], memo="scripted", account=myBook.accounts(fullname=toAccount)),
                     Split(value=transactionVariables['amount'], memo="scripted", account=myBook.accounts(fullname=transactionVariables['fromAccount']))]

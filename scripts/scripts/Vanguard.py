@@ -47,16 +47,12 @@ def locateVanguardWindow(driver):
 def getVanguard401kPriceAndShares(driver, accounts, book):
     locateVanguardWindow(driver)
     driver.openNewWindow('https://retirementplans.vanguard.com/VGApp/pe/faces/Investments.xhtml?SelectedPlanId=095895')
-    num = 2
-    while num <=3:
-        fundNumber = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[1]").text        
-        account = accounts['TSM401k'] if fundNumber == str(8585) else accounts['REIF401k']
-        account.balance = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[3]").text
-        account.price = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[4]").text.replace('$', '')
-        book.updatePriceInGnucash(account.symbol, Decimal(account.price))
-        account.value = driver.webDriver.find_element(By.XPATH,"//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[5]").text.replace('$','',).replace(',','')
-        num+=1
-    accounts['V401k'].balance = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[" + str(num) + "]/td[5]").text.replace("$", "").replace(',', '')
+    account = accounts['TSM401k']
+    account.balance = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[2]/td[3]").text
+    account.price = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[2]/td[4]").text.replace('$', '')
+    book.updatePriceInGnucash(account.symbol, Decimal(account.price))
+    account.value = driver.webDriver.find_element(By.XPATH,"//*[@id='investmentsForm:allFundsTabletbody0']/tr[2]/td[5]").text.replace('$','',).replace(',','')
+    accounts['V401k'].balance = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[2]/td[5]").text.replace("$", "").replace(',', '')
     
 def captureVanguard401kTransactions(driver):
     locateVanguardWindow(driver)
@@ -82,7 +78,7 @@ def captureVanguard401kTransactions(driver):
             column+=1
             shares = driver.webDriver.find_element(By.XPATH,transactionTable + str(row) + "]/td[" + str(column) + "]").text
             column+=2
-            amount = driver.webDriver.find_element(By.XPATH,transactionTable + str(row) + "]/td[" + str(column) + "]").text.replace('$','')
+            amount = driver.webDriver.find_element(By.XPATH,transactionTable + str(row) + "]/td[" + str(column) + "]").text.replace('$','').replace(',','')
             amount = -float(amount) if "Fee" in description else amount
             shares = -float(shares) if "Fee" in description else shares
             transaction = date, description, shares, amount
@@ -124,7 +120,6 @@ def runVanguard401k(driver, accounts, book):
     getVanguard401kPriceAndShares(driver, accounts, book)
     v401kActivity = captureVanguard401kTransactions(driver)
     book.importGnuTransaction(accounts['V401k'], v401kActivity, driver, 0)
-    accounts['REIF401k'].updateGnuBalanceAndValue(book.getBalance(accounts['REIF401k'].gnuAccount))
     accounts['TSM401k'].updateGnuBalanceAndValue(book.getBalance(accounts['TSM401k'].gnuAccount))
     accounts['V401k'].updateGnuBalance(book.getBalance(accounts['V401k'].gnuAccount))
     
@@ -140,23 +135,16 @@ if __name__ == '__main__':
     book = GnuCash('Finance')
     Pension = USD("VanguardPension", book)
     V401k = USD("Vanguard401k", book)
-    REIF401k = Security("Real Estate Index Fund", book)
     TSM401k = Security("Total Stock Market(401k)", book)
-    accounts = {'Pension': Pension, 'V401k': V401k, 'REIF401k': REIF401k, 'TSM401k': TSM401k}
+    accounts = {'Pension': Pension, 'V401k': V401k, 'TSM401k': TSM401k}
     # runVanguard401k(driver, accounts, book)
     runVanguardPension(driver,accounts,book)
     Pension.getData()
     V401k.getData()
     book.closeBook()
     
-    # REIF401k = Security("Real Estate Index Fund", book)
     # TSM401k = Security("Total Stock Market(401k)", book)
-    # print(REIF401k.gnuValue)
     # print(TSM401k.gnuValue)
-    
-    # REIF401k.updateGnuBalanceAndValue(book.getBalance(REIF401k.gnuAccount))
-    # print(REIF401k.gnuValue)
-
 
     # price = book.getPriceInGnucash(accounts['TSM401k'].symbol)
     # print(price)

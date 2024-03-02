@@ -115,7 +115,7 @@ def compileGnuTransactions(account, mybook, dateRange):
     return total
 
 def getCell(account, month, accounts='Personal'):
-    rowStart = 52 if accounts == 'Personal' else 25
+    rowStart = 50 if accounts == 'Personal' else 25
     row = str(rowStart + (month - 1))
     match account:
         case 'Amazon':
