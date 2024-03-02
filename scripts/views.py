@@ -69,29 +69,22 @@ def ally(request):
     book.closeBook()
     return returnRender(request, "scripts/ally.html", context)
 
-
 def amazon(request):
     book = GnuCash('Finance')
     AmazonGC = USD("Amazon GC", book)
-    # print(request.POST)
-    # print(request.method)
     if request.method == 'GET':
         context = {'account': AmazonGC}
-        book.closeBook()
-        print('done')
         return render(request,"scripts/amazon.html", context)
     elif request.method == 'POST':
-        # from selenium import webdriver
-        # from selenium.webdriver.chrome.service import Service
-        # from selenium.webdriver.common.by import By
         driver = Driver("Chrome")
         if "main" in request.POST:
             confirmAmazonGCBalance(driver, AmazonGC)
+        elif 'add' in request.POST:
+            addAmazonGCAmount(book, AmazonGC, Decimal(request.POST['amount']), request.POST['source'])
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/amazon"))
         context = {'account': AmazonGC}
         book.closeBook()
-        print('done')
         return returnRender(request, "scripts/amazon.html", context)
 
 

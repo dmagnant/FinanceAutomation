@@ -1,1 +1,39 @@
-{% extends "singleAccountGet.html" %}
+{% extends "base.html" %}
+{% block title %}Amazon GC{% endblock %}
+{% block content %}
+<h1>{{account.name}}</h1>
+    <div style="width: 100%; display: table;">
+        <div style="display: table-row;">
+            <div style="width: 20%; display:table-cell">
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="main">Main</button><br>
+                    <button type="submit" name="login">Login</button><br>
+                    <input type="text" name="amount">
+                    <select name="source" id="source">
+                        <option value="Online Insights">Online Insights</option>
+                        <option value="Pinecone Research">Pinecone Research</option>
+                        <option value="Reckner">Reckner</option>
+                        <option value="Sago">Sago</option>
+                        <option value="Tellwut">Tellwut</option>
+                    </select>
+                    <button type="submit" name="add">Add Amount</button><br>
+                </form>
+            </div>
+            <div style="width: 80%; display:table-cell">
+                &emsp;&emsp;&emsp;&emsp;&thinsp;balance: <b>${{account.balance}}</b><br>
+                gnuCash balance: <b>${{account.gnuBalance}}</b><br>
+                Review Transactions: <br><br>
+                <div style="width: 50%; display: table;">
+                    {%for tr in account.reviewTransactions %}
+                    <div style="display: table-row;">
+                        <div style="width: 20%; display:table-cell">
+                            {{tr}}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
