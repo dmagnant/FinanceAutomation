@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% block title %}Discover{% endblock %}
+{% block title %}{{account.name}}{% endblock %}
 {% block content %}
-    <h1>Discover</h1>
+<h1>{{account.name}}</h1>
     <div style="width: 100%; display: table;">
         <div style="display: table-row;">
             <div style="width: 20%; display:table-cell">
@@ -10,11 +10,13 @@
                     <button type="submit" name="main">Main</button><br>
                     <button type="submit" name="login">Login</button><br>
                     <button type="submit" name="balance">Balance</button><br>
-                    <button type="submit" name="rewards">Rewards</button><br><br>
+                    {% if "Ally" in account.name or "Sofi" in account.name %}
+                        <button type="submit" name="logout">Logout</button><br>
+                    {% endif %}
                 </form>
             </div>
             <div style="width: 80%; display:table-cell">
-                &emsp;&emsp;&emsp;&emsp;&ensp;balance: <b>${{account.balance}}</b><br>
+                &emsp;&emsp;&emsp;&emsp;&thinsp;balance: <b>${{account.balance}}</b><br>
                 gnuCash balance: <b>${{account.gnuBalance}}</b><br>
                 Review Transactions: <br><br>
                 <div style="width: 50%; display: table;">

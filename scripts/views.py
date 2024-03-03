@@ -50,7 +50,7 @@ def scripts(request):
         driver = Driver("Chrome")
         driver.closeWindowsExcept([':8000/'])
     context = {'bank':bank, 'cc':cc, 'crypto':crypto, 'mr':mr}
-    return returnRender(request, "scripts/scripts.html", context)
+    return returnRender(request, "scripts.html", context)
 
 def ally(request):
     book = GnuCash('Home')
@@ -67,14 +67,14 @@ def ally(request):
             Ally.setBalance(getAllyBalance(driver))
     context = {'account': Ally}
     book.closeBook()
-    return returnRender(request, "scripts/ally.html", context)
+    return returnRender(request, "banking/ally.html", context)
 
 def amazon(request):
     book = GnuCash('Finance')
     AmazonGC = USD("Amazon GC", book)
     if request.method == 'GET':
         context = {'account': AmazonGC}
-        return render(request,"scripts/amazon.html", context)
+        return render(request,"mr/amazon.html", context)
     elif request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
@@ -85,8 +85,7 @@ def amazon(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/amazon"))
         context = {'account': AmazonGC}
         book.closeBook()
-        return returnRender(request, "scripts/amazon.html", context)
-
+        return returnRender(request, "mr/amazon.html", context)
 
 def amex(request):
     book = GnuCash('Finance')
@@ -105,7 +104,7 @@ def amex(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/amex"))
     context = {'account': Amex}
     book.closeBook()
-    return returnRender(request, "scripts/amex.html", context)
+    return returnRender(request, "banking/creditcard.html", context)
 
 def barclays(request):
     book = GnuCash('Finance')
@@ -124,7 +123,7 @@ def barclays(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/barclays"))
     context = {'account': Barclays}
     book.closeBook()
-    return returnRender(request, "scripts/barclays.html", context)
+    return returnRender(request, "banking/creditcard.html", context)
 
 def bing(request):
     book = GnuCash('Finance')
@@ -147,7 +146,7 @@ def bing(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/bing"))
     context = {'Bing': Bing}
     book.closeBook()
-    return returnRender(request, "scripts/bing.html", context)
+    return returnRender(request, "mr/bing.html", context)
 
 def boa(request):
     personalBook = GnuCash('Finance')
@@ -171,7 +170,7 @@ def boa(request):
     context = {'Personal': Personal, 'Joint': Joint}
     personalBook.closeBook()
     jointBook.closeBook()
-    return returnRender(request, "scripts/boa.html", context)
+    return returnRender(request, "banking/boa.html", context)
 
 def chase(request):
     book = GnuCash('Finance')
@@ -190,7 +189,7 @@ def chase(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/chase"))
     context = {'account': Chase}
     book.closeBook()
-    return returnRender(request, "scripts/chase.html", context)
+    return returnRender(request, "banking/creditcard.html", context)
 
 def coinbase(request):
     book = GnuCash('Finance')
@@ -207,7 +206,7 @@ def coinbase(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/coinbase"))      
     context = {'Loopring': Loopring}
     book.closeBook()
-    return returnRender(request, "scripts/coinbase.html", context)
+    return returnRender(request, "crypto/coinbase.html", context)
 
 def creditCards(request):
     personalBook = GnuCash('Finance')
@@ -270,11 +269,11 @@ def creditCards(request):
         elif "discoverRewards" in request.POST:
             claimDiscoverRewards(driver)               
         elif "close windows" in request.POST:
-            driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/barclays"))
+            driver.closeWindowsExcept([':8000/'])
     context = {'Amex': Amex, 'Barclays': Barclays, 'Chase': Chase, 'Discover': Discover, 'BoA_P': BoA_P, 'BoA_J': BoA_J}
     personalBook.closeBook()
     jointBook.closeBook()
-    return returnRender(request, "scripts/creditCards.html", context)
+    return returnRender(request, "banking/creditCards.html", context)
 
 def dailyBank(request):
     personalBook = GnuCash('Finance')
@@ -321,7 +320,7 @@ def dailyBank(request):
         personalBook.openGnuCashUI()
     if bankAccounts['Ally'].reviewTransactions:
         jointBook.openGnuCashUI()
-    return returnRender(request, "scripts/dailyBank.html", context)
+    return returnRender(request, "banking/dailyBank.html", context)
 
 def dailyMR(request):
     personalBook = GnuCash('Finance')
@@ -394,7 +393,7 @@ def dailyMR(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/dailyMR"))
     context = {'mrAccounts': mrAccounts}
     personalBook.closeBook()
-    return returnRender(request, "scripts/dailyMR.html", context)
+    return returnRender(request, "mr/dailyMR.html", context)
         
 def discover(request):
     book = GnuCash('Finance')
@@ -413,7 +412,7 @@ def discover(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/discover"))
     context = {'account': Discover}
     book.closeBook()
-    return returnRender(request, "scripts/discover.html", context)
+    return returnRender(request, "banking/creditcard.html", context)
 
 def eternl(request):
     book = GnuCash('Finance')
@@ -430,7 +429,7 @@ def eternl(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/eternl"))
     context = {'account': Cardano}
     book.closeBook()
-    return returnRender(request, "scripts/eternl.html", context)
+    return returnRender(request, "crypto/eternl.html", context)
 
 def exodus(request):
     book = GnuCash('Finance')
@@ -443,7 +442,7 @@ def exodus(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/exodus"))
     context = {'account': Cosmos}
     book.closeBook()
-    return returnRender(request, "scripts/exodus.html", context)
+    return returnRender(request, "crypto/exodus.html", context)
 
 def fidelity(request):
     book = GnuCash('Finance')
@@ -464,7 +463,7 @@ def fidelity(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/fidelity"))
     book.closeBook()
     context = {'accounts': accounts}
-    return returnRender(request, "scripts/fidelity.html", context)
+    return returnRender(request, "banking/fidelity.html", context)
     
 def healthEquity(request):
     book = GnuCash('Finance')
@@ -484,7 +483,7 @@ def healthEquity(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/healthEquity"))
     context = {'HEaccounts': HEaccounts}
     book.closeBook()
-    return returnRender(request, "scripts/healthEquity.html", context)
+    return returnRender(request, "banking/healthEquity.html", context)
 
 def ioPay(request):
     book = GnuCash('Finance')
@@ -497,7 +496,7 @@ def ioPay(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/iopay"))
     context = {'account': IoTex}
     book.closeBook()
-    return returnRender(request, "scripts/iopay.html", context)
+    return returnRender(request, "crypto/iopay.html", context)
 
 def kraken(request):
     book = GnuCash('Finance')
@@ -514,7 +513,7 @@ def kraken(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/kraken"))
     context = {'account': Ethereum2}
     book.closeBook()
-    return returnRender(request, "scripts/kraken.html", context)
+    return returnRender(request, "crypto/kraken.html", context)
 
 def ledger(request):
     book = GnuCash('Finance')
@@ -526,7 +525,7 @@ def ledger(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/ledger"))
     context = {'coinList': coinList}
     book.closeBook()
-    return returnRender(request, "scripts/ledger.html", context)
+    return returnRender(request, "crypto/ledger.html", context)
 
 def monthly(request):
     personalBook = GnuCash('Finance')
@@ -591,7 +590,7 @@ def monthly(request):
     context = {'usdAccounts': usdAccounts, 'cryptoAccounts': cryptoAccounts}
     personalBook.closeBook()
     jointBook.closeBook()
-    return returnRender(request, "scripts/monthly.html", context)
+    return returnRender(request, "monthly.html", context)
 
 def myConstant(request):
     if request.method == 'POST':
@@ -609,7 +608,7 @@ def myConstant(request):
             locateMyConstantWindow(driver)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/myConstant"))
-    return render(request,"scripts/myconstant.html")
+    return render(request,"banking/myconstant.html")
 
 def paidviewpoint(request):
     book = GnuCash('Finance')
@@ -631,7 +630,7 @@ def paidviewpoint(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/paidviewpoint"))
     context = {'Paidviewpoint': Paidviewpoint}
     book.closeBook()
-    return returnRender(request, "scripts/paidviewpoint.html", context)
+    return returnRender(request, "mr/paidviewpoint.html", context)
 
 def paypal(request):
     if request.method == 'POST':
@@ -642,7 +641,7 @@ def paypal(request):
         locatePayPalWindow(driver)
     elif "close windows" in request.POST:
         driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/paypal"))        
-    return render(request,"scripts/paypal.html")
+    return render(request,"mr/paypal.html")
 
 def pinecone(request):
     book = GnuCash('Finance')
@@ -662,7 +661,7 @@ def pinecone(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/pinecone"))
     context = {'Pinecone': Pinecone}
     book.closeBook()
-    return returnRender(request, "scripts/pinecone.html", context)
+    return returnRender(request, "mr/pinecone.html", context)
 
 def presearch(request):
     book = GnuCash('Finance')
@@ -683,7 +682,7 @@ def presearch(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/presearch"))
     context = {'account': Presearch}
     book.closeBook()
-    return returnRender(request, "scripts/presearch.html", context)
+    return returnRender(request, "crypto/presearch.html", context)
 
 def psCoupons(request):
     if request.method == 'POST':
@@ -694,7 +693,7 @@ def psCoupons(request):
             locatePSCouponWindow(driver)         
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/pscoupons"))             
-    return render(request,"scripts/pscoupons.html")
+    return render(request,"mr/pscoupons.html")
 
 def sofi(request):
     book = GnuCash('Finance')
@@ -716,7 +715,7 @@ def sofi(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/sofi"))
     context = {'Checking': Checking, 'Savings': Savings}
     book.closeBook()
-    return returnRender(request, "scripts/sofi.html", context)
+    return returnRender(request, "banking/sofi.html", context)
 
 def swagbucks(request):
     book = GnuCash('Finance')
@@ -744,7 +743,7 @@ def swagbucks(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/swagbucks"))
     context = {'account': Swagbucks}
     book.closeBook()
-    return returnRender(request, "scripts/swagbucks.html", context)
+    return returnRender(request, "mr/swagbucks.html", context)
 
 def tellwut(request):
     book = GnuCash('Finance')
@@ -767,7 +766,7 @@ def tellwut(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/tellwut"))
     context = {'Tellwut': Tellwut}
     book.closeBook()
-    return returnRender(request, "scripts/tellwut.html", context)
+    return returnRender(request, "mr/tellwut.html", context)
 
 def updateGoals(request):
     context = {}
@@ -781,7 +780,7 @@ def updateGoals(request):
             runUpdateGoals(account, timeframe, book)
         elif "close windows" in request.POST:
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/updateGoals"))      
-    return returnRender(request, "scripts/updateGoals.html", context)
+    return returnRender(request, "updateGoals.html", context)
 
 def vanguard(request):
     book = GnuCash('Finance')
@@ -803,7 +802,7 @@ def vanguard(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/vanguard"))
     context = {'accounts': accounts}
     book.closeBook()        
-    return returnRender(request, "scripts/vanguard.html", context)
+    return returnRender(request, "banking/vanguard.html", context)
 
 def worthy(request):
     book = GnuCash('Finance')
@@ -818,4 +817,4 @@ def worthy(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/worthy"))
     context = {'account': Worthy}
     book.closeBook()
-    return returnRender(request, "scripts/worthy.html", context)
+    return returnRender(request, "banking/worthy.html", context)
