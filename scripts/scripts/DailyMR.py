@@ -2,7 +2,6 @@ if __name__ == '__main__' or __name__ == "Daily":
     from Classes.Asset import USD, Security
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
-    from Presearch import searchUsingPresearch
     from AmazonGC import confirmAmazonGCBalance
     from Pinecone import runPinecone
     from Swagbucks import runSwagbucks
@@ -11,7 +10,6 @@ else:
     from .Classes.Asset import USD, Security
     from .Classes.WebDriver import Driver
     from .Classes.GnuCash import GnuCash
-    from .Presearch import searchUsingPresearch
     from .AmazonGC import confirmAmazonGCBalance
     from .Pinecone import runPinecone
     from .Swagbucks import runSwagbucks
@@ -28,11 +26,9 @@ def getDailyMRAccounts(personalReadBook):
 
 def runDailyMR(accounts, book):
     driver = Driver("Chrome")
-    searchUsingPresearch(driver)
     runTellwut(driver, accounts['Tellwut'], book)
     confirmAmazonGCBalance(driver, accounts['AmazonGC'])
     runPinecone(driver, accounts['Pinecone'], book)
-    searchUsingPresearch(driver)
     runSwagbucks(driver, True, accounts['Swagbucks'], book)
     driver.findWindowByUrl("/scripts/daily")
     

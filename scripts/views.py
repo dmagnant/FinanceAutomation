@@ -346,8 +346,6 @@ def dailyMR(request):
             locatePresearchWindow(driver)          
         elif "presearchBalance" in request.POST:
             mrAccounts['Presearch'].setBalance(getPresearchBalance(driver))
-        elif "presearchSearch" in request.POST:
-            searchUsingPresearch(driver)
         elif "presearchRewards" in request.POST:
             presearchRewardsRedemptionAndBalanceUpdates(driver, mrAccounts['Presearch'], personalBook)
         elif "swagbucksMain" in request.POST:
@@ -674,8 +672,6 @@ def presearch(request):
             locatePresearchWindow(driver)          
         elif "balance" in request.POST:
             Presearch.setBalance(getPresearchBalance(driver))
-        elif "search" in request.POST:
-            searchUsingPresearch(driver)
         elif "rewards" in request.POST:
             presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch)
         elif "close windows" in request.POST:

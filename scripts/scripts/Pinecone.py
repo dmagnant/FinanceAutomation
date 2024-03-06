@@ -24,8 +24,8 @@ def locatePineconeWindow(driver):
 def pineConeLogin(driver):
     driver.openNewWindow('https://members.pineconeresearch.com/#/Login')
     time.sleep(4)
-    # click login
-    driver.webDriver.find_element(By.XPATH, "//*[@id='mainContainer']/div/div/div[1]/div/form/button").click()
+    driver.webDriver.find_element(By.XPATH, "//*[@id='mainContainer']/div/div/div[1]/div/form/button").click() # login
+    
     time.sleep(4)
 
 def getPineConeBalance(driver):

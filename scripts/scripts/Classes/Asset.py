@@ -190,6 +190,7 @@ class USD(Asset):
         self.reviewTransactions.append(transactions)
     
     def locateAndUpdateSpreadsheet(self, driver):
+        print('got here')
         balance = 0.00 if float(self.balance) < 0 else float(self.balance) * -1
         today = datetime.today()
         month = today.month

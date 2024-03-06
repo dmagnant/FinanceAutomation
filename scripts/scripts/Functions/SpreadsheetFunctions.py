@@ -92,8 +92,8 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
         f'Check spreadsheet and verify the getCell method is getting the correct Cell')
 
 def updateCheckingBalanceSpreadsheet(sheetTitle, tabTitle, accountName, month, value, symbol="$", modified=False):
-    projectedRows = [4,4,4,39,39,39,74,74,74,109,109,109]
-    projectedColumns = ['B','J','R','B','J','R','B','J','R','B','J','R']
+    projectedRows = [4,4,39,39,39,74,74,74,109,109,109,4]
+    projectedColumns = ['J','R','B','J','R','B','J','R','B','J','R','B']
     row=projectedRows[month-1]
     column=projectedColumns[month-1]
     jsonCreds = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
@@ -107,8 +107,10 @@ def updateCheckingBalanceSpreadsheet(sheetTitle, tabTitle, accountName, month, v
         else:
             row+=1
     cell = chr(ord(column) + 1) + str(row)
+    print(cell)
     worksheet.update(cell, value)
     cell = chr(ord(column) + 4) + str(row)
+    print(cell)
     worksheet.update(cell, value)
 
 def updateCryptoPrices(driver, book):

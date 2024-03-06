@@ -53,23 +53,6 @@ def locatePresearchWindow(driver):
 def presearchLogin(driver):
     driver.openNewWindow('https://presearch.com/')
 
-def searchUsingPresearch(driver):
-    locatePresearchWindow(driver)
-    num = 1
-    while num < 3:
-        search_prefix = "https://presearch.com/search?q="
-        search_term = None
-        while search_term is None:
-            search_term = RandomWords().random_word()
-        time.sleep(1)
-        search_path = search_prefix + search_term
-        try:
-            driver.webDriver.get(search_path)
-        except WebDriverException:
-            showMessage('check issue', f'target frame detached error when trying to attempt {search_path}')
-        time.sleep(random.choice([2, 3, 4]))
-        num+=1
-
 def claimPresearchRewards(driver):
     locatePresearchWindow(driver)
     driver = driver.webDriver
@@ -133,12 +116,20 @@ def presearchRewardsRedemptionAndBalanceUpdates(driver, account, book):
     account.setPrice(account.getPriceFromCoinGecko())
     account.updateSpreadsheetAndGnuCash(book)
     
-if __name__ == '__main__':
-    driver = Driver("Chrome")
-    book = GnuCash('Finance')
-    locatePresearchWindow(driver)
-    # searchUsingPresearch(driver)
-    Presearch = Security("Presearch", book)
-    presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book)
-    Presearch.getData()
-    book.closeBook()
+# if __name__ == '__main__':
+#     driver = Driver("Chrome")
+#     book = GnuCash('Finance')
+#     locatePresearchWindow(driver)
+#     # searchUsingPresearch(driver)
+#     Presearch = Security("Presearch", book)
+#     presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book)
+#     Presearch.getData()
+#     book.closeBook()
+    
+if __name__ == '__main__':    
+    book = GnuCash('Finance')    
+    Presearch = Security("Presearch", book)    
+    book.getDollarsInvestedPerSecurity(Presearch)
+
+    
+    
