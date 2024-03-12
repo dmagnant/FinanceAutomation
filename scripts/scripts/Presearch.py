@@ -106,7 +106,11 @@ def getPresearchBalance(driver):
     else:
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
-    return float(driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[1]/div/h2').text.strip(' PRE').replace(',', ''))
+    nodeStake = float(driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[1]/div/h2').text.strip(' PRE').replace(',', ''))
+    driver.webDriver.get('https://account.presearch.com/tokens/usage-rewards')
+    searchStake = float(driver.webDriver.find_element(By.XPATH,'/html/body/div[3]/div[3]/div[2]/div/section/dl[1]/div[1]/dd/p[1]').text.strip(' PRE').replace(',', ''))
+    driver.webDriver.get('https://nodes.presearch.org/dashboard')
+    return searchStake + nodeStake
 
 def presearchRewardsRedemptionAndBalanceUpdates(driver, account, book):
     preAvailableToStake = claimPresearchRewards(driver)
@@ -116,20 +120,16 @@ def presearchRewardsRedemptionAndBalanceUpdates(driver, account, book):
     account.setPrice(account.getPriceFromCoinGecko())
     account.updateSpreadsheetAndGnuCash(book)
     
-# if __name__ == '__main__':
-#     driver = Driver("Chrome")
-#     book = GnuCash('Finance')
-#     locatePresearchWindow(driver)
-#     # searchUsingPresearch(driver)
-#     Presearch = Security("Presearch", book)
-#     presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book)
-#     Presearch.getData()
-#     book.closeBook()
+if __name__ == '__main__':
+    driver = Driver("Chrome")
+    book = GnuCash('Finance')
+    locatePresearchWindow(driver)
+    Presearch = Security("Presearch", book)
+    presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book)
+    Presearch.getData()
+    book.closeBook()
     
-if __name__ == '__main__':    
-    book = GnuCash('Finance')    
-    Presearch = Security("Presearch", book)    
-    book.getDollarsInvestedPerSecurity(Presearch)
+
 
     
     

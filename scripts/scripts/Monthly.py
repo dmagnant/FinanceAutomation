@@ -47,6 +47,8 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         IRA = USD("IRA", personalBook)
         VIIIX = Security("HSA Investment", personalBook)
         HECash = USD("HSA Cash", personalBook)
+        VFIAX = Security("SF HSA Investment", personalBook)
+        OptumCash = USD("Optum Cash", personalBook)
         V401k = USD("Vanguard401k", personalBook)
         Pension = USD("VanguardPension", personalBook)
         TSM401k = Security("Total Stock Market(401k)", personalBook)
@@ -57,7 +59,7 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         Home = USD('Home', jointBook)
         LiquidAssets = USD("Liquid Assets", personalBook)
         Bonds = USD("Bonds", personalBook)
-        accounts = {'IRA':IRA,'VXUS':VXUS,'VTI':VTI,'SPAXX':SPAXX,'VIIIX':VIIIX,'HECash':HECash,'V401k':V401k,'TSM401k':TSM401k,'Worthy': Worthy,'Pension':Pension,'Home':Home,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
+        accounts = {'IRA':IRA,'VXUS':VXUS,'VTI':VTI,'SPAXX':SPAXX,'VIIIX':VIIIX,'HECash':HECash,'VFIAX':VFIAX,'OptumCash':OptumCash,'V401k':V401k,'TSM401k':TSM401k,'Worthy': Worthy,'Pension':Pension,'Home':Home,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
     elif type == 'Crypto':
         CryptoPortfolio = USD("Crypto", personalBook)
         Cardano = Security("Cardano", personalBook, 'ADA-Eternl')

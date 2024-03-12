@@ -11,11 +11,11 @@ if __name__ == '__main__' or __name__ == "BoA":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
-    from Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
+    from Functions.GeneralFunctions import (getPassword, getUsername, showMessage, getAnswerForSecurityQuestion)
 else:
     from .Classes.Asset import USD
     from .Classes.GnuCash import GnuCash
-    from .Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
+    from .Functions.GeneralFunctions import (getPassword, getUsername, showMessage, getAnswerForSecurityQuestion)
 
 def locateBoAWindowAndOpenAccount(driver, account):
     found = driver.findWindowByUrl("secure.bankofamerica.com")
@@ -40,22 +40,9 @@ def boALogin(driver, account):
         exception = "Caught"
     try:     # handle security questions
         question = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/div[2]/label").text
-        q1 = "What is the name of a college you applied to but didn't attend?"
-        a1 = os.environ.get('CollegeApplied')
-        q2 = "As a child, what did you want to be when you grew up?"
-        a2 = os.environ.get('DreamJob')
-        q3 = "What is the name of your first babysitter?"
-        a3 = os.environ.get('FirstBabySitter')
-        if driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/div[2]/label"):
-            question = driver.find_element(By.XPATH,"/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/div[2]/label").text
-            if question == q1:
-                driver.find_element(By.NAME, "challengeQuestionAnswer").send_keys(a1)
-            elif question == q2:
-                driver.find_element(By.NAME, "challengeQuestionAnswer").send_keys(a2)
-            else:
-                driver.find_element(By.NAME, "challengeQuestionAnswer").send_keys(a3)
-            driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/fieldset/div[2]/div/div[1]/input").click()
-            driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/a[1]/span").click()
+        driver.find_element(By.NAME, "challengeQuestionAnswer").send_keys(getAnswerForSecurityQuestion(question))
+        driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/fieldset/div[2]/div/div[1]/input").click()
+        driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/a[1]/span").click()
     except NoSuchElementException:
         exception = "Caught"
     try:     # close mobile app pop-up
@@ -149,7 +136,7 @@ if __name__ == '__main__':
     SET_ACCOUNT_VARIABLE = "BoA-joint" # Personal or BoA-joint
     bookName = 'Finance' if SET_ACCOUNT_VARIABLE == 'Personal' else 'Home'
     book = GnuCash(bookName)
-    driver = Driver("Chrome", book)
+    driver = Driver("Chrome")
     BoA = USD(SET_ACCOUNT_VARIABLE, book)
     runBoA(driver, BoA, book)
     BoA.getData()

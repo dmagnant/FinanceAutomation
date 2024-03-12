@@ -21,6 +21,7 @@ from scripts.scripts.Kraken import *
 from scripts.scripts.Ledger import *
 from scripts.scripts.Monthly import *
 from scripts.scripts.MyConstant import *
+from scripts.scripts.Optum import *
 from scripts.scripts.Paypal import *
 from scripts.scripts.Paidviewpoint import *
 from scripts.scripts.Pinecone import *
@@ -38,7 +39,7 @@ from scripts.scripts.Classes.GnuCash import GnuCash
 from scripts.scripts.Functions.GeneralFunctions import returnRender
 
 def scripts(request):
-    bank = ['Ally', 'Sofi', 'Fidelity', 'HealthEquity', 'Vanguard', 'Worthy']
+    bank = ['Ally', 'Sofi', 'Fidelity', 'HealthEquity', 'Optum', 'Vanguard', 'Worthy']
     bank.sort()
     cc = ['Amex', 'Barclays', 'BoA', 'Chase', 'Discover']
     cc.sort()
@@ -608,6 +609,25 @@ def myConstant(request):
             driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/myConstant"))
     return render(request,"banking/myconstant.html")
 
+def optum(request):
+    book = GnuCash('Finance')
+    VFIAX = Security("SF HSA Investment", book)
+    OptumCash = USD("Optum Cash", book)
+    OptumAccounts = {'VFIAX': VFIAX, 'OptumCash': OptumCash}
+    if request.method == 'POST':
+        driver = Driver("Chrome")
+        if "main" in request.POST:
+            print('create script for main')
+        elif "login" in request.POST:
+            locateOptumWindow(driver)
+        elif "balance" in request.POST:
+            print('create script for balances')
+        elif "close windows" in request.POST:
+            driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/optum"))
+    context = {'OptumAccounts': OptumAccounts}
+    book.closeBook()
+    return returnRender(request, "banking/optum.html", context)
+
 def paidviewpoint(request):
     book = GnuCash('Finance')
     Paidviewpoint = USD("Paidviewpoint", book)
@@ -667,7 +687,7 @@ def presearch(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
-            presearchRewardsRedemptionAndBalanceUpdates(driver)
+            presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book)
         elif "login" in request.POST:
             locatePresearchWindow(driver)          
         elif "balance" in request.POST:

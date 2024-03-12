@@ -47,6 +47,23 @@ def getPassword(name):
 def getOTP(account):
     return pyotp.TOTP(os.environ.get(account)).now()
 
+def getAnswerForSecurityQuestion(question):
+    match question:
+        case "What is the name of a college you applied to but didn't attend?":
+            return os.environ.get('CollegeApplied')
+        case 'As a child, what did you want to be when you grew up?':
+            return os.environ.get('DreamJob')
+        case "What is the name of your first babysitter?":
+            return os.environ.get('FirstBabySitter')
+        case 'What is the name of your first pet?':
+            return os.environ.get('FirstPet')
+        case 'What was your high school mascot?':
+            return os.environ.get('HSMascot')
+        case 'What is the name of the company of your first job?':
+            return os.environ.get('FirstEmployer')
+        case _:
+            print(f'account: {question} not found in "getAnswerForSecurityQuestion" function')        
+
 def loginPiHole(driver):
     driver.implicitly_wait(2)
     driver.get("http://192.168.1.144/admin/")
@@ -276,10 +293,14 @@ def getAccountPath(account):
             return mr + ":" + accountName
         case 'Brokerage':
             return nonLiquid + ":" + accountName
+        case 'Optum Cash':
+            return hsa + ":SF HSA Cash"
         case 'HSA Cash':
             return hsa + ":NM HSA Cash"
         case 'HSA Investment':
             return hsa + ":NM HSA Investment"
+        case 'SF HSA Investment':
+            return hsa + ":SF HSA Investment"
         case 'Vanguard401k':
             return v401k
         case 'VanguardPension':
@@ -367,10 +388,10 @@ def eventsHappening(date):
             events.append('Ally Interest')
         case 5:
             events.append('WE Energies')
-        case 12:
-            events.append('Mortgage Bill')
         case 13:
             events.append('BoA-Joint CC Bill posts')
+        case 14:
+            events.append('Mortgage Bill')            
         case 15:
             events.append('Paycheck')
         case 17:

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Optum HSA{% endblock %}
+{% block content %}
+    <h1>Optum HSA</h1>
+    <div style="width: 100%; display: table;">
+        <div style="display: table-row;">
+            <div style="width: 20%; display:table-cell">
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="main">Main</button><br>
+                    <button type="submit" name="login">Login</button><br>
+                    <button type="submit" name="balance">Balance</button><br>
+                </form>
+            </div>
+            <div style="width: 80%; display:table-cell">
+                &emsp;&emsp;HSA Cash balance: <b>${{OptumAccounts.OptumCash.balance}}</b><br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&thinsp;gnuBalance: <b>${{OptumAccounts.OptumCash.gnuBalance}}</b><br><br>
+                HSA Investment shares: <b>{{OptumAccounts.VFIAX.balance}} {{OptumAccounts.VFIAX.symbol}}</b><br>
+                &emsp;&ensp;&thinsp;&thinsp;gnuBalance shares: <b>{{OptumAccounts.VFIAX.gnuBalance}} {{OptumAccounts.VFIAX.symbol}}</b><br>
+                &ensp;HSA Investment Value: <b>${{OptumAccounts.VFIAX.value}}</b><br>
+                &emsp;&emsp;&ensp;&thinsp;&thinsp;${{OptumAccounts.VFIAX.price}} x shares: <b>${{OptumAccounts.VFIAX.gnuValue}}</b>
+            </div>
+        </div>
+    </div>
+{% endblock %}

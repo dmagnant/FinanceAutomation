@@ -27,6 +27,8 @@ def getSymbolByName(self):
             return 'ETH2'
         case 'hsa investment':
             return "VIIIX"        
+        case 'sf hsa investment':
+            return "VFIAX"
         case "iotex":
             return 'IOTX'
         case "loopring":

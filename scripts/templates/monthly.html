@@ -15,7 +15,7 @@
     </form>
     <div style="width: 100%; display: table;">
         <div style="display: table-row;">
-            <div style="width: 25%; display:table-cell">
+            <div style="width: 20%; display:table-cell">
                 <b><a href="{% url 'Fidelity' %}" target="_blank">Fidelity</a></b><br><br>
                 <form method="post">
                     {% csrf_token %}
@@ -39,7 +39,7 @@
                 &emsp;&emsp;&emsp;&emsp;&ensp;&thinsp;{{usdAccounts.VXUS.symbol}} value: <b>${{usdAccounts.VXUS.value}}</b><br>
                 &emsp;&emsp;&thinsp;${{usdAccounts.VXUS.price}} x shares: <b>${{usdAccounts.VXUS.gnuValue}}</b><br><br>
             </div>
-            <div style="width: 25%; display:table-cell">
+            <div style="width: 20%; display:table-cell">
                 <b><a href="{% url 'HealthEquity' %}" target="_blank">Health Equity</a></b><br><br>
                 <form method="post">
                     {% csrf_token %}
@@ -54,7 +54,22 @@
                 &ensp;HSA Investment Value: <b>${{usdAccounts.VIIIX.value}}</b><br>
                 &emsp;&emsp;&ensp;&thinsp;&thinsp;${{usdAccounts.VIIIX.price}} x shares: <b>${{usdAccounts.VIIIX.gnuValue}}</b><br><br>
             </div>
-            <div style="width: 25%; display:table-cell">
+            <div style="width: 20%; display:table-cell">
+                <b><a href="{% url 'Optum' %}" target="_blank">Optum HSA</a></b><br><br>
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" name="main">Main</button>&emsp;
+                        <button type="submit" name="login">Login</button>&emsp;
+                        <button type="submit" name="balance">Balance</button>&emsp;
+                    </form><br>
+                    &emsp;&emsp;HSA Cash balance: <b>${{usdAccounts.OptumCash.balance}}</b><br>
+                    &emsp;&emsp;&emsp;&emsp;&emsp;&thinsp;gnuBalance: <b>${{usdAccounts.OptumCash.gnuBalance}}</b><br><br>
+                    HSA Investment shares: <b>{{usdAccounts.VFIAX.balance}} {{OptumAccounts.VFIAX.symbol}}</b><br>
+                    &emsp;&ensp;&thinsp;&thinsp;gnuBalance shares: <b>{{usdAccounts.VFIAX.gnuBalance}} {{usdAccounts.VFIAX.symbol}}</b><br>
+                    &ensp;HSA Investment Value: <b>${{usdAccounts.VFIAX.value}}</b><br>
+                    &emsp;&emsp;&ensp;&thinsp;&thinsp;${{usdAccounts.VFIAX.price}} x shares: <b>${{usdAccounts.VFIAX.gnuValue}}</b>
+            </div>
+            <div style="width: 20%; display:table-cell">
                 <b><a href="{% url 'Vanguard' %}" target="_blank">Vanguard</a></b><br><br>
                 <form method="post">
                     {% csrf_token %}
@@ -71,7 +86,7 @@
                 &emsp;&emsp;&emsp;&ensp;&thinsp;TSM Value: <b>${{usdAccounts.TSM401k.value}}</b><br>
                 &emsp;${{usdAccounts.TSM401k.price}} x shares: <b>${{usdAccounts.TSM401k.gnuValue}}</b><br><br>
             </div>
-            <div style="width: 25%; display:table-cell">
+            <div style="width: 20%; display:table-cell">
                 <b><a href="{% url 'Worthy' %}" target="_blank">Worthy</a></b><br><br>
                 <form method="post">
                     {% csrf_token %}
