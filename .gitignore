@@ -2,6 +2,7 @@
 /Resources
 Paidviewpoint.py
 scripts/scripts/Functions/GeneralFunctions.py
+scripts/scripts/Functions/Test.py
 scripts/__pycache__/views.cpython-310.pyc
 scripts/scripts/Functions/__pycache__/GnuCashFunctions.cpython-310.pyc
 scripts/scripts/Classes/__pycache__/Asset.cpython-310.pyc
