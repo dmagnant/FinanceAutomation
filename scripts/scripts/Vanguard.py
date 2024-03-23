@@ -44,19 +44,17 @@ def locateVanguardWindow(driver):
         driver.webDriver.switch_to.window(found)
         time.sleep(1)
     
-def getVanguard401kPriceAndShares(driver, accounts, book):
+def getVanguard401kPriceAndShares(driver, account, book, planId):
     locateVanguardWindow(driver)
-    driver.openNewWindow('https://retirementplans.vanguard.com/VGApp/pe/faces/Investments.xhtml?SelectedPlanId=095895')
-    account = accounts['TSM401k']
+    driver.openNewWindow('https://retirementplans.vanguard.com/VGApp/pe/faces/Investments.xhtml?SelectedPlanId=' + planId)
     account.balance = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[2]/td[3]").text
     account.price = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[2]/td[4]").text.replace('$', '')
     book.updatePriceInGnucash(account.symbol, Decimal(account.price))
     account.value = driver.webDriver.find_element(By.XPATH,"//*[@id='investmentsForm:allFundsTabletbody0']/tr[2]/td[5]").text.replace('$','',).replace(',','')
-    accounts['V401k'].balance = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[2]/td[5]").text.replace("$", "").replace(',', '')
     
-def captureVanguard401kTransactions(driver):
+def captureVanguard401kTransactions(driver, planId):
     locateVanguardWindow(driver)
-    driver.openNewWindow('https://retirementplans.vanguard.com/VGApp/pe/faces/TransactionHistory.xhtml?SelectedPlanId=095895')
+    driver.openNewWindow('https://retirementplans.vanguard.com/VGApp/pe/faces/TransactionHistory.xhtml?SelectedPlanId=' + planId)
     lastMonth = getStartAndEndOfDateRange(datetime.today().date(), "month")
     v401kActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\401k.csv"
     open(v401kActivity, 'w', newline='').truncate()
@@ -117,11 +115,15 @@ def calculatePensionTransactions(book, today, account, interestYTD):
     
 def runVanguard401k(driver, accounts, book):
     locateVanguardWindow(driver)
-    getVanguard401kPriceAndShares(driver, accounts, book)
-    v401kActivity = captureVanguard401kTransactions(driver)
+    getVanguard401kPriceAndShares(driver, accounts['TSM401k'], book, '095895')
+    v401kActivity = captureVanguard401kTransactions(driver, '095895')
     book.importGnuTransaction(accounts['V401k'], v401kActivity, driver, 0)
     accounts['TSM401k'].updateGnuBalanceAndValue(book.getBalance(accounts['TSM401k'].gnuAccount))
-    accounts['V401k'].updateGnuBalance(book.getBalance(accounts['V401k'].gnuAccount))
+    getVanguard401kPriceAndShares(driver, accounts['EBI'], book, '090313')
+    v401kActivity = captureVanguard401kTransactions(driver, '090313')
+    book.importGnuTransaction(accounts['V401k'], v401kActivity, driver, 0)
+    accounts['EBI'].updateGnuBalanceAndValue(book.getBalance(accounts['EBI'].gnuAccount))
+    # accounts['V401k'].updateGnuBalance(book.getBalance(accounts['V401k'].gnuAccount))
     
 def runVanguardPension(driver, accounts, book):
     today = datetime.today().date()
@@ -135,8 +137,9 @@ if __name__ == '__main__':
     book = GnuCash('Finance')
     Pension = USD("VanguardPension", book)
     V401k = USD("Vanguard401k", book)
+    EBI = Security("Employee Benefit Index", book)
     TSM401k = Security("Total Stock Market(401k)", book)
-    accounts = {'Pension': Pension, 'V401k': V401k, 'TSM401k': TSM401k}
+    accounts = {'Pension': Pension, 'V401k': V401k, 'TSM401k': TSM401k, 'EBI':EBI}
     # runVanguard401k(driver, accounts, book)
     runVanguardPension(driver,accounts,book)
     Pension.getData()

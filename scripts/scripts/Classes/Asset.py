@@ -47,8 +47,8 @@ def getSymbolByName(self):
             return 'TWT'
         case "swagbucks":
             return 'SB'
-        case 'real estate index fund':
-            return 'VGSNX'
+        case 'employee benefit index':
+            return 'M038'
         case 'total stock market(401k)':
             return '8585'
         case 'total stock market(ira)':

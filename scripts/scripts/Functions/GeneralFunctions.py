@@ -164,7 +164,7 @@ def modifyTransactionDescription(description, amount="0.00"):
         description = "IRA Investment"
     elif "YOU SOLD" in description:
         description = "IRA sale of stock"
-    elif "Fee Real Estate" in description or "Fee Instl Tot Stk" in description:
+    elif "Fee Instl Tot Stk" in description:
         description = "401k Fee"
     elif "JONATHON MAGNANT" in description.upper():
         description = "Jonny payment"
@@ -304,7 +304,9 @@ def getAccountPath(account):
         case 'Vanguard401k':
             return v401k
         case 'VanguardPension':
-            return nonLiquid + ":Pension"  
+            return nonLiquid + ":Pension"
+        case 'Employee Benefit Index':
+            return v401k + ":" + accountName
         case 'Total Stock Market(401k)':
             return v401k + ":Total Stock Market"
         case 'IRA':

@@ -143,8 +143,8 @@ class Driver:
             self.switchToLastWindow()
                 
     def openNewWindow(self, url):
-        self.webDriver.switch_to.new_window('tab')
-        self.webDriver.get(url)
+        self.findWindowByUrl(self.webDriver.current_url)
+        self.webDriver.execute_script(f"window.open('{url}','new_tab')")
                 
     def switchToLastWindow(self):
         self.webDriver.switch_to.window(self.webDriver.window_handles[len(self.webDriver.window_handles)-1])

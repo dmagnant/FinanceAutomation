@@ -400,7 +400,7 @@ def discover(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
-            runDiscover(driver, Discover)
+            runDiscover(driver, Discover, book)
         elif "login" in request.POST:
             locateDiscoverWindow(driver)
         elif "balance" in request.POST:
@@ -803,7 +803,8 @@ def vanguard(request):
     Pension = USD("VanguardPension", book)
     V401k = USD("Vanguard401k", book)
     TSM401k = Security("Total Stock Market(401k)", book)
-    accounts = {'Pension': Pension, 'V401k': V401k,'TSM401k': TSM401k}
+    EBI = Security("Employee Benefit Index", book)    
+    accounts = {'Pension': Pension, 'V401k': V401k,'TSM401k': TSM401k,'EBI':EBI}
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "401k" in request.POST:

@@ -52,6 +52,7 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         V401k = USD("Vanguard401k", personalBook)
         Pension = USD("VanguardPension", personalBook)
         TSM401k = Security("Total Stock Market(401k)", personalBook)
+        EBI = Security("Employee Benefit Index", personalBook)
         VXUS = Security('Total Intl Stock Market', personalBook)
         VTI = Security('Total Stock Market(IRA)', personalBook)
         SPAXX = Security('Govt Money Market', personalBook)
@@ -59,7 +60,7 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         Home = USD('Home', jointBook)
         LiquidAssets = USD("Liquid Assets", personalBook)
         Bonds = USD("Bonds", personalBook)
-        accounts = {'IRA':IRA,'VXUS':VXUS,'VTI':VTI,'SPAXX':SPAXX,'VIIIX':VIIIX,'HECash':HECash,'VFIAX':VFIAX,'OptumCash':OptumCash,'V401k':V401k,'TSM401k':TSM401k,'Worthy': Worthy,'Pension':Pension,'Home':Home,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
+        accounts = {'IRA':IRA,'VXUS':VXUS,'VTI':VTI,'SPAXX':SPAXX,'VIIIX':VIIIX,'HECash':HECash,'VFIAX':VFIAX,'OptumCash':OptumCash,'V401k':V401k,'EBI':EBI,'TSM401k':TSM401k,'Worthy': Worthy,'Pension':Pension,'Home':Home,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
     elif type == 'Crypto':
         CryptoPortfolio = USD("Crypto", personalBook)
         Cardano = Security("Cardano", personalBook, 'ADA-Eternl')
@@ -119,7 +120,6 @@ def updateEnergyBillAmounts(driver, book, amount):
     updateSpreadsheet('Home', str(today.year) + ' Balance', 'Energy Bill', today.month, -float(amount))
     openSpreadsheet(driver, 'Home', str(today.year) + ' Balance')
     driver.findWindowByUrl("/scripts/monthly")
-
     
 def runUSD(driver, today, accounts, personalBook):
     lastMonth = getStartAndEndOfDateRange(today, "month")

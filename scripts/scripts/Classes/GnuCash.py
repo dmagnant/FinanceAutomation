@@ -574,10 +574,10 @@ class GnuCash:
                 amount = Decimal(row[3])
                 description = row[1]
                 fromAccount = account.gnuAccount
-                if "Real Estate Index" in description:
-                    fromAccount += ":Real Estate Index Fund"
-                elif "Instl Tot Stk Mkt" in description:
+                if "Instl Tot Stk Mkt" in description:
                     fromAccount += ":Total Stock Market"
+                elif 'Employee Benefit Index' in description:
+                    fromAccount += ":Employee Benefit Index"
                 shares = float(row[2])
                 description = modifyTransactionDescription(description)
                 reviewTransPath = row[0] + ", " + row[1] + ", " + row[3]
