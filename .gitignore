@@ -5,6 +5,7 @@ scripts/scripts/Functions/GeneralFunctions.py
 scripts/scripts/Functions/Test.py
 scripts/__pycache__/views.cpython-310.pyc
 scripts/scripts/Functions/__pycache__/GnuCashFunctions.cpython-310.pyc
+scripts/scripts/Functions/__pycache__/GeneralFunctions.cpython-310.pyc
 scripts/scripts/Classes/__pycache__/Asset.cpython-310.pyc
 scripts/scripts/__pycache__/Ally.cpython-310.pyc
 scripts/scripts/__pycache__/AmazonGC.cpython-310.pyc
@@ -44,3 +45,4 @@ scripts/scripts/Classes/__pycache__/WebDriver.cpython-310.pyc
 scripts/scripts/Functions/__pycache__/GeneralFunctions.cpython-310.pyc
 scripts/scripts/Functions/__pycache__/GnuCashFunctions.cpython-310.pyc
 scripts/scripts/Functions/__pycache__/SpreadsheetFunctions.cpython-310.pyc
+scripts/scripts/Functions/__pycache__/GeneralFunctions.cpython-310.pyc
