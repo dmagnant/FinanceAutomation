@@ -5,6 +5,7 @@ import time
 import zipfile
 
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import (InvalidArgumentException,
                                         WebDriverException)
 from selenium.webdriver.chrome.service import Service
@@ -144,7 +145,9 @@ class Driver:
                 
     def openNewWindow(self, url):
         self.findWindowByUrl(self.webDriver.current_url)
-        self.webDriver.execute_script(f"window.open('{url}','new_tab')")
+        self.webDriver.execute_script(f"window.open('')")
+        self.findWindowByUrl('about:blank')
+        self.webDriver.get(url)
                 
     def switchToLastWindow(self):
         self.webDriver.switch_to.window(self.webDriver.window_handles[len(self.webDriver.window_handles)-1])

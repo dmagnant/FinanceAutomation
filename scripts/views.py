@@ -562,12 +562,6 @@ def monthly(request):
             getWorthyBalance(driver, usdAccounts['Worthy'])
         elif "worthyLogin" in request.POST:
             locateWorthyWindow(driver)
-        elif "coinbaseMain" in request.POST:
-            runCoinbase(driver, [cryptoAccounts['Loopring']], personalBook)
-        elif "coinbaseLogin" in request.POST:
-            locateCoinbaseWindow(driver)
-        elif "coinbaseBalance" in request.POST:
-            getCoinbaseBalances(driver, [cryptoAccounts['Loopring']])
         elif "eternlMain" in request.POST:
             runEternl(driver, cryptoAccounts['Cardano'], personalBook)
         elif "eternlBalance" in request.POST:

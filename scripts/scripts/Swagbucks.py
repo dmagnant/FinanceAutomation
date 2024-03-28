@@ -286,15 +286,10 @@ def runSwagbucks(driver, runAlu, account, book):
         claimSwagBucksRewards(driver)
     swagbucksSearch(driver)
     
-# if __name__ == '__main__':
-#     driver = Driver("Chrome")
-#     book = GnuCash('Finance')
-#     Swagbucks = Security("Swagbucks", book)
-#     runSwagbucks(driver, False, Swagbucks, book)
-#     book.closeBook()
-
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    locateSwagBucksWindow(driver)
-    runAlusRevenge(driver)
+    book = GnuCash('Finance')
+    Swagbucks = Security("Swagbucks", book)
+    runSwagbucks(driver, False, Swagbucks, book)
+    book.closeBook()
 

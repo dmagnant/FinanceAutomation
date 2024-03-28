@@ -77,16 +77,10 @@ def runAmex(driver, account, book):
     if account.reviewTransactions:
         book.openGnuCashUI()
 
-# if __name__ == '__main__':
-#     driver = Driver("Chrome")
-#     book = GnuCash('Finance')
-#     Amex = USD("Amex", book)    
-#     runAmex(driver, Amex, book)
-#     Amex.getData()
-#     book.closeBook()
-    
 if __name__ == '__main__':
-    from datetime import datetime
-    date = datetime(2024,1,12,00,00).date()
-    dates = getPaycheckDates()
-    print(dates)
+    driver = Driver("Chrome")
+    book = GnuCash('Finance')
+    Amex = USD("Amex", book)    
+    runAmex(driver, Amex, book)
+    Amex.getData()
+    book.closeBook()

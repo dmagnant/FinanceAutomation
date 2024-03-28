@@ -30,7 +30,7 @@ def locateSofiWindow(driver):
     return True
 
 def sofiLogin(driver):
-    driver.openNewWindow('https://login.sofi.com/u/login?state=hKFo2SBrOGMtTVZSUHZPalVPbEUyZmJyWXhyV3pYMU9lSzhEUKFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIGptNWpvQnRQQlFtSHFJT216N0dfLU1aZFBUbWFqVXl6o2NpZNkgNkxuc0xDc2ZGRUVMbDlTQzBDaWNPdkdlb2JvZXFab2I')
+    driver.openNewWindow('https://www.sofi.com/login')
     driver = driver.webDriver
     time.sleep(2)
     driver.find_element(By.XPATH, "//*[@id='widget_block']/div/div[2]/div/div/main/section/div/div/div/form/div[2]/button").click() # login

@@ -1,6 +1,5 @@
 from datetime import datetime
 from decimal import Decimal
-from piecash import Split, Transaction
 
 if __name__ == "Classes.Asset":
     from Functions.GeneralFunctions import getCryptocurrencyPrice, getAccountPath
@@ -61,21 +60,17 @@ def getSymbolByName(self):
             print(f'Security: {self.name} not found in "getSymbolByName" function')
 
 def updateCoinQuantityFromStakingInGnuCash(self, myBook):
-    myBook = myBook.getWriteBook()
+    # myBook = myBook.getWriteBook()
     coinDifference = Decimal(self.balance) - Decimal(self.gnuBalance)
-    amount = round(self.price * coinDifference, 2)
+    amount = round(self.price * coinDifference, 3)
     if coinDifference > 0.001:
-        split = [Split(value=-amount, memo="scripted", account=myBook.accounts(fullname='Income:Investments:Staking')),
-                Split(value=amount, quantity=round(Decimal(coinDifference), 6), memo="scripted", account=myBook.accounts(fullname=self.gnuAccount))]
-        Transaction(post_date=datetime.today().date(), currency=myBook.currencies(mnemonic="USD"), description=self.symbol + ' staking', splits=split)
-        myBook.flush()
+        transactionInfo = {'amount': amount, 'toAccount': self.gnuAccount, 'coinDifference': round(Decimal(coinDifference), 6), 'description': self.symbol + ' staking'}
+        myBook.writeStakingTransaction(transactionInfo)
     elif coinDifference < 0:
         print(f'given balance of {self.balance} {self.symbol} '
         f'minus gnuCash balance of {self.gnuBalance} '
         f'leaves unexpected coin difference of {coinDifference} '
         f'is it rounding issue?')                
-
-
 
 class Asset:
     "this is a class for tracking asset information"
@@ -192,7 +187,6 @@ class USD(Asset):
         self.reviewTransactions.append(transactions)
     
     def locateAndUpdateSpreadsheet(self, driver):
-        print('got here')
         balance = 0.00 if float(self.balance) < 0 else float(self.balance) * -1
         today = datetime.today()
         month = today.month

@@ -39,12 +39,12 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
                     return ['H7', 'J7']
                 case 'IOTX':
                     return ['H8', 'J8']
-                case 'LRC':
-                    return ['H9', 'J9']
                 case 'DOT':
-                    return ['H10', 'J10']
+                    return ['H9', 'J9']
                 case 'PRE':
-                    return ['H11', 'J11']
+                    return ['H10', 'J10']
+                case 'XRP':
+                    return ['H11', 'J11']                
                 ## Checking Balance Spreadsheet(s)
                 case 'BoA':
                     return ['K5', 'S5', 'C40', 'K40', 'S40', 'C75', 'K75', 'S75', 'C110', 'K110', 'S110', 'C5']
@@ -84,7 +84,7 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
         cell = cell.replace(cell[0], chr(ord(cell[0]) + 3))
     sheetKey = getSheetKey(sheetTitle, tabTitle, worksheet, cell)
     if symbol == "$" or symbol == sheetKey:
-        worksheet.update(cell, value)
+        worksheet.update_acell(cell, value)
     else:
         showMessage('Key Mismatch',     
         f'the given key: {symbol} does not match the sheet key: {sheetKey} for the cell that is being updated: {cell} \n'
@@ -108,10 +108,10 @@ def updateCheckingBalanceSpreadsheet(sheetTitle, tabTitle, accountName, month, v
             row+=1
     cell = chr(ord(column) + 1) + str(row)
     print(cell)
-    worksheet.update(cell, value)
+    worksheet.update_acell(cell, value)
     cell = chr(ord(column) + 4) + str(row)
     print(cell)
-    worksheet.update(cell, value)
+    worksheet.update_acell(cell, value)
 
 def updateCryptoPrices(driver, book):
     print('updating coin prices')
@@ -148,7 +148,7 @@ def updateCryptoPrices(driver, book):
         symbol = coinSymbols[i]
         price = format(coinPrices[coin]["usd"], ".2f")
         book.updatePriceInGnucash(symbol, price)
-        worksheet.update((priceColumn + str(i + 2)), float(price))
+        worksheet.update_acell((priceColumn + str(i + 2)), float(price))
 
 def updateInvestmentPricesAndShares(driver, book, accounts):
     today = datetime.today().date()
@@ -188,7 +188,7 @@ def updateInvestmentPricesAndShares(driver, book, accounts):
             elif symbol == 'SPAXX':
                 if shares:
                     shares = float(accounts['SPAXX'].balance)
-                    worksheet.update(sharesColumn + str(row), shares)
+                    worksheet.update_acell(sharesColumn + str(row), shares)
                 row+=1
                 continue
             elif symbol == 'HOME':
@@ -198,8 +198,8 @@ def updateInvestmentPricesAndShares(driver, book, accounts):
                 price = getStockPrice(driver, symbol)
                 driver.webDriver.switch_to.window(spreadsheetWindow)
             if shares:
-                worksheet.update(sharesColumn + str(row), shares)
-            worksheet.update((priceColumn + str(row)), float(price))
+                worksheet.update_acell(sharesColumn + str(row), shares)
+            worksheet.update_acell((priceColumn + str(row)), float(price))
             row += 1
         else:
             stillInvestments = False

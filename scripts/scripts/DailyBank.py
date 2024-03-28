@@ -45,13 +45,24 @@ def runDailyBank(accounts, personalBook, jointBook):
 
 def tearDown(driver):
     sofiLogout(driver)
-    allyLogout(driver)        
+    # allyLogout(driver)        
     driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/daily"))
 
+# if __name__ == '__main__':
+#     personalBook = GnuCash('Finance')
+#     jointBook = GnuCash('Home')
+#     accounts = getDailyBankAccounts(personalBook, jointBook)
+#     GME = runDailyBank(accounts, personalBook, jointBook)
+#     personalBook.closeBook()
+#     jointBook.closeBook()
+
+
 if __name__ == '__main__':
+    driver = Driver("Chrome")
     personalBook = GnuCash('Finance')
-    jointBook = GnuCash('Home')
-    accounts = getDailyBankAccounts(personalBook, jointBook)
-    GME = runDailyBank(accounts, personalBook, jointBook)
+    # book = personalBook.getWriteBook()
+    from datetime import datetime
+    # print(personalBook.getPriceInGnucash('ATOM', datetime.today().date()))
+    updateCryptoPrices(driver, personalBook)
+    # personalBook.updatePriceInGnucash('ATOM', str(12.06))
     personalBook.closeBook()
-    jointBook.closeBook()

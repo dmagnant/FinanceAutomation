@@ -1,7 +1,7 @@
 import time
 from datetime import datetime
 from selenium.webdriver.common.by import By
-from piecash import Split, Transaction
+from decimal import Decimal
 
 
 if __name__ == '__main__' or __name__ == "AmazonGC":
@@ -23,14 +23,8 @@ def locateAmazonWindow(driver):
         time.sleep(1)
 
 def addAmazonGCAmount(book, account, amount, source):
-    print(amount)
-    print(source)
-    myBook = book.getWriteBook()
-    sourceAccount = 'Income:Market Research:' + source
-    split=[Split(value=amount, account=myBook.accounts(fullname=account.gnuAccount)),
-            Split(value=-amount, account=myBook.accounts(fullname=sourceAccount))]
-    Transaction(post_date=datetime.today().date(), currency=myBook.currencies(mnemonic="USD"), description=source, splits=split)
-    myBook.flush()
+    transactionInfo = {'amount': amount, 'toAccount': account.gnuAccount, 'fromAccount': 'Income:Market Research:' + source, 'date': datetime.today().date(),'description': source}
+    book.writeSimpleTransaction(transactionInfo)
     
 def confirmAmazonGCBalance(driver, account):
     locateAmazonWindow(driver)
@@ -41,11 +35,16 @@ def confirmAmazonGCBalance(driver, account):
     if str(account.gnuBalance) != account.balance:
         showMessage("Amazon GC Mismatch", f'Amazon balance: {account.balance} \n' f'Gnu Cash balance: {account.gnuBalance} \n')
 
+# if __name__ == '__main__':
+#     book = GnuCash('Finance')
+#     driver = Driver("Chrome")
+#     AmazonGC = USD("Amazon GC", book)    
+#     confirmAmazonGCBalance(driver, AmazonGC)
+#     AmazonGC.getData()
+#     book.closeBook()
+
 if __name__ == '__main__':
     book = GnuCash('Finance')
-    driver = Driver("Chrome")
-    AmazonGC = USD("Amazon GC", book)    
-    confirmAmazonGCBalance(driver, AmazonGC)
-    AmazonGC.getData()
+    AmazonGC = USD("Amazon GC", book)
+    addAmazonGCAmount(book, AmazonGC, Decimal(10.00), 'Pinecone')
     book.closeBook()
-

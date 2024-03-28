@@ -1,7 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
 import time
-from piecash import Split, Transaction
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
@@ -65,10 +64,9 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         CryptoPortfolio = USD("Crypto", personalBook)
         Cardano = Security("Cardano", personalBook, 'ADA-Eternl')
         Cosmos = Security("Cosmos", personalBook)
-        Loopring = Security("Loopring", personalBook)
         IoTex = Security("IoTex", personalBook)
         ledgerAccounts = getLedgerAccounts(personalBook)
-        accounts = {'CryptoPortfolio': CryptoPortfolio, 'Cardano': Cardano, 'Cosmos': Cosmos, 'Loopring': Loopring, 'IoTex': IoTex, 'ledgerAccounts': ledgerAccounts}
+        accounts = {'CryptoPortfolio': CryptoPortfolio, 'Cardano': Cardano, 'Cosmos': Cosmos, 'IoTex': IoTex, 'ledgerAccounts': ledgerAccounts}
     return accounts
 
 def monthlyRoundUp(account, myBook, date):
@@ -81,7 +79,6 @@ def monthlyRoundUp(account, myBook, date):
     
 
 def updateEnergyBillAmounts(driver, book, amount):
-    myBook = book.getWriteBook()
     driver.openNewWindow('https://www.we-energies.com/secure/auth/l/acct/summary_accounts.aspx')
     time.sleep(2)
     try:
@@ -110,11 +107,7 @@ def updateEnergyBillAmounts(driver, book, amount):
     billColumn -= 2
     weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
     electricity = Decimal(driver.webDriver.find_element(By.XPATH, weAmountPath).text.strip('$'))
-    split=[Split(value=electricity, account=myBook.accounts(fullname="Expenses:Utilities:Electricity")),
-            Split(value=gas, account=myBook.accounts(fullname="Expenses:Utilities:Gas")),
-            Split(value=-round(Decimal(amount), 2), account=myBook.accounts(fullname="Assets:Ally Checking Account"))]
-    Transaction(post_date=datetime.today().date().replace(day=24), currency=myBook.currencies(mnemonic="USD"), description='WE ENERGIES PAYMENT', splits=split)
-    myBook.flush()
+    book.writeUtilityTransaction({'electricity': electricity, 'gas': gas, 'total': amount})
     print(f'posted transaction: \n' f'date: {str(datetime.today().date())} \n' f'total: {str(amount)} \n' f'electricity: {str(electricity)}\n' f'gas: {str(gas)}')
     today = datetime.today()
     updateSpreadsheet('Home', str(today.year) + ' Balance', 'Energy Bill', today.month, -float(amount))

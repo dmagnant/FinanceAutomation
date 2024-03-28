@@ -132,11 +132,28 @@ class GnuCash:
         myBook = self.getWriteBook()
         try:
             gnuCashPrice = myBook.prices(commodity=myBook.commodities(mnemonic=symbol), currency=myBook.currencies(mnemonic="USD"), date=datetime.today().date())  # raise a KeyError if Price does not exist
+            if str(gnuCashPrice.value) == price:
+                return
             gnuCashPrice.value = Decimal(price)
         except KeyError:
-            p = Price(myBook.commodities(mnemonic=symbol), myBook.currencies(mnemonic="USD"), datetime.today().date(), Decimal(price), "last")
+            Price(commodity=myBook.commodities(mnemonic=symbol), currency=myBook.currencies(mnemonic="USD"), date=datetime.today().date(), value=Decimal(price), source="user:price", type="last")
         myBook.flush()
-           
+        
+        
+    def writeSimpleTransaction(self, transactionInfo):
+        myBook = self.getWriteBook()
+        split=[Split(value=transactionInfo['amount'], account=myBook.accounts(fullname=transactionInfo['toAccount'])),
+            Split(value=-transactionInfo['amount'], account=myBook.accounts(fullname=transactionInfo['fromAccount']))]
+        Transaction(post_date=transactionInfo['date'], currency=myBook.currencies(mnemonic="USD"), description=transactionInfo['description'], splits=split)
+        myBook.flush()
+        
+    def writeStakingTransaction(self, transactionInfo):
+        myBook = self.getWriteBook()
+        split = [Split(value=-transactionInfo['amount'], memo="scripted", account=myBook.accounts(fullname='Income:Investments:Staking')),
+                Split(value=transactionInfo['amount'], quantity=transactionInfo['coinDifference'], memo="scripted", account=myBook.accounts(fullname=transactionInfo['toAccount']))]
+        Transaction(post_date=datetime.today().date(), currency=myBook.currencies(mnemonic="USD"), description=transactionInfo['description'], splits=split)
+        myBook.flush()        
+                   
     def writeCryptoTransaction(self):
         myBook = self.getWriteBook()
         from_account = 'Assets:Liquid Assets:Sofi:Checking'
@@ -151,6 +168,14 @@ class GnuCash:
                 Split(value=round(amount-Decimal(1.99), 2), quantity=round(Decimal(35.052832), 6), memo="scripted", account=myBook.accounts(fullname=to_account)),
                 Split(value=round(Decimal(1.99),2), memo="scripted", account=myBook.accounts(fullname=fee_account))]
         Transaction(post_date=postdate.date(), currency=myBook.currencies(mnemonic="USD"), description=description, splits=split)
+        myBook.flush()
+        
+    def writeUtilityTransaction(self, transactionInfo):
+        myBook = self.getWriteBook()
+        split=[Split(value=transactionInfo['electricity'], account=myBook.accounts(fullname="Expenses:Utilities:Electricity")),
+            Split(value=transactionInfo['gas'], account=myBook.accounts(fullname="Expenses:Utilities:Gas")),
+            Split(value=-round(Decimal(transactionInfo['total']), 2), account=myBook.accounts(fullname="Assets:Ally Checking Account"))]
+        Transaction(post_date=datetime.today().date().replace(day=24), currency=myBook.currencies(mnemonic="USD"), description='WE ENERGIES PAYMENT', splits=split)
         myBook.flush()
         
     def getTotalOfAutomatedMRAccounts(self):
@@ -679,7 +704,7 @@ class GnuCash:
                     Split(value=round(Decimal(490.04), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:Federal Tax")),
                     Split(value=round(Decimal(181.83), 2), memo="scripted",account=myBook.accounts(fullname="Expenses:Income Taxes:State Tax")),
                     Split(value=round(Decimal(163.23), 2), memo="scripted",account=myBook.accounts(fullname="Assets:Non-Liquid Assets:HSA:SF HSA")),
-                    Split(value=-round(Decimal(25.00), 2), memo="scripted",account=myBook.accounts(fullname="Income:Employer Contributions:Pension Contributions")),                    
+                    Split(value=-round(Decimal(25.00), 2), memo="scripted",account=myBook.accounts(fullname="Income:Employer Contributions:HSA Contributions")),                    
                     Split(value=-round(Decimal(3653.85), 2), memo="scripted",account=myBook.accounts(fullname=toAccount))]            
         else:
             split = [Split(value=-transactionVariables['amount'], memo="scripted", account=myBook.accounts(fullname=toAccount)),
