@@ -44,6 +44,13 @@ else:
 def getMonthlyAccounts(type, personalBook, jointBook):
     if type == 'USD':
         IRA = USD("IRA", personalBook)
+        iraSPAXX = Security('IRA SPAXX', personalBook)
+        rIRA = USD("Roth IRA", personalBook)
+        riraVXUS = Security('Roth IRA VXUS', personalBook)
+        riraVTI = Security('Roth IRA VTI', personalBook)
+        riraSPAXX = Security('Roth IRA SPAXX', personalBook)
+        Brokerage = USD("Brokerage", personalBook)
+        brSPAXX = brSPAXX = Security('Brokerage SPAXX', personalBook)
         VIIIX = Security("HSA Investment", personalBook)
         HECash = USD("HSA Cash", personalBook)
         VFIAX = Security("SF HSA Investment", personalBook)
@@ -52,14 +59,13 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         Pension = USD("VanguardPension", personalBook)
         TSM401k = Security("Total Stock Market(401k)", personalBook)
         EBI = Security("Employee Benefit Index", personalBook)
-        VXUS = Security('Total Intl Stock Market', personalBook)
-        VTI = Security('Total Stock Market(IRA)', personalBook)
-        SPAXX = Security('Govt Money Market', personalBook)
         Worthy = USD("Worthy", personalBook)
         Home = USD('Home', jointBook)
         LiquidAssets = USD("Liquid Assets", personalBook)
         Bonds = USD("Bonds", personalBook)
-        accounts = {'IRA':IRA,'VXUS':VXUS,'VTI':VTI,'SPAXX':SPAXX,'VIIIX':VIIIX,'HECash':HECash,'VFIAX':VFIAX,'OptumCash':OptumCash,'V401k':V401k,'EBI':EBI,'TSM401k':TSM401k,'Worthy': Worthy,'Pension':Pension,'Home':Home,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
+        accounts = {'IRA':IRA,'iraSPAXX':iraSPAXX,'rIRA':rIRA,'riraVXUS':riraVXUS,'riraVTI':riraVTI,'riraSPAXX':riraSPAXX,'Brokerage':Brokerage,'brSPAXX':brSPAXX,
+                    'VIIIX':VIIIX,'HECash':HECash,'VFIAX':VFIAX,'OptumCash':OptumCash,'V401k':V401k,'EBI':EBI,'TSM401k':TSM401k,'Worthy': Worthy,'Pension':Pension,
+                    'Home':Home,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
     elif type == 'Crypto':
         CryptoPortfolio = USD("Crypto", personalBook)
         Cardano = Security("Cardano", personalBook, 'ADA-Eternl')

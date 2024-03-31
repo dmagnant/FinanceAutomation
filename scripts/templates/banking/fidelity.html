@@ -4,7 +4,7 @@
     <h1>Fidelity</h1>
     <div style="width: 100%; display: table;">
         <div style="display: table-row;">
-            <div style="width: 20%; display:table-cell">
+            <div style="width: 10%; display:table-cell">
                 <form method="post">
                     {% csrf_token %}
                     <button type="submit" name="main">Main</button><br>
@@ -12,23 +12,37 @@
                     <button type="submit" name="balance">Balance</button><br>
                 </form>
             </div>
-            <div style="width: 80%; display:table-cell">
-                &emsp;&emsp;&emsp;&emsp;&emsp;balance: <b>${{accounts.IRA.balance}}</b><br>
-                &emsp;&emsp;&emsp;&thinsp;gnuBalance: <b>${{accounts.IRA.gnuBalance}}</b><br><br>
+            <div style="width: 30%; display:table-cell">
+                &ensp;{{accounts.rIRA.name}} balance: <b>${{accounts.rIRA.balance}}</b><br>
+                &emsp;&emsp;&emsp;gnuBalance: <b>${{accounts.rIRA.gnuBalance}}</b><br><br>
                 
-                &emsp;&thinsp;{{accounts.SPAXX.symbol}} balance: <b>${{accounts.SPAXX.balance}}</b><br>
-                &emsp;&emsp;&emsp;gnuBalance: <b>${{accounts.SPAXX.gnuBalance}}</b><br><br>
+                &emsp;&thinsp;{{accounts.riraSPAXX.symbol}} balance: <b>${{accounts.riraSPAXX.balance}}</b><br>
+                &emsp;&emsp;&emsp;gnuBalance: <b>${{accounts.riraSPAXX.gnuBalance}}</b><br><br>
                 
-                &emsp;&emsp;&emsp;&emsp;&emsp;&ensp;{{accounts.VTI.symbol}} shares: <b>{{accounts.VTI.balance}} {{accounts.VTI.symbol}}</b><br>
-                &emsp;&ensp;&thinsp;gnuBalance shares: <b>{{accounts.VTI.gnuBalance}} {{accounts.VTI.symbol}}</b><br>
-                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;{{accounts.VTI.symbol}} value: <b>${{accounts.VTI.value}}</b><br>
-                &emsp;&emsp;&ensp;${{accounts.VTI.price}} x shares: <b>${{accounts.VTI.gnuValue}}</b><br><br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&ensp;{{accounts.riraVTI.symbol}} shares: <b>{{accounts.riraVTI.balance}} {{accounts.riraVTI.symbol}}</b><br>
+                &emsp;&ensp;&thinsp;gnuBalance shares: <b>{{accounts.riraVTI.gnuBalance}} {{accounts.riraVTI.symbol}}</b><br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;{{accounts.riraVTI.symbol}} value: <b>${{accounts.riraVTI.value}}</b><br>
+                &emsp;&emsp;&ensp;${{accounts.riraVTI.price}} x shares: <b>${{accounts.riraVTI.gnuValue}}</b><br><br>
 
-                &emsp;&emsp;&emsp;&emsp;{{accounts.VXUS.symbol}} shares: <b>{{accounts.VXUS.balance}} {{accounts.VXUS.symbol}}</b><br>
-                &emsp;&ensp;gnuBalance shares: <b>{{accounts.VXUS.gnuBalance}} {{accounts.VXUS.symbol}}</b><br>
-                &emsp;&emsp;&emsp;&emsp;&ensp;&thinsp;{{accounts.VXUS.symbol}} value: <b>${{accounts.VXUS.value}}</b><br>
-                &emsp;&emsp;&emsp;&ensp;${{accounts.VXUS.price}} x shares: <b>${{accounts.VXUS.gnuValue}}</b><br><br>
+                &emsp;&emsp;&emsp;&emsp;{{accounts.riraVXUS.symbol}} shares: <b>{{accounts.riraVXUS.balance}} {{accounts.riraVXUS.symbol}}</b><br>
+                &emsp;&ensp;gnuBalance shares: <b>{{accounts.riraVXUS.gnuBalance}} {{accounts.riraVXUS.symbol}}</b><br>
+                &emsp;&emsp;&emsp;&emsp;&ensp;&thinsp;{{accounts.riraVXUS.symbol}} value: <b>${{accounts.riraVXUS.value}}</b><br>
+                &emsp;&emsp;&emsp;&ensp;${{accounts.riraVXUS.price}} x shares: <b>${{accounts.riraVXUS.gnuValue}}</b><br><br>
             </div>
+            <div style="width: 30%; display:table-cell">
+                &emsp;&emsp;&emsp;{{accounts.IRA.name}} balance: <b>${{accounts.IRA.balance}}</b><br>
+                &emsp;&emsp;&emsp;gnuBalance: <b>${{accounts.IRA.gnuBalance}}</b><br><br>
+                
+                &emsp;&thinsp;{{accounts.iraSPAXX.symbol}} balance: <b>${{accounts.iraSPAXX.balance}}</b><br>
+                &emsp;&emsp;&emsp;gnuBalance: <b>${{accounts.iraSPAXX.gnuBalance}}</b><br><br>
+            </div>
+            <div style="width: 30%; display:table-cell">
+                {{accounts.Brokerage.name}} balance: <b>${{accounts.Brokerage.balance}}</b><br>
+                &emsp;&emsp;&emsp;&thinsp;gnuBalance: <b>${{accounts.Brokerage.gnuBalance}}</b><br><br>
+
+                &emsp;&thinsp;{{accounts.brSPAXX.symbol}} balance: <b>${{accounts.brSPAXX.balance}}</b><br>
+                &emsp;&emsp;&emsp;gnuBalance: <b>${{accounts.brSPAXX.gnuBalance}}</b><br><br>
+            </div>            
         </div>
     </div>
 {% endblock %}

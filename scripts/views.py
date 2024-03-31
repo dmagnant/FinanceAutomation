@@ -445,17 +445,13 @@ def exodus(request):
 
 def fidelity(request):
     book = GnuCash('Finance')
-    IRA = USD("IRA", book)
-    VXUS = Security('Total Intl Stock Market', book)
-    VTI = Security('Total Stock Market(IRA)', book)
-    SPAXX = Security('Govt Money Market', book)
-    accounts = {'IRA': IRA,'VXUS': VXUS,'VTI': VTI,'SPAXX': SPAXX}
+    accounts = getFidelityAccounts(book)
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:
             runFidelity(driver, accounts, book)
         elif "balance" in request.POST:
-            IRA.setBalance(getFidelityIRABalance(driver))
+            getFidelityBalance(driver, accounts)
         elif "login" in request.POST:
             locateFidelityWindow(driver)
         elif "close windows" in request.POST:
@@ -543,7 +539,7 @@ def monthly(request):
         elif "fidelityMain" in request.POST:
             runFidelity(driver, usdAccounts, personalBook)
         elif "fidelityBalance" in request.POST:
-            usdAccounts['IRA'].setBalance(getFidelityIRABalance(driver))
+            getFidelityBalance(driver, accounts)
         elif "fidelityLogin" in request.POST:
             locateFidelityWindow(driver)
         elif "HEMain" in request.POST:

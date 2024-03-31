@@ -11,6 +11,7 @@ if __name__ == '__main__' or __name__ == "AmazonGC":
     from Functions.GeneralFunctions import showMessage
 else:
     from .Classes.Asset import USD
+    from .Classes.WebDriver import Driver    
     from .Classes.GnuCash import GnuCash    
     from .Functions.GeneralFunctions import showMessage
 
@@ -25,7 +26,10 @@ def locateAmazonWindow(driver):
 def addAmazonGCAmount(book, account, amount, source):
     transactionInfo = {'amount': amount, 'toAccount': account.gnuAccount, 'fromAccount': 'Income:Market Research:' + source, 'date': datetime.today().date(),'description': source}
     book.writeSimpleTransaction(transactionInfo)
-    
+    account.reviewTransactions = [source + ': ' + str(amount)]
+    account.updateGnuBalance(book.getBalance(account.gnuAccount))
+    confirmAmazonGCBalance(Driver("Chrome"), account)
+
 def confirmAmazonGCBalance(driver, account):
     locateAmazonWindow(driver)
     balance = driver.webDriver.find_element(By.ID, "gc-ui-balance-gc-balance-value").text.strip('$')

@@ -22,8 +22,6 @@ def getSymbolByName(self):
             return 'ETH'
         case 'eth-ledger':
             return 'ETH'
-        case "ethereum2":
-            return 'ETH2'
         case 'hsa investment':
             return "VIIIX"        
         case 'sf hsa investment':
@@ -50,11 +48,11 @@ def getSymbolByName(self):
             return 'M038'
         case 'total stock market(401k)':
             return '8585'
-        case 'total stock market(ira)':
-            return 'VTI'
-        case 'total intl stock market':
-            return 'VXUS'
-        case 'govt money market':
+        case 'ira vti' | 'roth ira vti':
+            return 'VTI'      
+        case 'ira vxus' | 'roth ira vxus':
+            return 'VXUS'        
+        case 'ira spaxx' | 'roth ira spaxx' | 'brokerage spaxx':
             return 'SPAXX'
         case _:
             print(f'Security: {self.name} not found in "getSymbolByName" function')

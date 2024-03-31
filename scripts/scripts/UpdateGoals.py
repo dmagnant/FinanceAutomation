@@ -160,7 +160,7 @@ def updateSpreadsheet(account, month, value, accounts='Personal'):
     worksheetTitle = 'Goals' if accounts == 'Personal' else 'Finances'
     worksheet = sheet.worksheet(worksheetTitle)
     cell = getCell(account, month, accounts)
-    worksheet.update(cell, value)
+    worksheet.update_acell(cell, value)
 
 def runUpdateGoals(accounts, timeframe, book):
     driver = Driver("Chrome")
