@@ -19,7 +19,6 @@ else:
     from .Functions.GeneralFunctions import (getPassword,
                                              getStartAndEndOfDateRange,
                                              setDirectory, showMessage, modifyTransactionDescription)
-
 def locateSofiWindow(driver):
     found = driver.findWindowByUrl("sofi.com")
     if not found:
@@ -56,11 +55,15 @@ def sofiLogout(driver):
 
 def setMonthlySpendTarget(driver):
     locateSofiWindow(driver)
+    baseWindow = driver.webDriver.current_window_handle
     driver.openNewWindow('https://www.sofi.com/relay/app/spending/monthly-spending')
     time.sleep(1)
     driver.webDriver.find_element(By.XPATH,"//*[@id='mainContent']/section/section[1]/div/h3/button").click() # Edit
     time.sleep(1)
     driver.webDriver.find_element(By.XPATH,"//*[@id='mainContent']/section/form/div[3]/div/div[2]/button[2]").click() # Save
+    driver.webDriver.close()
+    driver.webDriver.switch_to.window(baseWindow)
+
 
 def getSofiBalanceAndOrientPage(driver, account):
     locateSofiWindow(driver)
@@ -137,6 +140,8 @@ def runSofi(driver, accounts, book):
     locateSofiWindow(driver)
     for account in accounts:
         runSofiAccount(driver, dateRange, today, account, book)
+    if today.day <= 7:
+        setMonthlySpendTarget(driver)        
     driver.webDriver.get("https://www.sofi.com/my/money/account/#/1000028154579/account-detail") # switch back to checking page
 
 # if __name__ == '__main__':

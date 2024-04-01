@@ -159,8 +159,9 @@ def updateInvestmentPricesAndShares(driver, book, accounts):
         spreadsheetWindow = driver.webDriver.current_window_handle
     else:
         driver.webDriver.switch_to.window(spreadsheetWindow)
-    row = 13  # first row after crypto investments
+    row = 12  # first row after crypto investments
     symbolColumn = 'B'
+    accountColumn = 'C'
     sharesColumn = 'D'
     sheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Asset Allocation')
     worksheet = sheet.worksheet('Investments')
@@ -170,25 +171,24 @@ def updateInvestmentPricesAndShares(driver, book, accounts):
         symbol = worksheet.acell(symbolColumn+str(row)).value
         shares = 0
         if symbol != None:
-            if symbol == '8585': 
+            if symbol == '8585':
                 price = book.getPriceInGnucash(accounts['TSM401k'].symbol, today)
-                if shares:
-                    shares = float(accounts['TSM401k'].balance)
-            elif symbol in ['VGSNX', 'VIIIX', 'VXUS', 'VTI']:
+                shares = float(accounts['TSM401k'].balance)
+            elif symbol == 'M038':
+                price = book.getPriceInGnucash(accounts['EBI'].symbol, today)
+                shares = float(accounts['EBI'].balance)
+            elif symbol in ['VIIIX', 'VXUS', 'VTI']:
                 price = book.getPriceInGnucash(symbol, today)
-                if shares:
-                    if symbol == 'VTI':
-                        shares = float(accounts['VTI'].balance)
-                    elif symbol == 'VIIIX':
-                        shares = float(accounts['VIIIX'].balance)
-                    elif symbol == 'VXUS':
-                        shares = float(accounts['VXUS'].balance)
-                    elif symbol == 'VGSNX':
-                        shares = float(accounts['REIF401k'].balance)
+                if symbol == 'VTI':
+                    shares = float(accounts['riraVTI'].balance)
+                elif symbol == 'VIIIX':
+                    shares = float(accounts['VIIIX'].balance)
+                elif symbol == 'VXUS':
+                    shares = float(accounts['riraVXUS'].balance)
             elif symbol == 'SPAXX':
-                if shares:
-                    shares = float(accounts['SPAXX'].balance)
-                    worksheet.update_acell(sharesColumn + str(row), shares)
+                account = accounts['riraSPAXX'] if worksheet.acell(accountColumn+str(row)).value == 'rIRA' else accounts['iraSPAXX']
+                shares = float(account.balance)
+                worksheet.update_acell(sharesColumn + str(row), shares)
                 row+=1
                 continue
             elif symbol == 'HOME':

@@ -44,12 +44,10 @@ def optumLogin(driver):
         exception = "already logged in"
     time.sleep(1)            
     
-    
-    
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
-    VFIAX = Security("SF HSA Investment", book)
+    VFIAX = Security("Optum Investment", book)
     OptumCash = USD("Optum Cash", book)
     OptumAccounts = {'VFIAX': VFIAX, 'OptumCash': OptumCash}
     locateOptumWindow(driver)

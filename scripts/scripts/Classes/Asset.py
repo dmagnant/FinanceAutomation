@@ -22,9 +22,9 @@ def getSymbolByName(self):
             return 'ETH'
         case 'eth-ledger':
             return 'ETH'
-        case 'hsa investment':
+        case 'he investment':
             return "VIIIX"        
-        case 'sf hsa investment':
+        case 'optum investment':
             return "VFIAX"
         case "iotex":
             return 'IOTX'

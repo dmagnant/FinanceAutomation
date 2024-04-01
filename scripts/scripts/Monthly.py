@@ -51,9 +51,9 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         riraSPAXX = Security('Roth IRA SPAXX', personalBook)
         Brokerage = USD("Brokerage", personalBook)
         brSPAXX = brSPAXX = Security('Brokerage SPAXX', personalBook)
-        VIIIX = Security("HSA Investment", personalBook)
-        HECash = USD("HSA Cash", personalBook)
-        VFIAX = Security("SF HSA Investment", personalBook)
+        VIIIX = Security("HE Investment", personalBook)
+        HECash = USD("HE Cash", personalBook)
+        VFIAX = Security("Optum Investment", personalBook)
         OptumCash = USD("Optum Cash", personalBook)
         V401k = USD("Vanguard401k", personalBook)
         Pension = USD("VanguardPension", personalBook)
@@ -122,7 +122,6 @@ def updateEnergyBillAmounts(driver, book, amount):
     
 def runUSD(driver, today, accounts, personalBook):
     lastMonth = getStartAndEndOfDateRange(today, "month")
-    setMonthlySpendTarget(driver)
     getWorthyBalance(driver, accounts['Worthy'])
     monthlyRoundUp(accounts['Worthy'], personalBook, lastMonth['endDate'])
     runHealthEquity(driver, {'VIIIX': accounts['VIIIX'], 'HECash': accounts['HECash'],'V401k': accounts['V401k']}, personalBook)

@@ -631,7 +631,6 @@ def paidviewpoint(request):
             paidviewpointLogin(driver)        
         elif "balance" in request.POST:
             Paidviewpoint.setBalance(getPaidviewpointBalance(driver))
-            Paidviewpoint.overwriteBalance(book)
         elif "rewards" in request.POST:
             redeemPaidviewpointRewards(driver)
         elif "close windows" in request.POST:

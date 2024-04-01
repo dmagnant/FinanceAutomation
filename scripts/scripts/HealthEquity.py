@@ -158,7 +158,7 @@ def runHealthEquity(driver, accounts, book):
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
-    VIIIX = Security("HSA Investment", book)
+    VIIIX = Security("HE Investment", book)
     HECash = USD("HE Cash", book)
     V401k = USD("Vanguard401k", book)
     HEaccounts = {'VIIIX': VIIIX, 'HECash': HECash, 'V401k': V401k}
