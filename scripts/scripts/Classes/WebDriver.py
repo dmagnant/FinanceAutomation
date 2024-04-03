@@ -1,9 +1,4 @@
-import os
-import shutil
-import sys
-import time
-import zipfile
-
+import os, shutil, time, zipfile, sys
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import (InvalidArgumentException,
@@ -13,12 +8,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-if __name__ == "Classes.WebDriver":
-    from Functions.GeneralFunctions import setDirectory
-elif __name__ == 'scripts.Classes.WebDriver':
-    from scripts.Functions.GeneralFunctions import setDirectory
-else:
-    from scripts.scripts.Functions.GeneralFunctions import setDirectory
+if __name__ == "Classes.WebDriver":             from Functions.GeneralFunctions import setDirectory
+elif __name__ == 'scripts.Classes.WebDriver':   from scripts.Functions.GeneralFunctions import setDirectory
+else:                                           from scripts.scripts.Functions.GeneralFunctions import setDirectory
 
 def configureDriverOptions(browser, asUser=True):
     if browser == "Edge":
@@ -30,8 +22,7 @@ def configureDriverOptions(browser, asUser=True):
         profile = {"download.prompt_for_download": False}
         # options.add_experimental_option("prefs", profile)
         options.add_argument("--no-sandbox")
-        if asUser:
-            options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\Microsoft\Edge\User Data")
+        if asUser:  options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\Microsoft\Edge\User Data")
     else:        
         options = webdriver.ChromeOptions()
         options.add_argument("enable-automation")
@@ -44,12 +35,10 @@ def configureDriverOptions(browser, asUser=True):
         options.add_experimental_option("debuggerAddress","localhost:9222")
         options.set_capability("pageLoadStrategy", "eager")
         options.set_capability("timeouts", {"implicit":1000})
-        if asUser:
-            options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\Google\Chrome\User Data")
+        if asUser:  options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\Google\Chrome\User Data")
     elif browser == "Brave":
         options.binary_location = "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe"
-        if asUser:
-            options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\BraveSoftware\Brave-Browser\User Data")
+        if asUser:  options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\BraveSoftware\Brave-Browser\User Data")
     options.add_argument("start-maximized")
     return options
 
@@ -71,12 +60,10 @@ def updateWebDriver(browser, version):
         driver.implicitly_wait(5)
         driver.get(url)
     time.sleep(3)
-    with zipfile.ZipFile(filePath, 'r') as zip_ref:
-        zip_ref.extractall(directory + r"\Projects\Coding\webdrivers")
+    with zipfile.ZipFile(filePath, 'r') as zip_ref: zip_ref.extractall(directory + r"\Projects\Coding\webdrivers")
     driver.quit()
     os.remove(filePath)
-    if browser == "Edge":
-        shutil.rmtree(directory + r"\Projects\Coding\webdrivers\Driver_Notes")
+    if browser == "Edge":   shutil.rmtree(directory + r"\Projects\Coding\webdrivers\Driver_Notes")
 
 def openWebDriver(browser, asUser=True):
     directory = setDirectory()
@@ -92,8 +79,7 @@ def openWebDriver(browser, asUser=True):
             # from webdriver_manager.chrome import ChromeDriverManager
             driver = webdriver.Chrome(service=Service(directory + r"\Projects\Coding\webdrivers\chromedriver.exe", service_args=["--verbose", "--log-path=C:\\Users\\dmagn\\driver.txt"]), options=options)
             # driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install(),service_args=["--verbose", "--log-path=C:\\Users\\dmagn\\driver1.txt"]), options=options)
-        else: 
-            driver = webdriver.Chrome(service=Service(directory + r"\Projects\Coding\webdrivers\chromedriver.exe", service_args=["--verbose", "--log-path=C:\\Users\\dmagn\\driver.txt"]))
+        else: driver = webdriver.Chrome(service=Service(directory + r"\Projects\Coding\webdrivers\chromedriver.exe", service_args=["--verbose", "--log-path=C:\\Users\\dmagn\\driver.txt"]))
         return driver
     elif browser == "Brave":
         return webdriver.Chrome(service=Service(directory + r"\Projects\Coding\webdrivers\chromedriver.exe"), options=options)
@@ -116,13 +102,11 @@ class Driver:
         
     def findWindowByUrl(self, url):
         currentWindow = self.webDriver.current_window_handle
-        if url in self.webDriver.current_url:
-            return currentWindow
+        if url in self.webDriver.current_url:   return currentWindow
         if len(self.webDriver.window_handles) > 1:
             for i in self.webDriver.window_handles:
                 self.webDriver.switch_to.window(i)
-                if url in self.webDriver.current_url:
-                    return self.webDriver.current_window_handle
+                if url in self.webDriver.current_url:   return self.webDriver.current_window_handle
         self.webDriver.switch_to.window(currentWindow)
         return False
 
@@ -132,16 +116,11 @@ class Driver:
             found = False
             self.webDriver.switch_to.window(self.webDriver.window_handles[index])
             for url in urls:
-                if url in self.webDriver.current_url:
-                    found = True
-            if found:
-                index += 1
-            else:
-                self.webDriver.close()
-        if displayWindowHandle:
-            self.webDriver.switch_to.window(displayWindowHandle)
-        else:
-            self.switchToLastWindow()
+                if url in self.webDriver.current_url:   found = True
+            if found:   index += 1
+            else:   self.webDriver.close()
+        if displayWindowHandle: self.webDriver.switch_to.window(displayWindowHandle)
+        else:   self.switchToLastWindow()
                 
     def openNewWindow(self, url):
         self.findWindowByUrl(self.webDriver.current_url)

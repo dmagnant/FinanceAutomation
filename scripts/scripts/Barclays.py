@@ -1,5 +1,4 @@
-import os
-import time
+import os, time
 from datetime import datetime
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
@@ -47,8 +46,7 @@ def barclaysLogin(driver):
             driver.find_element(By.ID, "rsaAns1").send_keys(a2)
             driver.find_element(By.ID, "rsaAns2").send_keys(a1)
         driver.find_element(By.ID, "rsaChallengeFormSubmitButton").click()
-    except NoSuchElementException:
-        exception = "Caught"
+    except NoSuchElementException:  exception = "Caught"
     # handle Confirm Your Identity
     try:
         driver.find_element(By.XPATH, "/html/body/section[2]/div[4]/div/div/div[2]/form/div/div[1]/div[2]/div/div/div[1]/div/div/div[2]/div[1]/label/span").click()
@@ -56,13 +54,9 @@ def barclaysLogin(driver):
         # User pop-up to enter SecurPass Code
         showMessage("Get Code From Phone", "Enter in box, then click OK")
         driver.find_element(By.XPATH, "//button[@type='submit']").click()
-    except NoSuchElementException:
-        exception = "Caught"
-    # handle Pop-up
-    try:
-        driver.find_element(By.XPATH, "/html/body/div[4]/div/button/span").click()
-    except NoSuchElementException:
-        exception = "Caught"
+    except NoSuchElementException:  exception = "Caught"
+    try:    driver.find_element(By.XPATH, "/html/body/div[4]/div/button/span").click() # close pop-up
+    except NoSuchElementException:  exception = "Caught"
 
 def getBarclaysBalance(driver):
     locateBarclaysWindow(driver)     
@@ -75,24 +69,14 @@ def exportBarclaysTransactions(driver, today):
     # Click on Transactions
     driver.find_element(By.XPATH, "/html/body/section[2]/div[1]/nav/div/ul/li[3]/ul/li/div/div[2]/ul/li[1]/a").click()
     driver.find_element(By.XPATH, "/html/body/section[2]/div[4]/div/div/div[3]/div[1]/div/div[2]/span/div/button/span[1]").click() # download
-    year = today.year
-    month = today.month
-    monthTo = str(month)
-    yrTO = str(year - 2000)
-    yearTo = str(year)
-    if month == 1:
-        monthFrom = "12"
-        yrFROM = str(year - 2001)
-        yearFrom = str(year - 1)
-    else:
-        monthFrom = str(month - 1)
-        yrFROM = yrTO
-        yearFrom = yearTo
+    year, month = today.year, today.month
+    monthTo, yrTO, yearTo = str(month), str(year - 2000), str(year)
+    if month == 1:  monthFrom, yrFROM, yearFrom = "12", str(year - 2001), str(year - 1)
+    else:           monthFrom, yrFROM, yearFrom = str(month - 1), yrTO, yearTo
     # enter date_range
     driver.find_element(By.ID, "downloadFromDate_input").send_keys(monthFrom + "/05/" + yrFROM)
     driver.find_element(By.ID, "downloadToDate_input").send_keys(monthTo + "/04/" + yrTO)
-    # click Download
-    driver.find_element(By.XPATH, "/html/body/div[3]/div[2]/div/div/div[2]/div/form/div[3]/div/button").click()
+    driver.find_element(By.XPATH, "/html/body/div[3]/div[2]/div/div/div[2]/div/form/div[3]/div/button").click() # Download
     time.sleep(2)
     return r"C:\Users\dmagn\Downloads\CreditCard_" + yearFrom + monthFrom + "05_" + yearTo + monthTo + "04.csv"
 
@@ -100,17 +84,14 @@ def claimBarclaysRewards(driver):
     locateBarclaysWindow(driver)
     driver = driver.webDriver
     driver.get("https://www.barclaycardus.com/servicing/cashBack?__fsk=337615032#!/redeem")
-    # click continue
-    driver.find_element(By.ID,"redeem-continue").click()
-    # click method of rewards
-    driver.find_element(By.ID, "mor_dropDown0").click()
+    driver.find_element(By.ID,"redeem-continue").click() # continue
+    driver.find_element(By.ID, "mor_dropDown0").click() # reward method
     driver.find_element(By.ID, "mor_dropDown0").send_keys(Keys.DOWN)
     driver.find_element(By.ID, "mor_dropDown0").send_keys(Keys.ENTER)
     time.sleep(1)
     driver.find_element(By.ID, "achModal-continue").click()
     time.sleep(1)
-    # click Redeem now
-    driver.find_element(By.ID, "redeem-continue").click()
+    driver.find_element(By.ID, "redeem-continue").click() # redeem now
 
 def runBarclays(driver, account, book):
     today = datetime.today()
@@ -118,12 +99,10 @@ def runBarclays(driver, account, book):
     account.setBalance(getBarclaysBalance(driver))
     rewardsBalance = float(driver.webDriver.find_element(By.XPATH, "//*[@id='rewardsTile']/div[2]/div/div[2]/div[1]/div").text.strip('$'))
     transactionsCSV = exportBarclaysTransactions(driver.webDriver, today)
-    if rewardsBalance >= float(50):
-        claimBarclaysRewards(driver)
+    if rewardsBalance >= float(50): claimBarclaysRewards(driver)
     book.importGnuTransaction(account, transactionsCSV, driver, 5)
     account.locateAndUpdateSpreadsheet(driver)
-    if account.reviewTransactions:
-        book.openGnuCashUI()
+    if account.reviewTransactions:  book.openGnuCashUI()
 
 if __name__ == '__main__':
     driver = Driver("Chrome")

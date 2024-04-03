@@ -31,19 +31,14 @@ def vanguardLogin(driver):
             showMessage('Security Code', "Enter Security code, then click OK")
             driver.webDriver.find_element(By.XPATH,"//*[@id='radioGroupId-bind-selection-group']/c11n-radio[1]/label/div").click() # remember me
             driver.webDriver.find_element(By.XPATH, "//*[@id='security-code-submit-btn']/button/span/span").click() # verify
-        except NoSuchElementException:
-            exception = "caught"
+        except NoSuchElementException:  exception = "caught"
     driver.webDriver.get('https://retirementplans.vanguard.com/VGApp/pe/web/sc/pso-pex-secure-overview-webapp/home')
 
 def locateVanguardWindow(driver):
     found = driver.findWindowByUrl("retirementplans.vanguard.com")
-    if not found:
-        found = driver.findWindowByUrl("ownyourfuture.vanguard.com")
-    if not found:
-        vanguardLogin(driver)
-    else:
-        driver.webDriver.switch_to.window(found)
-        time.sleep(1)
+    if not found:   found = driver.findWindowByUrl("ownyourfuture.vanguard.com")
+    if not found:   vanguardLogin(driver)
+    else:           driver.webDriver.switch_to.window(found); time.sleep(1)
     
 def getVanguard401kPriceAndShares(driver, account, book, planId):
     locateVanguardWindow(driver)
@@ -62,16 +57,13 @@ def captureVanguard401kTransactions(driver, planId):
     driver.webDriver.find_element(By.ID,"TransactionHistoryTabBox:transHistoryForm:viewByDate_main").click() # View history from: option
     driver.clickIDElementOnceAvaiable("TransactionHistoryTabBox:transHistoryForm:viewByDate:historyItemLabel2") # View last 3 months to ensure all transactions are visible
     time.sleep(1)
-    row = 1
-    transactionTable = "//*[@id='TransactionHistoryTabBox:transHistoryForm:transactionHistoryDataTabletbody0']/tr["
+    row, transactionTable = 1, "//*[@id='TransactionHistoryTabBox:transHistoryForm:transactionHistoryDataTabletbody0']/tr["
     while True:
         column=1
         row+=1
-        try:
-            date = datetime.strptime(driver.webDriver.find_element(By.XPATH,(transactionTable + str(row) + "]/td[" + str(column) + "]")).text, '%m/%d/%Y').date()
+        try:    date = datetime.strptime(driver.webDriver.find_element(By.XPATH,(transactionTable + str(row) + "]/td[" + str(column) + "]")).text, '%m/%d/%Y').date()
         except NoSuchElementException:
-            if row<=2:
-                showMessage('unable to find date', 'Likely need to adjust element path')
+            if row<=2:  showMessage('unable to find date', 'Likely need to adjust element path')
             break
         description = ''
         if date.month == lastMonth['endDate'].month:
@@ -87,8 +79,7 @@ def captureVanguard401kTransactions(driver, planId):
             shares = -float(shares) if "Fee" in description else shares
             transaction = date, description, shares, amount
             csv.writer(open(v401kActivity, 'a', newline='', encoding="utf-8")).writerow(transaction)
-        elif date.month < lastMonth['endDate'].month or date.year < lastMonth['endDate'].year:
-            break
+        elif date.month < lastMonth['endDate'].month or date.year < lastMonth['endDate'].year:  break
     return v401kActivity
     
 def getVanguardBalancesAndPensionInterestYTD(driver, accounts):
@@ -103,16 +94,14 @@ def getVanguardBalancesAndPensionInterestYTD(driver, accounts):
     return interestYTD
 
 def calculatePensionTransactions(book, today, account, interestYTD):
-    lastMonth = getStartAndEndOfDateRange(today, "month")
-    interestAmount = 0
+    lastMonth, interestAmount = getStartAndEndOfDateRange(today, "month"), 0
     transactions = [tr for tr in book.readBook.transactions
                     if str(tr.post_date.strftime('%Y')) == str(lastMonth['startDate'].year)
                     for spl in tr.splits
                     if spl.account.fullname == account.gnuAccount]
     for tr in transactions:
         for spl in tr.splits:
-            if spl.account.fullname == "Income:Investments:Interest":
-                interestAmount = interestAmount + abs(spl.value)
+            if spl.account.fullname == "Income:Investments:Interest":   interestAmount = interestAmount + abs(spl.value)
     accountChange = Decimal(account.balance) - account.gnuBalance
     interest = Decimal(interestYTD) - interestAmount
     employerContribution = accountChange - interest
@@ -134,19 +123,14 @@ def runVanguard401k(driver, accounts, book):
     accounts['V401k'].setBalance(accounts['V401k'].gnuBalance)
     
 def runVanguardPension(driver, accounts, book):
-    today = datetime.today().date()
     locateVanguardWindow(driver)
-    interestYTD = getVanguardBalancesAndPensionInterestYTD(driver, accounts)
+    today, interestYTD = datetime.today().date(), getVanguardBalancesAndPensionInterestYTD(driver, accounts)
     book.writeGnuTransaction(calculatePensionTransactions(book, today, accounts['Pension'], interestYTD))
     accounts['Pension'].updateGnuBalance(book.getBalance(accounts['Pension'].gnuAccount))
 
 if __name__ == '__main__':
-    # driver = Driver("Chrome")
-    book = GnuCash('Finance')
-    Pension = USD("VanguardPension", book)
-    V401k = USD("Vanguard401k", book)
-    EBI = Security("Employee Benefit Index", book)
-    TSM401k = Security("Total Stock Market(401k)", book)
+    driver, book = Driver("Chrome"), GnuCash('Finance')
+    Pension, V401k, TSM401k, EBI = USD("VanguardPension", book), USD("Vanguard401k", book), Security("Total Stock Market(401k)", book), Security("Employee Benefit Index", book)
     accounts = {'Pension': Pension, 'V401k': V401k, 'TSM401k': TSM401k, 'EBI':EBI}
     # runVanguard401k(driver, accounts, book)
     # runVanguardPension(driver,accounts,book)

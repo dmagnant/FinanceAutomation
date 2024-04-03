@@ -1,7 +1,5 @@
-import os
+import os, time, pyautogui
 import time
-
-import pyautogui
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
@@ -16,11 +14,8 @@ else:
  
 def locateBingWindow(driver):
     found = driver.findWindowByUrl("rewards.bing.com")
-    if not found:
-        bingLogin(driver)
-    else:
-        driver.webDriver.switch_to.window(found)
-        time.sleep(1)
+    if not found:   bingLogin(driver)
+    else:           driver.webDriver.switch_to.window(found); time.sleep(1)
     return True
    
 def bingLogin(driver):
@@ -35,8 +30,7 @@ def bingLogin(driver):
         time.sleep(1)
         driver.webDriver.find_element(By.XPATH, "/html/body/div/form/div/div/div[2]/div[1]/div/div/div/div/div/div[3]/div/div[2]/div/div[3]/div[2]/div/div/div[2]/input").click() # stay signed in
         driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[2]/main/section/div[1]/div[2]/section/div[1]/a[2]").click() # sign in link
-    except NoSuchElementException:
-        exception = "already logged in"
+    except NoSuchElementException:  exception = "already logged in"
 
 def bingActivities(driver):
     locateBingWindow(driver)
@@ -58,8 +52,7 @@ def bingActivities(driver):
             time.sleep(1)
             pointsLinks[2].click()
             driver.switchToLastWindow()
-    except NoSuchElementException:
-        exception = "caught"
+    except NoSuchElementException:  exception = "caught"
     time.sleep(2)
     pyautogui.leftClick(350, 950)
     time.sleep(2)
@@ -84,16 +77,14 @@ def claimBingRewards(driver):
     try:
         driver.webDriver.find_element(By.ID, "redeem-checkout-challenge-fullnumber").send_keys(os.environ.get('Phone'))
         driver.webDriver.find_element(By.XPATH, "//*[@id='redeem-checkout-challenge-validate']/span").click() # Send
-    except NoSuchElementException:
-        exception = "caught"
+    except NoSuchElementException:  exception = "caught"
 
 def runBing(driver, account, book):
     locateBingWindow(driver)
     bingActivities(driver)
     account.setBalance(getBingBalance(driver))
     book.updateMRBalance(account)
-    if int(account.balance) >= 5250:
-        claimBingRewards(driver)
+    if int(account.balance) >= 5250:    claimBingRewards(driver)
 
 if __name__ == '__main__':
     book = GnuCash('Finance')

@@ -1,4 +1,4 @@
-import os
+import os, time
 import time
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
@@ -14,27 +14,21 @@ else:
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import (getPassword, getUsername, getPaycheckDates)
 
-def getAmexBasePath():
-    return '/html/body/div[1]/div[2]/main/div/div/div/div/div'
+def getAmexBasePath():  return '/html/body/div[1]/div[2]/main/div/div/div/div/div'
             
             
 def locateAmexWindow(driver):
     found = driver.findWindowByUrl("americanexpress.com")
-    if not found:
-        amexLogin(driver)
-    else:
-        driver.webDriver.switch_to.window(found)
-        time.sleep(1) 
+    if not found:   amexLogin(driver)
+    else:           driver.webDriver.switch_to.window(found); time.sleep(1) 
         
 def amexLogin(driver):
     driver.openNewWindow('https://www.americanexpress.com/en-us/account/login?inav=iNavLnkLog')
     # driver.webDriver.find_element(By.ID, "eliloUserID").send_keys(getUsername('Amex'))
     # driver.webDriver.find_element(By.ID, "eliloPassword").send_keys(getPassword('Amex'))
     driver.webDriver.find_element(By.ID, "loginSubmit").click()
-    try: # handle pop-up
-        driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[5]/div/div/div/div/div/div[2]/div/div/div/div/div[1]/div/a/span/span").click()
-    except NoSuchElementException:
-        exception = "caught"
+    try: driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[5]/div/div/div/div/div/div[2]/div/div/div/div/div[1]/div/a/span/span").click() # close pop-up
+    except NoSuchElementException:  exception = "caught"
     time.sleep(1)
 
 def getAmexBalance(driver):
@@ -43,17 +37,13 @@ def getAmexBalance(driver):
 
 def exportAmexTransactions(driver):
     driver.find_element(By.XPATH, "//*[@id='axp-balance-payment']/div[2]/div[2]/div/div[1]/div[1]/div/a").click() # view transactions
-    try: 
-        driver.find_element(By.XPATH, "//*[@id='root']/div[1]/div/div[2]/div/div/div[4]/div/div[3]/div/div/div/div/div/div/div[2]/div/div/div[5]/div/div[2]/div/div[2]/a/span").click() # view activity
-    except NoSuchElementException:
-        exception = "caught"
+    try: driver.find_element(By.XPATH, "//*[@id='root']/div[1]/div/div[2]/div/div/div[4]/div/div[3]/div/div/div/div/div/div/div[2]/div/div/div[5]/div/div[2]/div/div[2]/a/span").click() # view activity
+    except NoSuchElementException:exception = "caught"
     time.sleep(6) 
     driver.find_element(By.XPATH, getAmexBasePath() + "/div[2]/div/div[2]/div/div/div/div[1]/div[1]/div/div/div[1]/div[2]/div[1]/div/button").click() # download arrow
     driver.find_element(By.XPATH, getAmexBasePath() + "/div[2]/div/div[2]/div/div/div[1]/div/div/div/div/div/div[2]/div/div/div[1]/div/fieldset/div[2]/label").click() # CSV Option
-    try: # delete old csv file
-        os.remove(r"C:\Users\dmagn\Downloads\activity.csv")
-    except FileNotFoundError:
-        exception = "caught"
+    try: os.remove(r"C:\Users\dmagn\Downloads\activity.csv")
+    except FileNotFoundError:   exception = "caught"
     driver.find_element(By.XPATH, getAmexBasePath() + "/div[2]/div/div[2]/div/div/div[1]/div/div/div/div/div/div[3]/div/a").click() # Download
     time.sleep(3)
 
@@ -74,8 +64,7 @@ def runAmex(driver, account, book):
     claimAmexRewards(driver)
     book.importGnuTransaction(account, r'C:\Users\dmagn\Downloads\activity.csv', driver)
     account.locateAndUpdateSpreadsheet(driver)
-    if account.reviewTransactions:
-        book.openGnuCashUI()
+    if account.reviewTransactions:  book.openGnuCashUI()
 
 if __name__ == '__main__':
     driver = Driver("Chrome")

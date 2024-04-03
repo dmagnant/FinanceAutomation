@@ -18,11 +18,8 @@ else:
 
 def locateTellWutWindow(driver):
     found = driver.findWindowByUrl("tellwut.com")
-    if not found:
-        tellwutLogin(driver)
-    else:
-        driver.webDriver.switch_to.window(found)
-        time.sleep(1)
+    if not found:   tellwutLogin(driver)
+    else:           driver.webDriver.switch_to.window(found); time.sleep(1)
 
 def tellwutLogin(driver):
     driver.openNewWindow('https://www.tellwut.com/')
@@ -30,8 +27,7 @@ def tellwutLogin(driver):
         driver.webDriver.find_element(By.XPATH,'/html/body/main/header/button[2]').click() # LOGIN button
         time.sleep(1)
         driver.webDriver.find_element(By.XPATH,"//*[@id='loginForm']/button").click() # LOGIN button (again)
-    except NoSuchElementException:
-        exception = 'already logged in'
+    except NoSuchElementException:  exception = 'already logged in'
         
 def getTellWutBalance(driver):
     locateTellWutWindow(driver)
@@ -40,27 +36,19 @@ def getTellWutBalance(driver):
 def clickButtons(driver, type):
     xpath = "//input[@type='" + type + "']"
     for i in driver.webDriver.find_elements(By.XPATH, xpath): # click all checkboxes
-        try:
-            i.click()
-        except(ElementNotInteractableException):
-            exception = 'notInteractable'
-        except(ElementClickInterceptedException):
-            findSubmitButton(driver)
-            i.click()
+        try:    i.click()
+        except(ElementNotInteractableException):    exception = 'notInteractable'
+        except(ElementClickInterceptedException):   findSubmitButton(driver); i.click()
 
-def findSubmitButton(driver):
-    return driver.webDriver.find_element(By.ID,'survey_form_submit')
+def findSubmitButton(driver):   return driver.webDriver.find_element(By.ID,'survey_form_submit')
 
 def completeTellWutSurveys(driver):
     locateTellWutWindow(driver)
     driver.webDriver.implicitly_wait(1)
     driver.webDriver.get('https://www.tellwut.com/most_recent_surveys') # load most recent surveys page
     time.sleep(2)
-    try:
-        driver.webDriver.find_element(By.XPATH,"//*[@id='surveyList']/div[1]/div[2]/div[1]/a").click() # survey link
-    except NoSuchElementException:
-        exception = "no surveys"
-        return False
+    try:    driver.webDriver.find_element(By.XPATH,"//*[@id='surveyList']/div[1]/div[2]/div[1]/a").click() # survey link
+    except NoSuchElementException:  return False
     num = 1
     while True:
         try:
@@ -68,8 +56,7 @@ def completeTellWutSurveys(driver):
             clickButtons(driver, 'radio')
             clickButtons(driver, 'checkbox')
             submitButton = findSubmitButton(driver)
-            try:
-                submitButton.click()
+            try:    submitButton.click()
             except ElementClickInterceptedException:
                 driver.webDriver.find_element(By.XPATH,"//*[@id='main']/section/div/div[2]/div[4]/div[1]") # scroll past to comments section
                 submitButton.click()
@@ -79,13 +66,10 @@ def completeTellWutSurveys(driver):
             try:
                 submitButton = findSubmitButton(driver)
                 showMessage('survey not complete', 'click survey answers manually, then click OK')
-                try:
-                    submitButton.click()
-                except NoSuchElementException:
-                    exception = 'clicked submit manually'
+                try:    submitButton.click()
+                except NoSuchElementException:  exception = 'clicked submit manually'
                 driver.webDriver.find_element(By.XPATH,"//*[@id='next-survey-btn']/a").click() # NEXT POLL
-            except NoSuchElementException:
-                break
+            except NoSuchElementException:  break
         num+=1
 
 def redeemTellWutRewards(driver):
@@ -101,8 +85,7 @@ def runTellwut(driver, account, book):
     completeTellWutSurveys(driver)
     account.setBalance(getTellWutBalance(driver))
     book.updateMRBalance(account)
-    if int(account.balance) >= 4000:
-        redeemTellWutRewards(driver)
+    if int(account.balance) >= 4000:    redeemTellWutRewards(driver)
 
 if __name__ == '__main__':
     driver = Driver("Chrome")

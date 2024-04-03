@@ -25,11 +25,9 @@ def updateCoin(coin, book):
     coin.updateSpreadsheetAndGnuCash(book)
     
 def runLedger(coinList, book):
-    if not (isProcessRunning('Ledger Live.exe')):
-        os.startfile(r'C:\Program Files\Ledger Live\Ledger Live.exe')
+    if not (isProcessRunning('Ledger Live.exe')):   os.startfile(r'C:\Program Files\Ledger Live\Ledger Live.exe')
     showMessage('Open Ledger and Verify Balances', "click OK and follow prompts")
-    for coin in coinList:
-        updateCoin(coin, book)
+    for coin in coinList:   updateCoin(coin, book)
 
 # if __name__ == '__main__':
 #     book = GnuCash('Finance')    
@@ -42,5 +40,6 @@ def runLedger(coinList, book):
 
 if __name__ == '__main__':
     from datetime import datetime
-    today = datetime.today()
-    print(today)
+    bank = ['Ally', 'Sofi', 'Fidelity', 'HealthEquity', 'Optum', 'Vanguard', 'Worthy'].sort()
+    bank.sort()
+    print(bank)

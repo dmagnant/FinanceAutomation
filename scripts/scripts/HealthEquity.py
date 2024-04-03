@@ -20,11 +20,8 @@ else:
 
 def locateHealthEquityWindow(driver):
     found = driver.findWindowByUrl("member.my.healthequity.com")
-    if not found:
-        healthEquitylogin(driver)
-    else:
-        driver.webDriver.switch_to.window(found)
-        time.sleep(1)
+    if not found:   healthEquitylogin(driver)
+    else:           driver.webDriver.switch_to.window(found); time.sleep(1)
 
 def healthEquitylogin(driver):
     driver.openNewWindow('https://member.my.healthequity.com/hsa/21895515-010')
@@ -37,10 +34,8 @@ def healthEquitylogin(driver):
             showMessage("Confirmation Code", "Enter code then click OK") # enter text code
             driver.find_element(By.XPATH, "//*[@id='VerifyOtpPanel']/div[4]/div[1]/div/label/span").click() # Remember me
             driver.find_element(By.ID, "verifyOtp").click() # click Confirm
-        except NoSuchElementException:
-            exception = "already verified"
-    except NoSuchElementException:
-        exception = "already logged in"
+        except NoSuchElementException:  exception = "already verified"
+    except NoSuchElementException:      exception = "already logged in"
     time.sleep(1)
 
 def getHealthEquityBalances(driver, accounts):
@@ -71,11 +66,8 @@ def captureHealthEquityInvestmentTransactionsAndBalances(driver, accounts, book)
     num = 1
     while True:
         element = driver.webDriver.find_element(By.XPATH, "//*[@id='fundSelection']/option[" + str(num) + "]")
-        if element.text == 'VIIIX':
-            element.click()
-            break
-        else:
-            num+=1
+        if element.text == 'VIIIX': element.click(); break
+        else:   num+=1
     num = 0
     startDateElement = driver.webDriver.find_element(By.ID, "startDate")
     endDateElement = driver.webDriver.find_element(By.ID, "endDate")
@@ -105,8 +97,7 @@ def captureHealthEquityInvestmentTransactionsAndBalances(driver, accounts, book)
             accounts['VIIIX'].setBalance(driver.webDriver.find_element(By.XPATH, "//*[@id='desktopTotalShares" + str(row) + "']/span").text)
             accounts['VIIIX'].value = driver.webDriver.find_element(By.XPATH, "//*[@id='desktopTotalValue" + str(row) + "']/span").text.replace('$', '').replace(',','')
             break
-        else:
-            showMessage('Unknown Transaction: ' + description, "check Investment transaction list for undefined transaction")
+        else:   showMessage('Unknown Transaction: ' + description, "check Investment transaction list for undefined transaction")
     return investmentActivity
 
 def captureHealthEquityCashTransactionsAndBalance(driver, accounts):
@@ -136,13 +127,9 @@ def captureHealthEquityCashTransactionsAndBalance(driver, accounts):
                 if "Interest" in description:
                     column+=1
                     accounts['HECash'].setBalance(driver.webDriver.find_element(By.XPATH,"//*[@id='ctl00_modulePageContent_MemberTransactionsStyled_gvTransferLines']/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/span").text.replace('$','').replace(',',''))
-            elif 'Employee Contribution' in description or 'Investment: ' in description:
-                continue
-            else:
-                showMessage('Unknown Transaction: ' + description, "check Cash transaction list for undefined transaction")
-                break
-        elif postDate.month < lastMonth['endDate'].month or postDate.year < lastMonth['endDate'].year:
-            break
+            elif 'Employee Contribution' in description or 'Investment: ' in description:   continue
+            else:   showMessage('Unknown Transaction: ' + description, "check Cash transaction list for undefined transaction"); break
+        elif postDate.month < lastMonth['endDate'].month or postDate.year < lastMonth['endDate'].year: break
     return cashActivity
     
 def runHealthEquity(driver, accounts, book):
@@ -156,11 +143,8 @@ def runHealthEquity(driver, accounts, book):
     accounts['HECash'].updateGnuBalance(book.getBalance(accounts['HECash'].gnuAccount))
 
 if __name__ == '__main__':
-    driver = Driver("Chrome")
-    book = GnuCash('Finance')
-    VIIIX = Security("HE Investment", book)
-    HECash = USD("HE Cash", book)
-    V401k = USD("Vanguard401k", book)
+    driver, book = Driver("Chrome"), GnuCash('Finance')
+    VIIIX, HECash, V401k = Security("HE Investment", book), USD("HE Cash", book), USD("Vanguard401k", book)
     HEaccounts = {'VIIIX': VIIIX, 'HECash': HECash, 'V401k': V401k}
     runHealthEquity(driver, HEaccounts, book)
     book.closeBook()

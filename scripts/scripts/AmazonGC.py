@@ -17,11 +17,8 @@ else:
 
 def locateAmazonWindow(driver):
     found = driver.findWindowByUrl("www.amazon.com/gc/balance")
-    if not found:
-        driver.openNewWindow('https://www.amazon.com/gc/balance')
-    else:
-        driver.webDriver.switch_to.window(found)
-        time.sleep(1)
+    if not found:   driver.openNewWindow('https://www.amazon.com/gc/balance')
+    else:           driver.webDriver.switch_to.window(found); time.sleep(1)
 
 def addAmazonGCAmount(book, account, amount, source):
     transactionInfo = {'amount': amount, 'toAccount': account.gnuAccount, 'fromAccount': 'Income:Market Research:' + source, 'date': datetime.today().date(),'description': source}
@@ -33,11 +30,9 @@ def addAmazonGCAmount(book, account, amount, source):
 def confirmAmazonGCBalance(driver, account):
     locateAmazonWindow(driver)
     balance = driver.webDriver.find_element(By.ID, "gc-ui-balance-gc-balance-value").text.strip('$')
-    if float(balance) == 0:
-        balance = "0"
+    if float(balance) == 0: balance = "0"
     account.setBalance(balance)
-    if str(account.gnuBalance) != account.balance:
-        showMessage("Amazon GC Mismatch", f'Amazon balance: {account.balance} \n' f'Gnu Cash balance: {account.gnuBalance} \n')
+    if str(account.gnuBalance) != account.balance:  showMessage("Amazon GC Mismatch", f'Amazon balance: {account.balance} \n' f'Gnu Cash balance: {account.gnuBalance} \n')
 
 # if __name__ == '__main__':
 #     book = GnuCash('Finance')
@@ -50,5 +45,4 @@ def confirmAmazonGCBalance(driver, account):
 if __name__ == '__main__':
     book = GnuCash('Finance')
     AmazonGC = USD("Amazon GC", book)
-    addAmazonGCAmount(book, AmazonGC, Decimal(10.00), 'Pinecone')
-    book.closeBook()
+    addAmazonGCAmount(book, AmazonGC, Decimal(10.00), 'Pinecone'), book.closeBook()

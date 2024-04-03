@@ -1,10 +1,5 @@
-import time
+import time, cv2, pyautogui, pygetwindow, numpy as np
 from datetime import datetime
-
-import cv2
-import numpy as np
-import pyautogui
-import pygetwindow
 from matplotlib import pyplot as plt
 from selenium.common.exceptions import (ElementClickInterceptedException,
                                         ElementNotInteractableException,
@@ -12,8 +7,6 @@ from selenium.common.exceptions import (ElementClickInterceptedException,
                                         StaleElementReferenceException,
                                         WebDriverException)
 from selenium.webdriver.common.by import By
-
-# from matplotlib import pyplot as plt
 
 if __name__ == '__main__' or __name__ == "Cointiply":
     from Classes.WebDriver import Driver
@@ -27,15 +20,11 @@ def cointiplyLogin(driver):
     driver.get("https://cointiply.com/login")
     #Login
     try:
-        # enter email
-        driver.find_element(By.XPATH, "//html/body/div/div[2]/section/div[1]/div/div[2]/div/div[3]/form/div[1]/input").send_keys(getUsername('Cointiply'))
-        # enter password
-        driver.find_element(By.XPATH, "/html/body/div/div[2]/section/div[1]/div/div[2]/div/div[3]/form/div[2]/input").send_keys(getPassword('Cointiply'))
+        driver.find_element(By.XPATH, "//html/body/div/div[2]/section/div[1]/div/div[2]/div/div[3]/form/div[1]/input").send_keys(getUsername('Cointiply')) # email
+        driver.find_element(By.XPATH, "/html/body/div/div[2]/section/div[1]/div/div[2]/div/div[3]/form/div[2]/input").send_keys(getPassword('Cointiply')) # password
         showMessage("CAPTCHA", 'Verify captcha, then click OK')
-        #click LOGIN
-        driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/section/div[1]/div/div[2]/div/div[3]/form/div[5]/button").click()
-    except NoSuchElementException:
-        exception = "already logged in"
+        driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/section/div[1]/div/div[2]/div/div[3]/form/div[5]/button").click() # login
+    except NoSuchElementException:  exception = "already logged in"
     # move window to primary monitor
     Cointiply = pygetwindow.getWindowsWithTitle('Cointiply Bitcoin Rewards - Earn Free Bitcoin - Google Chrome')[0]
     Cointiply.moveTo(10, 10)
@@ -44,41 +33,27 @@ def cointiplyLogin(driver):
 
 def runFaucet(driver, runFaucet):
     if runFaucet:
-        # Roll Faucet
         driver.get("https://cointiply.com/home?intent=faucet")
         time.sleep(2)
-        # click Roll & Win
         try:
-            driver.find_element(By.XPATH, "//*[@id='app']/div[4]/div/div/div[2]/div[2]/div[2]/div[1]/div/div[1]/div/button").click()
+            driver.find_element(By.XPATH, "//*[@id='app']/div[4]/div/div/div[2]/div[2]/div[2]/div[1]/div/div[1]/div/button").click() # Roll & Win
             showMessage("CAPTCHA", 'Verify captcha, then click OK')
-            # click Submit Captcha & Roll
-            driver.find_element(By.XPATH, "//*[@id='app']/div[4]/div/div/div[2]/div[1]/div[1]/div[1]/div/div/div/button").click()
+            driver.find_element(By.XPATH, "//*[@id='app']/div[4]/div/div/div[2]/div[1]/div[1]/div[1]/div/div/div/button").click() # submit and roll
             time.sleep(3)
-        except (NoSuchElementException, WebDriverException):
-            exception = "gotta wait"
+        except (NoSuchElementException, WebDriverException):    exception = "gotta wait"
 
 def watchVideos(driver):
-    #link from Cointiply
-    # link = "https://api.lootably.com/api/offerwall/redirect/offer/101-999?placementID=ckzg5jprk003u011d0wlt2vn9&rawPublisherUserID=2193072"
-    #direct link
     link = "https://loot.tv/account/login"
 
     driver.get(link)
-    # #click login
-    # driver.find_element(By.XPATH, "/html/body/div[4]/div/div/div[2]/div/div[2]/a[1]/button").click()
-    #enter email
     driver.find_element(By.XPATH, "//*[@id='__next']/div/div[2]/div[2]/div/div/div[2]/div[1]/input").send_keys(getUsername('Loot TV'))
-    #enter password
     driver.find_element(By.XPATH, "//*[@id='__next']/div/div[2]/div[2]/div/div/div[2]/div[2]/input").send_keys(getPassword('Loot TV'))
-    # click sign in
     driver.find_element(By.XPATH, "//*[@id='__next']/div/div[2]/div[2]/div/div/div[3]/button").click()
-    # click to watch video
     driver.find_element(By.XPATH, "//*[@id='__next']/div/div[2]/div[2]/div/div/div/div[3]/div/div[1]/div[2]/div[2]/div[1]/p").click()
 
 def ptcAds(driver):
     directory = setDirectory()
-    view_length = ""
-    selection = ""
+    view_length = selection = ""
     still_ads = True
 
     driver.get("https://cointiply.com/ptc")
@@ -89,31 +64,21 @@ def ptcAds(driver):
             driver.switch_to.window(driver.window_handles[len(driver.window_handles)-1])
             driver.close()
         driver.switch_to.window(main_window)
-        # make sure there are coins to be earned
         avail_coins = driver.find_element(By.XPATH, "//*[@id='app']/div[4]/div/div/div[2]/div[1]/div/div[1]/div[2]").text
         if int(avail_coins[0]) > 0:
             try:
-                # click to enable Rain Pool button
                 driver.find_element(By.XPATH, "//*[@id='app']/div[4]/div/div/div[1]/div[4]/div[2]/div/div[2]/span[3]").click()
                 time.sleep(1)
-                # "Click to qualify for rain pool
                 driver.find_element(By.XPATH, "//*[@id='app']/div[4]/div/div/div[1]/div[4]/div[2]/div/div[2]/div/label[2]").click()
                 time.sleep(1)
-                # click I UNDERSTAND
-                try:
-                    driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/div[3]/button[2]").click()
-                except NoSuchElementException:
-                    driver.find_element(By.XPATH, "/html/body/div[3]/div[1]/div[3]/button[2]").click()
-            except (ElementNotInteractableException, ElementClickInterceptedException):
-                exception = "already registered"
+                try:    driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/div[3]/button[2]").click()
+                except NoSuchElementException:  driver.find_element(By.XPATH, "/html/body/div[3]/div[1]/div[3]/button[2]").click()
+            except (ElementNotInteractableException, ElementClickInterceptedException): exception = "already registered"
             time.sleep(1)
             try:
-                # click on view highest paying add link
                 driver.find_element(By.XPATH, "//*[@id='app']/div[4]/div/div/div[2]/div[1]/div/div[1]/div[3]/button").click()
                 time.sleep(1)
-                # Obtain how long ad needs to be viewed for
                 driver.switch_to.window(main_window)
-                # Capture "X seconds remaining" element text
                 view_length = driver.find_element(By.XPATH, "//*[@id='app']/div[4]/div/div/div[2]/div[1]/div/div[2]/div/div/div[2]/span").text
             except (NoSuchElementException, StaleElementReferenceException):
                 print('view length not found')
@@ -148,15 +113,13 @@ def ptcAds(driver):
             while not(viewComplete):
                 driver.switch_to.window(main_window)
                 time.sleep(1)
-                if "Ad View Complete" in driver.title:
-                    viewComplete = True
+                if "Ad View Complete" in driver.title: viewComplete = True
                 else:
                     secondsLeft = int(driver.title.replace(" Seconds Left (Viewing Ad)", ""))
                     driver.switch_to.window(window_after)
                     time.sleep(secondsLeft + 2)
             # obtain which image needs to be selected
-            try:
-                selection = driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/div[2]/span[1]").text.replace("Select: ", "")
+            try: selection = driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/div[2]/span[1]").text.replace("Select: ", "")
             except NoSuchElementException:
                 try:
                     # skip ad
@@ -202,20 +165,14 @@ def ptcAds(driver):
             x_coord_avg = x_coord / 2
             time.sleep(1)
             img_num = 0
-            if x_coord_avg < 107:
-                img_num = 1
-            elif 107 <= x_coord_avg <= 200:
-                img_num = 2
-            elif 200 <= x_coord_avg <= 300:
-                img_num = 3
-            elif 300 <= x_coord_avg <= 400:
-                img_num = 4
-            elif x_coord_avg > 400:
-                img_num = 5
+            if x_coord_avg < 107:            img_num = 1
+            elif 107 <= x_coord_avg <= 200:  img_num = 2
+            elif 200 <= x_coord_avg <= 300:  img_num = 3
+            elif 300 <= x_coord_avg <= 400:  img_num = 4
+            elif x_coord_avg > 400:          img_num = 5
             driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/div[2]/div[1]/img[" + str(img_num) + "]").click()
             time.sleep(1)
-        else:
-            still_ads = False
+        else:   still_ads = False
 
 def nextRun(driver):
     minsLeftForFaucet = 60
@@ -223,14 +180,12 @@ def nextRun(driver):
         # Get Faucet Wait Time
         driver.get("https://cointiply.com/home?intent=faucet")
         time.sleep(2)
-        try: 
-            minsLeftForFaucet = int(driver.find_element(By.XPATH, "/html/body/div/div/div[4]/div/div/div[2]/div[2]/div[2]/div[1]/div/div[1]/ul/li[3]/p[1]").text) + 1
+        try:    minsLeftForFaucet = int(driver.find_element(By.XPATH, "/html/body/div/div/div[4]/div/div/div[2]/div[2]/div[2]/div[1]/div/div[1]/ul/li[3]/p[1]").text) + 1
         except NoSuchElementException:
             try:
                 driver.find_element(By.XPATH, "//*[@id='app']/div[4]/div/div/div[2]/div[2]/div[2]/div[1]/div/div[1]/div/button")
                 exception = "faucet wasn't run"
-            except NoSuchElementException:
-                print('time left not accurately captured, check web element')
+            except NoSuchElementException:  print('time left not accurately captured, check web element')
     return minsLeftForFaucet
 
 def calculateNextRun(minsLeftForFaucet):
@@ -248,12 +203,10 @@ def calculateNextRun(minsLeftForFaucet):
         if (nextRunMinute >= 60):
             nextRunMinute = abs(nextRunMinute - 60)
             nextRunHour += 1 if nextRunHour < 23 else 0
-    if nextRunMinute < 0 or nextRunMinute > 59:
-        showMessage('Next Run Minute is off', 'Nextrunminute = ' + str(nextRunMinute))
+    if nextRunMinute < 0 or nextRunMinute > 59: showMessage('Next Run Minute is off', 'Nextrunminute = ' + str(nextRunMinute))
     nextRun = now.replace(hour=nextRunHour, minute=nextRunMinute)
     print('next run at ', str(nextRun.hour) + ":" + "{:02d}".format(nextRun.minute))
-    if nextRun.hour == 0:
-        minsLeftForFaucet -= datetime.now().time().minute
+    if nextRun.hour == 0:   minsLeftForFaucet -= datetime.now().time().minute
     time.sleep(minsLeftForFaucet * 60)
 
 def runCointiply(driver, faucetRun=True):

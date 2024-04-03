@@ -1,8 +1,7 @@
-import time
+import time, math
 from decimal import Decimal
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
-import math
 
 if __name__ == '__main__' or __name__ == "IoPay":
     from Classes.Asset import Security
@@ -16,11 +15,8 @@ else:
 
 def locateIoPayWindow(driver):
     found = driver.findWindowByUrl("stake.iotex.io")
-    if not found:
-        IoPayLogin(driver)
-    else:
-        driver.webDriver.switch_to.window(found)
-        time.sleep(1)
+    if not found:   IoPayLogin(driver)
+    else:           driver.webDriver.switch_to.window(found); time.sleep(1)
 
 def IoPayLogin(driver):
     driver.openNewWindow('https://stake.iotex.io/')
@@ -33,8 +29,7 @@ def runIoPay(driver, account, book):
         driver.webDriver.find_element(By.XPATH,"//*[@id='__next']/section/nav/div/div[2]/div/div/button[1]").click() # connect wallet
         driver.webDriver.find_element(By.XPATH,"//*[@id='chakra-modal--body-1']/div/div[2]").click() # ledger
         driver.clickXPATHElementOnceAvaiable("//*[@id='chakra-modal--body-2']/div[1]/div/div[2]/button") # connect
-    except NoSuchElementException:
-        exception = "wallet already connected"
+    except NoSuchElementException:  exception = "wallet already connected"
     time.sleep(1)
     driver.webDriver.find_element(By.XPATH,"//*[@id='__next']/section/nav/div/div[2]/nav/div[4]/div/div/p").click() # click my Vote
     time.sleep(1)

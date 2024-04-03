@@ -18,11 +18,8 @@ else:
     
 def locateKrakenWindow(driver):
     found = driver.findWindowByUrl("kraken.com")
-    if not found:
-        krakenLogin(driver)
-    else:
-        driver.webDriver.switch_to.window(found)
-        time.sleep(1)
+    if not found:   krakenLogin(driver)
+    else:           driver.webDriver.switch_to.window(found); time.sleep(1)
 
 def krakenLogin(driver):
     driver.openNewWindow('https://www.kraken.com/sign-in')
@@ -38,21 +35,18 @@ def krakenLogin(driver):
         time.sleep(1)
         driver.find_element(By.ID, 'tfa').send_keys(token)
         driver.find_element(By.XPATH, "/html/body/div/div[2]/div[2]/form/div[1]/div/div/div[2]/button/div/div/div").click()
-    except (NoSuchElementException or StaleElementReferenceException):
-        exception = 'already logged in'
+    except (NoSuchElementException or StaleElementReferenceException):  exception = 'already logged in'
     time.sleep(2)
 
 def getKrakenBalance(driver):
     locateKrakenWindow(driver)
     driver.webDriver.get('https://www.kraken.com/u/history/ledger')
-    eth2Balance = ''
-    num = 1
+    eth2Balance, num = '', 1
     while num < 20:
         balance = driver.webDriver.find_element(By.XPATH, "//*[@id='__next']/div/main/div/div[2]/div/div/div[3]/div[2]/div/div[" + str(num) + "]/div/div[7]/div/div/span/span/span").text
         coin = driver.webDriver.find_element(By.XPATH, "//*[@id='__next']/div/main/div/div[2]/div/div/div[3]/div[2]/div/div[" + str(num) + "]/div/div[7]/div/div/div").text
         if coin == 'ETH2':
-            if not eth2Balance:
-                eth2Balance = float(balance)
+            if not eth2Balance: eth2Balance = float(balance)
         num = 21 if eth2Balance else num + 1
     return eth2Balance
 

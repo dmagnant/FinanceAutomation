@@ -1,5 +1,4 @@
 import time
-
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Eternl":
@@ -12,11 +11,8 @@ else:
 
 def locateEternlWindow(driver):
     found = driver.findWindowByUrl("eternl.io/app/mainnet")
-    if not found:
-        eternlLogin(driver)
-    else:
-        driver.webDriver.switch_to.window(found)
-        time.sleep(1)
+    if not found:   eternlLogin(driver)
+    else:           driver.webDriver.switch_to.window(found); time.sleep(1)
 
 def eternlLogin(driver):
     driver.openNewWindow('https://eternl.io/app/mainnet/wallet/xpub1wxalshqc32m-ml/summary')
@@ -31,7 +27,6 @@ def runEternl(driver, account, book):
     account.setPrice(account.getPriceFromCoinGecko())
     account.updateSpreadsheetAndGnuCash(book)
     
-
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')

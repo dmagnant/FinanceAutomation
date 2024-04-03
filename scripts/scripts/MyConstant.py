@@ -1,7 +1,5 @@
-import time
+import time, pyautogui
 from decimal import Decimal
-
-import pyautogui
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
@@ -15,16 +13,12 @@ else:
 
 def locateMyConstantWindow(driver):
     found = driver.findWindowByUrl("www.myconstant.com")
-    if not found:
-        myConstantLogin(driver)
-    else:
-        driver.webDriver.switch_to.window(found)
-        time.sleep(1)
+    if not found:   myConstantLogin(driver)
+    else:           driver.webDriver.switch_to.window(found); time.sleep(1)
 
 def myConstantLogin(driver):
     driver.openNewWindow('https://www.myconstant.com/log-in')
     driver = driver.webDriver
-    #login
     try:
         driver.find_element(By.ID, "lg_username").send_keys(getUsername('My Constant'))
         driver.find_element(By.ID, "lg_password").send_keys(getPassword('My Constant'))
@@ -34,16 +28,14 @@ def myConstantLogin(driver):
         pyautogui.press('space')
         showMessage("CAPTCHA", "Verify captcha, then click OK")
         driver.find_element(By.XPATH, "//*[@id='submit-btn']").click()
-        token = getOTP('my_constant')
-        char = 0
+        token, char = getOTP('my_constant'), 0
         time.sleep(2)
         while char < 6:
             xpath_start = "//*[@id='layout']/div[3]/div/div/div[2]/div/div/div/div[3]/div/div/div["            
             driver.find_element(By.XPATH, xpath_start + str(char + 1) + "]/input").send_keys(token[char])
             char += 1
         time.sleep(6)
-    except NoSuchElementException:
-        exception = "caught"
+    except NoSuchElementException:  exception = "caught"
 
 def getCoinBalance(driver, coin):
         # click dropdown menu
@@ -74,12 +66,9 @@ def getMyConstantBalances(driver, type):
         Bitcoin = Security("Bitcoin")
         Ethereum = Security("Ethereum")
         coinList = [Bitcoin, Ethereum]
-        # get coin balances
         for coin in coinList:
-            if coin.name == "Bitcoin":
-                coin.setBalance(getCoinBalance(driver, (coin.symbol)))
-            elif coin.name == "Ethereum":
-                coin.setBalance(getCoinBalance(driver, (coin.name)))
+            if coin.name == "Bitcoin":      coin.setBalance(getCoinBalance(driver, (coin.symbol)))
+            elif coin.name == "Ethereum":   coin.setBalance(getCoinBalance(driver, (coin.name)))
         return coinList
 
 def runMyConstant(driver, type):
@@ -95,8 +84,6 @@ if __name__ == '__main__':
     driver = Driver("Chrome")
     type = "USD"
     response = runMyConstant(driver, type)
-    if (type == "USD"):
-        response.getData()
+    if (type == "USD"): response.getData()
     elif (type == "Crypto"):
-        for coin in response:
-            coin.getData()
+        for coin in response:   coin.getData()

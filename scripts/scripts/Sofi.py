@@ -1,5 +1,4 @@
-import csv
-import time
+import csv, time
 from datetime import datetime
 
 from selenium.common.exceptions import NoSuchElementException
@@ -21,11 +20,8 @@ else:
                                              setDirectory, showMessage, modifyTransactionDescription)
 def locateSofiWindow(driver):
     found = driver.findWindowByUrl("sofi.com")
-    if not found:
-        sofiLogin(driver)
-    else:
-        driver.webDriver.switch_to.window(found)
-        time.sleep(1)
+    if not found:   sofiLogin(driver)
+    else:           driver.webDriver.switch_to.window(found); time.sleep(1)
     return True
 
 def sofiLogin(driver):
@@ -44,8 +40,7 @@ def sofiLogin(driver):
         showMessage("OTP Verification", "Enter code from phone, then click OK")
         driver.find_element(By.XPATH,"//*[@id='mainContent']/div/div/div[2]/div[3]/div[1]/label/span").click() # remember device
         driver.find_element(By.ID,"verifyCode").click()
-    except NoSuchElementException:
-        exception = 'otp not required'
+    except NoSuchElementException:  exception = 'otp not required'
 
 def sofiLogout(driver):
     locateSofiWindow(driver)
@@ -79,24 +74,15 @@ def getSofiBalanceAndOrientPage(driver, account):
         table += 1
         balance = findBalanceElement(driver.webDriver, table, div)
     account.setBalance(balance)
-    return {
-        'table': table,
-        'div': div
-    }
+    return {'table': table,'div': div}
 
-def setSofiTransactionElementRoot(table, row, column, div):
-    return "/html/body/div/main/div[3]/div[" + div + "]/table[" + str(table) + "]/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/span"
+def setSofiTransactionElementRoot(table, row, column, div): return "/html/body/div/main/div[3]/div[" + div + "]/table[" + str(table) + "]/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/span"
 
 def getTransactionsFromSofiWebsite(driver, dateRange, today, tableStart, div):
     sofiActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\sofi.csv"
     open(sofiActivity, 'w', newline='').truncate()
-    year = today.year
-    table = tableStart
-    row = 1
-    column = 1
-    elementRoot = setSofiTransactionElementRoot(table, row, column, div)
-    insideDateRange = True
-    previousMonth = False
+    year, table, insideDateRange, previousMonth, elementRoot = today.year, tableStart, True, False, setSofiTransactionElementRoot(table, row, column, div)
+    row = column = 1
     while insideDateRange:
         try:
             date = driver.find_element(By.XPATH, elementRoot).text
@@ -105,8 +91,7 @@ def getTransactionsFromSofiWebsite(driver, dateRange, today, tableStart, div):
                 day = date[4:]
                 date = f'{str(month)}/{day}/{str(year-2000)}'
             sofiDate = datetime.strptime(date, "%m/%d/%y").date()
-            if sofiDate < dateRange['startDate'] or sofiDate > dateRange['endDate']:
-                insideDateRange = False
+            if sofiDate < dateRange['startDate'] or sofiDate > dateRange['endDate']:    insideDateRange = False
             else:
                 column += 1
                 description = driver.find_element(By.XPATH, setSofiTransactionElementRoot(table, row, column, div)).text
@@ -125,8 +110,7 @@ def getTransactionsFromSofiWebsite(driver, dateRange, today, tableStart, div):
                 column = 1
                 elementRoot = setSofiTransactionElementRoot(table, row, column, div)
                 previousMonth = True
-            else:
-                insideDateRange = False
+            else:   insideDateRange = False
     return sofiActivity
 
 def runSofiAccount(driver, dateRange, today, account, book):
@@ -138,10 +122,8 @@ def runSofi(driver, accounts, book):
     today = datetime.today().date()
     dateRange = getStartAndEndOfDateRange(today, 7)
     locateSofiWindow(driver)
-    for account in accounts:
-        runSofiAccount(driver, dateRange, today, account, book)
-    if today.day <= 7:
-        setMonthlySpendTarget(driver)        
+    for account in accounts:    runSofiAccount(driver, dateRange, today, account, book)
+    if today.day <= 7:          setMonthlySpendTarget(driver)        
     driver.webDriver.get("https://www.sofi.com/my/money/account/#/1000028154579/account-detail") # switch back to checking page
 
 # if __name__ == '__main__':

@@ -1,8 +1,4 @@
-import random
-import time
-
-import pyautogui
-import pygetwindow
+import random, time, pyautogui, pygetwindow
 from random_words import RandomWords
 from selenium.common.exceptions import (ElementClickInterceptedException,
                                         ElementNotInteractableException,
@@ -22,32 +18,23 @@ else:
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import showMessage
 
-def getSwagbucksBasePath():
-    return '/html/body/div[2]/div[' 
+def getSwagbucksBasePath(): return '/html/body/div[2]/div[' 
     
 def closePopUps(driver):
-    try:
-        driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/section/section/aside/button[2]").click() # Yay for me
+    try:    driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/section/section/aside/button[2]").click() # Yay for me
     except NoSuchElementException:
-        try:
-            driver.webDriver.find_element(By.ID, "lightboxExit").click() # to exit pop-up
-        except (NoSuchElementException, ElementNotInteractableException):
-            exception = "caught"
+        try:    driver.webDriver.find_element(By.ID, "lightboxExit").click() # to exit pop-up
+        except (NoSuchElementException, ElementNotInteractableException): exception = "caught"
 
 def locateSwagBucksWindow(driver):
     found = driver.findWindowByUrl("swagbucks.com")
-    if not found:
-        swagBucksLogin(driver)
-    else:
-        driver.webDriver.switch_to.window(found)
-        time.sleep(1)
+    if not found:   swagBucksLogin(driver)
+    else:           driver.webDriver.switch_to.window(found); time.sleep(1)
 
 def swagBucksLogin(driver):
     driver.openNewWindow('https://www.swagbucks.com/')
-    try:
-        driver.webDriver.find_element(By.ID, "lightboxExit").click()
-    except (ElementNotInteractableException, NoSuchElementException):
-        exception = "caught"
+    try:    driver.webDriver.find_element(By.ID, "lightboxExit").click()
+    except (ElementNotInteractableException, NoSuchElementException):   exception = "caught"
         
 def swagBuckscontentDiscovery(driver):
     driver.openNewWindow("https://www.swagbucks.com/discover/alloffers?sort=2")
@@ -56,11 +43,8 @@ def swagBuckscontentDiscovery(driver):
     while True:
         contentPath = getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div[2]/div[1]/section[" + str(cardNum) + "]"
         try:
-            try:
-                earnings = driver.webDriver.find_element(By.XPATH, contentPath + "/p/span/span[3]").text
-            except NoSuchElementException:
-                cardNum += 1
-                continue
+            try:    earnings = driver.webDriver.find_element(By.XPATH, contentPath + "/p/span/span[3]").text
+            except NoSuchElementException:  cardNum += 1; continue
             description = driver.webDriver.find_element(By.XPATH, contentPath + "/button").text
             if "1 sb" in earnings.lower() or "check out the latest deals" == description.lower():
                 clickAmt = 1
@@ -72,14 +56,11 @@ def swagBuckscontentDiscovery(driver):
                     clickAmt += 1
                     if "discover daily interests" != description.lower():
                         break
-            elif "sb per" in earnings.lower() or int(earnings.lower().replace(" sb", '')) > 4:
-                break
+            elif "sb per" in earnings.lower() or int(earnings.lower().replace(" sb", '')) > 4:  break
             cardNum += 1
         except NoSuchElementException:
-            if cardNum == 1:
-                showMessage('failed to find content discovery', 'check script for correct element')
-            else:
-                break
+            if cardNum == 1:    showMessage('failed to find content discovery', 'check script for correct element')
+            else:       break
     driver.closeWindowsExcept([':8000/'])
 
 def runAlusRevenge(driver):
@@ -98,8 +79,7 @@ def runAlusRevenge(driver):
     element.send_keys(Keys.DOWN)
     redeemed = 0
     while redeemed < 3:
-        game_over_text = ""
-        num = 0
+        game_over_text, num = "", 0
         # click Play Now
         pyautogui.leftClick(850, 950)
         pyautogui.leftClick(850, 950)
@@ -126,8 +106,7 @@ def runAlusRevenge(driver):
                 time.sleep(5)
                 game_over_text = driver.webDriver.find_element(By.XPATH, "//*[@id='embedGameOverHdr']/h3").text
                 if game_over_text != "":
-                    if game_over_text != "No SB this time. Keep trying...":
-                        redeemed += 1
+                    if game_over_text != "No SB this time. Keep trying...": redeemed += 1
                     driver.webDriver.find_element(By.ID, "gamePlayAgainBtn").click() # play again
                     time.sleep(3)
                     break
@@ -139,38 +118,27 @@ def dailyPoll(driver):
     try:
         driver.webDriver.find_element(By.CSS_SELECTOR, "td.pollCheckbox").click() # first answer
         driver.webDriver.find_element(By.ID, "btnVote").click() # vote & earn
-    except NoSuchElementException:
-        exception = "already answered"
+    except NoSuchElementException:  exception = "already answered"
 
 def toDoList(driver):
     main = driver.webDriver.window_handles[len(driver.webDriver.window_handles)-1]
-    list_item_num = 1
-    button_num = 2
-    button_not_clicked = True
+    list_item_num, button_num, button_not_clicked = 1, 2, True
     closePopUps(driver)
     while list_item_num <= 8:
-        try:  # look for Daily Bonus header 
-            driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "1]/header/nav/div[3]/div/div/div/div[1]/h4")
+        try:  driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "1]/header/nav/div[3]/div/div/div/div[1]/h4") # look for Daily Bonus header 
         except NoSuchElementException:
-            try: # if not visible, click to show To Do List
-                driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "1]/header/nav/div[3]/button").click()
-            except (NoSuchElementException, ElementClickInterceptedException):
-                exception = "caught"
+            try: driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "1]/header/nav/div[3]/button").click() # if not visible, click to show To Do List
+            except (NoSuchElementException, ElementClickInterceptedException):  exception = "caught"
         time.sleep(1)
         list_item = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "1]/header/nav/div[3]/div/div/div/div[2]/div/section[1]/div/ul/li[" + str(list_item_num) + "]/a")
         if list_item.text == "Add A Magic Receipts Offer":
             driver.webDriver.get("https://www.swagbucks.com/grocery-receipts-merchant?category=-1&merchant-id=53")
             time.sleep(4)
             while button_not_clicked:
-                try:
-                    button = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "2]/div[2]/div[2]/main/reset-styles/div/div/div[2]/div[1]/section[4]/ul/li[" + str(button_num) +"]/div/a/div[2]/button/span")
-                except NoSuchElementException:
-                    button = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "2]/div[2]/div[2]/main/reset-styles/div/div/div[2]/div[1]/section[4]/ul/li[" + str(button_num) +"]/div/a/div[3]/button/span")                
-                if button.text == 'Add to List':
-                    button.click()
-                    button_not_clicked = False
-                else:
-                    button_num+=1
+                try:    button = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "2]/div[2]/div[2]/main/reset-styles/div/div/div[2]/div[1]/section[4]/ul/li[" + str(button_num) +"]/div/a/div[2]/button/span")
+                except NoSuchElementException:  button = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "2]/div[2]/div[2]/main/reset-styles/div/div/div[2]/div[1]/section[4]/ul/li[" + str(button_num) +"]/div/a/div[3]/button/span")                
+                if button.text == 'Add to List':    button.click(); button_not_clicked = False                    
+                else:                               button_num+=1
             driver.webDriver.get('https://www.swagbucks.com/')
             time.sleep(2)
         elif list_item.text == "Deal of the Day":
@@ -178,8 +146,7 @@ def toDoList(driver):
             list_item.click()
             time.sleep(6)
             window_num_after = len(driver.webDriver.window_handles)
-            if window_num_before == window_num_after:
-                driver.webDriver.get('https://www.swagbucks.com/')
+            if window_num_before == window_num_after:   driver.webDriver.get('https://www.swagbucks.com/')
             else:
                 driver.switchToLastWindow()
                 driver.webDriver.close()
@@ -202,13 +169,10 @@ def swagbucksInbox(driver):
             try:
                 driver.webDriver.find_element(By.XPATH, contentPath).click()
                 description = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/div[1]/div[1]/main/h1").text
-                if "Earn Every" in description:
-                    openAndCloseInboxItem(driver)
+                if "Earn Every" in description: openAndCloseInboxItem(driver)
                 elif "Discover Daily Interests" in description:
                     num = 0
-                    while num < 4:
-                        openAndCloseInboxItem(driver)
-                        num += 1
+                    while num < 4:  openAndCloseInboxItem(driver); num += 1
                 driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div[3]/div[2]/div[2]").click() # delete
             except ElementNotInteractableException: # description is blank
                 driver.webDriver.find_element(By.XPATH,'/html/body/div[2]/div[3]/div[1]/div[1]/main/div/div[2]/div/div[3]/div[1]/div/span').click() # checkbox
@@ -216,9 +180,7 @@ def swagbucksInbox(driver):
             time.sleep(1)
             alert = driver.webDriver.switch_to.alert
             alert.accept()
-        except NoSuchElementException:
-            exception = "no element found in inbox"
-            break
+        except NoSuchElementException: break
 
 def swagbucksSearch(driver):
     locateSwagBucksWindow(driver)
@@ -226,34 +188,20 @@ def swagbucksSearch(driver):
     num = 0
     while num < 1:
         search_term1 = None
-        # search_term2 = None
-        # search_term = None
         try:
-            # accept reward
             driver.find_element(By.XPATH, "//*[@id='tblAwardBannerAA']/div[2]/div/div[1]/form/input[2]")
             num += 1
             driver.find_element(By.ID, "claimSearchWinButton").click()
-        # if no reward, continue searching
         except NoSuchElementException:
             time.sleep(1)
-            try:
-                driver.find_element(By.ID, "sbLogoLink").click()
+            try:    driver.find_element(By.ID, "sbLogoLink").click()
             # pop-up in the way
-            except ElementClickInterceptedException:
-                closePopUps(driver)
-                driver.find_element(By.ID, "sbLogoLink").click()
+            except ElementClickInterceptedException:    closePopUps(driver); driver.find_element(By.ID, "sbLogoLink").click()
             time.sleep(1)
-            while search_term1 is None:
-                search_term1 = RandomWords().random_word()
-            # while search_term2 is None:
-            #     search_term2 = RandomWords().random_word()
-            # search_term = search_term1 + " " + search_term2
+            while search_term1 is None: search_term1 = RandomWords().random_word()
             driver.find_element(By.ID, "sbGlobalNavSearchInputWeb").send_keys(search_term1 + Keys.ENTER)
             time.sleep(random.choice([2, 3, 4]))
-        except NoSuchWindowException:
-            num = 3
-        except WebDriverException:
-            num = 3
+        except (NoSuchWindowException, WebDriverException): num = 3
 
 def getSwagBucksBalance(driver):
     locateSwagBucksWindow(driver)
@@ -274,22 +222,22 @@ def claimSwagBucksRewards(driver):
 def runSwagbucks(driver, runAlu, account, book):
     # closeExpressVPN()
     locateSwagBucksWindow(driver)
-    if runAlu:
-        runAlusRevenge(driver)
+    if runAlu:  runAlusRevenge(driver)
     dailyPoll(driver)
     swagbucksInbox(driver)
     toDoList(driver)
     swagBuckscontentDiscovery(driver)
+    swagbucksSearch(driver)
     account.setBalance(getSwagBucksBalance(driver))
     book.updateMRBalance(account)
-    if int(account.balance) > 1000:
-        claimSwagBucksRewards(driver)
-    swagbucksSearch(driver)
+    if int(account.balance) > 1000: claimSwagBucksRewards(driver)    
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
     Swagbucks = Security("Swagbucks", book)
-    runSwagbucks(driver, False, Swagbucks, book)
-    book.closeBook()
-
+    # runSwagbucks(driver, False, Swagbucks, book)
+    # book.closeBook()
+    
+    swagBuckscontentDiscovery(driver)
+    Swagbucks.setBalance(getSwagBucksBalance(driver))

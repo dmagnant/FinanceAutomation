@@ -20,11 +20,8 @@ else:
     
 def locateOptumWindow(driver):
     found = driver.findWindowByUrl("secure.optumfinancial.com")
-    if not found:
-        optumLogin(driver)
-    else:
-        driver.webDriver.switch_to.window(found)
-        time.sleep(1)
+    if not found:   optumLogin(driver)
+    else:           driver.webDriver.switch_to.window(found); time.sleep(1)
         
 def optumLogin(driver):
     driver.openNewWindow('https://secure.optumfinancial.com/portal/hsid/login?url=/portal/CC')
@@ -38,10 +35,8 @@ def optumLogin(driver):
             driver.webDriver.find_element(By.XPATH, '/html/body/div[1]/div[1]/div[2]/div[2]/div/div/main/div/div[2]/div/div/div/div/div/div[2]/form/div[4]/div/div/div[2]/input').send_keys(getAnswerForSecurityQuestion(question))
             # driver.webDriver.find_element(By.ID,'rememberMeLabel').click() # Trust this device
             driver.webDriver.find_element(By.ID, 'continueSubmitButton').click() # Continue
-        except NoSuchElementException:
-            exception = 'no security questions'
-    except NoSuchElementException:
-        exception = "already logged in"
+        except NoSuchElementException:  exception = 'no security questions'
+    except NoSuchElementException:      exception = "already logged in"
     time.sleep(1)            
     
 if __name__ == '__main__':
