@@ -27,7 +27,7 @@ def getSymbolByName(self):
         case "swagbucks":                                           return 'SB'
         case 'employee benefit index':                              return 'M038'
         case 'total stock market(401k)':                            return '8585'
-        case 'ira vti' | 'roth ira vti':                            return 'VTI'
+        case 'ira vti' | 'roth ira vti' | 'brokerage vti':          return 'VTI'
         case 'ira vxus' | 'roth ira vxus':                          return 'VXUS'        
         case 'ira spaxx' | 'roth ira spaxx' | 'brokerage spaxx':    return 'SPAXX'
         case _:                                                     print(f'Security: {self.name} not found in "getSymbolByName" function')

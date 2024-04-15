@@ -79,10 +79,9 @@ def getSofiBalanceAndOrientPage(driver, account):
 def setSofiTransactionElementRoot(table, row, column, div): return "/html/body/div/main/div[3]/div[" + div + "]/table[" + str(table) + "]/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/span"
 
 def getTransactionsFromSofiWebsite(driver, dateRange, today, tableStart, div):
-    sofiActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\sofi.csv"
-    open(sofiActivity, 'w', newline='').truncate()
-    year, table, insideDateRange, previousMonth, elementRoot = today.year, tableStart, True, False, setSofiTransactionElementRoot(table, row, column, div)
-    row = column = 1
+    sofiActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\sofi.csv";     open(sofiActivity, 'w', newline='').truncate()
+    year, table, insideDateRange, previousMonth, row, column = today.year, tableStart, True, False, 1, 1
+    elementRoot = setSofiTransactionElementRoot(table, row, column, div)
     while insideDateRange:
         try:
             date = driver.find_element(By.XPATH, elementRoot).text

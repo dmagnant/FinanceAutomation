@@ -27,15 +27,15 @@ else:
 
 def getMonthlyAccounts(type, personalBook, jointBook):
     if type == 'USD':
-        IRA, iraSPAXX = USD("IRA", personalBook), Security('IRA SPAXX', personalBook)
+        IRA, iraSPAXX, iraVTI = USD("IRA", personalBook), Security('IRA SPAXX', personalBook), Security('IRA VTI', personalBook)
         rIRA, riraVXUS, riraVTI, riraSPAXX = USD("Roth IRA", personalBook), Security('Roth IRA VXUS', personalBook), Security('Roth IRA VTI', personalBook), Security('Roth IRA SPAXX', personalBook)
-        Brokerage, brSPAXX = USD("Brokerage", personalBook), Security('Brokerage SPAXX', personalBook)
+        Brokerage, brSPAXX, brVTI = USD("Brokerage", personalBook), Security('Brokerage SPAXX', personalBook), Security('Brokerage VTI', personalBook)
         VIIIX, HECash = Security("HE Investment", personalBook), USD("HE Cash", personalBook)
         VFIAX, OptumCash = Security("Optum Investment", personalBook), USD("Optum Cash", personalBook)
         Pension, V401k, TSM401k, EBI = USD("VanguardPension", personalBook), USD("Vanguard401k", personalBook), Security("Total Stock Market(401k)", personalBook), Security("Employee Benefit Index", personalBook)
         Home, LiquidAssets = USD('Home', jointBook), USD("Liquid Assets", personalBook)
         Bonds, Worthy = USD("Bonds", personalBook), USD("Worthy", personalBook)        
-        accounts = {'IRA':IRA,'iraSPAXX':iraSPAXX,'rIRA':rIRA,'riraVXUS':riraVXUS,'riraVTI':riraVTI,'riraSPAXX':riraSPAXX,'Brokerage':Brokerage,'brSPAXX':brSPAXX,
+        accounts = {'IRA':IRA,'iraSPAXX':iraSPAXX,'iraVTI':iraVTI,'rIRA':rIRA,'riraVXUS':riraVXUS,'riraVTI':riraVTI,'riraSPAXX':riraSPAXX,'Brokerage':Brokerage,'brSPAXX':brSPAXX, 'brVTI':brVTI,
                     'VIIIX':VIIIX,'HECash':HECash,'VFIAX':VFIAX,'OptumCash':OptumCash,'V401k':V401k,'EBI':EBI,'TSM401k':TSM401k,'Worthy': Worthy,'Pension':Pension,
                     'Home':Home,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
     elif type == 'Crypto':

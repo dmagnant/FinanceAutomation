@@ -39,7 +39,10 @@ def runLedger(coinList, book):
 
 
 if __name__ == '__main__':
+    book = GnuCash('Finance')
+    gnuAccount = 'Assets:Non-Liquid Assets:CryptoCurrency'
     from datetime import datetime
-    bank = ['Ally', 'Sofi', 'Fidelity', 'HealthEquity', 'Optum', 'Vanguard', 'Worthy'].sort()
-    bank.sort()
-    print(bank)
+    date = date=datetime.today().date().replace(month=3, day=31)
+    print(book.getBalance(gnuAccount, date))
+
+

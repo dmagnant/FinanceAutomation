@@ -39,12 +39,12 @@ from scripts.scripts.Classes.GnuCash import GnuCash
 from scripts.scripts.Functions.GeneralFunctions import returnRender
 
 def scripts(request):
-    bank = ['Ally', 'Sofi', 'Fidelity', 'HealthEquity', 'Optum', 'Vanguard', 'Worthy']
-    cc = ['Amex', 'Barclays', 'BoA', 'Chase', 'Discover']
-    crypto = ['Coinbase', 'Eternl', 'Exodus', 'IoPay', 'Kraken', 'Ledger', 'MyConstant', 'Presearch']
-    mr = ['AmazonGC', 'Bing', 'Paidviewpoint', 'Paypal', 'Pinecone', 'PSCoupons', 'Swagbucks', 'Tellwut']
+    bank = ['Ally', 'Sofi', 'Fidelity', 'HealthEquity', 'Optum', 'Vanguard', 'Worthy']; bank.sort()
+    cc = ['Amex', 'Barclays', 'BoA', 'Chase', 'Discover']; cc.sort();
+    crypto = ['Coinbase', 'Eternl', 'Exodus', 'IoPay', 'Kraken', 'Ledger', 'MyConstant', 'Presearch']; crypto.sort()
+    mr = ['AmazonGC', 'Bing', 'Paidviewpoint', 'Paypal', 'Pinecone', 'PSCoupons', 'Swagbucks', 'Tellwut']; mr.sort()
     if "close windows" in request.POST: driver = Driver("Chrome"); driver.closeWindowsExcept([':8000/'])
-    context = {'bank':bank.sort(), 'cc':cc.sort(), 'crypto':crypto.sort(), 'mr':mr.sort()}
+    context = {'bank':bank, 'cc':cc, 'crypto':crypto, 'mr':mr}
     return returnRender(request, "scripts.html", context)
 
 def ally(request):
@@ -53,6 +53,7 @@ def ally(request):
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:runAlly(driver, Ally, book)
+        elif "energy" in request.POST:  updateEnergyBillAmounts(driver, book, request.POST['energyTotal'])        
         elif "login" in request.POST:   locateAllyWindow(driver)
         elif "logout" in request.POST:  allyLogout(driver)
         elif "balance" in request.POST: Ally.setBalance(getAllyBalance(driver))
@@ -340,7 +341,6 @@ def monthly(request):
     if request.method == 'POST':
         driver, today = Driver("Chrome"), datetime.today().date()
         if "USD" in request.POST:                   runUSD(driver, today, usdAccounts, personalBook)
-        elif "energy" in request.POST:              updateEnergyBillAmounts(driver, jointBook, request.POST['energyTotal'])
         elif "Crypto" in request.POST:              runCrypto(driver, today, cryptoAccounts, personalBook)
         elif "fidelityMain" in request.POST:        runFidelity(driver, usdAccounts, personalBook)
         elif "fidelityBalance" in request.POST:     getFidelityBalance(driver, accounts)

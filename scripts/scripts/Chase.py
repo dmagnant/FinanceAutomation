@@ -52,7 +52,7 @@ def exportChaseTransactions(driver, today):
     time.sleep(3)
     activateChaseWindow("transactions - chase")
     driver.webDriver.find_element(By.ID,'ACTIVITY-header-selector-label').click() # Activity Since Last Statement
-    pyautogui.press('down');    pyautogui.press('down')
+    pyautogui.press('down');    pyautogui.press('down'); pyautogui.press('down'); pyautogui.press('down'); pyautogui.press('down')
     pyautogui.press('enter')
     time.sleep(1)
     driver.webDriver.find_element(By.ID,"quick-action-download-activity-tooltip").click() # Download

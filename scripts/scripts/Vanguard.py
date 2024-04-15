@@ -87,10 +87,12 @@ def getVanguardBalancesAndPensionInterestYTD(driver, accounts):
     driver.webDriver.get('https://ownyourfuture.vanguard.com/main/dashboard/assets-details')
     time.sleep(1)
     pensionBalance = driver.webDriver.find_element(By.XPATH, "/html/body/div[3]/div/app-personalized-dashboard-root/app-assets-details/app-balance-details/div/div[3]/div[3]/div/app-details-card/div/div/div[1]/div[3]/h4").text.strip('$').replace(',', '')
+    print('pension: ' + str(pensionBalance))
     v401kBalance = driver.webDriver.find_element(By.XPATH,"/html/body/div[3]/div/app-personalized-dashboard-root/app-assets-details/app-balance-details/div/div[3]/app-details-card/div/div/div[1]/div[3]/h4").text.strip('$').replace(',', '')                                                  
     accounts['Pension'].setBalance(pensionBalance)
     accounts['V401k'].setBalance(v401kBalance)
     interestYTD = driver.webDriver.find_element(By.XPATH, "/html/body/div[3]/div/app-personalized-dashboard-root/app-assets-details/app-balance-details/div/div[3]/div[4]/div/app-details-card/div/div/div[1]/div[3]/h4").text.strip('$').replace(',', '')
+    print('interested YTD: ' + str(interestYTD))
     return interestYTD
 
 def calculatePensionTransactions(book, today, account, interestYTD):

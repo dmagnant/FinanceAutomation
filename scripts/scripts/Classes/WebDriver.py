@@ -98,7 +98,6 @@ class Driver:
     def __init__(self, browser, asUser=True):
         self.webDriver = openWebDriver(browser, asUser)
         self.webDriver.implicitly_wait(5)
-        print('driver initialized')
         
     def findWindowByUrl(self, url):
         currentWindow = self.webDriver.current_window_handle

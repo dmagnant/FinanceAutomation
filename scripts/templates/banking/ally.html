@@ -10,7 +10,12 @@
                     <button type="submit" name="main">Main</button><br>
                     <button type="submit" name="login">Login</button><br>
                     <button type="submit" name="balance">Balance</button><br>
-                    <button type="submit" name="logout">Logout</button><br>
+                    <button type="submit" name="logout">Logout</button><br><br>
+                </form>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="text" name="energyTotal">
+                    <button type="submit" name="energy">energy bill</button><br><br>
                 </form>
             </div>
             <div style="width: 80%; display:table-cell">

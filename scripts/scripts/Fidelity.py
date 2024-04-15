@@ -50,7 +50,6 @@ def getFidelityPricesAndShares(driver, allAccounts, book, accountToGet='all'):
         row += 1
         try:
             accountName = driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[1]/div[1]/div["+ str(row) +"]/div/div/span/div/div[2]/h3").text
-            if 'Traditional' in accountName:    row+=2
         except NoSuchElementException:
             try:
                 symbol = driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[1]/div[1]/div["+ str(row) +"]/div/div/span/div/div[2]/div/button").text.replace('$','')
@@ -144,10 +143,10 @@ def runFidelity(driver, accounts, book):
     accounts['brSPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['brSPAXX'].gnuAccount))
     
 def getFidelityAccounts(book):
-    IRA, iraSPAXX = USD("IRA", book), Security('IRA SPAXX', book)
+    IRA, iraSPAXX, iraVTI = USD("IRA", book), Security('IRA SPAXX', book), Security('IRA VTI', book)
     rIRA, riraVXUS, riraVTI, riraSPAXX = USD("Roth IRA", book), Security('Roth IRA VXUS', book), Security('Roth IRA VTI', book), Security('Roth IRA SPAXX', book)
-    Brokerage, brSPAXX = USD("Brokerage", book), Security('Brokerage SPAXX', book)
-    return {'rIRA': rIRA,'riraVXUS': riraVXUS,'riraVTI': riraVTI,'riraSPAXX': riraSPAXX, 'Brokerage':Brokerage, 'brSPAXX':brSPAXX, 'IRA':IRA, 'iraSPAXX':iraSPAXX}
+    Brokerage, brSPAXX, brVTI = USD("Brokerage", book), Security('Brokerage SPAXX', book), Security('Brokerage VTI', book)
+    return {'rIRA': rIRA,'riraVXUS': riraVXUS,'riraVTI': riraVTI,'riraSPAXX': riraSPAXX, 'Brokerage':Brokerage, 'brSPAXX':brSPAXX, 'brVTI':brVTI,'IRA':IRA, 'iraSPAXX':iraSPAXX, 'iraVTI':iraVTI}
     
 # if __name__ == '__main__':
 #     driver = Driver("Chrome")

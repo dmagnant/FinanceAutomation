@@ -64,8 +64,7 @@ def claimPresearchRewards(driver):
 
 def stakePresearchRewards(driver, availToStake):
     locatePresearchWindow(driver)
-    nodes = reliabilityScores = []
-    num, stillNodes = 1, True
+    num, stillNodes, nodes, reliabilityScores = 1, True, [], []
     while stillNodes:
         try:
             name = driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '6]/div/table/tbody/tr[' + str(num) + ']/td[1]').text

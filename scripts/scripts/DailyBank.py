@@ -59,10 +59,14 @@ def tearDown(driver):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    personalBook = GnuCash('Finance')
-    # book = personalBook.getWriteBook()
-    from datetime import datetime
-    # print(personalBook.getPriceInGnucash('ATOM', datetime.today().date()))
-    updateCryptoPrices(driver, personalBook)
-    # personalBook.updatePriceInGnucash('ATOM', str(12.06))
-    personalBook.closeBook()
+    # personalBook = GnuCash('Finance')
+    # # book = personalBook.getWriteBook()
+    # from datetime import datetime
+    # # print(personalBook.getPriceInGnucash('ATOM', datetime.today().date()))
+    # updateCryptoPrices(driver, personalBook)
+    # # personalBook.updatePriceInGnucash('ATOM', str(12.06))
+    # personalBook.closeBook()
+
+
+    GMEprice = getStockPrice(driver, 'GME')
+    print(GMEprice)
