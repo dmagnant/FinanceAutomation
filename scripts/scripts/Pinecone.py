@@ -48,7 +48,7 @@ def runPinecone(driver, account, book):
     locatePineconeWindow(driver)
     account.setBalance(getPineConeBalance(driver))
     book.updateMRBalance(account)
-    if float(account.balance) >= 300:   claimPineConeRewards(driver)
+    if float(account.balance) >= 1000:   claimPineConeRewards(driver)
 
 if __name__ == '__main__':
     driver = Driver("Chrome")

@@ -62,10 +62,11 @@ def exportBoATransactions(driver, account, today):
 
 def claimBoARewards(driver, account):
     locateBoAWindowAndOpenAccount(driver, account)
-    if 'joint' in account: # may need to address minimum of 2500 points restriction
+    if 'joint' in account:
         driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[2]/a").click() # view/redeem
         driver.webDriver.find_element(By.ID,"redeemButton").click() # redeem points
         driver.switchToLastWindow()
+        time.sleep(1)
         driver.webDriver.find_element(By.XPATH,"/html/body/main/div/div[2]/div[1]/div[1]/div/div[2]/div/div[1]/div[3]/a").click() # redeem
         availablePoints = driver.webDriver.find_element(By.ID,"summary_availablepoints").text.replace(',','')
         if int(availablePoints) >= 2500:

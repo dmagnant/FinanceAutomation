@@ -57,6 +57,7 @@ def ally(request):
         elif "login" in request.POST:   locateAllyWindow(driver)
         elif "logout" in request.POST:  allyLogout(driver)
         elif "balance" in request.POST: Ally.setBalance(getAllyBalance(driver))
+        elif "water" in request.POST:   payWaterBill(driver, book)
     context = {'account': Ally}
     book.closeBook();   return returnRender(request, "banking/ally.html", context)
 
@@ -498,8 +499,9 @@ def updateGoals(request):
         if "main" in request.POST:
             account, timeFrame = body.get("accounts"), body.get("TimeFrame")
             book = GnuCash('Finance') if account == 'Personal' else GnuCash('Home')
-            runUpdateGoals(account, timeFrame, book)
-        elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/updateGoals"))      
+            context = runUpdateGoals(account, timeFrame, book)
+            print(context)
+        elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/updateGoals"))
     return returnRender(request, "updateGoals.html", context)
 
 def vanguard(request):

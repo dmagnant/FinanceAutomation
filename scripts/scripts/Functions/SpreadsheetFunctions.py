@@ -22,6 +22,8 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
                     return ['K16', 'S16', 'C52', 'K52', 'S52', 'C88', 'K88', 'S88', 'C124', 'K124', 'S124', 'C16']
                 case 'Energy Bill':
                     return ['F27', 'N27', 'V27', 'F63', 'N63', 'V63', 'F99', 'N99', 'V99', 'F135', 'N135', 'V135']
+                case 'Water Bill':
+                    return ['F25', 'N25', 'V25', 'F61', 'N61', 'V61', 'F97', 'N97', 'V97', 'F133', 'N133', 'V133']
                 ## Cryptocurrency Spreadsheet
                 case 'ALGO':
                     return ['H2', 'J2']
@@ -155,7 +157,9 @@ def updateInvestmentPricesAndShares(driver, book, accounts):
                 shares = float(accounts['EBI'].balance)
             elif symbol in ['VIIIX', 'VXUS', 'VTI']:
                 price = book.getPriceInGnucash(symbol, today)
-                if symbol == 'VTI':     shares = float(accounts['riraVTI'].balance)
+                if symbol == 'VTI':
+                    account = accounts['riraVTI'] if worksheet.acell(accountColumn+str(row)).value == 'rIRA' else accounts['iraVTI']
+                    shares = float(account.balance)
                 elif symbol == 'VIIIX': shares = float(accounts['VIIIX'].balance)
                 elif symbol == 'VXUS':  shares = float(accounts['riraVXUS'].balance)
             elif symbol == 'SPAXX':

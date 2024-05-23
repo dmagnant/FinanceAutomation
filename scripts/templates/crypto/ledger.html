@@ -2,7 +2,7 @@
 {% block title %}Ledger{% endblock %}
 {% block content %}
     <h1>Ledger</h1>
-    <div style="width: 100%; display: table;">
+    <div style="width: 30%; display: table;">
         <div style="display: table-row;">
             <div style="width: 20%; display:table-cell">
                 <form method="post">
@@ -10,10 +10,16 @@
                     <button type="submit" name="main">Main</button><br>
                 </form>
             </div>
-            <div style="width: 80%; display:table-cell">
+            <div style="width: 5%; display:table-cell;text-align:right">
                 {% for coin in coinList %}
-                    &emsp;&ensp;&thinsp;balance: {{coin.balance}} {{coin.symbol}}<br>
-                    gnuBalance: {{coin.gnuBalance}} {{coin.symbol}}<br><br>
+                    balance: &thinsp; <br>
+                    gnuBalance: &thinsp; <br><br>
+                {% endfor %}
+            </div>
+            <div style="width: 5%; display:table-cell;text-align:left">
+                {% for coin in coinList %}
+                    {{coin.balance}} {{coin.symbol}}<br>
+                    {{coin.gnuBalance}} {{coin.symbol}}<br><br>
                 {% endfor %}
             </div>
         </div>

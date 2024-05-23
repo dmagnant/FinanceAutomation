@@ -4,9 +4,7 @@
     <h2>Monthly USD</h2>
     <form method="post">
         {% csrf_token %}
-        <button type="submit" name="USD">USD</button>
-        <button type="submit" name="prices">price update</button>
-        <button type="submit" name="shares">share update</button><br><br>
+        <button type="submit" name="USD">USD</button><br><br>
     </form>
     <div style="width: 100%; display: table;">
         <div style="display: table-row;">
@@ -14,78 +12,133 @@
                 <b><a href="{% url 'Fidelity' %}" target="_blank">Fidelity</a></b><br><br>
                 <form method="post">
                     {% csrf_token %}
-                    <button type="submit" name="fidelityMain">Main</button>&emsp;
-                    <button type="submit" name="fidelityLogin">Login</button>&emsp;
-                    <button type="submit" name="fidelityBalance">Balance</button>&emsp;
+                    <button type="submit" name="fidelityMain">Main</button>
+                    <button type="submit" name="fidelityLogin">Login</button>
+                    <button type="submit" name="fidelityBalance">Balance</button>
                 </form><br>
-                
-                {{usdAccounts.Brokerage.name}} balance: <b>${{usdAccounts.Brokerage.balance}}</b><br>
-                &emsp;&emsp;&emsp;&thinsp;gnuBalance: <b>${{usdAccounts.Brokerage.gnuBalance}}</b><br><br>
-                
-                &emsp;&thinsp;{{usdAccounts.brSPAXX.symbol}} balance: <b>${{usdAccounts.brSPAXX.balance}}</b><br>
-                &emsp;&emsp;&emsp;gnuBalance: <b>${{usdAccounts.brSPAXX.gnuBalance}}</b><br><br>
-
-                &emsp;&emsp;&emsp;&emsp;&emsp;&ensp;{{usdAccounts.brVTI.symbol}} shares: <b>{{usdAccounts.brVTI.balance}} {{usdAccounts.brVTI.symbol}}</b><br>
-                &emsp;&ensp;&thinsp;gnuBalance shares: <b>{{usdAccounts.brVTI.gnuBalance}} {{usdAccounts.brVTI.symbol}}</b><br>
-                &emsp;&emsp;&emsp;&emsp;&emsp;&ensp;{{usdAccounts.brVTI.symbol}} value: <b>${{usdAccounts.brVTI.value}}</b><br>
-                &emsp;&emsp;&ensp;${{usdAccounts.brVTI.price}} x shares: <b>${{usdAccounts.brVTI.gnuValue}}</b><br><br>
-
-                &ensp;{{usdAccounts.rIRA.name}} balance: <b>${{usdAccounts.rIRA.balance}}</b><br>
-                &emsp;&emsp;&emsp;&thinsp;gnuBalance: <b>${{usdAccounts.rIRA.gnuBalance}}</b><br><br>
-                
-                &emsp;&thinsp;{{usdAccounts.riraSPAXX.symbol}} balance: <b>${{usdAccounts.riraSPAXX.balance}}</b><br>
-                &emsp;&emsp;&emsp;gnuBalance: <b>${{usdAccounts.riraSPAXX.gnuBalance}}</b><br><br>
-                
-                &emsp;&emsp;&emsp;&emsp;&emsp;&ensp;{{usdAccounts.riraVTI.symbol}} shares: <b>{{usdAccounts.riraVTI.balance}} {{usdAccounts.riraVTI.symbol}}</b><br>
-                &emsp;&ensp;&thinsp;gnuBalance shares: <b>{{usdAccounts.riraVTI.gnuBalance}} {{usdAccounts.riraVTI.symbol}}</b><br>
-                &emsp;&emsp;&emsp;&emsp;&emsp;&ensp;{{usdAccounts.riraVTI.symbol}} value: <b>${{usdAccounts.riraVTI.value}}</b><br>
-                &emsp;&emsp;&ensp;${{usdAccounts.riraVTI.price}} x shares: <b>${{usdAccounts.riraVTI.gnuValue}}</b><br><br>
-
-                &emsp;&emsp;&emsp;&emsp;{{usdAccounts.riraVXUS.symbol}} shares: <b>{{usdAccounts.riraVXUS.balance}} {{usdAccounts.riraVXUS.symbol}}</b><br>
-                &emsp;&ensp;gnuBalance shares: <b>{{usdAccounts.riraVXUS.gnuBalance}} {{usdAccounts.riraVXUS.symbol}}</b><br>
-                &emsp;&emsp;&emsp;&emsp;&ensp;{{usdAccounts.riraVXUS.symbol}} value: <b>${{usdAccounts.riraVXUS.value}}</b><br>
-                &emsp;&emsp;&emsp;${{usdAccounts.riraVXUS.price}} x shares: <b>${{usdAccounts.riraVXUS.gnuValue}}</b><br><br>
+                <div style="display: table-row;">
+                    <div style="display:table-cell;text-align:right">
+                        {{usdAccounts.Brokerage.name}} balance: &thinsp; <br>
+                        gnuBalance: &thinsp; <br><br>
+                        {{usdAccounts.brSPAXX.symbol}} balance: &thinsp; <br>
+                        gnuBalance: &thinsp; <br><br>
+                        {{usdAccounts.brVTI.symbol}} shares: &thinsp; <br>
+                        gnuBalance shares: &thinsp; <br>
+                        {{usdAccounts.brVTI.symbol}} value: &thinsp; <br>
+                        ${{usdAccounts.brVTI.price}} x shares: &thinsp; <br><br>
+                        {{usdAccounts.rIRA.name}} balance: &thinsp; <br>
+                        gnuBalance: &thinsp; <br><br>
+                        {{usdAccounts.riraSPAXX.symbol}} balance: &thinsp; <br>
+                        gnuBalance: &thinsp; <br><br>
+                        {{usdAccounts.riraVTI.symbol}} shares: &thinsp; <br>
+                        gnuBalance shares: &thinsp; <br>
+                        {{usdAccounts.riraVTI.symbol}} value: &thinsp; <br>
+                        ${{usdAccounts.riraVTI.price}} x shares: &thinsp; <br><br>
+                        {{usdAccounts.riraVXUS.symbol}} shares: &thinsp; <br>
+                        gnuBalance shares: &thinsp; <br>
+                        {{usdAccounts.riraVXUS.symbol}} value: &thinsp; <br>
+                        ${{usdAccounts.riraVXUS.price}} x shares: &thinsp; <br><br>
+                    </div>
+                    <div style="display:table-cell;text-align:left">
+                        <b>${{usdAccounts.Brokerage.balance}}<br>
+                        ${{usdAccounts.Brokerage.gnuBalance}}<br><br>
+                        ${{usdAccounts.brSPAXX.balance}}<br>
+                        ${{usdAccounts.brSPAXX.gnuBalance}}<br><br>
+                        {{usdAccounts.brVTI.balance}} {{usdAccounts.brVTI.symbol}}<br>
+                        {{usdAccounts.brVTI.gnuBalance}} {{usdAccounts.brVTI.symbol}}<br>
+                        ${{usdAccounts.brVTI.value}}<br>
+                        ${{usdAccounts.brVTI.gnuValue}}<br><br>
+                        ${{usdAccounts.rIRA.balance}}<br>
+                        ${{usdAccounts.rIRA.gnuBalance}}<br><br>
+                        ${{usdAccounts.riraSPAXX.balance}}<br>
+                        ${{usdAccounts.riraSPAXX.gnuBalance}}<br><br>
+                        {{usdAccounts.riraVTI.balance}} {{usdAccounts.riraVTI.symbol}}<br>
+                        {{usdAccounts.riraVTI.gnuBalance}} {{usdAccounts.riraVTI.symbol}}<br>
+                        ${{usdAccounts.riraVTI.value}}<br>
+                        ${{usdAccounts.riraVTI.gnuValue}}<br><br>
+                        {{usdAccounts.riraVXUS.balance}} {{usdAccounts.riraVXUS.symbol}}<br>
+                        {{usdAccounts.riraVXUS.gnuBalance}} {{usdAccounts.riraVXUS.symbol}}<br>
+                        ${{usdAccounts.riraVXUS.value}}<br>
+                        ${{usdAccounts.riraVXUS.gnuValue}}</b><br><br>
+                    </div>
+                </div>  
             </div>
             <div style="width: 18%; display:table-cell">
                 <br><br><br><br>
-                &emsp;&emsp;&emsp;{{usdAccounts.IRA.name}} balance: <b>${{usdAccounts.IRA.balance}}</b><br>
-                &emsp;&emsp;&emsp;&thinsp;gnuBalance: <b>${{usdAccounts.IRA.gnuBalance}}</b><br><br>
-                
-                &emsp;&thinsp;{{usdAccounts.iraSPAXX.symbol}} balance: <b>${{usdAccounts.iraSPAXX.balance}}</b><br>
-                &emsp;&emsp;&emsp;gnuBalance: <b>${{usdAccounts.iraSPAXX.gnuBalance}}</b><br><br>
-
-                &emsp;&emsp;&emsp;&emsp;&emsp;&ensp;{{usdAccounts.iraVTI.symbol}} shares: <b>{{usdAccounts.iraVTI.balance}} {{usdAccounts.iraVTI.symbol}}</b><br>
-                &emsp;&ensp;&thinsp;gnuBalance shares: <b>{{usdAccounts.iraVTI.gnuBalance}} {{usdAccounts.iraVTI.symbol}}</b><br>
-                &emsp;&emsp;&emsp;&emsp;&emsp;&ensp;{{usdAccounts.iraVTI.symbol}} value: <b>${{usdAccounts.iraVTI.value}}</b><br>
-                &emsp;&emsp;&ensp;${{usdAccounts.iraVTI.price}} x shares: <b>${{usdAccounts.iraVTI.gnuValue}}</b><br><br>
+                <div style="display: table-row;">
+                    <div style="display:table-cell;text-align:right">
+                        {{usdAccounts.IRA.name}} balance: &thinsp; <br>
+                        gnuBalance: &thinsp; <br><br>
+                        {{usdAccounts.iraSPAXX.symbol}} balance: &thinsp; <br>
+                        gnuBalance: &thinsp; <br><br>
+                        {{usdAccounts.iraVTI.symbol}} shares: &thinsp; <br>
+                        gnuBalance shares: &thinsp; <br>
+                        {{usdAccounts.iraVTI.symbol}} value: &thinsp; <br>
+                        ${{usdAccounts.iraVTI.price}} x shares: &thinsp; <br><br>
+                    </div>
+                    <div style="display:table-cell;text-align:left">
+                        <b>${{usdAccounts.IRA.balance}}<br>
+                        ${{usdAccounts.IRA.gnuBalance}}<br><br>
+                        ${{usdAccounts.iraSPAXX.balance}}<br>
+                        ${{usdAccounts.iraSPAXX.gnuBalance}}<br><br>
+                        {{usdAccounts.iraVTI.balance}} {{usdAccounts.iraVTI.symbol}}<br>
+                        {{usdAccounts.iraVTI.gnuBalance}} {{usdAccounts.iraVTI.symbol}}<br>
+                        ${{usdAccounts.iraVTI.value}}<br>
+                        ${{usdAccounts.iraVTI.gnuValue}}</b><br><br>
+                    </div>
+                </div>
             </div>
             <div style="width: 25%; display:table-cell">
                 <b><a href="{% url 'Optum' %}" target="_blank">Optum HSA</a></b><br><br>
-                    <form method="post">
-                        {% csrf_token %}
-                        <button type="submit" name="main">Main</button>&emsp;
-                        <button type="submit" name="login">Login</button>&emsp;
-                        <button type="submit" name="balance">Balance</button>&emsp;
-                    </form><br>
-                    &emsp;&emsp;HSA Cash balance: <b>${{usdAccounts.OptumCash.balance}}</b><br>
-                    &emsp;&emsp;&emsp;&emsp;&emsp;&thinsp;gnuBalance: <b>${{usdAccounts.OptumCash.gnuBalance}}</b><br><br>
-                    HSA Investment shares: <b>{{usdAccounts.VFIAX.balance}} {{OptumAccounts.VFIAX.symbol}}</b><br>
-                    &emsp;&ensp;&thinsp;&thinsp;gnuBalance shares: <b>{{usdAccounts.VFIAX.gnuBalance}} {{usdAccounts.VFIAX.symbol}}</b><br>
-                    &ensp;HSA Investment Value: <b>${{usdAccounts.VFIAX.value}}</b><br>
-                    &emsp;&emsp;&ensp;&thinsp;&thinsp;${{usdAccounts.VFIAX.price}} x shares: <b>${{usdAccounts.VFIAX.gnuValue}}</b><br><br><br>
-                    <b><a href="{% url 'HealthEquity' %}" target="_blank">Health Equity</a></b><br><br>
-                    <form method="post">
-                        {% csrf_token %}
-                        <button type="submit" name="HEMain">Main</button>&emsp;
-                        <button type="submit" name="HELogin">Login</button>&emsp;
-                        <button type="submit" name="HEBalances">Balances</button>&emsp;
-                    </form><br>
-                    &emsp;&emsp;HSA Cash balance: <b>${{usdAccounts.HECash.balance}}</b><br>
-                    &emsp;&emsp;&emsp;&emsp;&emsp;&thinsp;gnuBalance: <b>${{usdAccounts.HECash.gnuBalance}}</b><br><br>
-                    HSA Investment shares: <b>{{usdAccounts.VIIIX.balance}} {{usdAccounts.VIIIX.symbol}}</b><br>
-                    &emsp;&ensp;&thinsp;&thinsp;gnuBalance shares: <b>{{usdAccounts.VIIIX.gnuBalance}} {{usdAccounts.VIIIX.symbol}}</b><br>
-                    &ensp;HSA Investment Value: <b>${{usdAccounts.VIIIX.value}}</b><br>
-                    &emsp;&emsp;&ensp;&thinsp;&thinsp;${{usdAccounts.VIIIX.price}} x shares: <b>${{usdAccounts.VIIIX.gnuValue}}</b><br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="main">Main</button>&emsp;
+                    <button type="submit" name="login">Login</button>&emsp;
+                    <button type="submit" name="balance">Balance</button>&emsp;
+                </form><br>
+                <div style="display: table-row;">
+                    <div style="display:table-cell;text-align:right">
+                        HSA Cash balance: &thinsp; <br>
+                        gnuBalance: &thinsp; <br><br>
+                        HSA Investment shares: &thinsp; <br>
+                        gnuBalance shares: &thinsp; <br><br>
+                        HSA Investment Value: &thinsp; <br>
+                        ${{usdAccounts.VFIAX.price}} x shares: &thinsp; <br><br>
+                    </div>
+                    <div style="display:table-cell;text-align:left">
+                        <b>${{usdAccounts.OptumCash.balance}}<br>
+                        ${{usdAccounts.OptumCash.gnuBalance}}<br><br>
+                        {{usdAccounts.VFIAX.balance}} {{usdAccounts.VFIAX.symbol}}<br>
+                        {{usdAccounts.VFIAX.gnuBalance}} {{usdAccounts.VFIAX.symbol}}<br><br>
+                        ${{usdAccounts.VFIAX.value}}<br>
+                        ${{usdAccounts.VFIAX.gnuValue}}</b><br><br>
+                    </div>
+                </div><br><br>
+                <b><a href="{% url 'HealthEquity' %}" target="_blank">Health Equity</a></b><br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="HEMain">Main</button>&emsp;
+                    <button type="submit" name="HELogin">Login</button>&emsp;
+                    <button type="submit" name="HEBalances">Balances</button>&emsp;
+                </form><br>
+                <div style="display: table-row;">
+                    <div style="display:table-cell;text-align:right">
+                        HSA Cash balance: &thinsp; <br>
+                        gnuBalance: &thinsp; <br><br>
+                        HSA Investment shares: &thinsp; <br>
+                        gnuBalance shares: &thinsp; <br><br>
+                        HSA Investment Value: &thinsp; <br>
+                        ${{usdAccounts.VIIIX.price}} x shares: &thinsp; <br>
+                    </div>
+                    <div style="display:table-cell;text-align:left">
+                        <b>${{usdAccounts.HECash.balance}}<br>
+                        ${{usdAccounts.HECash.gnuBalance}}<br><br>
+                        {{usdAccounts.VIIIX.balance}} {{usdAccounts.VIIIX.symbol}}<br>
+                        {{usdAccounts.VIIIX.gnuBalance}} {{usdAccounts.VIIIX.symbol}}<br><br>
+                        ${{usdAccounts.VIIIX.value}}<br>
+                        ${{usdAccounts.VIIIX.gnuValue}}</b><br><br>
+                    </div>
+                </div>
             </div>
             <div style="width: 25%; display:table-cell">
                 <b><a href="{% url 'Vanguard' %}" target="_blank">Vanguard</a></b><br><br>
@@ -95,18 +148,36 @@
                     <button type="submit" name="vanguardLogin">Login</button>&emsp;
                     <button type="submit" name="vanguardBalances">Balances</button>&emsp;
                 </form><br>
-                Pension Balance: <b>${{usdAccounts.Pension.balance}}</b><br>
-                &emsp;&emsp;&thinsp;gnuBalance: <b>${{usdAccounts.Pension.gnuBalance}}</b><br><br>
-                &emsp;&ensp;401k Balance: <b>${{usdAccounts.V401k.balance}}</b><br>
-                &emsp;&emsp;&thinsp;gnuBalance: <b>${{usdAccounts.V401k.gnuBalance}}</b><br><br>
-                &emsp;&emsp;&emsp;&thinsp;TSM shares: <b>{{usdAccounts.TSM401k.balance}} ({{usdAccounts.TSM401k.symbol}})</b><br>
-                gnuBalance shares: <b>{{usdAccounts.TSM401k.gnuBalance}} ({{usdAccounts.TSM401k.symbol}})</b><br>
-                &emsp;&emsp;&emsp;&ensp;&thinsp;TSM Value: <b>${{usdAccounts.TSM401k.value}}</b><br>
-                &emsp;${{usdAccounts.TSM401k.price}} x shares: <b>${{usdAccounts.TSM401k.gnuValue}}</b><br><br>
-                &emsp;&emsp;&emsp;&thinsp;EBI shares: <b>{{usdAccounts.EBI.balance}} ({{usdAccounts.EBI.symbol}})</b><br>
-                gnuBalance shares: <b>{{usdAccounts.EBI.gnuBalance}} ({{usdAccounts.EBI.symbol}})</b><br>
-                &emsp;&emsp;&emsp;&emsp;&thinsp;EBI value: <b>${{usdAccounts.EBI.value}}</b><br>
-                &emsp;${{usdAccounts.EBI.price}} x shares: <b>${{usdAccounts.EBI.gnuValue}}</b><br><br>   
+                <div style="display: table-row;">
+                    <div style="display:table-cell;text-align:right">
+                        Pension Balance: &thinsp; <br>
+                        gnuBalance: &thinsp; <br><br>
+                        401k Balance: &thinsp; <br>
+                        gnuBalance: &thinsp; <br><br>
+                        TSM shares: &thinsp; <br>
+                        gnuBalance shares: &thinsp; <br> 
+                        TSM Value: &thinsp; <br>
+                        ${{usdAccounts.TSM401k.price}} x shares: &thinsp; <br><br>
+                        EBI shares: &thinsp; <br>
+                        gnuBalance shares: &thinsp; <br> 
+                        EBI Value: &thinsp; <br>
+                        ${{usdAccounts.EBI.price}} x shares: &thinsp; <br><br>
+                    </div>
+                    <div style="display:table-cell;text-align:left">
+                        <b>${{usdAccounts.Pension.balance}}<br>
+                        ${{usdAccounts.Pension.gnuBalance}}<br><br>
+                        ${{usdAccounts.V401k.balance}}<br>
+                        ${{usdAccounts.V401k.gnuBalance}}<br><br>
+                        {{usdAccounts.TSM401k.balance}} ({{usdAccounts.TSM401k.symbol}})<br>
+                        {{usdAccounts.TSM401k.gnuBalance}} ({{usdAccounts.TSM401k.symbol}})<br>
+                        ${{usdAccounts.TSM401k.value}}<br>
+                        ${{usdAccounts.TSM401k.gnuValue}}<br><br>
+                        {{usdAccounts.EBI.balance}} ({{usdAccounts.EBI.symbol}})<br>
+                        {{usdAccounts.EBI.gnuBalance}} ({{usdAccounts.EBI.symbol}})<br>
+                        ${{usdAccounts.EBI.value}}<br>
+                        ${{usdAccounts.EBI.gnuValue}}</b><br><br>
+                    </div>
+                </div>
             </div>
             <div style="width: 25%; display:table-cell">
                 <b><a href="{% url 'Worthy' %}" target="_blank">Worthy</a></b><br><br>
@@ -115,8 +186,16 @@
                     <button type="submit" name="worthyLogin">Login</button>&emsp;
                     <button type="submit" name="worthyBalance">Balance</button>&emsp;
                 </form><br>
-                &emsp;&ensp;&thinsp;balance: <b>${{usdAccounts.Worthy.balance}}</b><br>
-                gnuBalance: <b>${{usdAccounts.Worthy.gnuBalance}}</b><br>
+                <div style="display: table-row;">
+                    <div style="display:table-cell;text-align:right">
+                        balance: &thinsp; <br>
+                        gnuBalance: &thinsp; <br><br>
+                    </div>
+                    <div style="display:table-cell;text-align:left">
+                        <b>${{usdAccounts.Worthy.balance}}<br>
+                        ${{usdAccounts.Worthy.gnuBalance}}</b><br><br>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -135,8 +214,16 @@
                     <button type="submit" name="eternlLogin">Login</button>
                     <button type="submit" name="eternlBalance">Balance</button>
                 </form><br><br>
-                ADA Balance: {{cryptoAccounts.Cardano.balance}}<br>
-                &ensp;&thinsp;gnuBalance: {{cryptoAccounts.Cardano.gnuBalance}}<br>
+                <div style="display: table-row;">
+                    <div style="display:table-cell;text-align:right">
+                        ADA balance: &thinsp; <br>
+                        gnuBalance: &thinsp; <br><br>
+                    </div>
+                    <div style="display:table-cell;text-align:left">
+                        <b>{{cryptoAccounts.Cardano.balance}}<br>
+                        {{cryptoAccounts.Cardano.gnuBalance}}</b><br><br>
+                    </div>
+                </div>
             </div>
             <div style="width: 16%; display:table-cell">
                 <b><a href="{% url 'IoPay' %}" target="_blank">IoPay</a></b><br><br>
@@ -144,8 +231,16 @@
                     {% csrf_token %}
                     <button type="submit" name="ioPayMain">Main</button>
                 </form><br><br>
-                IOTX Balance: <b>{{cryptoAccounts.IoTex.balance}}</b><br>
-                &emsp;gnuBalance: {{cryptoAccounts.IoTex.gnuBalance}}<br>
+                <div style="display: table-row;">
+                    <div style="display:table-cell;text-align:right">
+                        IOTX balance: &thinsp; <br>
+                        gnuBalance: &thinsp; <br><br>
+                    </div>
+                    <div style="display:table-cell;text-align:left">
+                        <b>{{cryptoAccounts.IoTex.balance}}<br>
+                        {{cryptoAccounts.IoTex.gnuBalance}}</b><br><br>
+                    </div>
+                </div>
             </div>
             <div style="width: 16%; display:table-cell">
                 <b><a href="{% url 'Ledger' %}" target="_blank">Ledger</a></b><br><br>
@@ -153,10 +248,20 @@
                     {% csrf_token %}
                     <button type="submit" name="ledgerMain">Main</button>
                 </form><br><br>
-                {% for coin in cryptoAccounts.ledgerAccounts %}
-                    {{coin.symbol}} balance: {{coin.balance}} <br>
-                    &emsp;gnuBalance: {{coin.gnuBalance}}<br><br>
-                {% endfor %}
+                <div style="display: table-row;">
+                    <div style="display:table-cell;text-align:right">
+                        {% for coin in cryptoAccounts.ledgerAccounts %}
+                            {{coin.symbol}} balance: &thinsp;<br>
+                            gnuBalance: &thinsp;<br><br>
+                        {% endfor %}
+                    </div>
+                    <div style="display:table-cell;text-align:left">
+                        {% for coin in cryptoAccounts.ledgerAccounts %}
+                            <b>{{coin.balance}}<br>
+                            {{coin.gnuBalance}}</b><br><br>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>

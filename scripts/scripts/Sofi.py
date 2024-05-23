@@ -8,6 +8,7 @@ if __name__ == '__main__' or __name__ == "Sofi":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
+    from Fidelity import getFidelityTransferAccount
     from Functions.GeneralFunctions import (getPassword,
                                             getStartAndEndOfDateRange,
                                             getUsername, setDirectory,
@@ -15,6 +16,7 @@ if __name__ == '__main__' or __name__ == "Sofi":
 else:
     from .Classes.Asset import USD
     from .Classes.GnuCash import GnuCash
+    from .Fidelity import getFidelityTransferAccount
     from .Functions.GeneralFunctions import (getPassword,
                                              getStartAndEndOfDateRange,
                                              setDirectory, showMessage, modifyTransactionDescription)
@@ -84,7 +86,7 @@ def getTransactionsFromSofiWebsite(driver, dateRange, today, tableStart, div):
     elementRoot = setSofiTransactionElementRoot(table, row, column, div)
     while insideDateRange:
         try:
-            date = driver.find_element(By.XPATH, elementRoot).text
+            date = driver.webDriver.find_element(By.XPATH, elementRoot).text
             if "/" not in date:
                 month = datetime.strptime(date[:3], "%b").month
                 day = date[4:]
@@ -93,10 +95,13 @@ def getTransactionsFromSofiWebsite(driver, dateRange, today, tableStart, div):
             if sofiDate < dateRange['startDate'] or sofiDate > dateRange['endDate']:    insideDateRange = False
             else:
                 column += 1
-                description = driver.find_element(By.XPATH, setSofiTransactionElementRoot(table, row, column, div)).text
+                description = driver.webDriver.find_element(By.XPATH, setSofiTransactionElementRoot(table, row, column, div)).text
                 column += 3
-                amount = driver.find_element(By.XPATH, setSofiTransactionElementRoot(table, row, column, div)).text.replace('$', '').replace(',', '')
+                amount = driver.webDriver.find_element(By.XPATH, setSofiTransactionElementRoot(table, row, column, div)).text.replace('$', '').replace(',', '')
                 description = modifyTransactionDescription(description, amount)
+                if description == "Fidelity Transfer":
+                    account = getFidelityTransferAccount(driver, amount.replace('-',''), sofiDate)
+                    description = description + " " + account
                 transaction = sofiDate, description, amount
                 csv.writer(open(sofiActivity, 'a', newline='')).writerow(transaction)
                 row += 1
@@ -114,14 +119,17 @@ def getTransactionsFromSofiWebsite(driver, dateRange, today, tableStart, div):
 
 def runSofiAccount(driver, dateRange, today, account, book):
     page = getSofiBalanceAndOrientPage(driver, account)
-    sofiActivity = getTransactionsFromSofiWebsite(driver.webDriver, dateRange, today, page['table'], page['div'])
+    sofiActivity = getTransactionsFromSofiWebsite(driver, dateRange, today, page['table'], page['div'])
     book.importUniqueTransactionsToGnuCash(account, sofiActivity, driver, dateRange, 0)
 
 def runSofi(driver, accounts, book):
     today = datetime.today().date()
     dateRange = getStartAndEndOfDateRange(today, 7)
     locateSofiWindow(driver)
-    for account in accounts:    runSofiAccount(driver, dateRange, today, account, book)
+    for account in accounts:    
+        runSofiAccount(driver, dateRange, today, account, book)
+        print(book.getBalance(account.gnuAccount))
+        account.updateGnuBalance(book.getBalance(account.gnuAccount))
     if today.day <= 7:          setMonthlySpendTarget(driver)        
     driver.webDriver.get("https://www.sofi.com/my/money/account/#/1000028154579/account-detail") # switch back to checking page
 
@@ -138,12 +146,18 @@ def runSofi(driver, accounts, book):
     # book.closeBook()
     
 if __name__ == '__main__':    
-    transactionDate = 'Feb 29'
-    month = datetime.strptime(transactionDate[:3], "%b").month
-    day = transactionDate[4:]
-    modifiedDate = str(month) + '/' + day + '/' + str(datetime.today().date().year-2000)
-    print(modifiedDate)
-    modifiedDate = f''
+    book = GnuCash('Finance')
+    Checking = USD("Sofi Checking", book)
+    Savings = USD("Sofi Savings", book)
+    print(book.getBalance(Checking.gnuAccount))
+    
+    
+    # transactionDate = 'Feb 29'
+    # month = datetime.strptime(transactionDate[:3], "%b").month
+    # day = transactionDate[4:]
+    # modifiedDate = str(month) + '/' + day + '/' + str(datetime.today().date().year-2000)
+    # print(modifiedDate)
+    # modifiedDate = f''
     
     
     

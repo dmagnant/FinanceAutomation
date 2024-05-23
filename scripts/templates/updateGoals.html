@@ -2,18 +2,155 @@
 {% block title %}Update Goals{% endblock %}
 {% block content %}
     <h1>Update Goals</h1>
-    <label for="accounts">Accounts </label>
-    <form method="post" id="Account">
-        <input type="radio" id="Personal" name="accounts" value="Personal" required>
-        <label for="Personal">Personal</label><br>
-        <input type="radio" id="Joint" name="accounts" value="Joint">
-        <label for="Joint">Joint</label><br>
-    <label for="Timeframe">Timeframe </label><br>
-        <input type="radio" id="Month" name="TimeFrame" value="Month" required>
-        <label for="Month">Month</label><br>
-        <input type="radio" id="YTD" name="TimeFrame" value="YTD">
-        <label for="YTD">YTD</label><br>        
-        {% csrf_token %}
-        <button type="submit" name="main">Main</button>
-    </form>
+    <div style="width=100%; display: table;">
+        <div style="display: table-row;">
+            <div style="display:table-cell">
+                <form method="post" id="Account">
+                    <label for="accounts">Accounts </label>&emsp;&emsp;&emsp;<label for="Timeframe">Timeframe </label><br>
+                    <input type="radio" id="Personal" name="accounts" value="Personal" required>
+                    <label for="Personal">Personal</label>&emsp;&emsp;
+                    <input type="radio" id="Month" name="TimeFrame" value="Month" required>
+                    <label for="Month">Month</label><br>
+                    <input type="radio" id="Joint" name="accounts" value="Joint">
+                    <label for="Joint">Joint</label>&emsp;&emsp;&emsp;&emsp;
+                    <input type="radio" id="YTD" name="TimeFrame" value="YTD">
+                    <label for="YTD">YTD</label><br><br>
+                    {% csrf_token %}
+                    <button type="submit" name="main">Main</button>
+            </div>
+        </div>
+        <div style="display: table-row;">
+            <h3>Personal</h3>
+        </div>
+        <div style="width:100%; display: table-row;">    
+            <div style="width:25%; display:table-cell">
+                <h4>Income</h4>
+                <div style="display: table-row;">
+                    <div style="display:table-cell;text-align:right">
+                        401k Contributions:&thinsp; <br>
+                        Dividends:&thinsp; <br>
+                        HSA Contributions:&thinsp; <br>
+                        Interest:&thinsp; <br>
+                        Pension Contributions:&thinsp; <br>
+                        Market Research:&thinsp; <br>
+                        Salary:&thinsp; <br>
+                    </div>
+                    <div style="display:table-cell;text-align:left">
+                        ${{401kContributions_Personal}}<br>
+                        ${{Dividends_Personal}}<br>
+                        ${{HSAContributions_Personal}}<br>
+                        ${{Interest_Personal}}<br>
+                        ${{PensionContributions_Personal}}<br>
+                        ${{MarketResearch_Personal}}<br>
+                        ${{Salary_Personal}}<br>
+                    </div>
+                </div>
+            </div>
+            <div style="width:25%; display:table-cell">
+                <h4>Personal Contributions</h4>
+                <div style="display: table-row;">
+                    <div style="display:table-cell;text-align:right">
+                        401k Contributions:&thinsp; <br>
+                        Brokerage Contributions:&thinsp; <br>
+                        Crypto Contributions:&thinsp; <br>
+                        HSA Contributions:&thinsp; <br>
+                        IRA Contributions:&thinsp; <br>
+                    </div>
+                    <div style="display:table-cell;text-align:left">
+                        ${{401kPersonalContributions}}<br>
+                        ${{BrokerageContributions}}<br>
+                        ${{CryptoContributions}}<br>
+                        ${{HSAPersonalContributions}}<br>
+                        ${{IRAContributions}}<br>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 25%; display:table-cell">
+                <h4>Expenses</h4>
+                <div style="display: table-row;">
+                    <div style="display:table-cell;text-align:right">
+                        Amazon:&thinsp; <br>
+                        Bank Fees:&thinsp; <br>
+                        Bars & Restaurants:&thinsp; <br>
+                        Clothing/Apparel:&thinsp; <br>
+                        Entertainment:&thinsp; <br>
+                        Groceries:&thinsp; <br>
+                        Income Taxes:&thinsp; <br>
+                        Joint Expenses:&thinsp;<br>
+                        Medical:&thinsp; <br>
+                        Other:&thinsp; <br>
+                        Loan Interest:&thinsp; <br>
+                        Loan Principle:&thinsp; <br>
+                        Transportation:&thinsp; <br>
+                    </div>
+                    <div style="display:table-cell;text-align:left">
+                        ${{Amazon_Personal}}<br>
+                        ${{BankFees_Personal}}<br>
+                        ${{BarsRestaurants_Personal}}<br>
+                        ${{ClothingApparel_Personal}}<br>
+                        ${{Entertainment_Personal}}<br>
+                        ${{Groceries_Personal}}<br>
+                        ${{IncomeTaxes_Personal}}<br>
+                        ${{JointExpenses_Personal}}<br>
+                        ${{Medical_Personal}}<br>
+                        ${{Other_Personal}}<br>
+                        ${{LoanInterest_Personal}}<br>
+                        ${{LoanPrinciple_Personal}}<br>
+                        ${{Transportation_Personal}}<br>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="width:100%; display: table-row;">    
+            <h3>Joint</h3>
+        </div>
+        <div style="width:100%; display: table-row;">    
+            <div style="width: 33%; display:table-cell">
+                <h4>Income</h4>
+                <div style="display: table-row;">
+                    <div style="display:table-cell;text-align:right">
+                        Dan Contributions:&thinsp; <br>
+                        Tessa Contributions:&thinsp; <br>
+                    </div>
+                    <div style="display:table-cell;text-align:left">
+                        ${{DansContributions_Joint}}<br>
+                        ${{TessasContributions_Joint}}<br>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 33%; display:table-cell">
+                <h4>Expenses</h4>
+                <div style="display: table-row;">
+                    <div style="display:table-cell;text-align:right">
+                        Amazon:&thinsp; <br>
+                        Bars and Restaurants:&thinsp; <br>
+                        Entertainment:&thinsp; <br>
+                        Groceries:&thinsp; <br>
+                        Home Depot:&thinsp; <br>
+                        Home Expenses:&thinsp; <br>
+                        Home Furnishings:&thinsp; <br>
+                        Mortgage Principle:&thinsp; <br>
+                        Other:&thinsp; <br>
+                        Pet:&thinsp; <br>
+                        Travel:&thinsp; <br>
+                        Utilities:&thinsp; <br>
+                    </div>
+                    <div style="display:table-cell;text-align:left">
+                        ${{Amazon_Joint}}<br>
+                        ${{BarsRestaurants_Joint}}<br>
+                        ${{Entertainment_Joint}}<br>
+                        ${{Groceries_Joint}}<br>
+                        ${{HomeDepot_Joint}}<br>
+                        ${{HomeExpenses_Joint}}<br>
+                        ${{HomeFurnishings_Joint}}<br>
+                        ${{MortgagePrinciple_Joint}}<br>
+                        ${{Other_Joint}}<br>
+                        ${{Pet_Joint}}<br>
+                        ${{Travel_Joint}}<br>
+                        ${{Utilities_Joint}}<br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

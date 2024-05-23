@@ -56,6 +56,7 @@ def exportChaseTransactions(driver, today):
     pyautogui.press('enter')
     time.sleep(1)
     driver.webDriver.find_element(By.ID,"quick-action-download-activity-tooltip").click() # Download
+    time.sleep(1)
     driver.webDriver.find_element(By.ID, "download").click() # Download
     monthFrom = "12"               if today.month == 1 else "{:02d}".format(today.month - 1)
     yearfrom = str(today.year - 1) if today.month == 1 else str(today.year)

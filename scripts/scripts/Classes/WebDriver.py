@@ -132,6 +132,7 @@ class Driver:
 
     def clickXPATHElementOnceAvaiable(self, xpath, wait=10):
         element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.XPATH,xpath)))
+        time.sleep(1)
         element.click()
         time.sleep(1)
         

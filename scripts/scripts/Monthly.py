@@ -1,10 +1,12 @@
-import time;    from datetime import datetime;  from decimal import Decimal
+import time, os, json;    from datetime import datetime;  from decimal import Decimal
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+
 
 if __name__ == '__main__' or __name__ == "Monthly":
     from Classes.Asset import USD, Security;    from Classes.WebDriver import Driver;   from Classes.GnuCash import GnuCash
-    from Functions.GeneralFunctions import getStartAndEndOfDateRange
+    from Functions.GeneralFunctions import getStartAndEndOfDateRange, getUsername, getNotes
     from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPricesAndShares
     from Eternl import runEternl
     from Ledger import runLedger, getLedgerAccounts
@@ -17,7 +19,7 @@ else:
     from .Classes.Asset import USD, Security;   from .Classes.WebDriver import Driver;  from .Classes.GnuCash import GnuCash
     from .Eternl import runEternl
     from .Ledger import runLedger, getLedgerAccounts
-    from .Functions.GeneralFunctions import (getStartAndEndOfDateRange)
+    from .Functions.GeneralFunctions import getStartAndEndOfDateRange, getUsername, getNotes
     from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPricesAndShares
     from .HealthEquity import runHealthEquity
     from .IoPay import runIoPay
@@ -82,7 +84,35 @@ def updateEnergyBillAmounts(driver, book, amount):
     today = datetime.today()
     updateSpreadsheet('Home', str(today.year) + ' Balance', 'Energy Bill', today.month, -float(amount))
     openSpreadsheet(driver, 'Home', str(today.year) + ' Balance')
-    driver.findWindowByUrl("/scripts/monthly")
+    driver.findWindowByUrl("/scripts/ally")
+    
+def payWaterBill(driver, book):
+    paymentAccountDetails = json.loads(getNotes('Ally Bank'))
+    today = datetime.today()
+    driver.openNewWindow('https://paywater.milwaukee.gov/webclient/user/login.seam')
+    try:
+        driver.webDriver.find_element(By.ID, 'login:j_id209:accountNumber').send_keys(getUsername('Water'))
+        driver.webDriver.find_element(By.ID, 'login:submitAccountEnabled').click() # login
+    except NoSuchElementException:  exception = "already logged in"
+    driver.webDriver.find_element(By.ID, 'j_id172:j_id372').click() # make payment
+    driver.findWindowByUrl('pay.bill2pay.com')
+    driver.webDriver.find_element(By.ID,'txtUserField1').send_keys(os.environ.get('firstName') + " " + os.environ.get('lastName'))
+    driver.webDriver.find_element(By.ID, 'txtPhone').send_keys(os.environ.get('Phone'))
+    driver.webDriver.find_element(By.ID, 'btnSubmit').click() # Continue
+    driver.webDriver.find_element(By.ID, 'txtNameonBankAccount').send_keys(os.environ.get('firstName') + " " + os.environ.get('lastName'))
+    driver.webDriver.find_element(By.ID, 'ddlBankAccountType').send_keys(Keys.DOWN)
+    driver.webDriver.find_element(By.ID, 'txtBankRoutingNumber').send_keys(paymentAccountDetails['routing'])
+    driver.webDriver.find_element(By.ID, 'txtBankAccountNumber').send_keys(paymentAccountDetails['account'])
+    driver.webDriver.find_element(By.ID, 'txtBankAccountNumber2').send_keys(paymentAccountDetails['account'])
+    driver.webDriver.find_element(By.ID, 'btnSubmitAch').click() # Continue
+    billTotal = driver.getXPATHElementTextOnceAvailable("//*[@id='tblAccountInfo']/tbody/tr[7]/td[2]").replace('$','')
+    driver.webDriver.find_element(By.ID, 'txtEmailAddress').send_keys(os.environ.get('Email'))
+    driver.webDriver.find_element(By.ID, 'chkTermsAgree').click() # agree to T&C
+    driver.webDriver.find_element(By.ID, 'btnSubmit').click() # Make a Payment
+    book.writeWaterBillTransaction(round(Decimal(billTotal), 2))
+    updateSpreadsheet('Home', str(today.year) + ' Balance', 'Water Bill', today.month, -float(billTotal))
+    openSpreadsheet(driver, 'Home', str(today.year) + ' Balance')
+    driver.findWindowByUrl("/scripts/ally")
     
 def runUSD(driver, today, accounts, personalBook):
     lastMonth = getStartAndEndOfDateRange(today, "month")

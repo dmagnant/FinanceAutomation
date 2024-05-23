@@ -12,15 +12,23 @@
         <div style="display: table-row;">
             <div style="width: 35%; display:table-cell">
                 <b><a href="{% url 'Sofi' %}" target="_blank">Sofi</a></b><br><br>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="sofiMain">Main</button>&emsp;
-                    <button type="submit" name="sofi" value="login">Login</button>&emsp;
-                    <button type="submit" name="sofiBalances">Balances</button>&emsp;
-                    <button type="submit" name="sofiLogout">Logout</button>
-                </form><br>
-                Checking Balance: <b>${{bankAccounts.Checking.balance}}</b><br>
-                &thinsp;gnuCash Balance: <b>${{bankAccounts.Checking.gnuBalance}}</b><br>
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" name="sofiMain">Main</button>
+                        <button type="submit" name="sofi" value="login">Login</button>
+                        <button type="submit" name="sofiBalances">Balances</button>
+                        <button type="submit" name="sofiLogout">Logout</button>
+                    </form><br>
+                <div style="display: table-row;">
+                    <div class="test" style="display:table-cell;text-align:right">
+                        Checking Balance: &thinsp; <br>
+                        gnuCash Balance: &thinsp; <br><br>
+                    </div>
+                    <div style="display:table-cell;text-align:left">
+                        <b>${{bankAccounts.Checking.balance}}<br>
+                        ${{bankAccounts.Checking.gnuBalance}}</b><br><br>
+                    </div>
+                </div>
                 Review Transactions:<br><br>
                 <div style="width: 50%; display: table;">
                     {%for tr in bankAccounts.Checking.reviewTransactions %}
@@ -31,8 +39,16 @@
                     </div>
                     {% endfor %}
                 </div>
-                &ensp;Savings Balance: <b>${{bankAccounts.Savings.balance}}</b><br>
-                &thinsp;gnuCash Balance: <b>${{bankAccounts.Savings.gnuBalance}}</b><br>
+                <div style="display: table-row;">
+                    <div style="display:table-cell;text-align:right">
+                        Savings Balance: &thinsp; <br>
+                        gnuCash Balance: &thinsp; <br><br>
+                    </div>
+                    <div style="display:table-cell;text-align:left">
+                        <b>${{bankAccounts.Savings.balance}} <br>
+                        ${{bankAccounts.Savings.gnuBalance}}</b> <br><br>
+                    </div>
+                </div>
                 Review Transactions:<br><br>
                 <div style="width: 50%; display: table;">
                     {%for tr in bankAccounts.Savings.reviewTransactions %}
@@ -48,13 +64,21 @@
                 <b><a href="{% url 'Ally' %}" target="_blank">Ally</a></b><br><br>
                 <form method="post">
                     {% csrf_token %}
-                    <button type="submit" name="allyMain">Main</button>&emsp;
-                    <button type="submit" name="allyLogin">Login</button>&emsp;
-                    <button type="submit" name="allyBalance">Balance</button>&emsp;
+                    <button type="submit" name="allyMain">Main</button>
+                    <button type="submit" name="allyLogin">Login</button>
+                    <button type="submit" name="allyBalance">Balance</button>
                     <button type="submit" name="allyLogout">Logout</button>
                 </form><br>
-                &emsp;&ensp;Balance: <b>${{bankAccounts.Ally.balance}}</b><br>
-                gnuBalance: <b>${{bankAccounts.Ally.gnuBalance}}</b><br>
+                <div style="display: table-row;">
+                    <div style="display:table-cell;text-align:right">
+                        Balance: &thinsp; <br>
+                        gnuBalance: &thinsp; <br><br>
+                    </div>
+                    <div style="display:table-cell;text-align:left">
+                        <b>${{bankAccounts.Ally.balance}}<br>
+                        ${{bankAccounts.Ally.gnuBalance}}</b><br><br>
+                    </div>
+                </div>
                 Review Transactions: <br><br>
                 <div style="width: 50%; display: table;">
                     {%for tr in bankAccounts.Ally.reviewTransactions %}

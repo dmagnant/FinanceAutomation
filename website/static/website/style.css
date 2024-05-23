@@ -5,13 +5,20 @@ body {
 }
 
 a, a:visited {
-    color:lightskyblue
+    color:lightskyblue;
+    display: inline-block;
+    margin-right: 20px;
 }
 
 a:hover {
-    color:white
+    color:white;
 }
 
 a:active {
-    color:red
+    color:red;
+}
+
+button {
+    display: inline-block;
+    margin-right: 20px;
 }

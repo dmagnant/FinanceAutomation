@@ -199,7 +199,6 @@ def runSwagbucks(driver, runAlu, account, book):
     swagBuckscontentDiscovery(driver)
     swagbucksSearch(driver)
     account.setBalance(getSwagBucksBalance(driver))
-    print(account.balance)
     book.updateMRBalance(account)
     if int(account.balance) > 1000: claimSwagBucksRewards(driver)    
     
@@ -208,7 +207,7 @@ if __name__ == '__main__':
     book = GnuCash('Finance')
     Swagbucks = Security("Swagbucks", book)
     runSwagbucks(driver, False, Swagbucks, book)
-    # book.closeBook()
+    book.closeBook()
     
     # swagBuckscontentDiscovery(driver)
     # Swagbucks.setBalance(getSwagBucksBalance(driver))
