@@ -158,3 +158,6 @@ if __name__ == '__main__':
 #     HEaccounts = {'VIIIX': VIIIX, 'HECash': HECash, 'V401k': V401k}
 #     captureHealthEquityCashTransactionsAndBalance(driver, HEaccounts)
 #     book.closeBook()
+
+if __name__ == '__main__':
+    locateHealthEquityWindow(driver)

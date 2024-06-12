@@ -198,13 +198,14 @@ def dailyBank(request):
         elif "tearDown" in request.POST:        tearDown(driver)
         elif "crypto" in request.POST:          updateCryptoPrices(driver, personalBook); bankAccounts['CryptoPortfolio'].updateGnuBalance(personalBook.getBalance(bankAccounts['CryptoPortfolio'].gnuAccount))
         elif "GME" in request.POST: GME =       getStockPrice(driver, 'GME'), personalBook.updatePriceInGnucash('GME', GME)
+        elif "paypalAdjust" in request.POST:    checkUncategorizedPaypalTransactions(driver, personalBook, bankAccounts['Paypal'], getStartAndEndOfDateRange(timeSpan=7))
         elif "sofiMain" in request.POST:        runSofi(driver, accounts)
         elif "sofiLogin" in request.POST:       locateSofiWindow(driver)
         elif "sofiLogout" in request.POST:      sofiLogout(driver)
         elif "sofiBalances" in request.POST:    getSofiBalanceAndOrientPage(driver, bankAccounts['Checking']); getSofiBalanceAndOrientPage(driver, bankAccounts['Savings'])
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/daily"))
     context = {'bankAccounts': bankAccounts, 'GME': "%.2f" % GME}
-    if bankAccounts['Checking'].reviewTransactions or bankAccounts['Savings'].reviewTransactions:   personalBook.openGnuCashUI()
+    if bankAccounts['Checking'].reviewTransactions or bankAccounts['Savings'].reviewTransactions or bankAccounts['Paypal'].reviewTransactions:   personalBook.openGnuCashUI()
     if bankAccounts['Ally'].reviewTransactions:                                                     jointBook.openGnuCashUI()
     personalBook.closeBook();   jointBook.closeBook();    return returnRender(request, "banking/dailyBank.html", context)
 
@@ -382,7 +383,7 @@ def myConstant(request):
 
 def optum(request):
     book = GnuCash('Finance')
-    VFIAX, OptumCash = Security("SF HSA Investment", book), USD("Optum Cash", book)
+    VFIAX, OptumCash = Security("Optum Investment", book), USD("Optum Cash", book)
     OptumAccounts = {'VFIAX': VFIAX, 'OptumCash': OptumCash}
     if request.method == 'POST':
         driver = Driver("Chrome")

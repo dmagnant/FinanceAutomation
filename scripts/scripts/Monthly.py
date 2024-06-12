@@ -3,30 +3,29 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
-
 if __name__ == '__main__' or __name__ == "Monthly":
     from Classes.Asset import USD, Security;    from Classes.WebDriver import Driver;   from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import getStartAndEndOfDateRange, getUsername, getNotes
     from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPricesAndShares
-    from Eternl import runEternl
+    from Eternl import runEternl, locateEternlWindow
     from Ledger import runLedger, getLedgerAccounts
-    from HealthEquity import runHealthEquity
-    from IoPay import runIoPay
-    from Worthy import getWorthyBalance 
-    from Vanguard import runVanguard401k
-    from Fidelity import runFidelity
+    from HealthEquity import runHealthEquity, locateHealthEquityWindow
+    from IoPay import runIoPay, locateIoPayWindow
+    from Worthy import getWorthyBalance, locateWorthyWindow
+    from Vanguard import runVanguard401k, locateVanguardWindow
+    from Fidelity import runFidelity, locateFidelityWindow
 else:
     from .Classes.Asset import USD, Security;   from .Classes.WebDriver import Driver;  from .Classes.GnuCash import GnuCash
-    from .Eternl import runEternl
+    from .Eternl import runEternl, locateEternlWindow
     from .Ledger import runLedger, getLedgerAccounts
     from .Functions.GeneralFunctions import getStartAndEndOfDateRange, getUsername, getNotes
     from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPricesAndShares
-    from .HealthEquity import runHealthEquity
-    from .IoPay import runIoPay
-    from .Worthy import getWorthyBalance
-    from .Vanguard import runVanguard401k
-    from .Fidelity import runFidelity
-
+    from .HealthEquity import runHealthEquity, locateHealthEquityWindow
+    from .IoPay import runIoPay, locateIoPayWindow
+    from .Worthy import getWorthyBalance, locateWorthyWindow
+    from .Vanguard import runVanguard401k, locateVanguardWindow
+    from .Fidelity import runFidelity, locateFidelityWindow
+    
 def getMonthlyAccounts(type, personalBook, jointBook):
     if type == 'USD':
         IRA, iraSPAXX, iraVTI = USD("IRA", personalBook), Security('IRA SPAXX', personalBook), Security('IRA VTI', personalBook)
@@ -55,7 +54,6 @@ def monthlyRoundUp(account, myBook, date):
     myBook.writeGnuTransaction(transactionVariables, account.gnuAccount)
     account.updateGnuBalance(myBook.getBalance(account.gnuAccount))
     
-
 def updateEnergyBillAmounts(driver, book, amount):
     driver.openNewWindow('https://www.we-energies.com/secure/auth/l/acct/summary_accounts.aspx')
     time.sleep(2)
@@ -114,7 +112,18 @@ def payWaterBill(driver, book):
     openSpreadsheet(driver, 'Home', str(today.year) + ' Balance')
     driver.findWindowByUrl("/scripts/ally")
     
+def loginToUSDAccounts(driver):
+    locateWorthyWindow(driver)
+    locateHealthEquityWindow(driver)
+    locateVanguardWindow(driver)
+    locateFidelityWindow(driver)
+ 
+def loginToCryptoAccounts(driver):
+    locateEternlWindow(driver)
+    locateIoPayWindow(driver)
+    
 def runUSD(driver, today, accounts, personalBook):
+    loginToUSDAccounts(driver)
     lastMonth = getStartAndEndOfDateRange(today, "month")
     getWorthyBalance(driver, accounts['Worthy'])
     monthlyRoundUp(accounts['Worthy'], personalBook, lastMonth['endDate'])
@@ -127,6 +136,7 @@ def runUSD(driver, today, accounts, personalBook):
     driver.findWindowByUrl("/scripts/monthly")
 
 def runCrypto(driver, today, accounts, personalBook):
+    loginToCryptoAccounts(driver)
     openSpreadsheet(driver, 'Asset Allocation', 'Cryptocurrency')
     runEternl(driver, accounts['Cardano'], personalBook)
     runIoPay(driver, accounts['IoTex'], personalBook)
@@ -142,15 +152,15 @@ def runMonthlyBank(personalBook, jointBook):
     runUSD(driver, today, usdAccounts, personalBook)
     runCrypto(driver, today, cryptoAccounts, personalBook)
 
-if __name__ == '__main__': # USD
-    driver = Driver("Chrome")
-    today = datetime.today().date()
-    personalBook = GnuCash('Finance')
-    jointBook = GnuCash('Home')
-    usdAccounts = getMonthlyAccounts('USD', personalBook, jointBook)
-    runUSD(driver, today, usdAccounts, personalBook)
-    personalBook.closeBook()
-    jointBook.closeBook()
+# if __name__ == '__main__': # USD
+#     driver = Driver("Chrome")
+#     today = datetime.today().date()
+#     personalBook = GnuCash('Finance')
+#     jointBook = GnuCash('Home')
+#     usdAccounts = getMonthlyAccounts('USD', personalBook, jointBook)
+#     runUSD(driver, today, usdAccounts, personalBook)
+#     personalBook.closeBook()
+#     jointBook.closeBook()
     
 # if __name__ == '__main__': # Crypto
 #     driver = Driver("Chrome")
@@ -162,21 +172,7 @@ if __name__ == '__main__': # USD
 #     personalBook.closeBook()
 #     jointBook.closeBook()
 
-    # # myBook = openGnuCashBook('Finance', True, True)
-    # # getTotalOfAutomatedMRAccounts(myBook)
-    
-    # driver = Driver("Chrome")
-    # vprices = getVanguardPrices(driver)
-    # updateInvestmentPrices(driver, jointBook, vprices)
-    
-    # driver = Driver("Chrome")
-    # personalBook = GnuCash('Finance')
-    # HealthEquity = USD("HSA", personalBook)
-    # healthEquity = getHealthEquityDividendsAndShares(driver, HealthEquity)
-    # vanguardInfo = getVanguardPriceAndShares(driver)
-    # updateInvestmentShares(driver, HealthEquity, vanguardInfo, fidelity)
-    
-# if __name__ == '__main__':
-#     driver = Driver("Chrome")
-#     getEnergyBillAmounts(driver, 201.32)
+if __name__ == '__main__':
+    driver = Driver("Chrome")
+    loginToUSDAccounts(driver)
     

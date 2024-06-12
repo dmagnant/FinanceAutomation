@@ -60,7 +60,7 @@
                     {% endfor %}
                 </div>
             </div>
-            <div style="width: 35%; display:table-cell">
+            <div style="width: %; display:table-cell">
                 <b><a href="{% url 'Ally' %}" target="_blank">Ally</a></b><br><br>
                 <form method="post">
                     {% csrf_token %}
@@ -89,6 +89,19 @@
                     </div>
                     {% endfor %}
                 </div>                
+            </div>
+            <div style="width: 15%; display:table-cell">
+                <br><br><form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="paypalAdjust">Paypal Recategorize</button><br><br>
+                    {%for tr in bankAccounts.Paypal.reviewTransactions %}
+                    <div style="display: table-row;">
+                        <div style="width: 20%; display:table-cell">
+                            {{tr}}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </form>
             </div>            
             <div style="width: 15%; display:table-cell">
                 <br><br><form method="post">

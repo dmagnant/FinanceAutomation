@@ -158,12 +158,24 @@ def updateInvestmentPricesAndShares(driver, book, accounts):
             elif symbol in ['VIIIX', 'VXUS', 'VTI']:
                 price = book.getPriceInGnucash(symbol, today)
                 if symbol == 'VTI':
-                    account = accounts['riraVTI'] if worksheet.acell(accountColumn+str(row)).value == 'rIRA' else accounts['iraVTI']
+                    match(worksheet.acell(accountColumn+str(row)).value):
+                        case 'rIRA':
+                            account = accounts['riraVTI']
+                        case 'IRA':
+                            account = accounts['iraVTI']
+                        case 'Brokerage':
+                            account = accounts['brVTI']
                     shares = float(account.balance)
                 elif symbol == 'VIIIX': shares = float(accounts['VIIIX'].balance)
                 elif symbol == 'VXUS':  shares = float(accounts['riraVXUS'].balance)
             elif symbol == 'SPAXX':
-                account = accounts['riraSPAXX'] if worksheet.acell(accountColumn+str(row)).value == 'rIRA' else accounts['iraSPAXX']
+                match(worksheet.acell(accountColumn+str(row)).value):
+                    case 'rIRA':
+                        account = accounts['riraSPAXX']
+                    case 'IRA':
+                        account = accounts['iraSPAXX']
+                    case 'Brokerage':
+                        account = accounts['brSPAXX']
                 shares = float(account.balance)
                 worksheet.update_acell(sharesColumn + str(row), shares)
                 row+=1

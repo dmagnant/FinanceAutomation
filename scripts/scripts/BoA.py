@@ -97,6 +97,7 @@ def claimBoARewards(driver, account):
         driver.switchToLastWindow()
         try:    driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div/button").click() # close pop-up
         except NoSuchElementException:  exception = "caught"
+        driver.webDriver.find_element(By.XPATH, "//*[@id='skip-to-maincontent']/div/div/div[1]/div/div/ul/li[1]/div/div[1]/div[2]/div/a").click() # get cash back
         driver.webDriver.find_element(By.ID, "redemption_option").click() # redemption option
         try: # redeem if balance
             driver.webDriver.find_element(By.ID, "redemption_option").send_keys("v") # for visa statement credit

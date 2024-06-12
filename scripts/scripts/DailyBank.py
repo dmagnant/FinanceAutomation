@@ -3,9 +3,9 @@ if __name__ == '__main__' or __name__ == "Daily":
     from Classes.Asset import USD, Security
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
-    from Functions.GeneralFunctions import getStockPrice 
+    from Functions.GeneralFunctions import getStockPrice, getStartAndEndOfDateRange
     from Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet, updateInvestmentPricesAndShares
-    from Paypal import runPaypal
+    from Paypal import runPaypal, checkUncategorizedPaypalTransactions
     from Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from Sofi import runSofi, sofiLogout
 else:
@@ -13,10 +13,11 @@ else:
     from .Classes.Asset import USD, Security
     from .Classes.WebDriver import Driver
     from .Classes.GnuCash import GnuCash
-    from .Functions.GeneralFunctions import getStockPrice
+    from .Functions.GeneralFunctions import getStockPrice, getStartAndEndOfDateRange
     from .Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet, updateInvestmentPricesAndShares
     from .Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from .Sofi import runSofi, sofiLogout
+    from. Paypal import runPaypal, checkUncategorizedPaypalTransactions
 
 def getDailyBankAccounts(personalReadBook, jointReadBook=''):
     CryptoPortfolio = USD("Crypto", personalReadBook)
@@ -24,7 +25,8 @@ def getDailyBankAccounts(personalReadBook, jointReadBook=''):
     Savings = USD("Sofi Savings", personalReadBook)
     Ally = USD("Ally", jointReadBook)
     Presearch = Security("Presearch", personalReadBook)
-    return {'CryptoPortfolio': CryptoPortfolio, 'Checking': Checking, 'Savings': Savings, 'Ally': Ally, 'Presearch': Presearch}
+    Paypal = USD("Paypal", personalReadBook)
+    return {'CryptoPortfolio': CryptoPortfolio, 'Checking': Checking, 'Savings': Savings, 'Ally': Ally, 'Presearch': Presearch, 'Paypal': Paypal}
 
 def runDailyBank(accounts, personalBook, jointBook):
     driver = Driver("Chrome")
@@ -38,6 +40,7 @@ def runDailyBank(accounts, personalBook, jointBook):
     openSpreadsheet(driver, 'Home', '2024 Balance')
     GMEprice = getStockPrice(driver, 'GME')
     personalBook.updatePriceInGnucash('GME', GMEprice)
+    checkUncategorizedPaypalTransactions(driver, personalBook, accounts['Paypal'], getStartAndEndOfDateRange(timeSpan=7))
     personalBook.purgeOldGnucashFiles()
     jointBook.purgeOldGnucashFiles()
     driver.findWindowByUrl("/scripts/daily")
@@ -58,15 +61,16 @@ def tearDown(driver):
 
 
 if __name__ == '__main__':
-    driver = Driver("Chrome")
-    # personalBook = GnuCash('Finance')
+    # driver = Driver("Chrome")
+    personalBook = GnuCash('Finance')
     # # book = personalBook.getWriteBook()
     # from datetime import datetime
     # # print(personalBook.getPriceInGnucash('ATOM', datetime.today().date()))
     # updateCryptoPrices(driver, personalBook)
     # # personalBook.updatePriceInGnucash('ATOM', str(12.06))
     # personalBook.closeBook()
+    Paypal = USD("Paypal", personalBook)
+    
 
-
-    GMEprice = getStockPrice(driver, 'GME')
-    print(GMEprice)
+    # GMEprice = getStockPrice(driver, 'GME')
+    # print(GMEprice)

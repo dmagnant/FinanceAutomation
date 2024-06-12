@@ -1,8 +1,9 @@
-import csv, time
+import csv, time, pyautogui
 from datetime import datetime
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Sofi":
     from Classes.Asset import USD
@@ -26,23 +27,36 @@ def locateSofiWindow(driver):
     else:           driver.webDriver.switch_to.window(found); time.sleep(1)
     return True
 
+def checkIfLoggedIn(driver):
+    return driver.webDriver.current_url == "https://www.sofi.com/member-home"
+    
 def sofiLogin(driver):
-    driver.openNewWindow('https://www.sofi.com/login')
-    driver = driver.webDriver
-    time.sleep(2)
-    driver.find_element(By.XPATH, "//*[@id='widget_block']/div/div[2]/div/div/main/section/div/div/div/form/div[2]/button").click() # login
-    # driver.find_element(By.ID,"error-3") # look for email is required error
-    # driver.find_element(By.ID, "username").send_keys(getUsername('Sofi'))
-    # time.sleep(1)
-    # driver.find_element(By.ID, "password").send_keys(getPassword('Sofi'))
-    # time.sleep(1)
-    # driver.find_element(By.XPATH, "//*[@id='widget_block']/main/section/div/div/div/form/div[2]/button").click() # login
-    try:
-        driver.find_element(By.ID,'code')
-        showMessage("OTP Verification", "Enter code from phone, then click OK")
-        driver.find_element(By.XPATH,"//*[@id='mainContent']/div/div/div[2]/div[3]/div[1]/label/span").click() # remember device
-        driver.find_element(By.ID,"verifyCode").click()
-    except NoSuchElementException:  exception = 'otp not required'
+    notLoggedIn = True
+    while notLoggedIn:
+        driver.openNewWindow('https://www.sofi.com/login')
+        time.sleep(2)
+        try:
+            driver.webDriver.find_element(By.XPATH, "//*[@id='widget_block']/div/div[2]/div/div/main/section/div/div/div/form/div[2]/button").click() # login
+            notLoggedIn = checkIfLoggedIn(driver)
+        except NoSuchElementException:
+            try:
+                pyautogui.press('tab')
+                pyautogui.press('space')
+                time.sleep(5)
+            except NoSuchElementException:
+                notLoggedIn = checkIfLoggedIn(driver)
+        # driver.webDriver.find_element(By.ID,"error-3") # look for email is required error
+        # driver.webDriver.find_element(By.ID, "username").send_keys(getUsername('Sofi'))
+        # time.sleep(1)
+        # driver.webDriver.find_element(By.ID, "password").send_keys(getPassword('Sofi'))
+        # time.sleep(1)
+        # driver.webDriver.find_element(By.XPATH, "//*[@id='widget_block']/main/section/div/div/div/form/div[2]/button").click() # login
+        # try:
+        #     driver.webDriver.find_element(By.ID,'code')
+        #     showMessage("OTP Verification", "Enter code from phone, then click OK")
+        #     driver.webDriver.find_element(By.XPATH,"//*[@id='mainContent']/div/div/div[2]/div[3]/div[1]/label/span").click() # remember device
+        #     driver.webDriver.find_element(By.ID,"verifyCode").click()
+        # except NoSuchElementException:  exception = 'otp not required'
 
 def sofiLogout(driver):
     locateSofiWindow(driver)
@@ -126,11 +140,10 @@ def runSofi(driver, accounts, book):
     today = datetime.today().date()
     dateRange = getStartAndEndOfDateRange(today, 7)
     locateSofiWindow(driver)
-    for account in accounts:    
+    for account in accounts:
         runSofiAccount(driver, dateRange, today, account, book)
-        print(book.getBalance(account.gnuAccount))
         account.updateGnuBalance(book.getBalance(account.gnuAccount))
-    if today.day <= 7:          setMonthlySpendTarget(driver)        
+    if today.day <= 7:          setMonthlySpendTarget(driver)  
     driver.webDriver.get("https://www.sofi.com/my/money/account/#/1000028154579/account-detail") # switch back to checking page
 
 # if __name__ == '__main__':
@@ -145,29 +158,11 @@ def runSofi(driver, accounts, book):
     # sofiLogout(driver)
     # book.closeBook()
     
-if __name__ == '__main__':    
+if __name__ == '__main__':
     book = GnuCash('Finance')
-    Checking = USD("Sofi Checking", book)
+    driver = Driver("Chrome")
+    today = datetime.today().date()
+    dateRange = getStartAndEndOfDateRange(today, 7)
     Savings = USD("Sofi Savings", book)
-    print(book.getBalance(Checking.gnuAccount))
-    
-    
-    # transactionDate = 'Feb 29'
-    # month = datetime.strptime(transactionDate[:3], "%b").month
-    # day = transactionDate[4:]
-    # modifiedDate = str(month) + '/' + day + '/' + str(datetime.today().date().year-2000)
-    # print(modifiedDate)
-    # modifiedDate = f''
-    
-    
-    
-    
-    # sofiDate = datetime.strptime(dateString, '%b %d %Y').date().replace(year=2024)
-    # print(sofiDate)
-    # try:
-    #     sofiDate = datetime.strptime(dateString, '%b %d').date().replace(year=2024)
-    # except ValueError:
-    #     dateString.
-    #     sofiDate = datetime.strptime(dateString, '%b %d').date().replace(year=2024)
-
-    # print(sofiDate)
+    sofiActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\sofi.csv"
+    book.importUniqueTransactionsToGnuCash(Savings, sofiActivity, driver, dateRange, 0)

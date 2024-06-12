@@ -45,30 +45,15 @@ if __name__ == '__main__':
     # date = date=datetime.today().date().replace(month=3, day=31)
     # print(book.getBalance(gnuAccount, date))
 
-    from Functions.GeneralFunctions import getStartAndEndOfDateRange, getPaycheckDates
-    from dateutil.relativedelta import relativedelta
-    from datetime import datetime
+    test = ['1']
 
-    if datetime.today().weekday() == 5:
-        print('yes')
+    test.extend(['2', '3'])
+    print(test)
 
-    print(datetime.today().weekday())
-    # print(getStartAndEndOfDateRange(datetime.today().date()+relativedelta(months=+1), 'month'))
-    
-    # def eventsHappening(date):
-    #     events, monthDates = [], getStartAndEndOfDateRange(date+relativedelta(months=+1), 'month')
-    #     if date.day == monthDates['endDate'].day:           events.append('Paycheck')
-    #     if date in getPaycheckDates():                      events.append('Paycheck')
-    #     if date.month in [2, 5, 8, 11] and date.day == 22:  events.append('Pay Water Bill')
-    #     match date.day:
-    #         case 1:         events.append('Pay Jon')
-    #         case 3:         events.append('Ally Interest')
-    #         case 5:         events.append('WE Energies')
-    #         case 13:        events.append('BoA-Joint CC Bill posts')
-    #         case 14:        events.append('Mortgage Bill')            
-    #         case 15:        events.append('Paycheck')
-    #         case 17:        events.append('Schedule Ally transfer')
-    #         case 24:        events.append('Utility Bill posts')
-    #         case _:         return events
-    #     return events
-    # print(eventsHappening(datetime.today().date().replace(day=22)))
+    def add_numbers_to_test(test):
+        test.extend(['4', '5'])
+        print(test)
+
+    def print_all_of_test(test):
+        for i in test:
+            print(i)

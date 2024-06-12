@@ -148,16 +148,27 @@ def captureFidelityTransactions(driver, account='all'):
                 column+=1
             descriptionElement = driver.webDriver.find_element(By.XPATH,setElementPath(row, table, column)+'/div')
             description = descriptionElement.text
+            fees = 0
             column+=1
-            amount = driver.webDriver.find_element(By.XPATH,setElementPath(row, table, column)).text.replace('$','').replace(',','').replace('-','').replace('+','')
+            amount = driver.webDriver.find_element(By.XPATH,setElementPath(row, table, column)).text.replace('$','').replace(',','').replace('+','')
             if not amount:  continue
-            if "YOU BOUGHT" in description.upper():
+            if "CASH CONTRIBUTION" in description.upper() or "ELECTRONIC FUNDS TRANSFER" in description.upper() or "REINVESTMENT" in description.upper(): continue
+            elif "YOU BOUGHT" in description.upper() or "YOU SOLD" in description.upper(): # buy/sell shares or options
                 descriptionElement.click()
-                shares = driver.webDriver.find_element(By.XPATH,getFidelityElementPathRoot()+str(table)+']/div['+str(row)+']/div[2]/div/activity-order-detail-panel/div/div/div[10]').text.replace('-','').replace('+','')
+                feesNum = 15
+                while feesNum < 19:
+                    feeDescription = driver.webDriver.find_element(By.XPATH, getFidelityElementPathRoot()+str(table)+']/div['+str(row)+']/div[2]/div/activity-order-detail-panel/div/div/div['+str(feesNum)+']').text
+                    if feeDescription == "Fees" or feeDescription == "Commission": # fees
+                        feesNum+=1
+                        fees += Decimal(driver.webDriver.find_element(By.XPATH,getFidelityElementPathRoot()+str(table)+']/div['+str(row)+']/div[2]/div/activity-order-detail-panel/div/div/div['+str(feesNum)+']').text.replace('$',''))
+                        feesNum+=1
+                    else: feesNum=19
+                if "TRANSACTION" not in description.upper(): # shares bought
+                    shares = driver.webDriver.find_element(By.XPATH,getFidelityElementPathRoot()+str(table)+']/div['+str(row)+']/div[2]/div/activity-order-detail-panel/div/div/div[10]').text.replace('+','')
+                else: shares = amount # options bought
                 descriptionElement.click()
-            elif "CASH CONTRIBUTION" in description.upper() or "ELECTRONIC FUNDS TRANSFER" in description.upper() or "REINVESTMENT" in description.upper() or "LIQUIDATION" in description.upper(): continue
             else:   shares = amount
-            transaction = date, description, amount, shares, accountName
+            transaction = date, description, amount, shares, accountName, fees
             csv.writer(open(fidelityActivity, 'a', newline='', encoding="utf-8")).writerow(transaction)
         elif date.month < lastMonth['endDate'].month or date.year < lastMonth['endDate'].year:  break
     return fidelityActivity
@@ -187,7 +198,11 @@ def getFidelityAccounts(book):
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = GnuCash('Finance')
+    book = GnuCash('Test')
     accounts = getFidelityAccounts(book)
-    runFidelity(driver, accounts, book)
+    # runFidelity(driver, accounts, book)
+    # book.closeBook()
+
+    fidelityActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\fidelity.csv"
+    book.importGnuTransaction(accounts, fidelityActivity, driver, 0)
     book.closeBook()
