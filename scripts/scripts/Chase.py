@@ -83,8 +83,12 @@ def claimChaseRewards(driver):
         pyautogui.press('tab'); pyautogui.press('tab')
         pyautogui.press('space')
         time.sleep(3)
-        driver.webDriver.find_element(By.XPATH,"/html/body/the-app/main/ng-component/section/div/section[1]/div/div/div[3]/mds-button[2]").click() # Submit            
-
+        n=1
+        while n<=12:
+            pyautogui.press('tab'); time.sleep(1);  n+=1
+        time.sleep(1)
+        pyautogui.press('space') # submit
+                                                                                
 def runChase(driver, account, book):
     locateChaseWindow(driver)
     account.setBalance(getChaseBalance(driver))

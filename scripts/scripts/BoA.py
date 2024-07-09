@@ -93,7 +93,7 @@ def claimBoARewards(driver, account):
         time.sleep(5)
         driver.webDriver.execute_script("window.scrollTo(0, 300)")
         time.sleep(3)
-        driver.webDriver.find_element(By.ID, "rewardsRedeembtn").click() # redeem cash rewards
+        driver.clickIDElementOnceAvaiable('rewardsRedeembtn') # redeem cash rewards
         driver.switchToLastWindow()
         try:    driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div/button").click() # close pop-up
         except NoSuchElementException:  exception = "caught"

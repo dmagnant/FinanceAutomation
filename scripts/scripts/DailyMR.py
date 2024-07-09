@@ -3,6 +3,7 @@ if __name__ == '__main__' or __name__ == "Daily":
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
     from AmazonGC import confirmAmazonGCBalance
+    from Paidviewpoint import getPaidviewpointBalance
     from Pinecone import runPinecone
     from Swagbucks import runSwagbucks
     from Tellwut import runTellwut
@@ -11,6 +12,7 @@ else:
     from .Classes.WebDriver import Driver
     from .Classes.GnuCash import GnuCash
     from .AmazonGC import confirmAmazonGCBalance
+    from .Paidviewpoint import getPaidviewpointBalance    
     from .Pinecone import runPinecone
     from .Swagbucks import runSwagbucks
     from .Tellwut import runTellwut
@@ -28,6 +30,8 @@ def runDailyMR(accounts, book):
     driver = Driver("Chrome")
     runTellwut(driver, accounts['Tellwut'], book)
     confirmAmazonGCBalance(driver, accounts['AmazonGC'])
+    accounts['Paidviewpoint'].setBalance(getPaidviewpointBalance(driver))
+    book.overwriteBalance(accounts['Paidviewpoint'])
     runPinecone(driver, accounts['Pinecone'], book)
     runSwagbucks(driver, True, accounts['Swagbucks'], book)
     driver.findWindowByUrl("/scripts/daily")

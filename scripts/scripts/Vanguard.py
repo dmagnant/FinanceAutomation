@@ -135,9 +135,15 @@ if __name__ == '__main__':
     # Pension.getData()
     # V401k.getData()
     # book.closeBook()
-    
-    planIDs = json.loads(getNotes('Vanguard'))
-    print(str(planIDs['A']))
+    interestAmount = 0
+    transactions = [tr for tr in book.readBook.transactions
+                    if tr.post_date.strftime('%Y') >= 2022
+                    for spl in tr.splits
+                    if spl.account.fullname == "Assets:Non-Liquid Assets:Pension"]
+    for tr in transactions:
+        for spl in tr.splits:
+            if spl.account.fullname == "Income:Investments:Interest":   interestAmount = interestAmount + abs(spl.value)
+    print(interestAmount)
     
     # accountNums = json.loads(getNotes('Fidelity'))
     # print(str(accountNums['rIRA']))

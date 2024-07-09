@@ -15,7 +15,7 @@ def getSymbolByName(self):
         case "cosmos":                                              return 'ATOM'
         case "ethereum":                                            return 'ETH'
         case 'he investment':                                       return "VIIIX"        
-        case 'optum investment':                                    return "VFIAX"
+        case 'vfiax':                                               return "VFIAX"
         case "iotex":                                               return 'IOTX'
         case "loopring":                                            return 'LRC'
         case "polkadot":                                            return 'DOT'
@@ -27,6 +27,7 @@ def getSymbolByName(self):
         case "swagbucks":                                           return 'SB'
         case 'employee benefit index':                              return 'M038'
         case 'total stock market(401k)':                            return '8585'
+        case 'ira gme' | 'roth ira gme' | 'brokerage gme':          return 'GME'
         case 'ira vti' | 'roth ira vti' | 'brokerage vti':          return 'VTI'
         case 'ira vxus' | 'roth ira vxus':                          return 'VXUS'        
         case 'ira spaxx' | 'roth ira spaxx' | 'brokerage spaxx':    return 'SPAXX'
@@ -50,6 +51,7 @@ class Asset:
     def getGnuAccount(self):        return self.gnuAccount
     def setGnuAccount(self, book):  self.gnuAccount = book.getGnuAccount(self)
     def getGnuBalance(self):        return self.gnuBalance
+    def setValue(self, value):      self.value = value
     
 class Security(Asset):    # this is a class for tracking security information
     def __init__(self, name, book, account=None):
@@ -79,18 +81,18 @@ class Security(Asset):    # this is a class for tracking security information
     
     def updateSpreadsheetAndGnuCash(self, book):
         account = self.symbol if self.account == None else self.account
-        updateSpreadsheet('Asset Allocation', 'Cryptocurrency', account, 1, self.balance, self.symbol)
-        updateSpreadsheet('Asset Allocation', 'Cryptocurrency', account, 2, float(self.price), self.symbol)
+        updateSpreadsheet('Asset Allocation', 'Investments', account, 1, self.balance, self.symbol)
+        updateSpreadsheet('Asset Allocation', 'Investments', account, 2, float(self.price), self.symbol)
         updateCoinQuantityFromStakingInGnuCash(self, book)
         self.updateGnuBalance(book.getBalance(self.gnuAccount))
 
     def updateBalanceInSpreadSheet(self, account=None):
         account = self.symbol if account == None else account
-        updateSpreadsheet('Asset Allocation', 'Cryptocurrency', account, 1, self.balance, self.symbol)
+        updateSpreadsheet('Asset Allocation', 'Investments', account, 1, self.balance, self.symbol)
 
     def updatePriceInSpreadSheet(self, account=None):
         account = self.symbol if account == None else account
-        updateSpreadsheet('Asset Allocation', 'Cryptocurrency', account, 2, self.price, self.symbol)
+        updateSpreadsheet('Asset Allocation', 'Investments', account, 2, self.price, self.symbol)
 
     def updateBalanceInGnuCash(self, book, account=None):
         account = self.symbol if account == None else account

@@ -31,7 +31,7 @@ def runIoPay(driver, account, book):
         driver.clickXPATHElementOnceAvaiable("//*[@id='chakra-modal--body-2']/div[1]/div/div[2]/button") # connect
     except NoSuchElementException:  exception = "wallet already connected"
     time.sleep(1)
-    driver.webDriver.find_element(By.XPATH,"//*[@id='__next']/section/nav/div/div[2]/nav/div[4]/div/div/p").click() # click my Vote
+    driver.webDriver.find_element(By.XPATH,"//*[@id='__next']/section/nav/div/div[2]/nav/div[4]/div/div/p").click() # click my Stake
     time.sleep(1)
     walletBalance = Decimal(driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/section/div[1]/main/div/div[5]/div[2]/div[2]/div[3]/div[2]/div[2]/div[2]/p[2]").text.replace(" IOTX", ""))
     if walletBalance > 5:

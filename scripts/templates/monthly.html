@@ -18,14 +18,6 @@
                 </form><br>
                 <div style="display: table-row;">
                     <div style="display:table-cell;text-align:right">
-                        {{usdAccounts.Brokerage.name}} balance: &thinsp; <br>
-                        gnuBalance: &thinsp; <br><br>
-                        {{usdAccounts.brSPAXX.symbol}} balance: &thinsp; <br>
-                        gnuBalance: &thinsp; <br><br>
-                        {{usdAccounts.brVTI.symbol}} shares: &thinsp; <br>
-                        gnuBalance shares: &thinsp; <br>
-                        {{usdAccounts.brVTI.symbol}} value: &thinsp; <br>
-                        ${{usdAccounts.brVTI.price}} x shares: &thinsp; <br><br>
                         {{usdAccounts.rIRA.name}} balance: &thinsp; <br>
                         gnuBalance: &thinsp; <br><br>
                         {{usdAccounts.riraSPAXX.symbol}} balance: &thinsp; <br>
@@ -38,17 +30,13 @@
                         gnuBalance shares: &thinsp; <br>
                         {{usdAccounts.riraVXUS.symbol}} value: &thinsp; <br>
                         ${{usdAccounts.riraVXUS.price}} x shares: &thinsp; <br><br>
+                        {{usdAccounts.riraGME.symbol}} shares: &thinsp; <br>
+                        gnuBalance shares: &thinsp; <br>
+                        {{usdAccounts.riraGME.symbol}} value: &thinsp; <br>
+                        ${{usdAccounts.riraGME.price}} x shares: &thinsp; <br><br>
                     </div>
                     <div style="display:table-cell;text-align:left">
-                        <b>${{usdAccounts.Brokerage.balance}}<br>
-                        ${{usdAccounts.Brokerage.gnuBalance}}<br><br>
-                        ${{usdAccounts.brSPAXX.balance}}<br>
-                        ${{usdAccounts.brSPAXX.gnuBalance}}<br><br>
-                        {{usdAccounts.brVTI.balance}} {{usdAccounts.brVTI.symbol}}<br>
-                        {{usdAccounts.brVTI.gnuBalance}} {{usdAccounts.brVTI.symbol}}<br>
-                        ${{usdAccounts.brVTI.value}}<br>
-                        ${{usdAccounts.brVTI.gnuValue}}<br><br>
-                        ${{usdAccounts.rIRA.balance}}<br>
+                        <b>${{usdAccounts.rIRA.balance}}<br>
                         ${{usdAccounts.rIRA.gnuBalance}}<br><br>
                         ${{usdAccounts.riraSPAXX.balance}}<br>
                         ${{usdAccounts.riraSPAXX.gnuBalance}}<br><br>
@@ -59,7 +47,11 @@
                         {{usdAccounts.riraVXUS.balance}} {{usdAccounts.riraVXUS.symbol}}<br>
                         {{usdAccounts.riraVXUS.gnuBalance}} {{usdAccounts.riraVXUS.symbol}}<br>
                         ${{usdAccounts.riraVXUS.value}}<br>
-                        ${{usdAccounts.riraVXUS.gnuValue}}</b><br><br>
+                        ${{usdAccounts.riraVXUS.gnuValue}}<br><br>
+                        {{usdAccounts.riraGME.balance}} {{usdAccounts.riraGME.symbol}}<br>
+                        {{usdAccounts.riraGME.gnuBalance}} {{usdAccounts.riraGME.symbol}}<br>
+                        ${{usdAccounts.riraGME.value}}<br>
+                        ${{usdAccounts.riraGME.gnuValue}}</b><br><br>
                     </div>
                 </div>  
             </div>
@@ -67,24 +59,40 @@
                 <br><br><br><br>
                 <div style="display: table-row;">
                     <div style="display:table-cell;text-align:right">
+                        {{usdAccounts.Brokerage.name}} balance: &thinsp; <br>
+                        gnuBalance: &thinsp; <br><br>
+                        {{usdAccounts.brSPAXX.symbol}} balance: &thinsp; <br>
+                        gnuBalance: &thinsp; <br><br>
+                        {{usdAccounts.brGME.symbol}} shares: &thinsp; <br>
+                        gnuBalance shares: &thinsp; <br>
+                        {{usdAccounts.brGME.symbol}} value: &thinsp; <br>
+                        ${{usdAccounts.brGME.price}} x shares: &thinsp; <br><br><br>
                         {{usdAccounts.IRA.name}} balance: &thinsp; <br>
                         gnuBalance: &thinsp; <br><br>
                         {{usdAccounts.iraSPAXX.symbol}} balance: &thinsp; <br>
                         gnuBalance: &thinsp; <br><br>
-                        {{usdAccounts.iraVTI.symbol}} shares: &thinsp; <br>
+                        {{usdAccounts.iraGME.symbol}} shares: &thinsp; <br>
                         gnuBalance shares: &thinsp; <br>
-                        {{usdAccounts.iraVTI.symbol}} value: &thinsp; <br>
-                        ${{usdAccounts.iraVTI.price}} x shares: &thinsp; <br><br>
+                        {{usdAccounts.iraGME.symbol}} value: &thinsp; <br>
+                        ${{usdAccounts.iraGME.price}} x shares: &thinsp; <br><br>
                     </div>
                     <div style="display:table-cell;text-align:left">
-                        <b>${{usdAccounts.IRA.balance}}<br>
+                        <b>${{usdAccounts.Brokerage.balance}}<br>
+                        ${{usdAccounts.Brokerage.gnuBalance}}<br><br>
+                        ${{usdAccounts.brSPAXX.balance}}<br>
+                        ${{usdAccounts.brSPAXX.gnuBalance}}<br><br>
+                        {{usdAccounts.brGME.balance}} {{usdAccounts.brGME.symbol}}<br>
+                        {{usdAccounts.brGME.gnuBalance}} {{usdAccounts.brGME.symbol}}<br>
+                        ${{usdAccounts.brGME.value}}<br>
+                        ${{usdAccounts.brGME.gnuValue}}<br><br>
+                        ${{usdAccounts.IRA.balance}}<br>
                         ${{usdAccounts.IRA.gnuBalance}}<br><br>
                         ${{usdAccounts.iraSPAXX.balance}}<br>
                         ${{usdAccounts.iraSPAXX.gnuBalance}}<br><br>
-                        {{usdAccounts.iraVTI.balance}} {{usdAccounts.iraVTI.symbol}}<br>
-                        {{usdAccounts.iraVTI.gnuBalance}} {{usdAccounts.iraVTI.symbol}}<br>
-                        ${{usdAccounts.iraVTI.value}}<br>
-                        ${{usdAccounts.iraVTI.gnuValue}}</b><br><br>
+                        {{usdAccounts.iraGME.balance}} {{usdAccounts.iraGME.symbol}}<br>
+                        {{usdAccounts.iraGME.gnuBalance}} {{usdAccounts.iraGME.symbol}}<br>
+                        ${{usdAccounts.iraGME.value}}<br>
+                        ${{usdAccounts.iraGME.gnuValue}}</b><br><br>
                     </div>
                 </div>
             </div>

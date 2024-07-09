@@ -4,7 +4,7 @@ if __name__ == '__main__' or __name__ == "Daily":
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import getStockPrice, getStartAndEndOfDateRange
-    from Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet, updateInvestmentPricesAndShares
+    from Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet, updateUSDInvestmentPricesAndShares, updateInvestmentPrices
     from Paypal import runPaypal, checkUncategorizedPaypalTransactions
     from Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from Sofi import runSofi, sofiLogout
@@ -14,7 +14,7 @@ else:
     from .Classes.WebDriver import Driver
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import getStockPrice, getStartAndEndOfDateRange
-    from .Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet, updateInvestmentPricesAndShares
+    from .Functions.SpreadsheetFunctions import updateCryptoPrices, openSpreadsheet, updateUSDInvestmentPricesAndShares, updateInvestmentPrices
     from .Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from .Sofi import runSofi, sofiLogout
     from. Paypal import runPaypal, checkUncategorizedPaypalTransactions
@@ -34,13 +34,10 @@ def runDailyBank(accounts, personalBook, jointBook):
     # runAlly(driver, accounts['Ally'], jointBook)
     presearchRewardsRedemptionAndBalanceUpdates(driver, accounts['Presearch'], personalBook)
     openSpreadsheet(driver, 'Checking Balance', '2024')
-    openSpreadsheet(driver, 'Asset Allocation', 'Cryptocurrency')
-    updateCryptoPrices(driver, personalBook)
+    GMEprice = updateInvestmentPrices(driver, personalBook)
     accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getBalance(accounts['CryptoPortfolio'].gnuAccount))
-    openSpreadsheet(driver, 'Home', '2024 Balance')
-    GMEprice = getStockPrice(driver, 'GME')
-    personalBook.updatePriceInGnucash('GME', GMEprice)
     checkUncategorizedPaypalTransactions(driver, personalBook, accounts['Paypal'], getStartAndEndOfDateRange(timeSpan=7))
+    openSpreadsheet(driver, 'Home', '2024 Balance')
     personalBook.purgeOldGnucashFiles()
     jointBook.purgeOldGnucashFiles()
     driver.findWindowByUrl("/scripts/daily")
@@ -61,16 +58,12 @@ def tearDown(driver):
 
 
 if __name__ == '__main__':
-    # driver = Driver("Chrome")
+    driver = Driver("Chrome")
     personalBook = GnuCash('Finance')
-    # # book = personalBook.getWriteBook()
-    # from datetime import datetime
-    # # print(personalBook.getPriceInGnucash('ATOM', datetime.today().date()))
+    book = personalBook.getWriteBook()
+    from datetime import datetime
+    # print(personalBook.getPriceInGnucash('ATOM', datetime.today().date()))
     # updateCryptoPrices(driver, personalBook)
-    # # personalBook.updatePriceInGnucash('ATOM', str(12.06))
-    # personalBook.closeBook()
-    Paypal = USD("Paypal", personalBook)
-    
-
-    # GMEprice = getStockPrice(driver, 'GME')
-    # print(GMEprice)
+    GMEprice = updateInvestmentPrices(driver, personalBook)
+    # personalBook.updatePriceInGnucash('ATOM', str(12.06))
+    personalBook.closeBook()

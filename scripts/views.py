@@ -196,8 +196,7 @@ def dailyBank(request):
         elif "allyBalance" in request.POST:     bankAccounts['Ally'].setBalance(getAllyBalance(driver))
         elif "paypal" in request.POST:          runPaypal(driver)
         elif "tearDown" in request.POST:        tearDown(driver)
-        elif "crypto" in request.POST:          updateCryptoPrices(driver, personalBook); bankAccounts['CryptoPortfolio'].updateGnuBalance(personalBook.getBalance(bankAccounts['CryptoPortfolio'].gnuAccount))
-        elif "GME" in request.POST: GME =       getStockPrice(driver, 'GME'), personalBook.updatePriceInGnucash('GME', GME)
+        elif "GME" in request.POST: GME =       getStockPrice('GME'); personalBook.updatePriceInGnucash('GME', GME)
         elif "paypalAdjust" in request.POST:    checkUncategorizedPaypalTransactions(driver, personalBook, bankAccounts['Paypal'], getStartAndEndOfDateRange(timeSpan=7))
         elif "sofiMain" in request.POST:        runSofi(driver, accounts)
         elif "sofiLogin" in request.POST:       locateSofiWindow(driver)
@@ -343,7 +342,7 @@ def monthly(request):
     if request.method == 'POST':
         driver, today = Driver("Chrome"), datetime.today().date()
         if "USD" in request.POST:                   runUSD(driver, today, usdAccounts, personalBook)
-        elif "Crypto" in request.POST:              runCrypto(driver, today, cryptoAccounts, personalBook)
+        elif "Crypto" in request.POST:              runCrypto(driver, cryptoAccounts, personalBook)
         elif "fidelityMain" in request.POST:        runFidelity(driver, usdAccounts, personalBook)
         elif "fidelityBalance" in request.POST:     getFidelityBalance(driver, accounts)
         elif "fidelityLogin" in request.POST:       locateFidelityWindow(driver)
@@ -383,13 +382,13 @@ def myConstant(request):
 
 def optum(request):
     book = GnuCash('Finance')
-    VFIAX, OptumCash = Security("Optum Investment", book), USD("Optum Cash", book)
+    VFIAX, OptumCash = Security("VFIAX", book), USD("Optum Cash", book)
     OptumAccounts = {'VFIAX': VFIAX, 'OptumCash': OptumCash}
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "main" in request.POST:              print('create script for main')
+        if "main" in request.POST:              runOptum(driver, OptumAccounts, book)
         elif "login" in request.POST:           locateOptumWindow(driver)
-        elif "balance" in request.POST:         print('create script for balances')
+        elif "balance" in request.POST:         getOptumBalance(driver, OptumAccounts, book)
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/optum"))
     context = {'OptumAccounts': OptumAccounts}
     book.closeBook();   return returnRender(request, "banking/optum.html", context)

@@ -41,9 +41,9 @@ def swagBuckscontentDiscovery(driver):
     cardNum = 1
     closePopUps(driver)
     while True:
-        contentPath = getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div[2]/div[1]/section[" + str(cardNum) + "]"
+        contentPath = getSwagbucksBasePath() + "4]/div[1]/div[1]/main/div[2]/div[1]/section[" + str(cardNum) + "]"
         try:
-            try:    earnings = driver.webDriver.find_element(By.XPATH, contentPath + "/p/span/span[3]").text
+            try:    earnings = driver.webDriver.find_element(By.XPATH, contentPath + "/p/span/span[3]").text;
             except NoSuchElementException:  cardNum += 1; continue
             description = driver.webDriver.find_element(By.XPATH, contentPath + "/button").text
             if "1 sb" in earnings.lower() or "check out the latest deals" == description.lower():
@@ -103,12 +103,12 @@ def toDoList(driver):
     list_item_num, button_num, button_not_clicked, main = 1, 2, True, driver.webDriver.window_handles[len(driver.webDriver.window_handles)-1]
     closePopUps(driver)
     while list_item_num <= 8:
-        try:  driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "1]/header/nav/div[3]/div/div/div/div[1]/h4") # look for Daily Bonus header 
+        try:  driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "2]/header/nav/div[3]/div/div/div/div[1]/h4") # look for Daily Bonus header 
         except NoSuchElementException:
-            try: driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "1]/header/nav/div[3]/button").click() # if not visible, click to show To Do List
+            try: driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "2]/header/nav/div[3]/button/span").click() # if not visible, click to show To Do List
             except (NoSuchElementException, ElementClickInterceptedException):  exception = "caught"
         time.sleep(1)
-        list_item = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "1]/header/nav/div[3]/div/div/div/div[2]/div/section[1]/div/ul/li[" + str(list_item_num) + "]/a")
+        list_item = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "2]/header/nav/div[3]/div/div/div/div[2]/div/section[1]/div/ul/li[" + str(list_item_num) + "]/a")
         if list_item.text == "Add A Magic Receipts Offer":
             driver.webDriver.get("https://www.swagbucks.com/grocery-receipts-merchant?category=-1&merchant-id=53"); time.sleep(4)
             while button_not_clicked:
@@ -117,7 +117,7 @@ def toDoList(driver):
                 if button.text == 'Add to List':    button.click(); button_not_clicked = False                    
                 else:                               button_num+=1
             driver.webDriver.get('https://www.swagbucks.com/'); time.sleep(2)
-        elif list_item.text == "Deal of the Day":
+        elif list_item.text == "Deal of the Day" or list_item.text == "Game Of The Day":
             window_num_before = len(driver.webDriver.window_handles)
             list_item.click();  time.sleep(6)
             window_num_after = len(driver.webDriver.window_handles)
@@ -139,18 +139,18 @@ def swagbucksInbox(driver):
     while True:
         closePopUps(driver)
         try: 
-            contentPath = getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div/div[2]/div/div[3]/div/a/div[2]/span"
+            contentPath = getSwagbucksBasePath() + "4]/div[1]/div[1]/main/div/div[2]/div/div[3]/div[1]/a"
             try:
                 driver.webDriver.find_element(By.XPATH, contentPath).click()
-                description = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/div[1]/div[1]/main/h1").text
+                description = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "4]/div[1]/div[1]/main/div/div[2]/div/div[3]/div[1]/a/div[2]/span").text
                 if "Earn Every" in description: openAndCloseInboxItem(driver)
                 elif "Discover Daily Interests" in description:
                     num = 0
                     while num < 4:  openAndCloseInboxItem(driver); num += 1
-                driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div[3]/div[2]/div[2]").click() # delete
+                driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "4]/div[1]/div[1]/main/div[3]/div[2]/div[2]").click() # delete
             except ElementNotInteractableException: # description is blank
-                driver.webDriver.find_element(By.XPATH,'/html/body/div[2]/div[3]/div[1]/div[1]/main/div/div[2]/div/div[3]/div[1]/div/span').click() # checkbox
-                driver.webDriver.find_element(By.XPATH, '/html/body/div[2]/div[3]/div[1]/div[1]/main/div/div[1]/div[2]/button[2]').click() # delete
+                driver.webDriver.find_element(By.XPATH,getSwagbucksBasePath() + '4]/div[1]/div[1]/main/div/div[2]/div/div[3]/div[1]/div/span').click() # checkbox
+                driver.webDriver.find_element(By.ID, 'deleteMessageCta').click() # delete
             time.sleep(1)
             alert = driver.webDriver.switch_to.alert;   alert.accept()
         except NoSuchElementException: break
@@ -177,12 +177,11 @@ def swagbucksSearch(driver):
 
 def getSwagBucksBalance(driver):
     locateSwagBucksWindow(driver)
-    return driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "1]/header/nav/section[2]/div[1]/p/var").text.replace('SB', '').replace(',', '')
+    return driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "2]/header/nav/section[2]/div[1]/p/var").text.replace('SB', '').replace(',', '')
 
 def claimSwagBucksRewards(driver):
     locateSwagBucksWindow(driver)
     driver = driver.webDriver
-    # Paypal $10 rewards page
     driver.get("https://www.swagbucks.com/p/prize/28353/PayPal-10");    time.sleep(4)
     driver.find_element(By.ID,"redeemBtnHolder").click() # Claim Reward
     driver.find_element(By.ID,"redeemBtn").click() # Claim a Gift Card
@@ -202,12 +201,15 @@ def runSwagbucks(driver, runAlu, account, book):
     swagbucksSearch(driver)
     if int(account.balance) > 1000: claimSwagBucksRewards(driver)
     
+# if __name__ == '__main__':
+#     driver = Driver("Chrome")
+#     book = GnuCash('Finance')
+#     Swagbucks = Security("Swagbucks", book)
+#     runSwagbucks(driver, False, Swagbucks, book)
+#     book.closeBook()
+
+
 if __name__ == '__main__':
-    driver = Driver("Chrome")
-    book = GnuCash('Finance')
-    Swagbucks = Security("Swagbucks", book)
-    runSwagbucks(driver, False, Swagbucks, book)
-    book.closeBook()
-    
-    # swagBuckscontentDiscovery(driver)
-    # Swagbucks.setBalance(getSwagBucksBalance(driver))
+    driver = Driver("Chrome")    
+    locateSwagBucksWindow(driver)
+    swagBuckscontentDiscovery(driver)

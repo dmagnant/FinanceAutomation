@@ -5,8 +5,8 @@ from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Monthly":
     from Classes.Asset import USD, Security;    from Classes.WebDriver import Driver;   from Classes.GnuCash import GnuCash
-    from Functions.GeneralFunctions import getStartAndEndOfDateRange, getUsername, getNotes
-    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPricesAndShares
+    from Functions.GeneralFunctions import getStartAndEndOfDateRange, getUsername, getNotes, setDirectory
+    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateUSDInvestmentPricesAndShares
     from Eternl import runEternl, locateEternlWindow
     from Ledger import runLedger, getLedgerAccounts
     from HealthEquity import runHealthEquity, locateHealthEquityWindow
@@ -14,29 +14,31 @@ if __name__ == '__main__' or __name__ == "Monthly":
     from Worthy import getWorthyBalance, locateWorthyWindow
     from Vanguard import runVanguard401k, locateVanguardWindow
     from Fidelity import runFidelity, locateFidelityWindow
+    from Optum import runOptum, locateOptumWindow
 else:
     from .Classes.Asset import USD, Security;   from .Classes.WebDriver import Driver;  from .Classes.GnuCash import GnuCash
     from .Eternl import runEternl, locateEternlWindow
     from .Ledger import runLedger, getLedgerAccounts
-    from .Functions.GeneralFunctions import getStartAndEndOfDateRange, getUsername, getNotes
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentPricesAndShares
+    from .Functions.GeneralFunctions import getStartAndEndOfDateRange, getUsername, getNotes, setDirectory
+    from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateUSDInvestmentPricesAndShares
     from .HealthEquity import runHealthEquity, locateHealthEquityWindow
     from .IoPay import runIoPay, locateIoPayWindow
     from .Worthy import getWorthyBalance, locateWorthyWindow
     from .Vanguard import runVanguard401k, locateVanguardWindow
     from .Fidelity import runFidelity, locateFidelityWindow
+    from .Optum import runOptum, locateOptumWindow
     
 def getMonthlyAccounts(type, personalBook, jointBook):
     if type == 'USD':
-        IRA, iraSPAXX, iraVTI = USD("IRA", personalBook), Security('IRA SPAXX', personalBook), Security('IRA VTI', personalBook)
-        rIRA, riraVXUS, riraVTI, riraSPAXX = USD("Roth IRA", personalBook), Security('Roth IRA VXUS', personalBook), Security('Roth IRA VTI', personalBook), Security('Roth IRA SPAXX', personalBook)
-        Brokerage, brSPAXX, brVTI = USD("Brokerage", personalBook), Security('Brokerage SPAXX', personalBook), Security('Brokerage VTI', personalBook)
+        IRA, iraSPAXX, iraGME = USD("IRA", personalBook), Security('IRA SPAXX', personalBook), Security('IRA GME', personalBook)
+        rIRA, riraVXUS, riraVTI, riraSPAXX, riraGME = USD("Roth IRA", personalBook), Security('Roth IRA VXUS', personalBook), Security('Roth IRA VTI', personalBook), Security('Roth IRA SPAXX', personalBook), Security('Roth IRA GME', personalBook)
+        Brokerage, brSPAXX, brGME = USD("Brokerage", personalBook), Security('Brokerage SPAXX', personalBook), Security('Brokerage GME', personalBook)
         VIIIX, HECash = Security("HE Investment", personalBook), USD("HE Cash", personalBook)
-        VFIAX, OptumCash = Security("Optum Investment", personalBook), USD("Optum Cash", personalBook)
+        VFIAX, OptumCash = Security("VFIAX", personalBook), USD("Optum Cash", personalBook)
         Pension, V401k, TSM401k, EBI = USD("VanguardPension", personalBook), USD("Vanguard401k", personalBook), Security("Total Stock Market(401k)", personalBook), Security("Employee Benefit Index", personalBook)
         Home, LiquidAssets = USD('Home', jointBook), USD("Liquid Assets", personalBook)
         Bonds, Worthy = USD("Bonds", personalBook), USD("Worthy", personalBook)        
-        accounts = {'IRA':IRA,'iraSPAXX':iraSPAXX,'iraVTI':iraVTI,'rIRA':rIRA,'riraVXUS':riraVXUS,'riraVTI':riraVTI,'riraSPAXX':riraSPAXX,'Brokerage':Brokerage,'brSPAXX':brSPAXX, 'brVTI':brVTI,
+        accounts = {'IRA':IRA,'iraSPAXX':iraSPAXX,'iraGME':iraGME,'rIRA':rIRA,'riraVXUS':riraVXUS,'riraVTI':riraVTI,'riraSPAXX':riraSPAXX,'riraGME':riraGME,'Brokerage':Brokerage,'brSPAXX':brSPAXX, 'brGME':brGME,
                     'VIIIX':VIIIX,'HECash':HECash,'VFIAX':VFIAX,'OptumCash':OptumCash,'V401k':V401k,'EBI':EBI,'TSM401k':TSM401k,'Worthy': Worthy,'Pension':Pension,
                     'Home':Home,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
     elif type == 'Crypto':
@@ -117,6 +119,7 @@ def loginToUSDAccounts(driver):
     locateHealthEquityWindow(driver)
     locateVanguardWindow(driver)
     locateFidelityWindow(driver)
+    locateOptumWindow(driver)
  
 def loginToCryptoAccounts(driver):
     locateEternlWindow(driver)
@@ -132,15 +135,13 @@ def runUSD(driver, today, accounts, personalBook):
     accounts['Bonds'].updateGnuBalance(personalBook.getBalance(accounts['Bonds'].gnuAccount))
     runVanguard401k(driver, accounts, personalBook)
     runFidelity(driver, accounts, personalBook)
-    updateInvestmentPricesAndShares(driver,personalBook,accounts)
+    updateUSDInvestmentPricesAndShares(driver,personalBook,accounts)
     driver.findWindowByUrl("/scripts/monthly")
 
-def runCrypto(driver, today, accounts, personalBook):
+def runCrypto(driver, accounts, personalBook):
     loginToCryptoAccounts(driver)
-    openSpreadsheet(driver, 'Asset Allocation', 'Cryptocurrency')
     runEternl(driver, accounts['Cardano'], personalBook)
     runIoPay(driver, accounts['IoTex'], personalBook)
-    # runLedger(accounts['ledgerAccounts'], personalBook)
     accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getBalance(accounts['CryptoPortfolio'].gnuAccount))
     driver.findWindowByUrl("/scripts/monthly")
 
@@ -150,7 +151,7 @@ def runMonthlyBank(personalBook, jointBook):
     usdAccounts = getMonthlyAccounts('USD', personalBook, jointBook)
     cryptoAccounts = getMonthlyAccounts('Crypto', personalBook, jointBook)
     runUSD(driver, today, usdAccounts, personalBook)
-    runCrypto(driver, today, cryptoAccounts, personalBook)
+    runCrypto(driver, cryptoAccounts, personalBook)
 
 # if __name__ == '__main__': # USD
 #     driver = Driver("Chrome")
@@ -174,5 +175,35 @@ def runMonthlyBank(personalBook, jointBook):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    loginToUSDAccounts(driver)
+    # loginToUSDAccounts(driver)
+    # import time, gspread
+    # from datetime import datetime
+    # worksheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Asset Allocation').worksheet('Investments')
+    # symbol = worksheet.acell("B"+str(2)).value
+    # print(symbol)
+    today = datetime.today().date()
+    personalBook = GnuCash('Finance')
+    jointBook = GnuCash('Home')
+    usdAccounts = getMonthlyAccounts('USD', personalBook, jointBook)
+    runUSD(driver, today, usdAccounts, personalBook)
+    
+    # book = GnuCash('Finance')
+
+    # # Pension, V401k, TSM401k, EBI = USD("VanguardPension", book), USD("Vanguard401k", book), Security("Total Stock Market(401k)", book), Security("Employee Benefit Index", book)
+
+    # security = USD("Vanguard401k", book)
+    # # get dollars invested balance (must be run per security)
+    # mybook, total = book.readBook, 0
+    # # retrieve transactions from GnuCash
+    # transactions = [tr for tr in mybook.transactions
+    #                 for spl in tr.splits
+    #                 if spl.account.fullname == security.gnuAccount
+    #                 if int(tr.post_date.strftime('%Y')) <= 2015]
+    # for tr in transactions:
+    #     amount, stakingTrans = 0, False
+    #     for spl in tr.splits:
+    #         if spl.account.fullname == security.gnuAccount and "Paycheck" in tr.description: 
+    #             total += abs(float(format(spl.value, ".2f")))
+    # print(f'total $ invested in {security.name}: ' + str(total))
+
     

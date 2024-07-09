@@ -48,27 +48,27 @@ def getFidelityTransferAccount(driver, sofiAmount, sofiDate):
     while True:
         row+=1
         column = 2
-        try:    dateElement = driver.webDriver.find_element(By.XPATH,setElementPath(row, table, column))
+        try:    dateElement = driver.webDriver.find_element(By.XPATH,setFidelityElementPath(row, table, column))
         except NoSuchElementException:
-            if row==1:  showMessage('Error finding Date Element', 'Element path for date element has changed, please update. \n' + setElementPath(row, table, column))
+            if row==1:  showMessage('Error finding Date Element', 'Element path for date element has changed, please update. \n' + setFidelityElementPath(row, table, column))
             break
         date = datetime.strptime(dateElement.text, '%b-%d-%Y').date()
         if date == sofiDate:
             column+=1
-            accountName = driver.webDriver.find_element(By.XPATH,setElementPath(row, table, column)).text
+            accountName = driver.webDriver.find_element(By.XPATH,setFidelityElementPath(row, table, column)).text
             if 'ROTH' in accountName:           accountName = 'rIRA'
             elif 'Individual' in accountName:   accountName = 'Brokerage'
             elif 'Traditional' in accountName:  accountName = 'IRA'
             column+=1
-            descriptionElement = driver.webDriver.find_element(By.XPATH,setElementPath(row, table, column)+'/div')
+            descriptionElement = driver.webDriver.find_element(By.XPATH,setFidelityElementPath(row, table, column)+'/div')
             description = descriptionElement.text
             if "Electronic Funds Transfer Received" in description or "CASH CONTRIBUTION" in description:
                 column+=1
-                amount = driver.webDriver.find_element(By.XPATH,setElementPath(row, table, column)).text.replace('$','').replace(',','').replace('-','').replace('+','')
+                amount = driver.webDriver.find_element(By.XPATH,setFidelityElementPath(row, table, column)).text.replace('$','').replace(',','').replace('-','').replace('+','')
                 if sofiAmount == amount:
                     return accountName
     
-def setElementPath(eRow, eTable, eColumn):  return getFidelityElementPathRoot() + str(eTable)+']/div['+str(eRow)+']/div/div['+str(eColumn) + ']'
+def setFidelityElementPath(eRow, eTable, eColumn):  return getFidelityElementPathRoot() + str(eTable)+']/div['+str(eRow)+']/div/div['+str(eColumn) + ']'
 
 def getFidelityElementPathRoot():   return "//*[@id='accountDetails']/div/div[2]/div/new-tab-group/new-tab-group-ui/div[2]/activity-orders-shell/div/ap143528-portsum-dashboard-activity-orders-home-root/div/div/account-activity-container/div/div[2]/activity-list[2]/div[2]/div["
 
@@ -133,7 +133,7 @@ def captureFidelityTransactions(driver, account='all'):
     while True:
         row+=1
         column, accountName = 2, account
-        try:    dateElement = driver.webDriver.find_element(By.XPATH,setElementPath(row, table, column))          
+        try:    dateElement = driver.webDriver.find_element(By.XPATH,setFidelityElementPath(row, table, column))          
         except NoSuchElementException:
             if row==1:  showMessage('Error finding Date Element', 'Element path for date element has changed, please update.')
             break
@@ -141,18 +141,18 @@ def captureFidelityTransactions(driver, account='all'):
         if date.month == lastMonth['endDate'].month:
             column+=1
             if account == 'all':
-                accountName = driver.webDriver.find_element(By.XPATH,setElementPath(row, table, column)).text
+                accountName = driver.webDriver.find_element(By.XPATH,setFidelityElementPath(row, table, column)).text
                 if 'ROTH' in accountName:           accountName = 'rIRA'
                 elif 'Individual' in accountName:   accountName = 'Brokerage'
                 elif 'Traditional' in accountName:  accountName = 'IRA'
                 column+=1
-            descriptionElement = driver.webDriver.find_element(By.XPATH,setElementPath(row, table, column)+'/div')
+            descriptionElement = driver.webDriver.find_element(By.XPATH,setFidelityElementPath(row, table, column)+'/div')
             description = descriptionElement.text
             fees = 0
             column+=1
-            amount = driver.webDriver.find_element(By.XPATH,setElementPath(row, table, column)).text.replace('$','').replace(',','').replace('+','')
+            amount = driver.webDriver.find_element(By.XPATH,setFidelityElementPath(row, table, column)).text.replace('$','').replace(',','').replace('+','')
             if not amount:  continue
-            if "CASH CONTRIBUTION" in description.upper() or "ELECTRONIC FUNDS TRANSFER" in description.upper() or "REINVESTMENT" in description.upper(): continue
+            if "CASH CONTRIBUTION" in description or "Electronic Funds Transfer" in description or "REINVESTMENT" in description or "JOURNAL" in description or "EXPIRED" in description or "ASSIGNED as of" in description: continue
             elif "YOU BOUGHT" in description.upper() or "YOU SOLD" in description.upper(): # buy/sell shares or options
                 descriptionElement.click()
                 feesNum = 15
@@ -191,18 +191,15 @@ def runFidelity(driver, accounts, book):
     accounts['Brokerage'].updateGnuBalance(book.getBalance(accounts['Brokerage'].gnuAccount))
     
 def getFidelityAccounts(book):
-    IRA, iraSPAXX, iraVTI = USD("IRA", book), Security('IRA SPAXX', book), Security('IRA VTI', book)
-    rIRA, riraVXUS, riraVTI, riraSPAXX = USD("Roth IRA", book), Security('Roth IRA VXUS', book), Security('Roth IRA VTI', book), Security('Roth IRA SPAXX', book)
-    Brokerage, brSPAXX, brVTI = USD("Brokerage", book), Security('Brokerage SPAXX', book), Security('Brokerage VTI', book)
-    return {'rIRA': rIRA,'riraVXUS': riraVXUS,'riraVTI': riraVTI,'riraSPAXX': riraSPAXX, 'Brokerage':Brokerage, 'brSPAXX':brSPAXX, 'brVTI':brVTI,'IRA':IRA, 'iraSPAXX':iraSPAXX, 'iraVTI':iraVTI}
+    IRA, iraSPAXX, iraGME = USD("IRA", book), Security('IRA SPAXX', book), Security('IRA GME', book)
+    rIRA, riraVXUS, riraVTI, riraSPAXX, riraGME = USD("Roth IRA", book), Security('Roth IRA VXUS', book), Security('Roth IRA VTI', book), Security('Roth IRA SPAXX', book), Security('Roth IRA GME', book)
+    Brokerage, brSPAXX, brGME = USD("Brokerage", book), Security('Brokerage SPAXX', book), Security('Brokerage GME', book)
+    return {'rIRA':rIRA,'riraVXUS':riraVXUS,'riraVTI':riraVTI,'riraSPAXX':riraSPAXX,'riraGME':riraGME,'Brokerage':Brokerage,'brSPAXX':brSPAXX,'brGME':brGME,'IRA':IRA,'iraSPAXX':iraSPAXX,'iraGME':iraGME}
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = GnuCash('Test')
+    book = GnuCash('Finance')
     accounts = getFidelityAccounts(book)
-    # runFidelity(driver, accounts, book)
-    # book.closeBook()
-
-    fidelityActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\fidelity.csv"
-    book.importGnuTransaction(accounts, fidelityActivity, driver, 0)
+    runFidelity(driver, accounts, book)
     book.closeBook()
+

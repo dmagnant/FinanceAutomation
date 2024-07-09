@@ -6,17 +6,6 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
     def getCell(account, month):
         def getCellArray(account):
             match account:
-                ## Asset Allocation Spreadsheet
-                # case 'Liquid Assets':
-                #     return ['B6', 'I6', 'P6', 'B26', 'I26', 'P26', 'B46', 'I46', 'P46', 'B66', 'I66', 'P66']
-                # case 'Bonds':
-                #     return ['F6', 'M6', 'T6', 'F26', 'M26', 'T26', 'F46', 'M46', 'T46', 'F66', 'M66', 'T66']
-                # case 'Vanguard401k':
-                #     return ['B8', 'I8', 'P8', 'B28', 'I28', 'P28', 'B48', 'I48', 'P48', 'B68', 'I68', 'P68']
-                # case 'VanguardPension':
-                #     return ['B10', 'I10', 'P10', 'B30', 'I30', 'P30', 'B50', 'I50', 'P50', 'B70', 'I70', 'P70']
-                # case 'Crypto':
-                #     return ['B12', 'I12', 'P12', 'B32', 'I32', 'P32', 'B52', 'I52', 'P52', 'B72', 'I72', 'P72']
                 #Joint
                 case 'BoA-joint':
                     return ['K16', 'S16', 'C52', 'K52', 'S52', 'C88', 'K88', 'S88', 'C124', 'K124', 'S124', 'C16']
@@ -24,27 +13,27 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
                     return ['F27', 'N27', 'V27', 'F63', 'N63', 'V63', 'F99', 'N99', 'V99', 'F135', 'N135', 'V135']
                 case 'Water Bill':
                     return ['F25', 'N25', 'V25', 'F61', 'N61', 'V61', 'F97', 'N97', 'V97', 'F133', 'N133', 'V133']
-                ## Cryptocurrency Spreadsheet
+                ## Cryptocurrency
                 case 'ALGO':
-                    return ['H2', 'J2']
+                    return ['D2', 'E2']
                 case 'BTC':
-                    return ['H3', 'J3']
+                    return ['D3', 'E3']
                 case 'ADA-Eternl':
-                    return ['H4', 'J4']
+                    return ['D4', 'E4']
                 case 'ADA-Nami':
-                    return ['H5', 'J5']
+                    return ['D5', 'E5']
                 case 'ATOM':
-                    return ['H6', 'J6']
+                    return ['D6', 'E6']
                 case 'ETH':
-                    return ['H7', 'J7']
+                    return ['D7', 'E7']
                 case 'IOTX':
-                    return ['H8', 'J8']
+                    return ['D8', 'E8']
                 case 'DOT':
-                    return ['H9', 'J9']
+                    return ['D9', 'E9']
                 case 'PRE':
-                    return ['H10', 'J10']
+                    return ['D10', 'E10']
                 case 'XRP':
-                    return ['H11', 'J11']                
+                    return ['D11', 'E11']                
                 ## Checking Balance Spreadsheet(s)
                 case 'BoA':
                     return ['K5', 'S5', 'C40', 'K40', 'S40', 'C75', 'K75', 'S75', 'C110', 'K110', 'S110', 'C5']
@@ -61,9 +50,10 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
         cell = (getCellArray(account))[month - 1]
         return cell
     def getSheetKey(sheetTitle, tabTitle, worksheet, cellToUpdate):
-        if sheetTitle == "Asset Allocation":    keyColumn = "B" if tabTitle == "Cryptocurrency" else "A"
-        elif sheetTitle == "Checking Balance":  keyColumn = "B"
-        elif sheetTitle == "Home":              keyColumn = "A" if tabTitle == "Finances" else "B"
+        keyColumn = "A" if sheetTitle == "Home" and tabTitle == "Finances" else "B"
+        # if sheetTitle == "Asset Allocation":    keyColumn = "B"
+        # elif sheetTitle == "Checking Balance":  keyColumn = "B"
+        # elif sheetTitle == "Home":              keyColumn = "A" if tabTitle == "Finances" else "B"
         worksheetKey = worksheet.acell(keyColumn + cellToUpdate[1:]).value
         return worksheetKey
     
@@ -108,10 +98,7 @@ def updateCryptoPrices(driver, book):
     coinSymbols = []
     sheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Asset Allocation')
     worksheet = sheet.worksheet('Cryptocurrency')
-    nameColumn = 'A'
-    symbolColumn = 'B'
-    priceColumn = 'J'
-    row = 2
+    nameColumn, symbolColumn, priceColumn, row = 'A', 'B', 'J', 2
     stillCoins = True
     while stillCoins:
         coinName = worksheet.acell(nameColumn+str(row)).value
@@ -131,23 +118,52 @@ def updateCryptoPrices(driver, book):
         book.updatePriceInGnucash(symbol, price)
         worksheet.update_acell((priceColumn + str(i + 2)), float(price))
 
-def updateInvestmentPricesAndShares(driver, book, accounts):
-    today = datetime.today().date()
-    print('updating investment prices')
+def getInvestmentsSpreadsheetDetails(driver):
     spreadsheetWindow = driver.findWindowByUrl("edit#gid=361024172")
     if not spreadsheetWindow:   openSpreadsheet(driver, 'Asset Allocation', 'Investments'); spreadsheetWindow = driver.webDriver.current_window_handle
     else:   driver.webDriver.switch_to.window(spreadsheetWindow)
-    row = 12  # first row after crypto investments
-    symbolColumn = 'B'
-    accountColumn = 'C'
-    sharesColumn = 'D'
-    sheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Asset Allocation')
-    worksheet = sheet.worksheet('Investments')
+    worksheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Asset Allocation').worksheet('Investments')
+    return {'worksheet': worksheet, 'row': 2, 'firstRowAfterCrypto':12, 'nameColumn': 'A','symbolColumn': 'B', 'accountColumn': 'C', 'sharesColumn': 'D', 'priceColumn': 'E'}
+
+def updateInvestmentPrices(driver, book):
+    spreadsheet = getInvestmentsSpreadsheetDetails(driver)
+    GMEprice = 0
+    symbolsToUpdate = ['GME', 'VIIIX', 'VXUS', 'VTI', 'VFIAX']
+    coinsToUpdate = {}
     stillInvestments = True
+    row = spreadsheet['row']
     while stillInvestments:
-        priceColumn = 'E'
-        symbol = worksheet.acell(symbolColumn+str(row)).value
-        shares = 0
+        symbol = spreadsheet['worksheet'].acell(spreadsheet['symbolColumn']+str(row)).value
+        print(symbol)
+        if symbol != 'SPAXX':
+            if symbol in symbolsToUpdate:
+                price = getStockPrice(symbol)
+                book.updatePriceInGnucash(symbol, price)
+                spreadsheet['worksheet'].update_acell(spreadsheet['priceColumn'] + str(row), float(price))
+                symbolsToUpdate.remove(symbol)
+                if symbol == 'GME': GMEprice = price
+            elif spreadsheet['worksheet'].acell(spreadsheet['accountColumn']+str(row)).value == "Crypto":
+                coinName = spreadsheet['worksheet'].acell(spreadsheet['nameColumn']+str(row)).value.lower()
+                if coinName not in list(coinsToUpdate.keys()):  coinsToUpdate[coinName] = {'symbol': symbol, 'row': row}
+            row += 1
+        else:   stillInvestments = False
+    coinPrices = getCryptocurrencyPrice(list(coinsToUpdate.keys()))     # get prices from coingecko in a single call
+    for coin in list(coinsToUpdate.keys()):
+        price = format(coinPrices[coin]["usd"], ".2f")
+        book.updatePriceInGnucash(coinsToUpdate.get(coin).get('symbol'), price)
+        spreadsheet['worksheet'].update_acell((spreadsheet['priceColumn'] + str(coinsToUpdate.get(coin).get('row'))), float(price))
+    return GMEprice
+
+def updateUSDInvestmentPricesAndShares(driver, book, accounts):
+    today = datetime.today().date()
+    spreadsheet = getInvestmentsSpreadsheetDetails(driver)
+    updatedSymbols = []
+    stillInvestments = True
+    row = spreadsheet['firstRowAfterCrypto']
+    while stillInvestments:
+        shares, spreadsheet['priceColumn'] = 0, 'E', 
+        symbol = spreadsheet['worksheet'].acell(spreadsheet['symbolColumn']+str(row)).value
+        print(symbol)
         if symbol != None:
             if symbol == '8585':
                 price = book.getPriceInGnucash(accounts['TSM401k'].symbol, today)
@@ -158,36 +174,28 @@ def updateInvestmentPricesAndShares(driver, book, accounts):
             elif symbol in ['VIIIX', 'VXUS', 'VTI']:
                 price = book.getPriceInGnucash(symbol, today)
                 if symbol == 'VTI':
-                    match(worksheet.acell(accountColumn+str(row)).value):
-                        case 'rIRA':
-                            account = accounts['riraVTI']
-                        case 'IRA':
-                            account = accounts['iraVTI']
-                        case 'Brokerage':
-                            account = accounts['brVTI']
+                    match(spreadsheet['worksheet'].acell(spreadsheet['accountColumn']+str(row)).value):
+                        case 'rIRA':        account = accounts['riraVTI']
+                        case 'IRA':         account = accounts['iraVTI']
+                        case 'Brokerage':   account = accounts['brVTI']
                     shares = float(account.balance)
                 elif symbol == 'VIIIX': shares = float(accounts['VIIIX'].balance)
                 elif symbol == 'VXUS':  shares = float(accounts['riraVXUS'].balance)
             elif symbol == 'SPAXX':
-                match(worksheet.acell(accountColumn+str(row)).value):
-                    case 'rIRA':
-                        account = accounts['riraSPAXX']
-                    case 'IRA':
-                        account = accounts['iraSPAXX']
-                    case 'Brokerage':
-                        account = accounts['brSPAXX']
+                match(spreadsheet['worksheet'].acell(spreadsheet['accountColumn']+str(row)).value):
+                    case 'rIRA':        account = accounts['riraSPAXX']
+                    case 'IRA':         account = accounts['iraSPAXX']
+                    case 'Brokerage':   account = accounts['brSPAXX']
                 shares = float(account.balance)
-                worksheet.update_acell(sharesColumn + str(row), shares)
-                row+=1
+                spreadsheet['worksheet'].update_acell(spreadsheet.get('sharesColumn') + str(row), shares)
+                row += 1
                 continue
-            elif symbol == 'HOME':
-                price = (250000 - accounts['Home'].getGnuBalance()) / 2
-                priceColumn = 'F'
-            else:
-                price = getStockPrice(driver, symbol)
-                driver.webDriver.switch_to.window(spreadsheetWindow)
-            if shares:  worksheet.update_acell(sharesColumn + str(row), shares)
-            worksheet.update_acell((priceColumn + str(row)), float(price))
+            elif symbol == 'HOME':  spreadsheet['priceColumn'], price = 'F', (250000 - accounts['Home'].getGnuBalance()) / 2
+            else:                   price = getStockPrice(symbol)
+            if shares:  spreadsheet['worksheet'].update_acell(spreadsheet.get('sharesColumn') + str(row), shares)
+            if symbol not in updatedSymbols:
+                updatedSymbols.append(symbol)
+                spreadsheet['worksheet'].update_acell((spreadsheet['priceColumn'] + str(row)), float(price))
             row += 1
         else:   stillInvestments = False
 
@@ -199,7 +207,6 @@ def openSpreadsheet(driver, sheet, tab=''):
     elif sheet == 'Asset Allocation':
         url += '1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/'
         if tab == 'Goals':              url += 'edit#gid=1813404638'            
-        elif tab == 'Cryptocurrency':   url += 'edit#gid=623829469'
         elif tab == 'Investments':      url += 'edit#gid=361024172'
     elif sheet == 'Home':
         url += '1oP3U7y8qywvXG9U_zYXgjFfqHrCyPtUDl4zPDftFCdM/'
