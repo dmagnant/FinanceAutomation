@@ -16,6 +16,7 @@ else:
 
 def getTotalForIncomeExpenseAccounts(accountList, mybook, transactions, timeframe, date, accounts, accountsType, worksheet):
     for i in accountList:
+        print(i)
         total, readBook = 0, mybook.readBook
         accountsToUpdate = [readBook.accounts(fullname=mybook.getGnuAccount(i))]
         for acc in accountsToUpdate[0].children:    accountsToUpdate.append(acc)
@@ -157,7 +158,7 @@ def getCellForYTD(account, accountsType):
 
 def getWorkSheet(accountsType):
     jsonCreds = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
-    sheetTitle = 'Asset Allocation' if accountsType == 'Personal' else 'Home'
+    sheetTitle = 'Finances' if accountsType == 'Personal' else 'Home'
     sheet = gspread.service_account(filename=jsonCreds).open(sheetTitle)
     worksheetTitle = 'Goals' if accountsType == 'Personal' else 'Finances'
     return sheet.worksheet(worksheetTitle)
@@ -169,7 +170,7 @@ def updateSpreadsheet(worksheet, account, date, value, accountsType, timeframe):
 def runUpdateGoals(accountsType, timeframe, book):
     driver = Driver("Chrome")
     readBook = book.readBook
-    openSpreadsheet(driver, 'Asset Allocation', 'Goals') if accountsType == "Personal" else openSpreadsheet(driver, 'Home', 'Finances')
+    openSpreadsheet(driver, 'Finances', 'Goals') if accountsType == "Personal" else openSpreadsheet(driver, 'Home', 'Finances')
     worksheet = getWorkSheet(accountsType)
     dateRange = getStartAndEndOfDateRange(datetime.today().date(), timeframe)
     transactions = [tr for tr in readBook.transactions

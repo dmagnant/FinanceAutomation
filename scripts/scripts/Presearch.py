@@ -1,7 +1,7 @@
 import time, random
 from statistics import mode
 
-from random_words import RandomWords
+from random_word import RandomWords
 from selenium.common.exceptions import (NoSuchElementException,
                                         WebDriverException)
 from selenium.webdriver.common.by import By

@@ -9,7 +9,8 @@
                     {% csrf_token %}
                     <button type="submit" name="main">Main</button><br>
                     <button type="submit" name="login">Login</button><br>
-                    <input type="text" name="amount">
+                    <input type="text" placeholder="amount" name="amount" size=5>
+                    <input type="text" placeholder="description" name="description">
                     <select name="source" id="source">
                         <option value="Accelerant">Accelerant</option>
                         <option value="Online Insights">Online Insights</option>
@@ -17,8 +18,11 @@
                         <option value="Reckner">Reckner</option>
                         <option value="Sago">Sago</option>
                         <option value="Tellwut">Tellwut</option>
-                    </select>
-                    <button type="submit" name="add">Add Amount</button><br>
+                        <option value="Personal">Expense: Personal</option>
+                        <option value="Joint">Expense: Joint</option>
+                    </select><label> account</label><br>
+                    <button type="submit" name="earn">Add</button>
+                    <button type="submit" name="spend">Spend</button><br>
                 </form>
             </div>
             <div style="width: 80%; display:table-cell">

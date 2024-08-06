@@ -12,11 +12,7 @@ else:
 def getLedgerAccounts(readBook):
     Bitcoin = Security("Bitcoin", readBook)
     Ethereum = Security("Ethereum", readBook)
-    Cosmos = Security("Cosmos", readBook)
-    Polkadot = Security("Polkadot", readBook)
-    Algorand = Security("Algorand", readBook)
-    XRP = Security("Ripple", readBook)
-    return [Bitcoin, Ethereum, Cosmos, Polkadot, Algorand, XRP]
+    return [Bitcoin, Ethereum]
 
 def updateCoin(coin, book):
     balance = float(input(f"Paste {coin.symbol} balance here: "))

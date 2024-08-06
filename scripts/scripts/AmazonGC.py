@@ -20,11 +20,24 @@ def locateAmazonWindow(driver):
     if not found:   driver.openNewWindow('https://www.amazon.com/gc/balance')
     else:           driver.webDriver.switch_to.window(found); time.sleep(1)
 
-def addAmazonGCAmount(book, account, amount, source):
-    transactionInfo = {'amount': amount, 'toAccount': account.gnuAccount, 'fromAccount': 'Income:Market Research:' + source, 'date': datetime.today().date(),'description': source}
+def writeAmazonGCTransactionFromUI(book, account, requestInfo):
+    if 'earn' in requestInfo:
+        amount = Decimal(requestInfo['amount'])
+        source = 'Income:Market Research:' + requestInfo['source']
+    elif 'spend' in requestInfo:
+        amount = -Decimal(requestInfo['amount'])
+        source = book.getGnuAccount('Amazon') if 'Joint' not in requestInfo['source'] else book.getGnuAccount('Joint Expenses')
+    else:   showMessage('Error', 'Missing proper header to submit this transaction from UI')
+    description = requestInfo['description'] if requestInfo['description'] else requestInfo['source']
+    transactionInfo = {'amount': amount, 'toAccount': account.gnuAccount, 'fromAccount': source, 'date': datetime.today().date(),'description': description}
     book.writeSimpleTransaction(transactionInfo)
     account.reviewTransactions = [source + ': ' + str(amount)]
     account.updateGnuBalance(book.getBalance(account.gnuAccount))
+    if 'Joint' in requestInfo['source']:
+        jointBook = GnuCash('Home')
+        transactionInfo = {'amount': amount, 'toAccount': jointBook.getGnuAccount("Dan's Contributions"), 'fromAccount': jointBook.getGnuAccount('Amazon'), 'date': datetime.today().date(),'description': description}
+        jointBook.writeSimpleTransaction(transactionInfo)
+        jointBook.closeBook()
     confirmAmazonGCBalance(Driver("Chrome"), account)
 
 def confirmAmazonGCBalance(driver, account):
@@ -45,4 +58,5 @@ def confirmAmazonGCBalance(driver, account):
 if __name__ == '__main__':
     book = GnuCash('Finance')
     AmazonGC = USD("Amazon GC", book)
-    addAmazonGCAmount(book, AmazonGC, Decimal(10.00), 'Pinecone'), book.closeBook()
+    AmazonGC.getData()
+    # addAmazonGCAmount(book, AmazonGC, Decimal(10.00), 'Pinecone'), book.closeBook()

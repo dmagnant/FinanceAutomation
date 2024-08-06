@@ -53,7 +53,5 @@ def runCoinbase(driver, account, book):
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
-    Loopring = Security("Loopring", book)
-    runCoinbase(driver, Loopring, book)
-    Loopring.getData()
+    runCoinbase(driver, book)
     book.closeBook()

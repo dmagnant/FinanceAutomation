@@ -131,6 +131,7 @@ def runUSD(driver, today, accounts, personalBook):
     getWorthyBalance(driver, accounts['Worthy'])
     monthlyRoundUp(accounts['Worthy'], personalBook, lastMonth['endDate'])
     runHealthEquity(driver, {'VIIIX': accounts['VIIIX'], 'HECash': accounts['HECash'],'V401k': accounts['V401k']}, personalBook)
+    runOptum(driver, accounts, personalBook)
     accounts['LiquidAssets'].updateGnuBalance(personalBook.getBalance(accounts['LiquidAssets'].gnuAccount))
     accounts['Bonds'].updateGnuBalance(personalBook.getBalance(accounts['Bonds'].gnuAccount))
     runVanguard401k(driver, accounts, personalBook)
@@ -181,11 +182,13 @@ if __name__ == '__main__':
     # worksheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Asset Allocation').worksheet('Investments')
     # symbol = worksheet.acell("B"+str(2)).value
     # print(symbol)
-    today = datetime.today().date()
-    personalBook = GnuCash('Finance')
-    jointBook = GnuCash('Home')
-    usdAccounts = getMonthlyAccounts('USD', personalBook, jointBook)
-    runUSD(driver, today, usdAccounts, personalBook)
+    # today = datetime.today().date()
+    # personalBook = GnuCash('Finance')
+    # jointBook = GnuCash('Home')
+    # usdAccounts = getMonthlyAccounts('USD', personalBook, jointBook)
+    # runUSD(driver, today, usdAccounts, personalBook)
+    
+    loginToUSDAccounts(driver)
     
     # book = GnuCash('Finance')
 

@@ -41,7 +41,7 @@ from scripts.scripts.Functions.GeneralFunctions import returnRender
 def scripts(request):
     bank = ['Ally', 'Sofi', 'Fidelity', 'HealthEquity', 'Optum', 'Vanguard', 'Worthy']; bank.sort()
     cc = ['Amex', 'Barclays', 'BoA', 'Chase', 'Discover']; cc.sort();
-    crypto = ['Coinbase', 'Eternl', 'Exodus', 'IoPay', 'Kraken', 'Ledger', 'MyConstant', 'Presearch']; crypto.sort()
+    crypto = ['Coinbase', 'Eternl', 'IoPay', 'Ledger', 'Presearch']; crypto.sort()
     mr = ['AmazonGC', 'Bing', 'Paidviewpoint', 'Paypal', 'Pinecone', 'PSCoupons', 'Swagbucks', 'Tellwut']; mr.sort()
     if "close windows" in request.POST: driver = Driver("Chrome"); driver.closeWindowsExcept([':8000/'])
     context = {'bank':bank, 'cc':cc, 'crypto':crypto, 'mr':mr}
@@ -64,13 +64,15 @@ def ally(request):
 def amazon(request):
     book = GnuCash('Finance')
     AmazonGC = USD("Amazon GC", book)
-    if request.method == 'GET': context = {'account': AmazonGC}; return render(request,"mr/amazon.html", context)
-    elif request.method == 'POST':
+    if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:              confirmAmazonGCBalance(driver, AmazonGC)
-        elif 'add' in request.POST:             addAmazonGCAmount(book, AmazonGC, Decimal(request.POST['amount']), request.POST['source'])
+        elif 'earn' in request.POST or 'spend' in request.POST:
+            requestInfo = request.POST.copy()
+            del requestInfo['csrfmiddlewaretoken']
+            writeAmazonGCTransactionFromUI(book, AmazonGC, requestInfo)
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/amazon"))
-        context = {'account': AmazonGC}
+    context = {'account': AmazonGC}
     book.closeBook();   return returnRender(request, "mr/amazon.html", context)
 
 def amex(request):
@@ -141,14 +143,13 @@ def chase(request):
 
 def coinbase(request):
     book = GnuCash('Finance')
-    Loopring = Security("Loopring", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "main" in request.POST:              runCoinbase(driver, [Loopring], book)
+        if "main" in request.POST:              runCoinbase(driver, book)
         elif "login" in request.POST:           locateCoinbaseWindow(driver)
-        elif "balance" in request.POST:         getCoinbaseBalances(driver, [Loopring])
+        elif "balance" in request.POST:         getCoinbaseBalances(driver)
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/coinbase"))      
-    context = {'Loopring': Loopring}
+    context = {}
     book.closeBook();   return returnRender(request, "crypto/coinbase.html", context)
 
 def creditCards(request):
@@ -196,13 +197,12 @@ def dailyBank(request):
         elif "allyBalance" in request.POST:     bankAccounts['Ally'].setBalance(getAllyBalance(driver))
         elif "paypal" in request.POST:          runPaypal(driver)
         elif "tearDown" in request.POST:        tearDown(driver)
-        elif "GME" in request.POST: GME =       getStockPrice('GME'); personalBook.updatePriceInGnucash('GME', GME)
         elif "paypalAdjust" in request.POST:    checkUncategorizedPaypalTransactions(driver, personalBook, bankAccounts['Paypal'], getStartAndEndOfDateRange(timeSpan=7))
         elif "sofiMain" in request.POST:        runSofi(driver, accounts)
         elif "sofiLogin" in request.POST:       locateSofiWindow(driver)
         elif "sofiLogout" in request.POST:      sofiLogout(driver)
         elif "sofiBalances" in request.POST:    getSofiBalanceAndOrientPage(driver, bankAccounts['Checking']); getSofiBalanceAndOrientPage(driver, bankAccounts['Savings'])
-        elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/daily"))
+        elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/']); driver.findWindowByUrl("scripts/daily")
     context = {'bankAccounts': bankAccounts, 'GME': "%.2f" % GME}
     if bankAccounts['Checking'].reviewTransactions or bankAccounts['Savings'].reviewTransactions or bankAccounts['Paypal'].reviewTransactions:   personalBook.openGnuCashUI()
     if bankAccounts['Ally'].reviewTransactions:                                                     jointBook.openGnuCashUI()

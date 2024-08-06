@@ -3,7 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -34,7 +34,8 @@ def prepFidelityTransactionSearch(driver, includePending, account='all'):
     locateFidelityWindow(driver)
     driver.webDriver.find_element(By.XPATH, "//*[@id='portsum-tab-activity']/a/span").click() # Activity & Orders
     accountNum = str(json.loads(getNotes('Fidelity'))[account]) if account != 'all' else 'allaccounts'
-    driver.clickXPATHElementOnceAvaiable(f"//*[@id='{accountNum}']/span/s-slot/s-assigned-wrapper/div/div/span") # Account
+    try:    driver.clickXPATHElementOnceAvaiable(f"//*[@id='{accountNum}']/span/s-slot/s-assigned-wrapper/div/div/span") # Account
+    except ElementClickInterceptedException:    exception = "already on all accounts"
     if not includePending:
         driver.clickXPATHElementOnceAvaiable("//*[@id='accountDetails']/div/div[2]/div/new-tab-group/new-tab-group-ui/div[2]/activity-orders-shell/div/ap143528-portsum-dashboard-activity-orders-home-root/div/div/account-activity-container/div/div[1]/div[2]/apex-kit-field-group/s-root/div/div/s-slot/s-assigned-wrapper/div/core-filter-button[2]/pvd3-button/s-root/button/div/span/s-slot/s-assigned-wrapper") # History
         driver.clickXPATHElementOnceAvaiable("//*[@id='timeperiod-select-button']/span[1]") #Timeframe
@@ -184,10 +185,8 @@ def runFidelity(driver, accounts, book):
     accounts['riraSPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['riraSPAXX'].gnuAccount))
     accounts['rIRA'].updateGnuBalance(book.getBalance(accounts['rIRA'].gnuAccount))
     accounts['iraSPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['iraSPAXX'].gnuAccount))
-    accounts['iraVTI'].updateGnuBalanceAndValue(book.getBalance(accounts['iraVTI'].gnuAccount))
     accounts['IRA'].updateGnuBalance(book.getBalance(accounts['IRA'].gnuAccount))
     accounts['brSPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['brSPAXX'].gnuAccount))
-    accounts['brVTI'].updateGnuBalanceAndValue(book.getBalance(accounts['brVTI'].gnuAccount))
     accounts['Brokerage'].updateGnuBalance(book.getBalance(accounts['Brokerage'].gnuAccount))
     
 def getFidelityAccounts(book):

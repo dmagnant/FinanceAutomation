@@ -81,10 +81,9 @@ def getSofiBalanceAndOrientPage(driver, account):
     driver.webDriver.get("https://www.sofi.com/my/money/account/1000028154579/account-detail") if 'checking' in account.name.lower() else driver.webDriver.get("https://www.sofi.com/my/money/account/1000028154560/account-detail")
     time.sleep(2)
     table = 1
-    div = '2' if 'checking' in account.name.lower() else '3'
+    div = '2' if 'checking' in account.name.lower() else '4'
     def findBalanceElement(webDriver, table, div):
-        xpath = "/html/body/div/main/div[3]/div[" + div + "]/table[" + str(table)  + "]/tbody/tr[1]/td[6]/span"
-        return webDriver.find_element(By.XPATH, xpath).text.strip('$').replace(',', '')
+        return webDriver.find_element(By.XPATH, "/html/body/div[1]/main/div[3]/div[" + div + "]/table[" + str(table)  + "]/tbody/tr[1]/td[6]/span").text.strip('$').replace(',', '')
     balance = findBalanceElement(driver.webDriver, table, div)
     if balance == "": # Pending transactions will load as table 1 with a blank balance. if pending transactions exist, move to next Table
         table += 1
@@ -116,6 +115,7 @@ def getTransactionsFromSofiWebsite(driver, dateRange, today, tableStart, div):
                 if description == "Fidelity Transfer":
                     account = getFidelityTransferAccount(driver, amount.replace('-',''), sofiDate)
                     description = description + " " + account
+                    locateSofiWindow(driver)
                 transaction = sofiDate, description, amount
                 csv.writer(open(sofiActivity, 'a', newline='')).writerow(transaction)
                 row += 1
@@ -146,23 +146,22 @@ def runSofi(driver, accounts, book):
     if today.day <= 7:          setMonthlySpendTarget(driver)  
     driver.webDriver.get("https://www.sofi.com/my/money/account/#/1000028154579/account-detail") # switch back to checking page
 
-# if __name__ == '__main__':
-    # driver = Driver("Chrome")
-    # book = GnuCash('Finance')
-    # Checking = USD("Sofi Checking", book)
-    # Savings = USD("Sofi Savings", book)
-    # accounts = [Checking, Savings]
-    # runSofi(driver, accounts, book)
-    # for account in accounts:
-    #     account.getData()
-    # sofiLogout(driver)
-    # book.closeBook()
-    
 if __name__ == '__main__':
-    book = GnuCash('Finance')
     driver = Driver("Chrome")
-    today = datetime.today().date()
-    dateRange = getStartAndEndOfDateRange(today, 7)
+    book = GnuCash('Finance')
+    Checking = USD("Sofi Checking", book)
     Savings = USD("Sofi Savings", book)
-    sofiActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\sofi.csv"
-    book.importUniqueTransactionsToGnuCash(Savings, sofiActivity, driver, dateRange, 0)
+    accounts = [Checking, Savings]
+    runSofi(driver, accounts, book)
+    for account in accounts:
+        account.getData()
+    book.closeBook()
+    
+# if __name__ == '__main__':
+#     book = GnuCash('Finance')
+#     driver = Driver("Chrome")
+#     today = datetime.today().date()
+#     dateRange = getStartAndEndOfDateRange(today, 7)
+#     Savings = USD("Sofi Savings", book)
+#     sofiActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\sofi.csv"
+#     book.importUniqueTransactionsToGnuCash(Savings, sofiActivity, driver, dateRange, 0)

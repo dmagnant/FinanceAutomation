@@ -1,5 +1,5 @@
 import random, time, pyautogui, pygetwindow
-from random_words import RandomWords
+from random_word import RandomWords
 from selenium.common.exceptions import (ElementClickInterceptedException,
                                         ElementNotInteractableException,
                                         NoSuchElementException,
@@ -142,7 +142,7 @@ def swagbucksInbox(driver):
             contentPath = getSwagbucksBasePath() + "4]/div[1]/div[1]/main/div/div[2]/div/div[3]/div[1]/a"
             try:
                 driver.webDriver.find_element(By.XPATH, contentPath).click()
-                description = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "4]/div[1]/div[1]/main/div/div[2]/div/div[3]/div[1]/a/div[2]/span").text
+                description = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "4]/div[1]/div[1]/main/h1").text
                 if "Earn Every" in description: openAndCloseInboxItem(driver)
                 elif "Discover Daily Interests" in description:
                     num = 0
@@ -162,6 +162,7 @@ def swagbucksSearch(driver):
         search_term1 = None
         try:
             driver.find_element(By.XPATH, "//*[@id='tblAwardBannerAA']/div[2]/div/div[1]/form/input[2]")
+            driver
             num += 1
             driver.find_element(By.ID, "claimSearchWinButton").click()
         except NoSuchElementException:
@@ -170,8 +171,9 @@ def swagbucksSearch(driver):
             # pop-up in the way
             except ElementClickInterceptedException:    closePopUps(driver); driver.find_element(By.ID, "sbLogoLink").click()
             time.sleep(1)
-            while search_term1 is None: search_term1 = RandomWords().random_word()
-            driver.find_element(By.ID, "sbGlobalNavSearchInputWeb").send_keys(search_term1 + Keys.ENTER)
+            while search_term1 is None: search_term1 = RandomWords().get_random_word()
+            driver.find_element(By.ID, "sbGlobalNavSearchInputWeb").send_keys(search_term1)
+            driver.find_element(By.ID, "sbGlobalNavSearchInputWeb").send_keys(Keys.ENTER)
             time.sleep(random.choice([2, 3, 4]))
         except (NoSuchWindowException, WebDriverException): num = 3
 
@@ -211,5 +213,10 @@ def runSwagbucks(driver, runAlu, account, book):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")    
-    locateSwagBucksWindow(driver)
-    swagBuckscontentDiscovery(driver)
+    # locateSwagBucksWindow(driver)
+    # swagBuckscontentDiscovery(driver)
+    swagbucksSearch(driver)
+    
+    # search_term1 = RandomWords().get_random_word
+    # print(search_term1)
+    # print(type(search_term1))

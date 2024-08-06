@@ -34,13 +34,20 @@ def getTellWutBalance(driver):
     return driver.webDriver.find_element(By.XPATH, "/html/body/main/header/a[2]/div/div[2]/span").text
 
 def clickButtons(driver, type):
+    # findSubmitButton(driver)
+    # num = 0
     xpath = "//input[@type='" + type + "']"
-    for i in driver.webDriver.find_elements(By.XPATH, xpath): # click all checkboxes
-        try:    i.click()
-        except(ElementNotInteractableException):    exception = 'notInteractable'
-        except(ElementClickInterceptedException):   findSubmitButton(driver); i.click()
-
-def findSubmitButton(driver):   return driver.webDriver.find_element(By.ID,'survey_form_submit')
+    list = driver.webDriver.find_elements(By.XPATH, xpath)
+    for i in list: # click all checkboxes
+        try:    
+            # x, y = str(i.rect['x'] + 10), str(i.rect['y'] + 10)
+            # driver.webDriver.execute_script(f"window.scrollTo({x}, {y})")
+            i.send_keys(Keys.SPACE)
+        except(ElementNotInteractableException):    
+            # print(f'button number {str(num)} failed to be selected')
+            continue
+def findSubmitButton(driver):   
+    return driver.webDriver.find_element(By.ID,'survey_form_submit')
 
 def completeTellWutSurveys(driver):
     locateTellWutWindow(driver)
@@ -56,10 +63,12 @@ def completeTellWutSurveys(driver):
             clickButtons(driver, 'radio')
             clickButtons(driver, 'checkbox')
             submitButton = findSubmitButton(driver)
-            try:    submitButton.click()
-            except ElementClickInterceptedException:
-                driver.webDriver.find_element(By.XPATH,"//*[@id='main']/section/div/div[2]/div[4]/div[1]") # scroll past to comments section
-                submitButton.click()
+            submitButton.send_keys(Keys.ENTER)
+            # try:    submitButton.click
+            
+            # except ElementClickInterceptedException:
+            #     driver.webDriver.find_element(By.XPATH,"//*[@id='main']/section/div/div[2]/div[4]/div[1]") # scroll past to comments section
+            #     submitButton.click()
             time.sleep(8)
             driver.webDriver.find_element(By.XPATH,"//*[@id='next-survey-btn']/a").click() # NEXT POLL
         except NoSuchElementException:
@@ -91,7 +100,6 @@ if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
     Tellwut = Security("Tellwut", book)
-    Tellwut.getData()
     runTellwut(driver, Tellwut, book)
     book.closeBook()
     

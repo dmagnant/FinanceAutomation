@@ -21,29 +21,37 @@ def locateBoAWindowAndOpenAccount(driver, account):
     else:           driver.webDriver.switch_to.window(found); time.sleep(1)
         
 def boALogin(driver, account):
+    def getUserNameElement():       return driver.webDriver.find_element(By.ID, "onlineId1")
+    def getPassWordElement():       return driver.webDriver.find_element(By.ID,"passcode1")
+    def getSignInErrorMessage():    return driver.webDriver.find_element(By.ID,"signin-message")
+    def clickLoginButton():         driver.webDriver.find_element(By.ID,'signIn').click()
+    
     driver.openNewWindow('https://www.bankofamerica.com/')
-    driver = driver.webDriver
-    print(driver.find_element(By.ID, "onlineId1").text)
-    print(driver.find_element(By.ID, "passcode1").text)
-    driver.find_element(By.ID, "onlineId1").send_keys(getUsername('BoA CC'))
-    driver.find_element(By.ID, "passcode1").send_keys(getPassword('BoA CC'))
-    driver.find_element(By.XPATH, "//*[@id='signIn']").click()
+    getUserNameElement().click()
+    getPassWordElement().send_keys(getPassword('BoA CC'))
+    clickLoginButton()
+    # try:    
+    #     getSignInErrorMessage()
+    #     driver.webDriver.find_element(By.ID, "onlineId1").send_keys(getUsername('BoA CC'))
+    #     driver.webDriver.find_element(By.ID, "passcode1").send_keys(getPassword('BoA CC'))
+    #     clickLoginButton()
+    # except  NoSuchElementException: exception = "good to proceed"
     try:     # handle ID verification
-        driver.find_element(By.XPATH, "//*[@id='btnARContinue']/span[1]").click()
+        driver.webDriver.find_element(By.XPATH, "//*[@id='btnARContinue']/span[1]").click()
         showMessage("Get Verification Code", "Enter code, then click OK")
-        driver.find_element(By.XPATH, "//*[@id='yes-recognize']").click()
-        driver.find_element(By.XPATH, "//*[@id='continue-auth-number']/span").click()
+        driver.webDriver.find_element(By.XPATH, "//*[@id='yes-recognize']").click()
+        driver.webDriver.find_element(By.XPATH, "//*[@id='continue-auth-number']/span").click()
     except NoSuchElementException:  exception = "Caught"
     try:     # handle security questions
-        question = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/div[2]/label").text
-        driver.find_element(By.NAME, "challengeQuestionAnswer").send_keys(getAnswerForSecurityQuestion(question))
-        driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/fieldset/div[2]/div/div[1]/input").click()
-        driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/a[1]/span").click()
+        question = driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/div[2]/label").text
+        driver.webDriver.find_element(By.NAME, "challengeQuestionAnswer").send_keys(getAnswerForSecurityQuestion(question))
+        driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/fieldset/div[2]/div/div[1]/input").click()
+        driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/a[1]/span").click()
     except NoSuchElementException:  exception = "Caught"
-    try:     driver.find_element(By.XPATH, "//*[@id='sasi-overlay-module-modalClose']/span[1]").click() # close pop-up
+    try:     driver.webDriver.find_element(By.XPATH, "//*[@id='sasi-overlay-module-modalClose']/span[1]").click() # close pop-up
     except NoSuchElementException:  exception = "Caught"
     partialLink = 'Travel Rewards Visa Signature - 8955' if 'joint' in account else 'Customized Cash Rewards Visa Signature - 5700'
-    driver.find_element(By.PARTIAL_LINK_TEXT, partialLink).click()
+    driver.webDriver.find_element(By.PARTIAL_LINK_TEXT, partialLink).click()
     time.sleep(3)
 
 def getBoABalance(driver, account):
@@ -64,7 +72,7 @@ def claimBoARewards(driver, account):
     locateBoAWindowAndOpenAccount(driver, account)
     if 'joint' in account:
         driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[2]/a").click() # view/redeem
-        driver.webDriver.find_element(By.ID,"redeemButton").click() # redeem points
+        driver.clickIDElementOnceAvaiable("redeemButton") # redeem points
         driver.switchToLastWindow()
         time.sleep(1)
         driver.webDriver.find_element(By.XPATH,"/html/body/main/div/div[2]/div[1]/div[1]/div/div[2]/div/div[1]/div[3]/a").click() # redeem
@@ -115,13 +123,18 @@ def runBoA(driver, account, book):
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:  book.openGnuCashUI()
 
-if __name__ == '__main__':
-    SET_ACCOUNT_VARIABLE = "BoA-joint" # Personal or BoA-joint
-    bookName = 'Finance' if SET_ACCOUNT_VARIABLE == 'Personal' else 'Home'
-    book = GnuCash(bookName)
-    driver = Driver("Chrome")
-    BoA = USD(SET_ACCOUNT_VARIABLE, book)
-    runBoA(driver, BoA, book)
-    BoA.getData()
-    book.closeBook()
+# if __name__ == '__main__':
+#     SET_ACCOUNT_VARIABLE = "BoA-joint" # BoA or BoA-joint
+#     bookName = 'Finance' if SET_ACCOUNT_VARIABLE == 'Personal' else 'Home'
+#     book = GnuCash(bookName)
+#     driver = Driver("Chrome")
+#     BoA = USD(SET_ACCOUNT_VARIABLE, book)
+#     runBoA(driver, BoA, book)
+#     BoA.getData()
+#     book.closeBook()
     
+if __name__ == '__main__':
+    driver = Driver("Chrome")
+    book = GnuCash('Finance')
+    BoA = USD('BoA', book)
+    locateBoAWindowAndOpenAccount(driver, BoA)

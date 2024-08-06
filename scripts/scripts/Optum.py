@@ -6,7 +6,7 @@ from selenium.common.exceptions import NoSuchElementException, StaleElementRefer
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
-if __name__ == '__main__' or __name__ == "HealthEquity":
+if __name__ == '__main__' or __name__ == "Optum":
     from Classes.Asset import USD, Security
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
@@ -67,7 +67,8 @@ def captureOptumTransactions(driver, accounts):
     open(optumActivity, 'w', newline='').truncate()
     lastMonth = getStartAndEndOfDateRange(datetime.today().date(), "month")
     row = 0
-    driver.clickXPATHElementOnceAvaiable("//*[@id='investmentBox']/a") # Investments
+    if "investcenter" not in driver.webDriver.current_url:
+        driver.clickXPATHElementOnceAvaiable("//*[@id='investmentBox']/a") # Investments
     driver.clickXPATHElementOnceAvaiable("//*[@id='invest-center-submenu']/li[2]/a") # Investment Transactions
     driver.clickXPATHElementOnceAvaiable("//*[@id='investCenter']/div[3]/div[1]/div/div/a") # View all settled Transactions
     driver.webDriver.find_element(By.ID,"startDate").send_keys(lastMonth['startDate'].strftime('%m/%d/%Y'))
@@ -93,7 +94,6 @@ def captureOptumTransactions(driver, accounts):
             transaction = date, description, shares, amount, accounts['VFIAX']
             csv.writer(open(optumActivity, 'a', newline='', encoding="utf-8")).writerow(transaction)
         elif date.month < lastMonth['endDate'].month or date.year < lastMonth['endDate'].year:  break
-        break ## remove this after there are mulitple transactions to view
     return optumActivity
 
 def runOptum(driver, accounts, book):

@@ -9,18 +9,13 @@ else:
 
 def getSymbolByName(self):
     match self.name.lower():
-        case "algorand":                                            return 'ALGO'
         case "bitcoin":                                             return 'BTC'
         case "cardano":                                             return 'ADA'
-        case "cosmos":                                              return 'ATOM'
         case "ethereum":                                            return 'ETH'
         case 'he investment':                                       return "VIIIX"        
         case 'vfiax':                                               return "VFIAX"
         case "iotex":                                               return 'IOTX'
-        case "loopring":                                            return 'LRC'
-        case "polkadot":                                            return 'DOT'
         case "presearch":                                           return 'PRE'
-        case 'ripple':                                              return 'XRP'
         case "bing":                                                return 'BNG'
         case "pinecone":                                            return 'PNCN'
         case "tellwut":                                             return 'TWT'
@@ -81,18 +76,18 @@ class Security(Asset):    # this is a class for tracking security information
     
     def updateSpreadsheetAndGnuCash(self, book):
         account = self.symbol if self.account == None else self.account
-        updateSpreadsheet('Asset Allocation', 'Investments', account, 1, self.balance, self.symbol)
-        updateSpreadsheet('Asset Allocation', 'Investments', account, 2, float(self.price), self.symbol)
+        updateSpreadsheet('Finances', 'Investments', account, 1, self.balance, self.symbol)
+        updateSpreadsheet('Finances', 'Investments', account, 2, float(self.price), self.symbol)
         updateCoinQuantityFromStakingInGnuCash(self, book)
         self.updateGnuBalance(book.getBalance(self.gnuAccount))
 
     def updateBalanceInSpreadSheet(self, account=None):
         account = self.symbol if account == None else account
-        updateSpreadsheet('Asset Allocation', 'Investments', account, 1, self.balance, self.symbol)
+        updateSpreadsheet('Finances', 'Investments', account, 1, self.balance, self.symbol)
 
     def updatePriceInSpreadSheet(self, account=None):
         account = self.symbol if account == None else account
-        updateSpreadsheet('Asset Allocation', 'Investments', account, 2, self.price, self.symbol)
+        updateSpreadsheet('Finances', 'Investments', account, 2, self.price, self.symbol)
 
     def updateBalanceInGnuCash(self, book, account=None):
         account = self.symbol if account == None else account
@@ -126,8 +121,8 @@ class USD(Asset):
             updateSpreadsheet('Home', str(year) + ' Balance', self.name, month, balance, 'BoA CC')
             updateSpreadsheet('Home', str(year) + ' Balance', self.name, month, balance, 'BoA CC', True)
         else:
-            openSpreadsheet(driver, 'Checking Balance', str(year))
-            updateCheckingBalanceSpreadsheet('Checking Balance', year, self.name, month, balance, self.name + " CC")
+            openSpreadsheet(driver, 'Finances', str(year))
+            updateCheckingBalanceSpreadsheet('Finances', year, self.name, month, balance, self.name + " CC")
     
 
             
