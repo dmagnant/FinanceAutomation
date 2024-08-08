@@ -120,3 +120,4 @@ if __name__ == '__main__':
     Barclays = USD("Barclays", book)   
     Barclays.setBalance(float(116.22))
     Barclays.locateAndUpdateSpreadsheet(driver)
+        
