@@ -112,6 +112,8 @@ class USD(Asset):
         
     def locateAndUpdateSpreadsheet(self, driver):
         balance = 0.00 if float(self.balance) < 0 else float(self.balance) * -1
+        if self.value: balance = self.value
+        print('updated cc balance in Asset.locateandupdatespreadsheet to account for credit received.')
         today = datetime.today()
         month, year = today.month, today.year
         # switch worksheets if running in December (to next year's worksheet)

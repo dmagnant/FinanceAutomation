@@ -83,7 +83,7 @@ def amex(request):
         if "main" in request.POST:              runAmex(driver, Amex, book)
         elif "login" in request.POST:           locateAmexWindow(driver)
         elif "balance" in request.POST:         Amex.setBalance(getAmexBalance(driver))
-        elif "rewards" in request.POST:         claimAmexRewards(driver)
+        elif "rewards" in request.POST:         claimAmexRewards(driver, Amex)
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/amex"))
     context = {'account': Amex}
     book.closeBook();   return returnRender(request, "banking/creditcard.html", context)
@@ -160,7 +160,7 @@ def creditCards(request):
         if "amexMain" in request.POST:              runAmex(driver, Amex, personalBook)
         elif "amexLogin" in request.POST:           locateAmexWindow(driver)
         elif "amexBalances" in request.POST:        Amex.setBalance(getAmexBalance(driver))
-        elif "amexRewards" in request.POST:         claimAmexRewards(driver)
+        elif "amexRewards" in request.POST:         claimAmexRewards(driver, Amex)
         elif "barclaysMain" in request.POST:        runBarclays(driver, Barclays, personalBook)
         elif "barclaysLogin" in request.POST:       locateBarclaysWindow(driver)
         elif "barclaysBalances" in request.POST:    Barclays.setBalance(getBarclaysBalance(driver))
@@ -180,7 +180,7 @@ def creditCards(request):
         elif "discoverMain" in request.POST:        runDiscover(driver, Discover, personalBook)
         elif "discoverLogin" in request.POST:       locateDiscoverWindow(driver)
         elif "discoverBalances" in request.POST:    Discover.setBalance(getDiscoverBalance(driver))
-        elif "discoverRewards" in request.POST:     claimDiscoverRewards(driver)               
+        elif "discoverRewards" in request.POST:     claimDiscoverRewards(driver, Discover)               
         elif "close windows" in request.POST:       driver.closeWindowsExcept([':8000/'])
     context = {'Amex': Amex, 'Barclays': Barclays, 'Chase': Chase, 'Discover': Discover, 'BoA_P': BoA_P, 'BoA_J': BoA_J}
     personalBook.closeBook();   jointBook.closeBook();    return returnRender(request, "banking/creditCards.html", context)
@@ -253,7 +253,7 @@ def discover(request):
         if "main" in request.POST:              runDiscover(driver, Discover, book)
         elif "login" in request.POST:           locateDiscoverWindow(driver)
         elif "balance" in request.POST:         Discover.setBalance(getDiscoverBalance(driver))
-        elif "rewards" in request.POST:         claimDiscoverRewards(driver)   
+        elif "rewards" in request.POST:         claimDiscoverRewards(driver, Discover)   
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/discover"))
     context = {'account': Discover}
     book.closeBook();   return returnRender(request, "banking/creditcard.html", context)
@@ -328,7 +328,7 @@ def kraken(request):
     book.closeBook();   return returnRender(request, "crypto/kraken.html", context)
 
 def ledger(request):
-    book = GnuCash('Finance')
+    book = GnuCash('Test')
     coinList = getLedgerAccounts(book)
     if request.method == 'POST':
         if "main" in request.POST:              runLedger(coinList)

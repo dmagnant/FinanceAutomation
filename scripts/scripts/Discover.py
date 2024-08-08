@@ -48,10 +48,11 @@ def exportDiscoverTransactions(driver, today):
     stmtYear, stmtMonth = str(today.year), today.strftime('%m')
     return r"C:\Users\dmagn\Downloads\Discover-Statement-" + stmtYear + stmtMonth + "12.csv"
 
-def claimDiscoverRewards(driver):
+def claimDiscoverRewards(driver, account):
     locateDiscoverWindow(driver)    
     driver.webDriver.get("https://card.discover.com/cardmembersvcs/rewards/app/redemption?ICMPGN=AC_NAV_L3_REDEEM#/cash")
-    try:
+    balance = driver.webDriver.find_element(By.XPATH,"//*[@id='main-content-rwd']/div/div/div[1]/section[2]/div/div/span").text.replace(' Available', '').replace('$','')
+    if float(balance) > 0:
         driver.webDriver.find_element(By.ID, "electronic-deposit").click() # Electronic Deposit to your bank account
         time.sleep(1)
         driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[1]/main/div/div/section/div[2]/div/form/div[2]/fieldset/div[3]/div[2]/span[2]/button").click() # Redeem All link
@@ -59,14 +60,17 @@ def claimDiscoverRewards(driver):
         driver.webDriver.find_element(By.XPATH, "//*[@id='cashbackForm']/div[4]/input").click() # Continue
         time.sleep(1)
         driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[1]/main/div/div/section/div[2]/div/div/div/div[1]/div/div/div[2]/div/button[1]").click() # Submit
-    except (NoSuchElementException, ElementClickInterceptedException):  exception = "caught"
+    account.setValue(float(balance))
+    if account.value:   account.value = account.balance - account.value
+    print('balance: ' + account.balance)
+    print('value: ' + account.value)
 
 def runDiscover(driver, account, book):
     today = datetime.today()
     locateDiscoverWindow(driver)
     account.setBalance(getDiscoverBalance(driver))
     transactionsCSV = exportDiscoverTransactions(driver.webDriver, today)
-    claimDiscoverRewards(driver)
+    claimDiscoverRewards(driver, account)
     book.importGnuTransaction(account, transactionsCSV, driver)
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions: book.openGnuCashUI()

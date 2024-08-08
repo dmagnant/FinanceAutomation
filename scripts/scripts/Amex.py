@@ -46,7 +46,7 @@ def exportAmexTransactions(driver):
     driver.find_element(By.XPATH, getAmexBasePath() + "[1]/div/div/div/div/div/div[3]/div/a/span").click() # Download
     time.sleep(3)
 
-def claimAmexRewards(driver):
+def claimAmexRewards(driver, account):
     locateAmexWindow(driver)   
     driver.webDriver.get("https://global.americanexpress.com/rewards")
     rewardsBalance = driver.webDriver.find_element(By.ID, "globalmrnavpointbalance").text.replace('$', '')
@@ -55,20 +55,32 @@ def claimAmexRewards(driver):
         driver.webDriver.find_element(By.ID, "rewardsInput").send_keys(Keys.TAB)
         driver.webDriver.find_element(By.XPATH, "//*[@id='continue-btn']/span").click()
         driver.webDriver.find_element(By.XPATH, "//*[@id='use-dollars-btn']/span").click()
+    account.setValue(float(rewardsBalance))
+    if account.value:
+        account.value = account.balance - account.value
+    print('balance: ' + account.balance)
+    print('value: ' + account.value)
 
 def runAmex(driver, account, book):
     locateAmexWindow(driver)
     account.setBalance(getAmexBalance(driver))
     exportAmexTransactions(driver.webDriver)
-    claimAmexRewards(driver)
+    claimAmexRewards(driver, account)
     book.importGnuTransaction(account, r'C:\Users\dmagn\Downloads\activity.csv', driver)
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:  book.openGnuCashUI()
 
+# if __name__ == '__main__':
+#     driver = Driver("Chrome")
+#     book = GnuCash('Finance')
+#     Amex = USD("Amex", book)
+#     runAmex(driver, Amex, book)
+#     Amex.getData()
+#     book.closeBook()
+
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
-    Amex = USD("Amex", book)    
-    runAmex(driver, Amex, book)
-    Amex.getData()
-    book.closeBook()
+    Amex = USD("Amex", book)
+    Amex.setBalance(getAmexBalance(driver))
+    claimAmexRewards(driver, Amex)

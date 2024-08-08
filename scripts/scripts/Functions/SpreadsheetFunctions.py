@@ -86,6 +86,7 @@ def updateInvestmentPrices(driver, book):
             if symbol in symbolsToUpdate:
                 price = getStockPrice(symbol)
                 book.updatePriceInGnucash(symbol, price)
+                print(f'about to update column: {str(spreadsheet['priceColumn'])} and row: {str(row)} and price: {str(price)}')
                 spreadsheet['worksheet'].update_acell(spreadsheet['priceColumn'] + str(row), float(price))
                 symbolsToUpdate.remove(symbol)
                 if symbol == 'GME': GMEprice = price

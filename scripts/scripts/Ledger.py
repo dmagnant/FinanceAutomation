@@ -35,21 +35,21 @@ def runLedger(coinList, book):
 
 
 if __name__ == '__main__':
-    # book = GnuCash('Finance')
+    book = GnuCash('Finance')
     # gnuAccount = 'Assets:Non-Liquid Assets:CryptoCurrency'
     # from datetime import datetime
     # date = date=datetime.today().date().replace(month=3, day=31)
     # print(book.getBalance(gnuAccount, date))
 
-    test = ['1']
+    # test = ['1']
 
-    test.extend(['2', '3'])
-    print(test)
+    # test.extend(['2', '3'])
+    # print(test)
 
-    def add_numbers_to_test(test):
-        test.extend(['4', '5'])
-        print(test)
+    # def add_numbers_to_test(test):
+    #     test.extend(['4', '5'])
+    #     print(test)
 
-    def print_all_of_test(test):
-        for i in test:
-            print(i)
+    # def print_all_of_test(test):
+    #     for i in test:
+    #         print(i)

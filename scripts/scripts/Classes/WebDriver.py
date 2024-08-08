@@ -15,7 +15,6 @@ else:                                           from scripts.scripts.Functions.G
 def configureDriverOptions(browser, asUser=True):
     if browser == "Edge":
         options = webdriver.EdgeOptions()
-        # following options not compatible to Chrome remote debugging window
         # options.add_experimental_option('excludeSwitches', ['enable-logging'])
         options.add_experimental_option("debuggerAddress","localhost:9222")
         # options.add_experimental_option("detach", True)
@@ -25,17 +24,18 @@ def configureDriverOptions(browser, asUser=True):
         if asUser:  options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\Microsoft\Edge\User Data")
     else:        
         options = webdriver.ChromeOptions()
-        options.add_argument("enable-automation")
-        options.add_argument("--headless")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-extensions")
-        options.add_argument("--dns-prefetch-disable")
-        options.add_argument("--disable-gpu")
+        # options.add_argument("enable-automation")
+        # options.add_argument("--headless")
+        # options.add_argument("--no-sandbox")
+        # options.add_argument("--disable-extensions")
+        # options.add_argument("--dns-prefetch-disable")
+        # options.add_argument("--disable-gpu")
+        options.debugger_address="localhost:9223"
     if browser == "Chrome":
-        options.add_experimental_option("debuggerAddress","localhost:9222")
         options.set_capability("pageLoadStrategy", "eager")
         options.set_capability("timeouts", {"implicit":1000})
-        if asUser:  options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\Google\Chrome\User Data")
+        if asUser:  
+            options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\Google\Chrome\User Data")
     elif browser == "Brave":
         options.binary_location = "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe"
         if asUser:  options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\BraveSoftware\Brave-Browser\User Data")
@@ -69,29 +69,17 @@ def openWebDriver(browser, asUser=True):
     directory = setDirectory()
     options = configureDriverOptions(browser, asUser)
     if browser == "Edge":
-        versionBinaryPathText = " with binary path C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+        # versionBinaryPathText = " with binary path C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
         return webdriver.Edge(service=Service(directory + r"\Projects\Coding\webdrivers\msedgedriver.exe"), options=options)
-    elif browser == "Chrome":
-        versionBinaryPathText = " with binary path C:\Program Files\Google\Chrome\Application\chrome.exe"
-        if asUser:
+    # elif browser == "Chrome":
+        # versionBinaryPathText = " with binary path C:\Program Files\Google\Chrome\Application\chrome.exe"
+        # if asUser:
             # from selenium import webdriver
             # from selenium.webdriver.chrome.service import Service as ChromeService
             # from webdriver_manager.chrome import ChromeDriverManager
-            driver = webdriver.Chrome(service=Service(directory + r"\Projects\Coding\webdrivers\chromedriver.exe", service_args=["--verbose", "--log-path=C:\\Users\\dmagn\\driver.txt"]), options=options)
+            # driver = webdriver.Chrome(service=Service(directory + r"\Projects\Coding\webdrivers\chromedriver.exe", service_args=["--verbose", "--log-path=C:\\Users\\dmagn\\driver.txt"]), options=options)
             # driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install(),service_args=["--verbose", "--log-path=C:\\Users\\dmagn\\driver1.txt"]), options=options)
-        else: driver = webdriver.Chrome(service=Service(directory + r"\Projects\Coding\webdrivers\chromedriver.exe", service_args=["--verbose", "--log-path=C:\\Users\\dmagn\\driver.txt"]))
-        return driver
-    elif browser == "Brave":
-        return webdriver.Chrome(service=Service(directory + r"\Projects\Coding\webdrivers\chromedriver.exe"), options=options)
-        # except InvalidArgumentException:
-        #     print('user profile already in use, opening blank window')
-        #     options = configureDriverOptions(browser, False)
-        # except WebDriverException:
-        #     print(str(sys.exc_info()[1]))
-        #     error = str(sys.exc_info()[1]).partition('\n')[2].partition('\n')[0]
-        #     print(error)
-        #     version = error.replace("Current browser version is ", '').replace(versionBinaryPathText, '')
-        #     updateWebDriver(browser, version)
+    return webdriver.Chrome(service=Service(r"G:\My Drive\Projects\Coding\webdrivers\chromedriver.exe"), options=options)
 
 class Driver:
     "this is a class for creating webdriver with implicit wait"

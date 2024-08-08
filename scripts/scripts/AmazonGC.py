@@ -22,6 +22,7 @@ def locateAmazonWindow(driver):
 
 def writeAmazonGCTransactionFromUI(book, account, requestInfo):
     if 'earn' in requestInfo:
+        print('test')
         amount = Decimal(requestInfo['amount'])
         source = 'Income:Market Research:' + requestInfo['source']
     elif 'spend' in requestInfo:
@@ -55,8 +56,12 @@ def confirmAmazonGCBalance(driver, account):
 #     AmazonGC.getData()
 #     book.closeBook()
 
+# if __name__ == '__main__':
+#     book = GnuCash('Finance')
+#     AmazonGC = USD("Amazon GC", book)
+#     AmazonGC.getData()
+#     # addAmazonGCAmount(book, AmazonGC, Decimal(10.00), 'Pinecone'), book.closeBook()
+    
+    
 if __name__ == '__main__':
-    book = GnuCash('Finance')
-    AmazonGC = USD("Amazon GC", book)
-    AmazonGC.getData()
-    # addAmazonGCAmount(book, AmazonGC, Decimal(10.00), 'Pinecone'), book.closeBook()
+    driver = Driver("Chrome")
