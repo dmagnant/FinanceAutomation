@@ -28,7 +28,7 @@ def activateChaseWindow(title):
 def chaseLogin(driver):
     driver.openNewWindow('https://secure.chase.com/web/auth/#/logon/logon/chaseOnline?treatment=chase&lang=en')
     time.sleep(5)
-    activateChaseWindow("sign in - chase")
+    activateChaseWindow("sign in - chase.com")
     n=1
     while n<=8: pyautogui.press('tab'); n+=1
     try:                            driver.webDriver.find_element(By.ID,"signin-button").click() # Sign In

@@ -47,11 +47,12 @@ class Asset:
     def setGnuAccount(self, book):  self.gnuAccount = book.getGnuAccount(self)
     def getGnuBalance(self):        return self.gnuBalance
     def setValue(self, value):      self.value = value
+    def setCost(self, cost):        self.cost = cost
     
 class Security(Asset):    # this is a class for tracking security information
     def __init__(self, name, book, account=None):
         self.name, self.account = name, account
-        self.balance = self.value = ''
+        self.balance = self.value = self.cost = ''
         self.symbol = getSymbolByName(self)
         self.price = book.getPriceInGnucash(self.symbol, datetime.today().date())
         self.gnuAccount = book.getGnuAccount(name, account)
@@ -96,8 +97,10 @@ class Security(Asset):    # this is a class for tracking security information
 class USD(Asset):
     "this is a class for tracking USD information"
     def __init__(self, name, book):
-        self.name, self.balance, self.units, self.currency, self.reviewTransactions, self.account = name, "", 0, 'USD', [], None
+        self.balance = self.value = self.cost = ''
+        self.name, self.units, self.currency, self.reviewTransactions, self.account = name, 0, 'USD', [], None
         self.gnuAccount = book.getGnuAccount(accountName=self.name)
+
         balance = book.getBalance(self.gnuAccount)
         self.gnuBalance = round(balance, 2) if float(balance)>0 else 0
     def getReviewTransactions(self):                return self.reviewTransactions
@@ -120,11 +123,10 @@ class USD(Asset):
         if month == 12: year = year + 1
         if self.name == 'BoA-joint':
             openSpreadsheet(driver, 'Home', str(year) + ' Balance')
-            updateSpreadsheet('Home', str(year) + ' Balance', self.name, month, balance, 'BoA CC')
-            updateSpreadsheet('Home', str(year) + ' Balance', self.name, month, balance, 'BoA CC', True)
+            updateSpreadsheet('Home', str(year) + ' Balance', self.name, month, balance, modifiedCC=True)
         else:
             openSpreadsheet(driver, 'Finances', str(year))
-            updateCheckingBalanceSpreadsheet('Finances', year, self.name, month, balance, self.name + " CC")
+            updateCheckingBalanceSpreadsheet('Finances', year, self.name, month, balance)
     
 
             

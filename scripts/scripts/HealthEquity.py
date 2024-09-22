@@ -25,16 +25,19 @@ def locateHealthEquityWindow(driver):
 
 def healthEquitylogin(driver):
     driver.openNewWindow('https://member.my.healthequity.com/hsa/21895515-010')
-    driver = driver.webDriver
     try:
-        driver.find_element(By.ID, "ctl00_modulePageContent_btnLogin").click() # login
+        driver.webDriver.find_element(By.ID,"ctl00_modulePageContent_txtUserIdStandard").click()
+        driver.webDriver.find_element(By.ID,"ctl00_modulePageContent_txtPassword").click()
+        driver.webDriver.find_element(By.ID, "ctl00_modulePageContent_btnLogin").click() # login
         try:  # Two-Step Authentication
-            driver.find_element(By.XPATH, "//*[@id='sendEmailTextVoicePanel']/div[5]/span[1]/span/label/span/strong").click() # send code to phone
-            driver.find_element(By.ID, "sendOtp").click() # Send confirmation code
+            driver.webDriver.find_element(By.XPATH, "//*[@id='sendEmailTextVoicePanel']/div[5]/span[1]/span/label/span/strong").click() # send code to phone
+            driver.webDriver.find_element(By.ID, "sendOtp").click() # Send confirmation code
             showMessage("Confirmation Code", "Enter code then click OK") # enter text code
-            driver.find_element(By.XPATH, "//*[@id='VerifyOtpPanel']/div[4]/div[1]/div/label/span").click() # Remember me
-            driver.find_element(By.ID, "verifyOtp").click() # click Confirm
+            driver.webDriver.find_element(By.XPATH, "//*[@id='VerifyOtpPanel']/div[4]/div[1]/div/label/span").click() # Remember me
+            driver.webDriver.find_element(By.ID, "verifyOtp").click() # click Confirm
         except NoSuchElementException:  exception = "already verified"
+        try:    driver.webDriver.find_element(By.XPATH,"//*[@id='topmenu']/div[2]/a/span").click() # Home button to bypass error
+        except NoSuchElementException:  exception = "no error to bypass"
     except NoSuchElementException:      exception = "already logged in"
     time.sleep(1)
 

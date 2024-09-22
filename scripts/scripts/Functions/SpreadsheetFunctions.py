@@ -2,7 +2,7 @@ import time, gspread
 from datetime import datetime
 from .GeneralFunctions import getCryptocurrencyPrice, setDirectory, showMessage, getStockPrice
 
-def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", modified=False):
+def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", modifiedCC=False):
     def getCell(account, month):
         def getCellArray(account):
             match account:
@@ -38,16 +38,20 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
     sheet = gspread.service_account(filename=jsonCreds).open(sheetTitle)
     worksheet = sheet.worksheet(str(tabTitle))
     cell = getCell(account, month)
-    if modified: cell = cell.replace(cell[0], chr(ord(cell[0]) + 3))
     sheetKey = getSheetKey(sheetTitle, tabTitle, worksheet, cell)
-    if symbol == "$" or symbol == sheetKey: worksheet.update_acell(cell, value)
+    if symbol == "$" or symbol == sheetKey: 
+        worksheet.update_acell(cell, value)
+        if modifiedCC: worksheet.update_acell(cell.replace(cell[0], chr(ord(cell[0]) + 3)), value)
+        if account == 'Water Bill': 
+            worksheet.update_acell(cell.replace(cell[0], chr(ord(cell[0]) - 1)), account)
+            worksheet.update_acell(cell.replace(cell[0], chr(ord(cell[0]) - 4)), '')
     else:
         showMessage('Key Mismatch',     
         f'the given key: {symbol} does not match the sheet key: {sheetKey} for the cell that is being updated: {cell} \n'
         f'This is likely due to an update on the spreadsheet: {sheetTitle} > {tabTitle} \n'
         f'Check spreadsheet and verify the getCell method is getting the correct Cell')
 
-def updateCheckingBalanceSpreadsheet(sheetTitle, tabTitle, accountName, month, value, symbol="$", modified=False):
+def updateCheckingBalanceSpreadsheet(sheetTitle, tabTitle, accountName, month, value):
     projectedRows = [4,4,39,39,39,74,74,74,109,109,109,4]
     projectedRows = [3,3,38,38,38,73,73,73,108,108,108,3]
     projectedColumns = ['J','R','B','J','R','B','J','R','B','J','R','B']
@@ -61,17 +65,15 @@ def updateCheckingBalanceSpreadsheet(sheetTitle, tabTitle, accountName, month, v
         description = worksheet.acell(column+str(row)).value
         if accountName in description:  cellNotFound = False
         else:   row+=1
-    cell = chr(ord(column) + 1) + str(row)
-    worksheet.update_acell(cell, value)
-    cell = chr(ord(column) + 4) + str(row)
-    worksheet.update_acell(cell, value)
+    worksheet.update_acell(chr(ord(column) + 1) + str(row), value)
+    worksheet.update_acell(chr(ord(column) + 4) + str(row), value)
 
 def getInvestmentsSpreadsheetDetails(driver):
     spreadsheetWindow = driver.findWindowByUrl("edit#gid=361024172")
     if not spreadsheetWindow:   openSpreadsheet(driver, 'Finances', 'Investments'); spreadsheetWindow = driver.webDriver.current_window_handle
     else:   driver.webDriver.switch_to.window(spreadsheetWindow)
     worksheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Finances').worksheet('Investments')
-    return {'worksheet': worksheet, 'row': 2, 'firstRowAfterCrypto':8, 'nameColumn': 'A','symbolColumn': 'B', 'accountColumn': 'C', 'sharesColumn': 'D', 'priceColumn': 'E'}
+    return {'worksheet': worksheet, 'row': 2, 'firstRowAfterCrypto':8, 'nameColumn': 'A','symbolColumn': 'B', 'accountColumn': 'C', 'sharesColumn': 'D', 'priceColumn': 'E', 'costColumn': 'H'}
 
 def updateInvestmentPrices(driver, book):
     spreadsheet = getInvestmentsSpreadsheetDetails(driver)
@@ -102,23 +104,26 @@ def updateInvestmentPrices(driver, book):
         spreadsheet['worksheet'].update_acell((spreadsheet['priceColumn'] + str(coinsToUpdate.get(coin).get('row'))), float(price))
     return GMEprice
 
-def updateUSDInvestmentPricesAndShares(driver, book, accounts):
-    today = datetime.today().date()
-    spreadsheet = getInvestmentsSpreadsheetDetails(driver)
-    updatedSymbols = []
-    stillInvestments = True
+def updateUSDInvestmentPricesSharesAndCost(driver, book, accounts):
+    today, updatedSymbols, stillInvestments, spreadsheet = datetime.today().date(), [], True, getInvestmentsSpreadsheetDetails(driver)
     row = spreadsheet['firstRowAfterCrypto']
     while stillInvestments:
-        shares, spreadsheet['priceColumn'] = 0, 'E', 
+        spreadsheet['priceColumn'] = 'E'
+        shares = cost = 0
         symbol = spreadsheet['worksheet'].acell(spreadsheet['symbolColumn']+str(row)).value
-        print(symbol)
         if symbol != None:
             if symbol == '8585':
                 price = book.getPriceInGnucash(accounts['TSM401k'].symbol, today)
                 shares = float(accounts['TSM401k'].balance)
+                cost = float(accounts['TSM401k'].cost)
             elif symbol == 'M038':
                 price = book.getPriceInGnucash(accounts['EBI'].symbol, today)
                 shares = float(accounts['EBI'].balance)
+                cost = float(accounts['EBI'].cost)
+            elif symbol == 'VFIAX':
+                price = book.getPriceInGnucash(symbol, today)
+                shares = float(accounts['VFIAX'].balance)
+                cost = book.getDollarsInvestedPerSecurity(accounts['VFIAX'])
             elif symbol in ['VIIIX', 'VXUS', 'VTI']:
                 price = book.getPriceInGnucash(symbol, today)
                 if symbol == 'VTI':
@@ -127,8 +132,18 @@ def updateUSDInvestmentPricesAndShares(driver, book, accounts):
                         case 'IRA':         account = accounts['iraVTI']
                         case 'Brokerage':   account = accounts['brVTI']
                     shares = float(account.balance)
-                elif symbol == 'VIIIX': shares = float(accounts['VIIIX'].balance)
-                elif symbol == 'VXUS':  shares = float(accounts['riraVXUS'].balance)
+                    cost = float(account.cost)
+                elif symbol == 'VIIIX': shares = float(accounts['VIIIX'].balance); cost = float(account.cost)
+                elif symbol == 'VXUS':  shares = float(accounts['riraVXUS'].balance); cost = float(account.cost)
+            elif symbol == 'GME':
+                match(spreadsheet['worksheet'].acell(spreadsheet['accountColumn']+str(row)).value):
+                    case 'rIRA':        account = accounts['riraGME']
+                    case 'IRA':         account = accounts['iraGME']
+                    case 'Brokerage':   account = accounts['brGME']
+                    case _:             row += 1; continue
+                price = getStockPrice(symbol)
+                shares = float(account.balance)
+                cost = float(account.cost)
             elif symbol == 'SPAXX':
                 match(spreadsheet['worksheet'].acell(spreadsheet['accountColumn']+str(row)).value):
                     case 'rIRA':        account = accounts['riraSPAXX']
@@ -141,6 +156,7 @@ def updateUSDInvestmentPricesAndShares(driver, book, accounts):
             elif symbol == 'HOME':  spreadsheet['priceColumn'], price = 'F', (250000 - accounts['Home'].getGnuBalance()) / 2
             else:                   price = getStockPrice(symbol)
             if shares:  spreadsheet['worksheet'].update_acell(spreadsheet.get('sharesColumn') + str(row), shares)
+            if cost:    spreadsheet['worksheet'].update_acell(spreadsheet.get('costColumn') + str(row), cost)
             if symbol not in updatedSymbols:
                 updatedSymbols.append(symbol)
                 spreadsheet['worksheet'].update_acell((spreadsheet['priceColumn'] + str(row)), float(price))

@@ -6,7 +6,7 @@ from selenium.webdriver.common.keys import Keys
 if __name__ == '__main__' or __name__ == "Monthly":
     from Classes.Asset import USD, Security;    from Classes.WebDriver import Driver;   from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import getStartAndEndOfDateRange, getUsername, getNotes, setDirectory
-    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateUSDInvestmentPricesAndShares
+    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateUSDInvestmentPricesSharesAndCost
     from Eternl import runEternl, locateEternlWindow
     from Ledger import runLedger, getLedgerAccounts
     from HealthEquity import runHealthEquity, locateHealthEquityWindow
@@ -20,7 +20,7 @@ else:
     from .Eternl import runEternl, locateEternlWindow
     from .Ledger import runLedger, getLedgerAccounts
     from .Functions.GeneralFunctions import getStartAndEndOfDateRange, getUsername, getNotes, setDirectory
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateUSDInvestmentPricesAndShares
+    from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateUSDInvestmentPricesSharesAndCost
     from .HealthEquity import runHealthEquity, locateHealthEquityWindow
     from .IoPay import runIoPay, locateIoPayWindow
     from .Worthy import getWorthyBalance, locateWorthyWindow
@@ -35,11 +35,11 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         Brokerage, brSPAXX, brGME = USD("Brokerage", personalBook), Security('Brokerage SPAXX', personalBook), Security('Brokerage GME', personalBook)
         VIIIX, HECash = Security("HE Investment", personalBook), USD("HE Cash", personalBook)
         VFIAX, OptumCash = Security("VFIAX", personalBook), USD("Optum Cash", personalBook)
-        Pension, V401k, TSM401k, EBI = USD("VanguardPension", personalBook), USD("Vanguard401k", personalBook), Security("Total Stock Market(401k)", personalBook), Security("Employee Benefit Index", personalBook)
+        V401k, TSM401k, EBI = USD("Vanguard401k", personalBook), Security("Total Stock Market(401k)", personalBook), Security("Employee Benefit Index", personalBook)
         Home, LiquidAssets = USD('Home', jointBook), USD("Liquid Assets", personalBook)
         Bonds, Worthy = USD("Bonds", personalBook), USD("Worthy", personalBook)        
         accounts = {'IRA':IRA,'iraSPAXX':iraSPAXX,'iraGME':iraGME,'rIRA':rIRA,'riraVXUS':riraVXUS,'riraVTI':riraVTI,'riraSPAXX':riraSPAXX,'riraGME':riraGME,'Brokerage':Brokerage,'brSPAXX':brSPAXX, 'brGME':brGME,
-                    'VIIIX':VIIIX,'HECash':HECash,'VFIAX':VFIAX,'OptumCash':OptumCash,'V401k':V401k,'EBI':EBI,'TSM401k':TSM401k,'Worthy': Worthy,'Pension':Pension,
+                    'VIIIX':VIIIX,'HECash':HECash,'VFIAX':VFIAX,'OptumCash':OptumCash,'V401k':V401k,'EBI':EBI,'TSM401k':TSM401k,'Worthy': Worthy,
                     'Home':Home,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
     elif type == 'Crypto':
         CryptoPortfolio = USD("Crypto", personalBook)
@@ -136,7 +136,7 @@ def runUSD(driver, today, accounts, personalBook):
     accounts['Bonds'].updateGnuBalance(personalBook.getBalance(accounts['Bonds'].gnuAccount))
     runVanguard401k(driver, accounts, personalBook)
     runFidelity(driver, accounts, personalBook)
-    updateUSDInvestmentPricesAndShares(driver,personalBook,accounts)
+    updateUSDInvestmentPricesSharesAndCost(driver,personalBook,accounts)
     driver.findWindowByUrl("/scripts/monthly")
 
 def runCrypto(driver, accounts, personalBook):
@@ -189,24 +189,3 @@ if __name__ == '__main__':
     # runUSD(driver, today, usdAccounts, personalBook)
     
     loginToUSDAccounts(driver)
-    
-    # book = GnuCash('Finance')
-
-    # # Pension, V401k, TSM401k, EBI = USD("VanguardPension", book), USD("Vanguard401k", book), Security("Total Stock Market(401k)", book), Security("Employee Benefit Index", book)
-
-    # security = USD("Vanguard401k", book)
-    # # get dollars invested balance (must be run per security)
-    # mybook, total = book.readBook, 0
-    # # retrieve transactions from GnuCash
-    # transactions = [tr for tr in mybook.transactions
-    #                 for spl in tr.splits
-    #                 if spl.account.fullname == security.gnuAccount
-    #                 if int(tr.post_date.strftime('%Y')) <= 2015]
-    # for tr in transactions:
-    #     amount, stakingTrans = 0, False
-    #     for spl in tr.splits:
-    #         if spl.account.fullname == security.gnuAccount and "Paycheck" in tr.description: 
-    #             total += abs(float(format(spl.value, ".2f")))
-    # print(f'total $ invested in {security.name}: ' + str(total))
-
-    

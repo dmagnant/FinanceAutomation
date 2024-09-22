@@ -56,12 +56,9 @@ def confirmAmazonGCBalance(driver, account):
 #     AmazonGC.getData()
 #     book.closeBook()
 
-# if __name__ == '__main__':
-#     book = GnuCash('Finance')
-#     AmazonGC = USD("Amazon GC", book)
-#     AmazonGC.getData()
+if __name__ == '__main__':
+    book = GnuCash('Finance')
+    AmazonGC = USD("Amazon GC", book)
+    AmazonGC.getData()
 #     # addAmazonGCAmount(book, AmazonGC, Decimal(10.00), 'Pinecone'), book.closeBook()
     
-    
-if __name__ == '__main__':
-    driver = Driver("Chrome")

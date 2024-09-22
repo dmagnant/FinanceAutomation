@@ -298,7 +298,7 @@ def healthEquity(request):
     HEaccounts = {'VIIIX': VIIIX, 'HECash': HECash, 'V401k': V401k}
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "main" in request.POST:              runHealthEquity(driver, HEaccounts)
+        if "main" in request.POST:              runHealthEquity(driver, HEaccounts, book)
         elif "login" in request.POST:           locateHealthEquityWindow(driver)
         elif "balance" in request.POST:         getHealthEquityBalances(driver, HEaccounts)
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/healthEquity"))
@@ -351,7 +351,6 @@ def monthly(request):
         elif "HEBalances" in request.POST:          getHealthEquityBalances(driver, {'VIIIX': usdAccounts['VIIIX'], 'HECash': usdAccounts['HECash'], 'V401k': usdAccounts['V401k']})
         elif "vanguard401k" in request.POST:        runVanguard401k(driver, usdAccounts, personalBook)
         elif "vanguardLogin" in request.POST:       locateVanguardWindow(driver)
-        elif "vanguardBalances" in request.POST:    getVanguardBalancesAndPensionInterestYTD(driver, [usdAccounts['Pension'], usdAccounts['V401k']])
         elif "worthyBalance" in request.POST:       getWorthyBalance(driver, usdAccounts['Worthy'])
         elif "worthyLogin" in request.POST:         locateWorthyWindow(driver)
         elif "eternlMain" in request.POST:          runEternl(driver, cryptoAccounts['Cardano'], personalBook)
@@ -506,12 +505,11 @@ def updateGoals(request):
 
 def vanguard(request):
     book = GnuCash('Finance')
-    Pension, V401k, TSM401k, EBI = USD("VanguardPension", book), USD("Vanguard401k", book), Security("Total Stock Market(401k)", book), Security("Employee Benefit Index", book)
-    accounts = {'Pension': Pension, 'V401k': V401k,'TSM401k': TSM401k,'EBI':EBI}
+    V401k, TSM401k, EBI = USD("Vanguard401k", book), Security("Total Stock Market(401k)", book), Security("Employee Benefit Index", book)
+    accounts = {'V401k': V401k,'TSM401k': TSM401k,'EBI':EBI}
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "401k" in request.POST:              runVanguard401k(driver, accounts, book)
-        elif "Pension" in request.POST:         runVanguardPension(driver, accounts, book)
         elif "login" in request.POST:           locateVanguardWindow(driver)
         elif "balance" in request.POST:         getVanguardBalancesAndPensionInterestYTD(driver, accounts)
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/vanguard"))

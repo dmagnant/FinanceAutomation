@@ -27,15 +27,18 @@ def boALogin(driver, account):
     def clickLoginButton():         driver.webDriver.find_element(By.ID,'signIn').click()
     
     driver.openNewWindow('https://www.bankofamerica.com/')
-    getUserNameElement().click()
-    getPassWordElement().send_keys(getPassword('BoA CC'))
+    username = getUserNameElement()
+    username.click()
+    time.sleep(3)
+    password = getPassWordElement()
+    password.send_keys(getPassword('BoA CC'))
     clickLoginButton()
-    # try:    
-    #     getSignInErrorMessage()
-    #     driver.webDriver.find_element(By.ID, "onlineId1").send_keys(getUsername('BoA CC'))
-    #     driver.webDriver.find_element(By.ID, "passcode1").send_keys(getPassword('BoA CC'))
-    #     clickLoginButton()
-    # except  NoSuchElementException: exception = "good to proceed"
+    try:    
+        getSignInErrorMessage()
+        driver.webDriver.find_element(By.ID, "onlineId1").send_keys(getUsername('BoA CC'))
+        driver.webDriver.find_element(By.ID, "passcode1").send_keys(getPassword('BoA CC'))
+        clickLoginButton()
+    except  NoSuchElementException: exception = "good to proceed"
     try:     # handle ID verification
         driver.webDriver.find_element(By.XPATH, "//*[@id='btnARContinue']/span[1]").click()
         showMessage("Get Verification Code", "Enter code, then click OK")
@@ -71,15 +74,15 @@ def exportBoATransactions(driver, account, today):
 def claimBoARewards(driver, account):
     locateBoAWindowAndOpenAccount(driver, account)
     if 'joint' in account:
-        driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[2]/a").click() # view/redeem
+        driver.webDriver.find_element(By.XPATH," /html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[2]/a").click() # view/redeem
         driver.clickIDElementOnceAvaiable("redeemButton") # redeem points
         driver.switchToLastWindow()
         time.sleep(1)
         driver.webDriver.find_element(By.XPATH,"/html/body/main/div/div[2]/div[1]/div[1]/div/div[2]/div/div[1]/div[3]/a").click() # redeem
-        availablePoints = driver.webDriver.find_element(By.ID,"summary_availablepoints").text.replace(',','')
+        availablePoints = driver.webDriver.find_element(By.ID,"zsummary_availablepoints").text.replace(',','')
         if int(availablePoints) >= 2500:
             remainingPoints = availablePoints
-            num = 4
+            num = 1
             if int(availablePoints) > 0:
                 while remainingPoints:
                     driver.webDriver.find_element(By.XPATH,"/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[6]/label/input").click() # select to redeem

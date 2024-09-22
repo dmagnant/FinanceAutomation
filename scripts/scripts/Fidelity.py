@@ -82,7 +82,7 @@ def getFidelityBalance(driver, allAccounts, accountBalanceToGet='all'):
         balance = driver.getXPATHElementTextOnceAvailable(f"//*[@id='{accountNum}']/span/s-slot/s-assigned-wrapper/div/div/div[2]/div/span[2]").replace('$','').replace(',','')
         allAccounts[account].setBalance(balance)
 
-def getFidelityPricesAndShares(driver, allAccounts, book, accountToGet='all'):
+def getFidelityPricesSharesAndCost(driver, allAccounts, book, accountToGet='all'):
     locateFidelityWindow(driver)
     accountNum = str(json.loads(getNotes('Fidelity'))[accountToGet]) if accountToGet != 'all' else 'allaccounts'
     driver.clickXPATHElementOnceAvaiable(f"//*[@id='{accountNum}']/span/s-slot/s-assigned-wrapper/div/div") # Account
@@ -91,9 +91,8 @@ def getFidelityPricesAndShares(driver, allAccounts, book, accountToGet='all'):
     row = 0
     while True:
         row += 1
-        try:
-            accountName = driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[1]/div[1]/div["+ str(row) +"]/div/div/span/div/div[2]/h3").text
-        except NoSuchElementException:
+        try:    accountName = driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[1]/div[1]/div["+ str(row) +"]/div/div/span/div/div[2]/h3").text
+        except  NoSuchElementException:
             try:
                 symbol = driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[1]/div[1]/div["+ str(row) +"]/div/div/span/div/div[2]/div/button").text.replace('$','')
                 if symbol == 'VXUS':
@@ -105,15 +104,20 @@ def getFidelityPricesAndShares(driver, allAccounts, book, accountToGet='all'):
                 elif symbol == 'Cash':
                     if 'ROTH' in accountName:           account = allAccounts['riraSPAXX']
                     elif 'Individual' in accountName:   account = allAccounts['brSPAXX']
-                    elif 'Traditional' in accountName:  account = allAccounts['iraSPAXX']
+                    elif 'Traditional' in accountName:  account = allAccounts['iraSPAXX'] 
+                elif symbol == 'GME':
+                    if 'ROTH' in accountName:           account = allAccounts['riraGME']
+                    elif 'Individual' in accountName:   account = allAccounts['brGME']
+                    elif 'Traditional' in accountName:  account = allAccounts['iraGME']
                 else:   continue
-
-                if symbol != 'Cash':
+                if symbol == 'Cash': account.setBalance(driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[7]/div/span").text.replace('$', '').replace(',',''))
+                elif 'GME' in symbol and symbol != 'GME':   continue # skip options contracts
+                else: # get equity positions
                     account.price = Decimal(driver.webDriver.find_element(By.XPATH, "//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[1]/div/span").text.replace('$', ''))
                     book.updatePriceInGnucash(account.symbol, account.price)
-                    account.setBalance(driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[9]/div/span").text.replace('$', '').replace(',',''))
+                    account.setBalance(driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[9]/div/span").text.replace('$', '').replace(',',''))                    
                     account.value = driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[7]/div/span").text.replace('$', '').replace(',','')
-                else:   account.setBalance(driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[7]/div/span").text.replace('$', '').replace(',',''))
+                    account.setCost(driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[11]/div/span").text.replace('$', '').replace(',',''))
             except NoSuchElementException:
                 if accountToGet != 'all':
                     if row==2:  showMessage('Failed to Find Individual Account Share/Price Info', 'Need to update element information for prices and shares in Fidelity')
@@ -137,7 +141,9 @@ def captureFidelityTransactions(driver, account='all'):
         try:    dateElement = driver.webDriver.find_element(By.XPATH,setFidelityElementPath(row, table, column))          
         except NoSuchElementException:
             if row==1:  showMessage('Error finding Date Element', 'Element path for date element has changed, please update.')
-            break
+            else: 
+                try: driver.webDriver.find_element(By.XPATH,"//*[@id='ao-history-list']/div[3]/div/div/apex-kit-button/s-root/button/div/span/s-slot/s-assigned-wrapper").click() # load more results
+                except NoSuchElementException:  break
         date = datetime.strptime(dateElement.text, '%b-%d-%Y').date()
         if date.month == lastMonth['endDate'].month:
             column+=1
@@ -177,15 +183,18 @@ def captureFidelityTransactions(driver, account='all'):
 def runFidelity(driver, accounts, book):
     locateFidelityWindow(driver)
     getFidelityBalance(driver, accounts)
-    getFidelityPricesAndShares(driver, accounts, book)
+    getFidelityPricesSharesAndCost(driver, accounts, book)
     fidelityActivity = captureFidelityTransactions(driver)
     book.importGnuTransaction(accounts, fidelityActivity, driver, 0)
+    accounts['riraGME'].updateGnuBalanceAndValue(book.getBalance(accounts['riraGME'].gnuAccount))
     accounts['riraVXUS'].updateGnuBalanceAndValue(book.getBalance(accounts['riraVXUS'].gnuAccount))
     accounts['riraVTI'].updateGnuBalanceAndValue(book.getBalance(accounts['riraVTI'].gnuAccount))
     accounts['riraSPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['riraSPAXX'].gnuAccount))
     accounts['rIRA'].updateGnuBalance(book.getBalance(accounts['rIRA'].gnuAccount))
+    accounts['iraGME'].updateGnuBalanceAndValue(book.getBalance(accounts['iraGME'].gnuAccount))
     accounts['iraSPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['iraSPAXX'].gnuAccount))
     accounts['IRA'].updateGnuBalance(book.getBalance(accounts['IRA'].gnuAccount))
+    accounts['brGME'].updateGnuBalanceAndValue(book.getBalance(accounts['brGME'].gnuAccount))
     accounts['brSPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['brSPAXX'].gnuAccount))
     accounts['Brokerage'].updateGnuBalance(book.getBalance(accounts['Brokerage'].gnuAccount))
     
@@ -201,4 +210,3 @@ if __name__ == '__main__':
     accounts = getFidelityAccounts(book)
     runFidelity(driver, accounts, book)
     book.closeBook()
-

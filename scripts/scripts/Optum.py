@@ -11,12 +11,12 @@ if __name__ == '__main__' or __name__ == "Optum":
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange,
-                                            showMessage, setDirectory, getPassword, getAnswerForSecurityQuestion)
+                                            showMessage, setDirectory, getUsername, getPassword, getAnswerForSecurityQuestion)
 else:
     from .Classes.Asset import USD, Security
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import (getStartAndEndOfDateRange,
-                                             showMessage, setDirectory, getPassword, getAnswerForSecurityQuestion)  
+                                             showMessage, setDirectory, getUsername, getPassword, getAnswerForSecurityQuestion)  
     
 def locateOptumWindow(driver):
     found = driver.findWindowByUrl("secure.optumfinancial.com")
@@ -35,6 +35,7 @@ def locateOptumWindow(driver):
 def optumLogin(driver):
     driver.openNewWindow('https://secure.optumfinancial.com/portal/hsid/login?url=/portal/CC')
     try:
+        driver.webDriver.find_element(By.ID, "username").send_keys(getUsername('Optum HSA'))
         driver.webDriver.find_element(By.ID, "password").send_keys(getPassword('Optum HSA'))
         driver.webDriver.find_element(By.ID, "submitBtn").click() # Sign in
         time.sleep(3)
@@ -51,13 +52,15 @@ def getOptumBalance(driver, accounts):
     accounts['OptumCash'].setBalance(driver.webDriver.find_element(By.ID,"availableToSpendBoxValue").text.replace("$","").replace(",",""))
     accounts['VFIAX'].setValue(driver.webDriver.find_element(By.ID,"investmentBalance").text.replace("$","").replace(",",""))
 
-def getOptumPricesAndShares(driver, accounts, book):
+def getOptumPricesSharesAndCost(driver, accounts, book):
     locateOptumWindow(driver)
     optumInvestPageURL = "https://secure.optumfinancial.com/portal/CC/cdhportal/cdhaccount/investcenter"
     if not driver.webDriver.current_url == optumInvestPageURL:  driver.webDriver.get(optumInvestPageURL)
     accounts['VFIAX'].price = driver.webDriver.find_element(By.XPATH,"//*[@id='investCenter']/div[4]/div/div[1]/div[2]/div/table/tbody/tr[1]/td[4]").text.replace("$","").replace(",","")
     book.updatePriceInGnucash(accounts['VFIAX'].symbol, accounts['VFIAX'].price)
     accounts['VFIAX'].setBalance(driver.webDriver.find_element(By.XPATH,"//*[@id='investCenter']/div[4]/div/div[1]/div[2]/div/table/tbody/tr[1]/td[3]").text.replace(",",""))
+    accounts['VFIAX'].cost = book.getDollarsInvestedPerSecurity(accounts['VFIAX'])
+    
     
 def setOptumTransactionPath(row, column):    return f"//*[@id='trans']/tbody/tr[{str(row)}]/td[{str(column)}]"
 
@@ -99,9 +102,10 @@ def captureOptumTransactions(driver, accounts):
 def runOptum(driver, accounts, book):
     locateOptumWindow(driver)
     getOptumBalance(driver, accounts)
-    getOptumPricesAndShares(driver, accounts, book)
+    getOptumPricesSharesAndCost(driver, accounts, book)
     optumActivity = captureOptumTransactions(driver, accounts)
     book.importGnuTransaction(accounts['VFIAX'], optumActivity, driver, 0)
+    accounts['VFIAX'].setCost(book.getDollarsInvestedPerSecurity(accounts['VFIAX']))
     accounts['OptumCash'].updateGnuBalance(book.getBalance(accounts['OptumCash'].gnuAccount))
     accounts['VFIAX'].updateGnuBalanceAndValue(book.getBalance(accounts['VFIAX'].gnuAccount))
     
@@ -109,7 +113,13 @@ if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
     VFIAX = Security("VFIAX", book)
-    OptumCash = USD("Optum Cash", book)
-    OptumAccounts = {'VFIAX': VFIAX, 'OptumCash': OptumCash}
-    runOptum(driver, OptumAccounts, book)
-    book.closeBook()
+    # OptumCash = USD("Optum Cash", book)
+    # OptumAccounts = {'VFIAX': VFIAX, 'OptumCash': OptumCash}
+    # runOptum(driver, OptumAccounts, book)
+    # book.closeBook()
+
+    # book.getDollarsInvestedPerSecurity(VFIAX)
+    # from Functions.GeneralFunctions import getStockPrice
+    # print(getStockPrice(VFIAX.symbol))
+
+    print(book.getDollarsInvestedPerSecurity(VFIAX))

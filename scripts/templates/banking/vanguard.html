@@ -8,14 +8,11 @@
                 <form method="post">
                     {% csrf_token %}
                     <button type="submit" name="401k">401k</button><br>
-                    <button type="submit" name="Pension">Pension</button><br>
                     <button type="submit" name="login">Login</button><br>
-                    <button type="submit" name="balances">Balances</button>
+                    <button type="submit" name="balance">Balances</button>
                 </form>
             </div>
             <div style="width: 80%; display:table-cell">
-                Pension Balance: <b>${{accounts.Pension.balance}}</b><br>
-                &emsp;&emsp;&thinsp;gnuBalance: <b>${{accounts.Pension.gnuBalance}}</b><br><br>
                 &emsp;&ensp;401k Balance: <b>${{accounts.V401k.balance}}</b><br>
                 &emsp;&emsp;&thinsp;gnuBalance: <b>${{accounts.V401k.gnuBalance}}</b><br><br>
                 &emsp;&emsp;&emsp;&thinsp;TSM shares: <b>{{accounts.TSM401k.balance}} ({{accounts.TSM401k.symbol}})</b><br>

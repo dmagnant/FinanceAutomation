@@ -28,10 +28,10 @@ def barclaysLogin(driver):
     # Login
     try:
         driver.find_element(By.ID, "username").send_keys(getUsername('Barclay Card'))
-        time.sleep(2)
+    except ElementNotInteractableException: exception = 'username already entered'
+    try:
         driver.find_element(By.ID, "password").send_keys(getPassword('Barclay Card'))
-        time.sleep(2)
-    except ElementNotInteractableException: exception = 'creds already entered'
+    except ElementNotInteractableException: exception = 'password already entered'
     driver.find_element(By.ID, "loginButton").click()
     # handle security questions
     try:
@@ -120,4 +120,3 @@ if __name__ == '__main__':
     Barclays = USD("Barclays", book)   
     Barclays.setBalance(float(116.22))
     Barclays.locateAndUpdateSpreadsheet(driver)
-        
