@@ -30,13 +30,13 @@ def writeAmazonGCTransactionFromUI(book, account, requestInfo):
         source = book.getGnuAccount('Amazon') if 'Joint' not in requestInfo['source'] else book.getGnuAccount('Joint Expenses')
     else:   showMessage('Error', 'Missing proper header to submit this transaction from UI')
     description = requestInfo['description'] if requestInfo['description'] else requestInfo['source']
-    transactionInfo = {'amount': amount, 'toAccount': account.gnuAccount, 'fromAccount': source, 'date': datetime.today().date(),'description': description}
+    transactionInfo = {'amount': amount, 'toAccount': account.gnuAccount.fullname, 'fromAccount': source, 'date': datetime.today().date(),'description': description}
     book.writeSimpleTransaction(transactionInfo)
     account.reviewTransactions = [source + ': ' + str(amount)]
-    account.updateGnuBalance(book.getBalance(account.gnuAccount))
+    account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
     if 'Joint' in requestInfo['source']:
         jointBook = GnuCash('Home')
-        transactionInfo = {'amount': amount, 'toAccount': jointBook.getGnuAccount("Dan's Contributions"), 'fromAccount': jointBook.getGnuAccount('Amazon'), 'date': datetime.today().date(),'description': description}
+        transactionInfo = {'amount': amount, 'toAccount': jointBook.getGnuAccountName("Dan's Contributions"), 'fromAccount': jointBook.getGnuAccountName('Amazon'), 'date': datetime.today().date(),'description': description}
         jointBook.writeSimpleTransaction(transactionInfo)
         jointBook.closeBook()
     confirmAmazonGCBalance(Driver("Chrome"), account)

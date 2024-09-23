@@ -36,11 +36,10 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         VIIIX, HECash = Security("HE Investment", personalBook), USD("HE Cash", personalBook)
         VFIAX, OptumCash = Security("VFIAX", personalBook), USD("Optum Cash", personalBook)
         V401k, TSM401k, EBI = USD("Vanguard401k", personalBook), Security("Total Stock Market(401k)", personalBook), Security("Employee Benefit Index", personalBook)
-        Home, LiquidAssets = USD('Home', jointBook), USD("Liquid Assets", personalBook)
+        LiquidAssets = USD("Liquid Assets", personalBook)
         Bonds, Worthy = USD("Bonds", personalBook), USD("Worthy", personalBook)        
         accounts = {'IRA':IRA,'iraSPAXX':iraSPAXX,'iraGME':iraGME,'rIRA':rIRA,'riraVXUS':riraVXUS,'riraVTI':riraVTI,'riraSPAXX':riraSPAXX,'riraGME':riraGME,'Brokerage':Brokerage,'brSPAXX':brSPAXX, 'brGME':brGME,
-                    'VIIIX':VIIIX,'HECash':HECash,'VFIAX':VFIAX,'OptumCash':OptumCash,'V401k':V401k,'EBI':EBI,'TSM401k':TSM401k,'Worthy': Worthy,
-                    'Home':Home,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
+                    'VIIIX':VIIIX,'HECash':HECash,'VFIAX':VFIAX,'OptumCash':OptumCash,'V401k':V401k,'EBI':EBI,'TSM401k':TSM401k,'Worthy': Worthy,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
     elif type == 'Crypto':
         CryptoPortfolio = USD("Crypto", personalBook)
         Cardano = Security("Cardano", personalBook, 'ADA-Eternl')
@@ -54,7 +53,7 @@ def monthlyRoundUp(account, myBook, date):
     # change = round(change, 2)
     if account.name == "MyConstant" or account.name == "Worthy":    transactionVariables = {'postDate': date, 'description': "Interest", 'amount': -change, 'fromAccount': "Income:Investments:Interest"}
     myBook.writeGnuTransaction(transactionVariables, account.gnuAccount)
-    account.updateGnuBalance(myBook.getBalance(account.gnuAccount))
+    account.updateGnuBalance(myBook.getGnuAccountBalance(account.gnuAccount))
     
 def updateEnergyBillAmounts(driver, book, amount):
     driver.openNewWindow('https://www.we-energies.com/secure/auth/l/acct/summary_accounts.aspx')
@@ -132,10 +131,10 @@ def runUSD(driver, today, accounts, personalBook):
     monthlyRoundUp(accounts['Worthy'], personalBook, lastMonth['endDate'])
     runHealthEquity(driver, {'VIIIX': accounts['VIIIX'], 'HECash': accounts['HECash'],'V401k': accounts['V401k']}, personalBook)
     runOptum(driver, accounts, personalBook)
-    accounts['LiquidAssets'].updateGnuBalance(personalBook.getBalance(accounts['LiquidAssets'].gnuAccount))
-    accounts['Bonds'].updateGnuBalance(personalBook.getBalance(accounts['Bonds'].gnuAccount))
+    accounts['LiquidAssets'].updateGnuBalance(personalBook.getGnuAccountBalance(accounts['LiquidAssets'].gnuAccount))
+    accounts['Bonds'].updateGnuBalance(personalBook.getGnuAccountBalance(accounts['Bonds'].gnuAccount))
     runVanguard401k(driver, accounts, personalBook)
-    runFidelity(driver, accounts, personalBook)
+    # runFidelity(driver, accounts, personalBook)
     updateUSDInvestmentPricesSharesAndCost(driver,personalBook,accounts)
     driver.findWindowByUrl("/scripts/monthly")
 
@@ -143,7 +142,7 @@ def runCrypto(driver, accounts, personalBook):
     loginToCryptoAccounts(driver)
     runEternl(driver, accounts['Cardano'], personalBook)
     runIoPay(driver, accounts['IoTex'], personalBook)
-    accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getBalance(accounts['CryptoPortfolio'].gnuAccount))
+    accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getGnuAccountBalance(accounts['CryptoPortfolio'].gnuAccount))
     driver.findWindowByUrl("/scripts/monthly")
 
 def runMonthlyBank(personalBook, jointBook):

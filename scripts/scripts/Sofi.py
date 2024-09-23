@@ -142,7 +142,7 @@ def runSofi(driver, accounts, book):
     locateSofiWindow(driver)
     for account in accounts:
         runSofiAccount(driver, dateRange, today, account, book)
-        account.updateGnuBalance(book.getBalance(account.gnuAccount))
+        account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
     if today.day <= 7:          setMonthlySpendTarget(driver)  
     driver.webDriver.get("https://www.sofi.com/my/money/account/#/1000028154579/account-detail") # switch back to checking page
 

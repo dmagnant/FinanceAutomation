@@ -186,17 +186,20 @@ def runFidelity(driver, accounts, book):
     getFidelityPricesSharesAndCost(driver, accounts, book)
     fidelityActivity = captureFidelityTransactions(driver)
     book.importGnuTransaction(accounts, fidelityActivity, driver, 0)
-    accounts['riraGME'].updateGnuBalanceAndValue(book.getBalance(accounts['riraGME'].gnuAccount))
-    accounts['riraVXUS'].updateGnuBalanceAndValue(book.getBalance(accounts['riraVXUS'].gnuAccount))
-    accounts['riraVTI'].updateGnuBalanceAndValue(book.getBalance(accounts['riraVTI'].gnuAccount))
-    accounts['riraSPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['riraSPAXX'].gnuAccount))
-    accounts['rIRA'].updateGnuBalance(book.getBalance(accounts['rIRA'].gnuAccount))
-    accounts['iraGME'].updateGnuBalanceAndValue(book.getBalance(accounts['iraGME'].gnuAccount))
-    accounts['iraSPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['iraSPAXX'].gnuAccount))
-    accounts['IRA'].updateGnuBalance(book.getBalance(accounts['IRA'].gnuAccount))
-    accounts['brGME'].updateGnuBalanceAndValue(book.getBalance(accounts['brGME'].gnuAccount))
-    accounts['brSPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['brSPAXX'].gnuAccount))
-    accounts['Brokerage'].updateGnuBalance(book.getBalance(accounts['Brokerage'].gnuAccount))
+    for accountName in list(accounts.keys()):
+        account = accounts.get(accountName)
+        account.updateGnuBalanceAndValue(book.getBalance(account.gnuAccount))
+    # accounts['riraGME'].updateGnuBalanceAndValue(book.getBalance(accounts['riraGME'].gnuAccount))
+    # accounts['riraVXUS'].updateGnuBalanceAndValue(book.getBalance(accounts['riraVXUS'].gnuAccount))
+    # accounts['riraVTI'].updateGnuBalanceAndValue(book.getBalance(accounts['riraVTI'].gnuAccount))
+    # accounts['riraSPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['riraSPAXX'].gnuAccount))
+    # accounts['rIRA'].updateGnuBalance(book.getBalance(accounts['rIRA'].gnuAccount))
+    # accounts['iraGME'].updateGnuBalanceAndValue(book.getBalance(accounts['iraGME'].gnuAccount))
+    # accounts['iraSPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['iraSPAXX'].gnuAccount))
+    # accounts['IRA'].updateGnuBalance(book.getBalance(accounts['IRA'].gnuAccount))
+    # accounts['brGME'].updateGnuBalanceAndValue(book.getBalance(accounts['brGME'].gnuAccount))
+    # accounts['brSPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['brSPAXX'].gnuAccount))
+    # accounts['Brokerage'].updateGnuBalance(book.getBalance(accounts['Brokerage'].gnuAccount))
     
 def getFidelityAccounts(book):
     IRA, iraSPAXX, iraGME = USD("IRA", book), Security('IRA SPAXX', book), Security('IRA GME', book)
@@ -204,9 +207,27 @@ def getFidelityAccounts(book):
     Brokerage, brSPAXX, brGME = USD("Brokerage", book), Security('Brokerage SPAXX', book), Security('Brokerage GME', book)
     return {'rIRA':rIRA,'riraVXUS':riraVXUS,'riraVTI':riraVTI,'riraSPAXX':riraSPAXX,'riraGME':riraGME,'Brokerage':Brokerage,'brSPAXX':brSPAXX,'brGME':brGME,'IRA':IRA,'iraSPAXX':iraSPAXX,'iraGME':iraGME}
     
+# if __name__ == '__main__':
+#     driver = Driver("Chrome")
+#     book = GnuCash('Finance')
+#     accounts = getFidelityAccounts(book)
+#     runFidelity(driver, accounts, book)
+#     book.closeBook()
+
 if __name__ == '__main__':
-    driver = Driver("Chrome")
     book = GnuCash('Finance')
-    accounts = getFidelityAccounts(book)
-    runFidelity(driver, accounts, book)
+    roth = USD("Roth IRA", book)
+    print(type(roth.gnuAccount))
+    import piecash
+    print(isinstance(roth.gnuAccount, piecash.core.account.Account))
+    # accounts = book.readBook.accounts(fullname=roth.gnuAccount).children
+    # for acc in accounts:
+    #     print(acc.fullname)
+
+    # accounts = getFidelityAccounts(book)
+    # for accountName in list(accounts.keys()):
+    #     print(accountName)
+    #     account = accounts.get(accountName)
+    #     account.getData()
     book.closeBook()
+

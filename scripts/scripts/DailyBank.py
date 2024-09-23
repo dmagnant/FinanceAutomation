@@ -32,11 +32,13 @@ def getDailyBankAccounts(personalReadBook, jointReadBook=''):
 def runDailyBank(accounts, personalBook, jointBook):
     driver = Driver("Chrome")
     runSofi(driver, [accounts['Checking'], accounts['Savings']], personalBook)
+    ## runFidelity
+    print('put runfidelity code here')
     # runAlly(driver, accounts['Ally'], jointBook)
     presearchRewardsRedemptionAndBalanceUpdates(driver, accounts['Presearch'], personalBook)
     openSpreadsheet(driver, 'Finances', str(datetime.today().date().year))
     GMEprice = updateInvestmentPrices(driver, personalBook)
-    accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getBalance(accounts['CryptoPortfolio'].gnuAccount))
+    accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getGnuAccountBalance(accounts['CryptoPortfolio'].gnuAccount))
     checkUncategorizedPaypalTransactions(driver, personalBook, accounts['Paypal'], getStartAndEndOfDateRange(timeSpan=7))
     openSpreadsheet(driver, 'Home', '2024 Balance')
     personalBook.purgeOldGnucashFiles()

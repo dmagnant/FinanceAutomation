@@ -43,8 +43,7 @@ class Asset:
     def getName(self):              return self.name
     def getBalance(self):           return self.balance
     def setBalance(self, balance):  self.balance = balance
-    def getGnuAccount(self):        return self.gnuAccount
-    def setGnuAccount(self, book):  self.gnuAccount = book.getGnuAccount(self)
+    def getGnuAccount(self):        return self.getGnuAccountName(self.name)
     def getGnuBalance(self):        return self.gnuBalance
     def setValue(self, value):      self.value = value
     def setCost(self, cost):        self.cost = cost
@@ -55,8 +54,8 @@ class Security(Asset):    # this is a class for tracking security information
         self.balance = self.value = self.cost = ''
         self.symbol = getSymbolByName(self)
         self.price = book.getPriceInGnucash(self.symbol, datetime.today().date())
-        self.gnuAccount = book.getGnuAccount(name, account)
-        self.gnuBalance = Decimal(book.getBalance(self.gnuAccount))
+        self.gnuAccount = book.getGnuAccountName(name, account)
+        self.gnuBalance = Decimal(book.getGnuAccountBalance(self.gnuAccount))
         self.gnuValue = self.getGnuValue()
     def getPrice(self):                     return self.price
     def getPriceFromCoinGecko(self):        return getCryptocurrencyPrice(self.name)[self.name.lower()]['usd']
@@ -80,7 +79,7 @@ class Security(Asset):    # this is a class for tracking security information
         updateSpreadsheet('Finances', 'Investments', account, 1, self.balance, self.symbol)
         updateSpreadsheet('Finances', 'Investments', account, 2, float(self.price), self.symbol)
         updateCoinQuantityFromStakingInGnuCash(self, book)
-        self.updateGnuBalance(book.getBalance(self.gnuAccount))
+        self.updateGnuBalance(book.getGnuAccountBalance(self.gnuAccount))
 
     def updateBalanceInSpreadSheet(self, account=None):
         account = self.symbol if account == None else account
@@ -99,9 +98,8 @@ class USD(Asset):
     def __init__(self, name, book):
         self.balance = self.value = self.cost = ''
         self.name, self.units, self.currency, self.reviewTransactions, self.account = name, 0, 'USD', [], None
-        self.gnuAccount = book.getGnuAccount(accountName=self.name)
-
-        balance = book.getBalance(self.gnuAccount)
+        self.gnuAccount = book.getGnuAccountName(name)
+        balance = book.getGnuAccountBalance(self.gnuAccount)
         self.gnuBalance = round(balance, 2) if float(balance)>0 else 0
     def getReviewTransactions(self):                return self.reviewTransactions
     def setReviewTransactions(self, transactions):  self.reviewTransactions.append(transactions)
