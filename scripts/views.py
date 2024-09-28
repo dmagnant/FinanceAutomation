@@ -187,10 +187,10 @@ def creditCards(request):
 
 def dailyBank(request):
     personalBook, jointBook = GnuCash('Finance'), GnuCash('Home')
-    bankAccounts, GME = getDailyBankAccounts(personalBook, jointBook), personalBook.getPriceInGnucash('GME', datetime.today().date())
+    bankAccounts = getDailyBankAccounts(personalBook, jointBook)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "bank" in request.POST:GME =         runDailyBank(bankAccounts, personalBook, jointBook)
+        if "bank" in request.POST:           runDailyBank(bankAccounts, personalBook, jointBook)
         elif "allyMain" in request.POST:        runAlly(driver, bankAccounts['Ally'], jointBook)
         elif "allyLogin" in request.POST:       locateAllyWindow(driver)
         elif "allyLogout" in request.POST:      allyLogout(driver)        
@@ -203,7 +203,7 @@ def dailyBank(request):
         elif "sofiLogout" in request.POST:      sofiLogout(driver)
         elif "sofiBalances" in request.POST:    getSofiBalanceAndOrientPage(driver, bankAccounts['Checking']); getSofiBalanceAndOrientPage(driver, bankAccounts['Savings'])
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/']); driver.findWindowByUrl("scripts/daily")
-    context = {'bankAccounts': bankAccounts, 'GME': "%.2f" % GME}
+    context = {'bankAccounts': bankAccounts}
     if bankAccounts['Checking'].reviewTransactions or bankAccounts['Savings'].reviewTransactions or bankAccounts['Paypal'].reviewTransactions:   personalBook.openGnuCashUI()
     if bankAccounts['Ally'].reviewTransactions:                                                     jointBook.openGnuCashUI()
     personalBook.closeBook();   jointBook.closeBook();    return returnRender(request, "banking/dailyBank.html", context)

@@ -165,3 +165,38 @@ if __name__ == '__main__':
 #     Savings = USD("Sofi Savings", book)
 #     sofiActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\sofi.csv"
 #     book.importUniqueTransactionsToGnuCash(Savings, sofiActivity, driver, dateRange, 0)
+
+# if __name__ == '__main__':
+#     book = GnuCash('Finance')
+#     read = book.readBook
+#     write = book.getWriteBook()
+#     print('read num: ' + str(read.session.hash_key))
+#     print('write num: ' + str(write.session.hash_key))
+
+#     write2 = book.getWriteBook()
+#     print('write 2 num: ' + str(write2.session.hash_key))
+
+#     latest = book.getLatestBook()
+#     print('latest: ' + str(latest.session.hash_key))
+
+
+
+
+
+    # Savings = USD("Sofi Savings", book)
+    # transactions = book.getTransactionsByGnuAccountAndDescription(Savings.gnuAccount, "Interest earned")
+    # total = 0
+    # for tr in transactions:
+    #     for spl in tr.splits:
+    #         if Savings.gnuAccount in spl.account.fullname:
+    #             total += spl.value
+    # print('Total: ' + str(total))
+
+
+    # driver = Driver("Chrome")
+    # Checking = USD("Sofi Checking", book)
+    # accounts = [Checking, Savings]
+    # runSofi(driver, accounts, book)
+    # for account in accounts:
+    #     account.getData()
+    # book.closeBook()

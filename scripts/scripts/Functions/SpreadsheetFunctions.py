@@ -73,38 +73,91 @@ def getInvestmentsSpreadsheetDetails(driver):
     if not spreadsheetWindow:   openSpreadsheet(driver, 'Finances', 'Investments'); spreadsheetWindow = driver.webDriver.current_window_handle
     else:   driver.webDriver.switch_to.window(spreadsheetWindow)
     worksheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Finances').worksheet('Investments')
-    return {'worksheet': worksheet, 'row': 2, 'firstRowAfterCrypto':8, 'nameColumn': 'A','symbolColumn': 'B', 'accountColumn': 'C', 'sharesColumn': 'D', 'priceColumn': 'E', 'costColumn': 'H'}
+    return {'worksheet': worksheet, 'row': 2, 'firstRowAfterCrypto':8, 'nameColumn': 'A','symbolColumn': 'B', 'accountColumn': 'C', 'sharesColumn': 'D', 'priceColumn': 'E', 'costColumn': 'F', 'valueColumn': 'J'}
 
-def updateInvestmentPrices(driver, book):
+def updateInvestmentsDaily(driver, book):
     spreadsheet = getInvestmentsSpreadsheetDetails(driver)
-    GMEprice = 0
     symbolsToUpdate = ['GME', 'VIIIX', 'VXUS', 'VTI', 'VFIAX']
     coinsToUpdate = {}
     stillInvestments = True
     row = spreadsheet['row']
     while stillInvestments:
         symbol = spreadsheet['worksheet'].acell(spreadsheet['symbolColumn']+str(row)).value
-        if symbol != 'SPAXX':
+        if symbol != None:
             if symbol in symbolsToUpdate:
                 price = getStockPrice(symbol)
                 book.updatePriceInGnucash(symbol, price)
-                print(f'about to update column: {str(spreadsheet['priceColumn'])} and row: {str(row)} and price: {str(price)}')
                 spreadsheet['worksheet'].update_acell(spreadsheet['priceColumn'] + str(row), float(price))
                 symbolsToUpdate.remove(symbol)
-                if symbol == 'GME': GMEprice = price
             elif spreadsheet['worksheet'].acell(spreadsheet['accountColumn']+str(row)).value == "Crypto":
                 coinName = spreadsheet['worksheet'].acell(spreadsheet['nameColumn']+str(row)).value.lower()
                 if coinName not in list(coinsToUpdate.keys()):  coinsToUpdate[coinName] = {'symbol': symbol, 'row': row}
+            elif symbol == 'Options': 
+                row+=1
+                continue
             row += 1
-        else:   stillInvestments = False
+        else:   
+            if 'Savings' == spreadsheet['worksheet'].acell(spreadsheet['accountColumn']+str(row)).value:
+                spreadsheet['worksheet'].update_acell(spreadsheet['valueColumn']+str(row), float(book.getGnuAccountBalance(book.getGnuAccountName('Sofi Savings'))))
+            stillInvestments = False
     coinPrices = getCryptocurrencyPrice(list(coinsToUpdate.keys()))     # get prices from coingecko in a single call
     for coin in list(coinsToUpdate.keys()):
         price = format(coinPrices[coin]["usd"], ".2f")
         book.updatePriceInGnucash(coinsToUpdate.get(coin).get('symbol'), price)
         spreadsheet['worksheet'].update_acell((spreadsheet['priceColumn'] + str(coinsToUpdate.get(coin).get('row'))), float(price))
-    return GMEprice
 
-def updateUSDInvestmentPricesSharesAndCost(driver, book, accounts):
+def updateInvestmentsDailyAmended(driver, book, accounts):
+    spreadsheet = getInvestmentsSpreadsheetDetails(driver)
+    symbolsWithPricesUpdated = ['SPAXX', 'Options']
+    symbolsToAvoid = ['8585', 'M038']
+    coinsToUpdate = {}
+    stillInvestments = True
+    row = spreadsheet['row']
+    while stillInvestments:
+        symbol = spreadsheet['worksheet'].acell(spreadsheet['symbolColumn']+str(row)).value
+        if symbol != None:
+            if symbol in symbolsToAvoid:
+                row+=1
+                continue
+            else:
+                print('symbol: ' + symbol + ' and row: ' + str(row))
+                account = spreadsheet['worksheet'].acell(spreadsheet['accountColumn']+str(row)).value
+            if account == "Crypto":
+                coinName = spreadsheet['worksheet'].acell(spreadsheet['nameColumn']+str(row)).value.lower()
+                if coinName not in list(coinsToUpdate.keys()):  coinsToUpdate[coinName] = {'symbol': symbol, 'row': row}
+            elif account in ['Brokerage', 'rIRA', 'IRA']:
+                updateFidelityInvestments(symbol, symbolsWithPricesUpdated, account, accounts['Fidelity'], book, spreadsheet, row)
+            else:
+                if symbol not in symbolsWithPricesUpdated:
+                    price = getStockPrice(symbol)
+                    book.updatePriceInGnucash(symbol, price)
+                    spreadsheet['worksheet'].update_acell(spreadsheet['priceColumn'] + str(row), float(price))
+                    symbolsWithPricesUpdated.append(symbol)
+            row += 1
+        else:   
+            if 'Savings' == spreadsheet['worksheet'].acell(spreadsheet['accountColumn']+str(row)).value:
+                spreadsheet['worksheet'].update_acell(spreadsheet['valueColumn']+str(row), float(book.getGnuAccountBalance(book.getGnuAccountName('Sofi Savings'))))
+            stillInvestments = False
+    coinPrices = getCryptocurrencyPrice(list(coinsToUpdate.keys()))     # get prices from coingecko in a single call
+    for coin in list(coinsToUpdate.keys()):
+        price = format(coinPrices[coin]["usd"], ".2f")
+        book.updatePriceInGnucash(coinsToUpdate.get(coin).get('symbol'), price)
+        spreadsheet['worksheet'].update_acell((spreadsheet['priceColumn'] + str(coinsToUpdate.get(coin).get('row'))), float(price))
+
+def updateFidelityInvestments(symbol, symbolsWithPricesUpdated, accountID, accounts, book, spreadsheet, row):
+    if symbol not in symbolsWithPricesUpdated:
+        price = getStockPrice(symbol)
+        book.updatePriceInGnucash(symbol, price)
+        spreadsheet['worksheet'].update_acell(spreadsheet['priceColumn'] + str(row), float(price))
+        symbolsWithPricesUpdated.append(symbol)
+    if accountID == 'Brokerage':  accountPrefix = 'br'
+    elif accountID == 'rIRA':     accountPrefix = 'rira'
+    elif accountID == 'IRA':      accountPrefix = 'ira'
+    account = accounts[accountPrefix + symbol]
+    if account.balance:  spreadsheet['worksheet'].update_acell(spreadsheet.get('sharesColumn') + str(row), float(account.balance))
+    if account.cost:    spreadsheet['worksheet'].update_acell(spreadsheet.get('costColumn') + str(row), float(account.cost))
+
+def updateInvestmentsMonthly(driver, book, accounts):
     today, updatedSymbols, stillInvestments, spreadsheet = datetime.today().date(), [], True, getInvestmentsSpreadsheetDetails(driver)
     row = spreadsheet['firstRowAfterCrypto']
     while stillInvestments:
@@ -153,7 +206,6 @@ def updateUSDInvestmentPricesSharesAndCost(driver, book, accounts):
                 spreadsheet['worksheet'].update_acell(spreadsheet.get('sharesColumn') + str(row), shares)
                 row += 1
                 continue
-            elif symbol == 'HOME':  spreadsheet['priceColumn'], price = 'F', (250000 - accounts['Home'].getGnuBalance()) / 2
             else:                   price = getStockPrice(symbol)
             if shares:  spreadsheet['worksheet'].update_acell(spreadsheet.get('sharesColumn') + str(row), shares)
             if cost:    spreadsheet['worksheet'].update_acell(spreadsheet.get('costColumn') + str(row), cost)

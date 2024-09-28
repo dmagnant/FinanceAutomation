@@ -6,7 +6,7 @@ from selenium.webdriver.common.keys import Keys
 if __name__ == '__main__' or __name__ == "Monthly":
     from Classes.Asset import USD, Security;    from Classes.WebDriver import Driver;   from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import getStartAndEndOfDateRange, getUsername, getNotes, setDirectory
-    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateUSDInvestmentPricesSharesAndCost
+    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentsMonthly
     from Eternl import runEternl, locateEternlWindow
     from Ledger import runLedger, getLedgerAccounts
     from HealthEquity import runHealthEquity, locateHealthEquityWindow
@@ -20,7 +20,7 @@ else:
     from .Eternl import runEternl, locateEternlWindow
     from .Ledger import runLedger, getLedgerAccounts
     from .Functions.GeneralFunctions import getStartAndEndOfDateRange, getUsername, getNotes, setDirectory
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateUSDInvestmentPricesSharesAndCost
+    from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentsMonthly
     from .HealthEquity import runHealthEquity, locateHealthEquityWindow
     from .IoPay import runIoPay, locateIoPayWindow
     from .Worthy import getWorthyBalance, locateWorthyWindow
@@ -134,8 +134,8 @@ def runUSD(driver, today, accounts, personalBook):
     accounts['LiquidAssets'].updateGnuBalance(personalBook.getGnuAccountBalance(accounts['LiquidAssets'].gnuAccount))
     accounts['Bonds'].updateGnuBalance(personalBook.getGnuAccountBalance(accounts['Bonds'].gnuAccount))
     runVanguard401k(driver, accounts, personalBook)
-    # runFidelity(driver, accounts, personalBook)
-    updateUSDInvestmentPricesSharesAndCost(driver,personalBook,accounts)
+    runFidelity(driver, accounts, personalBook)
+    updateInvestmentsMonthly(driver,personalBook,accounts)
     driver.findWindowByUrl("/scripts/monthly")
 
 def runCrypto(driver, accounts, personalBook):

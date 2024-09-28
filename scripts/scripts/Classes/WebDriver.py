@@ -129,6 +129,10 @@ class Driver:
         element.click()
         time.sleep(1)
     
+    def getXPATHElementOnceAvailable(self, xpath, wait=10):
+        element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.XPATH,xpath)))
+        return element
+
     def getXPATHElementTextOnceAvailable(self, xpath, wait=10):
         element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.XPATH,xpath)))
         return element.text
