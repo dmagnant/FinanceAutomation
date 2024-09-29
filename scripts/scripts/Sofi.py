@@ -75,7 +75,6 @@ def setMonthlySpendTarget(driver):
     driver.webDriver.close()
     driver.webDriver.switch_to.window(baseWindow)
 
-
 def getSofiBalanceAndOrientPage(driver, account):
     locateSofiWindow(driver)
     driver.webDriver.get("https://www.sofi.com/my/money/account/1000028154579/account-detail") if 'checking' in account.name.lower() else driver.webDriver.get("https://www.sofi.com/my/money/account/1000028154560/account-detail")
@@ -131,6 +130,9 @@ def getTransactionsFromSofiWebsite(driver, dateRange, today, tableStart, div):
             else:   insideDateRange = False
     return sofiActivity
 
+def getSofiAccounts(book):
+    return {'Checking': USD("Sofi Checking", book), 'Savings': USD("Sofi Savings", book)}
+
 def runSofiAccount(driver, dateRange, today, account, book):
     page = getSofiBalanceAndOrientPage(driver, account)
     sofiActivity = getTransactionsFromSofiWebsite(driver, dateRange, today, page['table'], page['div'])
@@ -140,63 +142,34 @@ def runSofi(driver, accounts, book):
     today = datetime.today().date()
     dateRange = getStartAndEndOfDateRange(today, 7)
     locateSofiWindow(driver)
-    for account in accounts:
+    for accountName in list(accounts.keys()):
+        account = accounts.get(accountName)
         runSofiAccount(driver, dateRange, today, account, book)
         account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
     if today.day <= 7:          setMonthlySpendTarget(driver)  
     driver.webDriver.get("https://www.sofi.com/my/money/account/#/1000028154579/account-detail") # switch back to checking page
 
-if __name__ == '__main__':
-    driver = Driver("Chrome")
-    book = GnuCash('Finance')
-    Checking = USD("Sofi Checking", book)
-    Savings = USD("Sofi Savings", book)
-    accounts = [Checking, Savings]
-    runSofi(driver, accounts, book)
-    for account in accounts:
-        account.getData()
-    book.closeBook()
-    
 # if __name__ == '__main__':
+#     driver = Driver("Chrome")
 #     book = GnuCash('Finance')
+#     accounts = getSofiAccounts(book)
+#     runSofi(driver, accounts, book)
+#     for account in list(accounts.keys()):
+#         accounts.get(account).getData()
+#     book.closeBook()
+    
+if __name__ == '__main__':
+    book = GnuCash('Finance')
 #     driver = Driver("Chrome")
 #     today = datetime.today().date()
 #     dateRange = getStartAndEndOfDateRange(today, 7)
-#     Savings = USD("Sofi Savings", book)
+    accounts = getSofiAccounts(book)
+
 #     sofiActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\sofi.csv"
 #     book.importUniqueTransactionsToGnuCash(Savings, sofiActivity, driver, dateRange, 0)
-
-# if __name__ == '__main__':
-#     book = GnuCash('Finance')
-#     read = book.readBook
-#     write = book.getWriteBook()
-#     print('read num: ' + str(read.session.hash_key))
-#     print('write num: ' + str(write.session.hash_key))
-
-#     write2 = book.getWriteBook()
-#     print('write 2 num: ' + str(write2.session.hash_key))
-
-#     latest = book.getLatestBook()
-#     print('latest: ' + str(latest.session.hash_key))
-
-
-
-
-
-    # Savings = USD("Sofi Savings", book)
-    # transactions = book.getTransactionsByGnuAccountAndDescription(Savings.gnuAccount, "Interest earned")
-    # total = 0
-    # for tr in transactions:
-    #     for spl in tr.splits:
-    #         if Savings.gnuAccount in spl.account.fullname:
-    #             total += spl.value
-    # print('Total: ' + str(total))
-
-
-    # driver = Driver("Chrome")
-    # Checking = USD("Sofi Checking", book)
-    # accounts = [Checking, Savings]
-    # runSofi(driver, accounts, book)
-    # for account in accounts:
-    #     account.getData()
-    # book.closeBook()
+    Pension = USD('Pension', book)
+    Pension.setCost(Pension.gnuBalance - Pension.getInterestTotalForDateRange(book))
+    print('Pension cost: ' + str(Pension.cost))
+    accounts['Savings'].setCost(accounts['Savings'].gnuBalance - accounts['Savings'].getInterestTotalForDateRange(book))
+    print('Savings cost: ' + str(accounts['Savings'].cost))
+    book.closeBook()

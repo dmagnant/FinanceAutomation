@@ -146,11 +146,10 @@ def runVanguard401k(driver, accounts, book):
 #             if spl.account.fullname == "Income:Investments:Interest":   interestAmount = interestAmount + abs(spl.value)
 #     print(interestAmount)
     
+def getVanguardAccounts(book):
+    return {'V401k': USD("Vanguard401k", book), 'TSM401k': Security("Total Stock Market(401k)", book), 'EBI': Security("Employee Benefit Index", book)}
 
 if __name__ == '__main__':
     driver, book = Driver("Chrome"), GnuCash('Finance')
-    Pension, V401k, TSM401k, EBI = USD("VanguardPension", book), USD("Vanguard401k", book), Security("Total Stock Market(401k)", book), Security("Employee Benefit Index", book)
-    accounts = {'V401k': V401k, 'TSM401k': TSM401k, 'EBI':EBI}
-    # getVanguardBalancesAndPensionInterestYTD(driver, accounts)
-    for i in list(accounts.values()):
-        book.getDollarsInvestedPerSecurity(i)
+    accounts = getVanguardAccounts(book)
+    getVanguardBalancesAndPensionInterestYTD(driver, accounts)

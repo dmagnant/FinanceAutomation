@@ -198,13 +198,13 @@ def dailyBank(request):
         elif "paypal" in request.POST:          runPaypal(driver)
         elif "tearDown" in request.POST:        tearDown(driver)
         elif "paypalAdjust" in request.POST:    checkUncategorizedPaypalTransactions(driver, personalBook, bankAccounts['Paypal'], getStartAndEndOfDateRange(timeSpan=7))
-        elif "sofiMain" in request.POST:        runSofi(driver, accounts)
+        elif "sofiMain" in request.POST:        runSofi(driver, bankAccounts['Sofi'], personalBook)
         elif "sofiLogin" in request.POST:       locateSofiWindow(driver)
         elif "sofiLogout" in request.POST:      sofiLogout(driver)
-        elif "sofiBalances" in request.POST:    getSofiBalanceAndOrientPage(driver, bankAccounts['Checking']); getSofiBalanceAndOrientPage(driver, bankAccounts['Savings'])
+        elif "sofiBalances" in request.POST:    getSofiBalanceAndOrientPage(driver, bankAccounts['Sofi']['Checking']); getSofiBalanceAndOrientPage(driver, bankAccounts['Sofi']['Savings'])
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/']); driver.findWindowByUrl("scripts/daily")
     context = {'bankAccounts': bankAccounts}
-    if bankAccounts['Checking'].reviewTransactions or bankAccounts['Savings'].reviewTransactions or bankAccounts['Paypal'].reviewTransactions:   personalBook.openGnuCashUI()
+    if bankAccounts['Sofi']['Checking'].reviewTransactions or bankAccounts['Sofi']['Savings'].reviewTransactions or bankAccounts['Paypal'].reviewTransactions:   personalBook.openGnuCashUI()
     if bankAccounts['Ally'].reviewTransactions:                                                     jointBook.openGnuCashUI()
     personalBook.closeBook();   jointBook.closeBook();    return returnRender(request, "banking/dailyBank.html", context)
 
@@ -343,13 +343,13 @@ def monthly(request):
         driver, today = Driver("Chrome"), datetime.today().date()
         if "USD" in request.POST:                   runUSD(driver, today, usdAccounts, personalBook)
         elif "Crypto" in request.POST:              runCrypto(driver, cryptoAccounts, personalBook)
-        elif "fidelityMain" in request.POST:        runFidelity(driver, usdAccounts, personalBook)
-        elif "fidelityBalance" in request.POST:     getFidelityBalance(driver, accounts)
-        elif "fidelityLogin" in request.POST:       locateFidelityWindow(driver)
-        elif "HEMain" in request.POST:              runHealthEquity(driver, {'VIIIX': usdAccounts['VIIIX'], 'HECash': usdAccounts['HECash'], 'V401k': usdAccounts['V401k']}, personalBook)
+        elif "HEMain" in request.POST:              runHealthEquity(driver, usdAccounts['HealthEquity'], personalBook)
         elif "HELogin" in request.POST:             locateHealthEquityWindow(driver)
-        elif "HEBalances" in request.POST:          getHealthEquityBalances(driver, {'VIIIX': usdAccounts['VIIIX'], 'HECash': usdAccounts['HECash'], 'V401k': usdAccounts['V401k']})
-        elif "vanguard401k" in request.POST:        runVanguard401k(driver, usdAccounts, personalBook)
+        elif "HEBalances" in request.POST:          getHealthEquityBalances(driver, usdAccounts['HealthEquity'])
+        elif 'optumMain' in request.POST:           runOptum(driver, usdAccounts['Optum'], personalBook)    
+        elif 'optumLogin' in request.POST:          locateOptumWindow(driver)
+        elif 'optumBalance' in request.POST:        getOptumBalance(driver, usdAccounts['Optum'])
+        elif "vanguard401k" in request.POST:        runVanguard401k(driver, usdAccounts['Vanguard'], personalBook)
         elif "vanguardLogin" in request.POST:       locateVanguardWindow(driver)
         elif "worthyBalance" in request.POST:       getWorthyBalance(driver, usdAccounts['Worthy'])
         elif "worthyLogin" in request.POST:         locateWorthyWindow(driver)
@@ -357,9 +357,6 @@ def monthly(request):
         elif "eternlBalance" in request.POST:       cryptoAccounts['Cardano'].setBalance(getEternlBalance(driver))
         elif "eternlLogin" in request.POST:         locateEternlWindow(driver)
         elif "ioPayMain" in request.POST:           runIoPay(driver, cryptoAccounts['IoTex'])
-        elif "krakenMain" in request.POST:          runKraken(driver, cryptoAccounts['Ethereum2'], personalBook)
-        elif "krakenBalance" in request.POST:       cryptoAccounts['Ethereum2'].setBalance(getKrakenBalance(driver))
-        elif "krakenLogin" in request.POST:         locateKrakenWindow(driver)
         elif "ledgerMain" in request.POST:          runLedger(cryptoAccounts['ledgerAccounts'], personalBook)            
         elif "close windows" in request.POST:       driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/monthly"))
     context = {'usdAccounts': usdAccounts, 'cryptoAccounts': cryptoAccounts}
@@ -449,15 +446,15 @@ def psCoupons(request):
 
 def sofi(request):
     book = GnuCash('Finance')
-    Checking, Savings = USD("Sofi Checking", book), USD("Sofi Savings", book)
+    accounts = getSofiAccounts(book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "main" in request.POST:              runSofi(driver, [Checking, Savings], book)
+        if "main" in request.POST:              runSofi(driver, accounts, book)
         elif "login" in request.POST:           locateSofiWindow(driver)
         elif "logout" in request.POST:          sofiLogout(driver)            
-        elif "balances" in request.POST:        getSofiBalanceAndOrientPage(driver, Checking);  getSofiBalanceAndOrientPage(driver, Savings)
+        elif "balances" in request.POST:        getSofiBalanceAndOrientPage(driver, accounts['Checking']);  getSofiBalanceAndOrientPage(driver, accounts['Savings'])
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/sofi"))
-    context = {'Checking': Checking, 'Savings': Savings}
+    context = {'Sofi':accounts}
     book.closeBook();   return returnRender(request, "banking/sofi.html", context)
 
 def swagbucks(request):

@@ -1,10 +1,10 @@
 from datetime import datetime;  from decimal import Decimal
 
 if __name__ == "Classes.Asset":
-    from Functions.GeneralFunctions import getCryptocurrencyPrice
+    from Functions.GeneralFunctions import getCryptocurrencyPrice, getStartAndEndOfDateRange
     from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateCheckingBalanceSpreadsheet
 else:
-    from scripts.scripts.Functions.GeneralFunctions import getCryptocurrencyPrice
+    from scripts.scripts.Functions.GeneralFunctions import getCryptocurrencyPrice, getStartAndEndOfDateRange
     from scripts.scripts.Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateCheckingBalanceSpreadsheet
 
 def getSymbolByName(self):
@@ -126,5 +126,15 @@ class USD(Asset):
             openSpreadsheet(driver, 'Finances', str(year))
             updateCheckingBalanceSpreadsheet('Finances', year, self.name, month, balance)
     
-
-            
+    def getInterestTotalForDateRange(self, book):
+        interestAccount = book.getGnuAccountName('Interest')
+        dateRange = getStartAndEndOfDateRange(timeSpan='all', minDate=datetime(2022,1,1,0,0,0).date())
+        allInvestmentTransactions = book.getTransactionsByGnuAccountAndDateRange(self.gnuAccount, dateRange)
+        savingsTransactions = book.getTransactionsByGnuAccount(self.gnuAccount, transactionsToFilter=allInvestmentTransactions)
+        totalInterest = 0
+        for tr in savingsTransactions:
+            for spl in tr.splits:
+                if spl.account.fullname == interestAccount:
+                    totalInterest += abs(spl.value)
+        print('total interest for: ' + self.name + ' is: ' + str(totalInterest))
+        return totalInterest

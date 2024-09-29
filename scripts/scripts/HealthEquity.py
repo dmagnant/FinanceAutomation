@@ -134,7 +134,10 @@ def captureHealthEquityCashTransactionsAndBalance(driver, accounts):
             else:   showMessage('Unknown Transaction: ' + description, "check Cash transaction list for undefined transaction"); break
         elif postDate.month < lastMonth['endDate'].month or postDate.year < lastMonth['endDate'].year: break
     return cashActivity
-    
+
+def getHealthEquityAccounts(book):
+    return {'VIIIX': Security("HE Investment", book), 'HECash': USD("HE Cash", book)}
+
 def runHealthEquity(driver, accounts, book):
     locateHealthEquityWindow(driver)
     getHealthEquityBalances(driver, accounts)
@@ -147,8 +150,7 @@ def runHealthEquity(driver, accounts, book):
 
 if __name__ == '__main__':
     driver, book = Driver("Chrome"), GnuCash('Finance')
-    VIIIX, HECash, V401k = Security("HE Investment", book), USD("HE Cash", book), USD("Vanguard401k", book)
-    HEaccounts = {'VIIIX': VIIIX, 'HECash': HECash, 'V401k': V401k}
+    HEaccounts = getHealthEquityAccounts(book)
     runHealthEquity(driver, HEaccounts, book)
     book.closeBook()
 
@@ -157,8 +159,7 @@ if __name__ == '__main__':
 #     book = GnuCash('Finance')
 #     VIIIX = Security("HSA Investment", book)
 #     HECash = USD("HSA Cash", book)
-#     V401k = USD("Vanguard401k", book)
-#     HEaccounts = {'VIIIX': VIIIX, 'HECash': HECash, 'V401k': V401k}
+#     HEaccounts = {'VIIIX': VIIIX, 'HECash': HECash}
 #     captureHealthEquityCashTransactionsAndBalance(driver, HEaccounts)
 #     book.closeBook()
 

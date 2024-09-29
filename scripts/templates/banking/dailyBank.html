@@ -25,13 +25,13 @@
                         gnuCash Balance: &thinsp; <br><br>
                     </div>
                     <div style="display:table-cell;text-align:left">
-                        <b>${{bankAccounts.Checking.balance}}<br>
-                        ${{bankAccounts.Checking.gnuBalance}}</b><br><br>
+                        <b>${{bankAccounts.Sofi.Checking.balance}}<br>
+                        ${{bankAccounts.Sofi.Checking.gnuBalance}}</b><br><br>
                     </div>
                 </div>
                 Review Transactions:<br><br>
                 <div style="width: 50%; display: table;">
-                    {%for tr in bankAccounts.Checking.reviewTransactions %}
+                    {%for tr in bankAccounts.Sofi.Checking.reviewTransactions %}
                     <div style="display: table-row;">
                         <div style="width: 20%; display:table-cell">
                             {{tr}}
@@ -45,13 +45,13 @@
                         gnuCash Balance: &thinsp; <br><br>
                     </div>
                     <div style="display:table-cell;text-align:left">
-                        <b>${{bankAccounts.Savings.balance}} <br>
-                        ${{bankAccounts.Savings.gnuBalance}}</b> <br><br>
+                        <b>${{bankAccounts.Sofi.Savings.balance}} <br>
+                        ${{bankAccounts.Sofi.Savings.gnuBalance}}</b> <br><br>
                     </div>
                 </div>
                 Review Transactions:<br><br>
                 <div style="width: 50%; display: table;">
-                    {%for tr in bankAccounts.Savings.reviewTransactions %}
+                    {%for tr in bankAccounts.Sofi.Savings.reviewTransactions %}
                     <div style="display: table-row;">
                         <div style="width: 20%; display:table-cell">
                             {{tr}}

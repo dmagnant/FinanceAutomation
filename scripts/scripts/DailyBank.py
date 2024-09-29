@@ -8,7 +8,7 @@ if __name__ == '__main__' or __name__ == "Daily":
     from Functions.SpreadsheetFunctions import openSpreadsheet, updateInvestmentsDaily, updateInvestmentsDailyAmended
     from Paypal import runPaypal, checkUncategorizedPaypalTransactions
     from Presearch import presearchRewardsRedemptionAndBalanceUpdates
-    from Sofi import runSofi, sofiLogout
+    from Sofi import runSofi, sofiLogout, getSofiAccounts
     from Fidelity import runFidelityDaily, getFidelityAccounts
 else:
     from .Ally import allyLogout, runAlly
@@ -18,27 +18,27 @@ else:
     from .Functions.GeneralFunctions import getStartAndEndOfDateRange
     from .Functions.SpreadsheetFunctions import openSpreadsheet, updateInvestmentsDaily, updateInvestmentsDailyAmended
     from .Presearch import presearchRewardsRedemptionAndBalanceUpdates
-    from .Sofi import runSofi, sofiLogout
+    from .Sofi import runSofi, sofiLogout, getSofiAccounts
     from. Paypal import runPaypal, checkUncategorizedPaypalTransactions
     from .Fidelity import runFidelityDaily, getFidelityAccounts
 
-def getDailyBankAccounts(personalReadBook, jointReadBook=''):
-    CryptoPortfolio = USD("Crypto", personalReadBook)
-    Checking = USD("Sofi Checking", personalReadBook)
-    Savings = USD("Sofi Savings", personalReadBook)
-    Ally = USD("Ally", jointReadBook)
-    Presearch = Security("Presearch", personalReadBook)
-    Paypal = USD("Paypal", personalReadBook)
-    Fidelity = getFidelityAccounts(personalReadBook)
-    return {'CryptoPortfolio': CryptoPortfolio, 'Checking': Checking, 'Savings': Savings, 'Ally': Ally, 'Presearch': Presearch, 'Paypal': Paypal, 'Fidelity': Fidelity}
+def getDailyBankAccounts(personalBook, jointBook=''):
+    CryptoPortfolio = USD("Crypto", personalBook)
+    Sofi = getSofiAccounts(personalBook)
+    Ally = USD("Ally", jointBook)
+    Presearch = Security("Presearch", personalBook)
+    Paypal = USD("Paypal", personalBook)
+    Fidelity = getFidelityAccounts(personalBook)
+    return {'CryptoPortfolio': CryptoPortfolio, 'Sofi':Sofi, 'Ally': Ally, 'Presearch': Presearch, 'Paypal': Paypal, 'Fidelity': Fidelity}
 
 def runDailyBank(accounts, personalBook, jointBook):
     driver = Driver("Chrome")
-    runSofi(driver, [accounts['Checking'], accounts['Savings']], personalBook)
+    today = datetime.today().date()
+    runSofi(driver, accounts['Sofi'], personalBook)
     runFidelityDaily(driver, accounts['Fidelity'], personalBook)
     # runAlly(driver, accounts['Ally'], jointBook)
-    # presearchRewardsRedemptionAndBalanceUpdates(driver, accounts['Presearch'], personalBook)
-    openSpreadsheet(driver, 'Finances', str(datetime.today().date().year))
+    presearchRewardsRedemptionAndBalanceUpdates(driver, accounts['Presearch'], personalBook)
+    openSpreadsheet(driver, 'Finances', str(today.year))
     # updateInvestmentsDaily(driver, personalBook)
     updateInvestmentsDailyAmended(driver, personalBook, accounts)
     accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getGnuAccountBalance(accounts['CryptoPortfolio'].gnuAccount))
@@ -63,16 +63,8 @@ def tearDown(driver):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    personalBook = GnuCash('Finance')
-    jointBook = GnuCash('Home')
-    book = personalBook.getWriteBook()
-    from datetime import datetime
-    accounts = getDailyBankAccounts(personalBook, jointBook)
-
-    # print(personalBook.getPriceInGnucash('ATOM', datetime.today().date()))
-    # updateCryptoPrices(driver, personalBook)
-    # updateInvestmentsDaily(driver, personalBook)
-    # personalBook.updatePriceInGnucash('ATOM', str(12.06))
-
-    updateInvestmentsDailyAmended(driver, personalBook, accounts)
-    personalBook.closeBook()
+    # personalBook = GnuCash('Finance')
+    # jointBook = GnuCash('Home')
+    # book = personalBook.getWriteBook()
+    # from datetime import datetime
+    openSpreadsheet(driver, 'Finances', str(datetime.today().date().year))

@@ -93,7 +93,8 @@ class Driver:
         if len(self.webDriver.window_handles) > 1:
             for i in self.webDriver.window_handles:
                 self.webDriver.switch_to.window(i)
-                if url in self.webDriver.current_url:   return self.webDriver.current_window_handle
+                if url in self.webDriver.current_url:   
+                    return self.webDriver.current_window_handle
         self.webDriver.switch_to.window(currentWindow)
         return False
 

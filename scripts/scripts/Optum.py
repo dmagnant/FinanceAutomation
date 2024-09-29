@@ -99,6 +99,9 @@ def captureOptumTransactions(driver, accounts):
         elif date.month < lastMonth['endDate'].month or date.year < lastMonth['endDate'].year:  break
     return optumActivity
 
+def getOptumAccounts(book):
+    return {'VFIAX': Security("VFIAX", book), 'OptumCash': USD("Optum Cash", book)}
+
 def runOptum(driver, accounts, book):
     locateOptumWindow(driver)
     getOptumBalance(driver, accounts)
@@ -112,14 +115,6 @@ def runOptum(driver, accounts, book):
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
-    VFIAX = Security("VFIAX", book)
-    # OptumCash = USD("Optum Cash", book)
-    # OptumAccounts = {'VFIAX': VFIAX, 'OptumCash': OptumCash}
-    # runOptum(driver, OptumAccounts, book)
-    # book.closeBook()
-
-    # book.getDollarsInvestedPerSecurity(VFIAX)
-    # from Functions.GeneralFunctions import getStockPrice
-    # print(getStockPrice(VFIAX.symbol))
-
-    print(book.getDollarsInvestedPerSecurity(VFIAX))
+    accounts = getOptumAccounts(book)
+    runOptum(driver, accounts, book)
+    book.closeBook()

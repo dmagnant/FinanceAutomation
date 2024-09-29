@@ -14,11 +14,11 @@
                 </form>
             </div>
             <div style="width: 80%; display:table-cell">
-                Checking Balance: <b>${{Checking.balance}}</b><br>
-                &thinsp;gnuCash Balance: <b>${{Checking.gnuBalance}}</b><br>
+                Checking Balance: <b>${{Sofi.Checking.balance}}</b><br>
+                &thinsp;gnuCash Balance: <b>${{Sofi.Checking.gnuBalance}}</b><br>
                 Review Transactions:<br><br>
                 <div style="width: 50%; display: table;">
-                    {%for tr in Checking.reviewTransactions %}
+                    {%for tr in Sofi.Checking.reviewTransactions %}
                     <div style="display: table-row;">
                         <div style="width: 20%; display:table-cell">
                             {{tr}}
@@ -26,11 +26,11 @@
                     </div>
                     {% endfor %}
                 </div><br><br>
-                &ensp;Savings Balance: <b>${{Savings.balance}}</b><br>
-                &thinsp;gnuCash Balance: <b>${{Savings.gnuBalance}}</b><br>
+                &ensp;Savings Balance: <b>${{Sofi.Savings.balance}}</b><br>
+                &thinsp;gnuCash Balance: <b>${{Sofi.Savings.gnuBalance}}</b><br>
                 Review Transactions: <br><br>
                 <div style="width: 50%; display: table;">
-                    {%for tr in Savings.reviewTransactions %}
+                    {%for tr in Sofi.Savings.reviewTransactions %}
                     <div style="display: table-row;">
                         <div style="width: 20%; display:table-cell">
                             {{tr}}

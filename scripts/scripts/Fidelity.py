@@ -128,7 +128,6 @@ def getFidelityPricesSharesAndCost(driver, allAccounts, book, accountToGet='all'
         except  NoSuchElementException:
             try:
                 symbol = driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div[2]/div[2]/div[2]/div[3]/div[1]/div[1]/div["+ str(row) +"]/div/div/span/div/div[2]/div/button").text.replace('$','')
-                print(symbol)
                 if symbol == 'VXUS':
                     if 'ROTH' in accountName:           account = allAccounts['riraVXUS']
                 elif symbol == 'VTI':

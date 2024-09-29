@@ -9,37 +9,32 @@ if __name__ == '__main__' or __name__ == "Monthly":
     from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentsMonthly
     from Eternl import runEternl, locateEternlWindow
     from Ledger import runLedger, getLedgerAccounts
-    from HealthEquity import runHealthEquity, locateHealthEquityWindow
+    from HealthEquity import runHealthEquity, locateHealthEquityWindow, getHealthEquityAccounts
     from IoPay import runIoPay, locateIoPayWindow
     from Worthy import getWorthyBalance, locateWorthyWindow
-    from Vanguard import runVanguard401k, locateVanguardWindow
-    from Fidelity import runFidelity, locateFidelityWindow
-    from Optum import runOptum, locateOptumWindow
+    from Vanguard import runVanguard401k, locateVanguardWindow, getVanguardAccounts
+    from Optum import runOptum, locateOptumWindow, getOptumAccounts
 else:
     from .Classes.Asset import USD, Security;   from .Classes.WebDriver import Driver;  from .Classes.GnuCash import GnuCash
     from .Eternl import runEternl, locateEternlWindow
     from .Ledger import runLedger, getLedgerAccounts
     from .Functions.GeneralFunctions import getStartAndEndOfDateRange, getUsername, getNotes, setDirectory
     from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentsMonthly
-    from .HealthEquity import runHealthEquity, locateHealthEquityWindow
+    from .HealthEquity import runHealthEquity, locateHealthEquityWindow, getHealthEquityAccounts
     from .IoPay import runIoPay, locateIoPayWindow
     from .Worthy import getWorthyBalance, locateWorthyWindow
-    from .Vanguard import runVanguard401k, locateVanguardWindow
-    from .Fidelity import runFidelity, locateFidelityWindow
-    from .Optum import runOptum, locateOptumWindow
+    from .Vanguard import runVanguard401k, locateVanguardWindow, getVanguardAccounts
+    from .Optum import runOptum, locateOptumWindow, getOptumAccounts
     
 def getMonthlyAccounts(type, personalBook, jointBook):
     if type == 'USD':
-        IRA, iraSPAXX, iraGME = USD("IRA", personalBook), Security('IRA SPAXX', personalBook), Security('IRA GME', personalBook)
-        rIRA, riraVXUS, riraVTI, riraSPAXX, riraGME = USD("Roth IRA", personalBook), Security('Roth IRA VXUS', personalBook), Security('Roth IRA VTI', personalBook), Security('Roth IRA SPAXX', personalBook), Security('Roth IRA GME', personalBook)
-        Brokerage, brSPAXX, brGME = USD("Brokerage", personalBook), Security('Brokerage SPAXX', personalBook), Security('Brokerage GME', personalBook)
-        VIIIX, HECash = Security("HE Investment", personalBook), USD("HE Cash", personalBook)
-        VFIAX, OptumCash = Security("VFIAX", personalBook), USD("Optum Cash", personalBook)
-        V401k, TSM401k, EBI = USD("Vanguard401k", personalBook), Security("Total Stock Market(401k)", personalBook), Security("Employee Benefit Index", personalBook)
-        LiquidAssets = USD("Liquid Assets", personalBook)
-        Bonds, Worthy = USD("Bonds", personalBook), USD("Worthy", personalBook)        
-        accounts = {'IRA':IRA,'iraSPAXX':iraSPAXX,'iraGME':iraGME,'rIRA':rIRA,'riraVXUS':riraVXUS,'riraVTI':riraVTI,'riraSPAXX':riraSPAXX,'riraGME':riraGME,'Brokerage':Brokerage,'brSPAXX':brSPAXX, 'brGME':brGME,
-                    'VIIIX':VIIIX,'HECash':HECash,'VFIAX':VFIAX,'OptumCash':OptumCash,'V401k':V401k,'EBI':EBI,'TSM401k':TSM401k,'Worthy': Worthy,'LiquidAssets':LiquidAssets,'Bonds':Bonds}
+        HealthEquity = getHealthEquityAccounts(personalBook)
+        Optum = getOptumAccounts(personalBook)
+        Vanguard = getVanguardAccounts(personalBook)
+        Savings = USD('Sofi Savings', personalBook)
+        Worthy = USD("Worthy", personalBook)
+        Pension = USD('Pension', personalBook)
+        accounts = {'HealthEquity':HealthEquity,'Optum':Optum,'Vanguard':Vanguard,'Worthy': Worthy,'Savings': Savings, 'Pension': Pension}
     elif type == 'Crypto':
         CryptoPortfolio = USD("Crypto", personalBook)
         Cardano = Security("Cardano", personalBook, 'ADA-Eternl')
@@ -50,7 +45,6 @@ def getMonthlyAccounts(type, personalBook, jointBook):
 
 def monthlyRoundUp(account, myBook, date):
     change = round(Decimal(account.balance - float(account.gnuBalance)), 2)
-    # change = round(change, 2)
     if account.name == "MyConstant" or account.name == "Worthy":    transactionVariables = {'postDate': date, 'description': "Interest", 'amount': -change, 'fromAccount': "Income:Investments:Interest"}
     myBook.writeGnuTransaction(transactionVariables, account.gnuAccount)
     account.updateGnuBalance(myBook.getGnuAccountBalance(account.gnuAccount))
@@ -117,7 +111,6 @@ def loginToUSDAccounts(driver):
     locateWorthyWindow(driver)
     locateHealthEquityWindow(driver)
     locateVanguardWindow(driver)
-    locateFidelityWindow(driver)
     locateOptumWindow(driver)
  
 def loginToCryptoAccounts(driver):
@@ -129,12 +122,11 @@ def runUSD(driver, today, accounts, personalBook):
     lastMonth = getStartAndEndOfDateRange(today, "month")
     getWorthyBalance(driver, accounts['Worthy'])
     monthlyRoundUp(accounts['Worthy'], personalBook, lastMonth['endDate'])
-    runHealthEquity(driver, {'VIIIX': accounts['VIIIX'], 'HECash': accounts['HECash'],'V401k': accounts['V401k']}, personalBook)
-    runOptum(driver, accounts, personalBook)
-    accounts['LiquidAssets'].updateGnuBalance(personalBook.getGnuAccountBalance(accounts['LiquidAssets'].gnuAccount))
-    accounts['Bonds'].updateGnuBalance(personalBook.getGnuAccountBalance(accounts['Bonds'].gnuAccount))
-    runVanguard401k(driver, accounts, personalBook)
-    runFidelity(driver, accounts, personalBook)
+    runHealthEquity(driver, accounts['HealthEquity'], personalBook)
+    runOptum(driver, accounts['Optum'], personalBook)
+    runVanguard401k(driver, accounts['Vanguard'], personalBook)
+    accounts['Pension'].setCost(accounts['Pension'].gnuBalance - accounts['Pension'].getInterestTotalForDateRange(personalBook))
+    accounts['Savings'].setCost(accounts['Savings'].gnuBalance - accounts['Savings'].getInterestTotalForDateRange(personalBook))
     updateInvestmentsMonthly(driver,personalBook,accounts)
     driver.findWindowByUrl("/scripts/monthly")
 
