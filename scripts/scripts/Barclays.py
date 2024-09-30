@@ -1,5 +1,6 @@
-import os, time
+import os, time, csv
 from datetime import datetime
+from decimal import Decimal
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
 from selenium.webdriver.common.by import By
@@ -8,11 +9,11 @@ if __name__ == '__main__' or __name__ == "Barclays":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
-    from Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
+    from Functions.GeneralFunctions import (getPassword, getUsername, showMessage, getStartAndEndOfDateRange)
 else:
     from .Classes.Asset import USD
     from .Classes.GnuCash import GnuCash
-    from .Functions.GeneralFunctions import (getPassword, getUsername, showMessage)
+    from .Functions.GeneralFunctions import (getPassword, getUsername, showMessage, getStartAndEndOfDateRange)
 
 def locateBarclaysWindow(driver):
     found = driver.findWindowByUrl("barclaycardus.com")
@@ -95,14 +96,37 @@ def claimBarclaysRewards(driver):
     time.sleep(1)
     driver.find_element(By.ID, "redeem-continue").click() # redeem now
 
+def importBarclaysTransactions(account, barclaysActivity, book, gnuCashTransactions):
+    existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
+    num=0
+    for row in csv.reader(open(barclaysActivity), delimiter=','):
+        if num <5: num+=1; continue # skip header lines
+        postDate = datetime.strptime(row[0], '%m/%d/%Y').date()
+        rawDescription = row[1]
+        amount = Decimal(row[3])
+        fromAccount = account.gnuAccount
+        if "PAYMENT RECEIVED" in description.upper():   continue
+        elif "BARCLAYCARD US" in description.upper() and float(amount) > 0:         description = "Barclays CC Rewards"
+        else:                                                                       description = rawDescription
+        toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
+        if toAccount == 'Expenses:Other':   account.setReviewTransactions(str(postDate) + ", " + description + ", " + str(amount))
+        splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
+        book.writeUniqueTransaction(existingTransactions, postDate, description, splits)
+        account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
+
+
 def runBarclays(driver, account, book):
     today = datetime.today()
     locateBarclaysWindow(driver)
+    dateRange = getStartAndEndOfDateRange(timeSpan=60)
+    gnuCashTransactions = book.getTransactionsByDateRange(dateRange)    
     account.setBalance(getBarclaysBalance(driver))
     rewardsBalance = float(driver.webDriver.find_element(By.XPATH, "//*[@id='rewardsTile']/div[2]/div/div[2]/div[1]/div").text.strip('$'))
-    transactionsCSV = exportBarclaysTransactions(driver.webDriver, today)
+    barclaysActivity = exportBarclaysTransactions(driver.webDriver, today)
     if rewardsBalance >= float(50): claimBarclaysRewards(driver)
-    book.importGnuTransaction(account, transactionsCSV, driver, 5)
+    importBarclaysTransactions(account, barclaysActivity, book, gnuCashTransactions)
+    account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
+    # book.importGnuTransaction(account, barclaysActivity, driver, 5)
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:  book.openGnuCashUI()
 

@@ -64,11 +64,10 @@ def getOptumPricesSharesAndCost(driver, accounts, book):
     
 def setOptumTransactionPath(row, column):    return f"//*[@id='trans']/tbody/tr[{str(row)}]/td[{str(column)}]"
 
-def captureOptumTransactions(driver, accounts):
+def captureOptumTransactions(driver, lastMonth):
     locateOptumWindow(driver)
     optumActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\optum.csv"
     open(optumActivity, 'w', newline='').truncate()
-    lastMonth = getStartAndEndOfDateRange(datetime.today().date(), "month")
     row = 0
     if "investcenter" not in driver.webDriver.current_url:
         driver.clickXPATHElementOnceAvaiable("//*[@id='investmentBox']/a") # Investments
@@ -94,7 +93,7 @@ def captureOptumTransactions(driver, accounts):
             shares = driver.webDriver.find_element(By.XPATH,setOptumTransactionPath(row, column)).text
             column+=2
             amount = driver.webDriver.find_element(By.XPATH,setOptumTransactionPath(row, column)).text.replace('$','').replace(',','')
-            transaction = date, description, shares, amount, accounts['VFIAX']
+            transaction = date, description, shares, amount
             csv.writer(open(optumActivity, 'a', newline='', encoding="utf-8")).writerow(transaction)
         elif date.month < lastMonth['endDate'].month or date.year < lastMonth['endDate'].year:  break
     return optumActivity
@@ -102,19 +101,35 @@ def captureOptumTransactions(driver, accounts):
 def getOptumAccounts(book):
     return {'VFIAX': Security("VFIAX", book), 'OptumCash': USD("Optum Cash", book)}
 
-def runOptum(driver, accounts, book):
+def importOptumTransactions(account, optumActivity, book, gnuCashTransactions):
+    existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
+    for row in csv.reader(open(optumActivity), delimiter=','):
+        postDate = datetime.strptime(row[0], '%Y-%m-%d').date()
+        rawDescription = row[1]
+        fromAccount = account.gnuAccount
+        shares = float(row[2])
+        amount = Decimal(row[3])
+        if "Vanguard 500 Index Admiral" in rawDescription:  description = "HSA VFIAX Investment"
+        else:                                               description = rawDescription
+        toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
+        splits = [{'amount': -amount, 'account':toAccount},{'amount': amount, 'account':fromAccount, 'quantity': round(Decimal(shares),3)}]
+        book.writeUniqueTransaction(existingTransactions, postDate, description, splits)
+
+def runOptum(driver, accounts, book, gnuCashTransactions, lastMonth):
     locateOptumWindow(driver)
     getOptumBalance(driver, accounts)
     getOptumPricesSharesAndCost(driver, accounts, book)
-    optumActivity = captureOptumTransactions(driver, accounts)
-    book.importGnuTransaction(accounts['VFIAX'], optumActivity, driver, 0)
+    optumActivity = captureOptumTransactions(driver, lastMonth)
+    importOptumTransactions(accounts['VFIAX'], optumActivity, book, gnuCashTransactions)
     accounts['VFIAX'].setCost(book.getDollarsInvestedPerSecurity(accounts['VFIAX']))
-    accounts['OptumCash'].updateGnuBalance(book.getBalance(accounts['OptumCash'].gnuAccount))
-    accounts['VFIAX'].updateGnuBalanceAndValue(book.getBalance(accounts['VFIAX'].gnuAccount))
+    accounts['OptumCash'].updateGnuBalance(book.getGnuAccountBalance(accounts['OptumCash'].gnuAccount))
+    accounts['VFIAX'].updateGnuBalanceAndValue(book.getGnuAccountBalance(accounts['VFIAX'].gnuAccount))
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = GnuCash('Finance')
+    book = GnuCash('Test')
     accounts = getOptumAccounts(book)
-    runOptum(driver, accounts, book)
+    lastMonth = getStartAndEndOfDateRange(timeSpan="month")
+    gnuCashTransactions = book.getTransactionsByDateRange(lastMonth)
+    runOptum(driver, accounts, book, gnuCashTransactions, lastMonth)
     book.closeBook()

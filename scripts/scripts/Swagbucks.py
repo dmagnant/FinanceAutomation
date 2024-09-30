@@ -43,7 +43,7 @@ def swagBuckscontentDiscovery(driver):
     while True:
         contentPath = getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div[2]/div[1]/section[" + str(cardNum) + "]"
         try:
-            try:    earnings = driver.webDriver.find_element(By.XPATH, contentPath + "/p/span/span[3]").text; print(earnings)
+            try:    earnings = driver.webDriver.find_element(By.XPATH, contentPath + "/p/span/span[3]").text; 
             except NoSuchElementException:  cardNum += 1; continue
             description = driver.webDriver.find_element(By.XPATH, contentPath + "/button").text
             if "1 sb" in earnings.lower() or "check out the latest deals" == description.lower():
@@ -112,17 +112,13 @@ def toDoList(driver):
         if list_item.text == "Add A Magic Receipts Offer":
             driver.webDriver.get("https://www.swagbucks.com/grocery-receipts-merchant?category=-1&merchant-id=53"); time.sleep(4)
             while button_not_clicked:
-                print('trying to find button num: ' + str(button_num))
                 try:    
                     button = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "2]/div[2]/div[2]/main/reset-styles/div/div/div[2]/div[1]/section[4]/ul/li[" + str(button_num) +"]/div/a/div[2]/button/span")
-                    print('found 1st')
                 except NoSuchElementException:  
                     button = driver.webDriver.find_element(By.XPATH, getSwagbucksBasePath() + "2]/div[2]/div[2]/main/reset-styles/div/div/div[2]/div[1]/section[4]/ul/li[" + str(button_num) +"]/div/a/div[3]/button/span")                
-                    print('found 2nd')
                 if button.text == 'Add to List':    
                     button.click(); button_not_clicked = False                    
                 else:                               
-                    print('button text not found')
                     button_num+=1
             driver.webDriver.get('https://www.swagbucks.com/'); time.sleep(2)
         elif list_item.text == "Deal of the Day" or list_item.text == "Game Of The Day":

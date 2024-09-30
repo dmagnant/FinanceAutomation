@@ -4,17 +4,15 @@ from decimal import Decimal
 
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
 if __name__ == '__main__' or __name__ == "Fidelity":
     from Classes.Asset import USD, Security
-    from Classes.GnuCash import GnuCash, createNewTestBook, checkIfGnuCashTransactionExists
+    from Classes.GnuCash import GnuCash, createNewTestBook
     from Classes.WebDriver import Driver
     from Functions.GeneralFunctions import (showMessage, getPassword, getStartAndEndOfDateRange, setDirectory, getNotes)    
 else:
     from .Classes.Asset import USD, Security
-    from .Classes.GnuCash import GnuCash, createNewTestBook, checkIfGnuCashTransactionExists
+    from .Classes.GnuCash import GnuCash, createNewTestBook
     from .Functions.GeneralFunctions import (showMessage, getPassword, getStartAndEndOfDateRange, setDirectory, getNotes)    
     
 def getFidelityAccounts(book):
@@ -28,11 +26,8 @@ def getFidelityAccounts(book):
 def getFidelityBaseAccounts(fidelityAccounts):  return {'rIRA':fidelityAccounts['rIRA'], 'Brokerage':fidelityAccounts['Brokerage'],'IRA':fidelityAccounts['IRA']}
 
 def getFidelityCSVFile(account):
-    if account == 'all':            fidelityActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\fidelity.csv"
-    elif account == 'rIRA':         fidelityActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\fidelityRIRA.csv"
-    elif account == 'Brokerage':    fidelityActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\fidelityBrokerage.csv"
-    elif account == 'IRA':          fidelityActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\fidelityIRA.csv"
-    return fidelityActivity
+    accountSuffix = f"fidelity{account}"
+    return setDirectory() + f"\Projects\Coding\Python\FinanceAutomation\Resources\{accountSuffix}.csv"
 
 def locateFidelityWindow(driver):
     found = driver.findWindowByUrl("digital.fidelity.com")
@@ -257,11 +252,12 @@ def writeFidelityOptionMarketChangeTransaction(accounts, book):
 def importFidelityTransactions(account, fidelityActivity, book, gnuCashTransactions):
     existingTransactions = book.getTransactionsByGnuAccountIncludingChildren(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
     for row in csv.reader(open(fidelityActivity), delimiter=','):
-        rawDescription = row[1] # determine fromAccount based on raw description
         postDate = datetime.strptime(row[0], '%Y-%m-%d').date()
-        fees = round(Decimal(row[5]),2)
+        rawDescription = row[1] # determine fromAccount based on raw description
         amount = Decimal(row[2])
         shares = float(row[3])
+        accountinTrans = row[4]
+        fees = round(Decimal(row[5]),2)
         fromAccount = account.gnuAccount
         splits = []
         if "REINVESTMENT" in rawDescription or "REF #T" in rawDescription:
@@ -269,26 +265,26 @@ def importFidelityTransactions(account, fidelityActivity, book, gnuCashTransacti
         elif "DIVIDEND" in rawDescription:
             amount,shares = -amount,-shares
             fromAccount += ":SPAXX"
-            description = row[4] + " Dividend"
+            description = accountinTrans + " Dividend"
         elif "MARGIN INTEREST" in rawDescription: 
             fromAccount += ":SPAXX"  
-            description = row[4] + " Margin Interest"
+            description = accountinTrans + " Margin Interest"
         elif "OPENING TRANSACTION" in rawDescription or "CLOSING TRANSACTION" in rawDescription:
             fromAccount = "Income:Investments:Premiums"
-            description = formatFidelityOptionTransactionDescription(rawDescription, row[4])
+            description = formatFidelityOptionTransactionDescription(rawDescription, accountinTrans)
         elif "YOU BOUGHT" in rawDescription: 
             shares = -shares
-            description = row[4] + " Investment"
+            description = accountinTrans + " Investment"
         elif "YOU SOLD" in rawDescription:
             shares = shares
-            description = row[4] + " Sale"
+            description = accountinTrans + " Sale"
         if "VXUS" in rawDescription and "DIVIDEND" not in rawDescription and "TRANSACTION" not in rawDescription:           fromAccount += ":VXUS"
         elif "VTI" in rawDescription and "DIVIDEND" not in rawDescription and "TRANSACTION" not in rawDescription:          fromAccount += ":VTI"                                     
         elif "GME" in rawDescription and "DIVIDEND" not in rawDescription and "TRANSACTION" not in rawDescription:          fromAccount += ":GME"
         toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
         if not shares: shares = amount
         if fees:
-            splits.append({'amount': amount, 'account': toAccount, 'quantity': amount})
+            splits.append({'amount': amount, 'account': toAccount, 'quantity': shares})
             splits.append({'amount':fees, 'account':"Expenses:Bank Fees"})
             if fromAccount == 'Income:Investments:Premiums': # buy/sell options
                 splits.append({'amount':-(amount+fees), 'account': fromAccount, 'quantity':-round(Decimal(amount+fees),2)})
@@ -297,86 +293,45 @@ def importFidelityTransactions(account, fidelityActivity, book, gnuCashTransacti
             else: # sell shares
                 splits.append({'amount':-(amount+fees), 'account':fromAccount, 'quantity':round(Decimal(shares),2)})
         elif "Margin Interest" in description:
-            splits.append({'amount':amount, 'account':fromAccount, 'quantity':amount})
+            splits.append({'amount':amount, 'account':fromAccount, 'quantity':shares})
             splits.append({'amount':-amount, 'account':toAccount, 'quantity':-round(Decimal(shares),2)})
         else: # dividends # buy/sell shares 
-            splits.append({'amount':amount, 'account':toAccount, 'quantity':Decimal(amount)})
+            splits.append({'amount':amount, 'account':toAccount, 'quantity':Decimal(shares)})
             splits.append({'amount':-amount, 'account':fromAccount, 'quantity':-round(Decimal(shares),2)})
         
-        if not checkIfGnuCashTransactionExists(existingTransactions, postDate, description, splits):
-            gnuSplits = []
-            for spl in splits:
-                if 'quantity' in spl:
-                    gnuSplits.append(book.createSplit(spl['amount'], spl['account'], spl['quantity']))
-                else:
-                    gnuSplits.append(book.createSplit(spl['amount'], spl['account']))
-            book.writeTransaction(postDate, description, gnuSplits)
+        book.writeUniqueTransaction(existingTransactions, postDate, description, splits)
 
-def runFidelity(driver, accounts, book):
-    locateFidelityWindow(driver)
-    getFidelityBalance(driver, accounts)
-    getFidelityPricesSharesAndCost(driver, accounts, book)
-    prepFidelityTransactionSearch(driver, True)
-    fidelityActivity = captureFidelityTransactions(driver, getStartAndEndOfDateRange(timeSpan="month"))
-    book.importGnuTransaction(accounts, fidelityActivity, driver, 0)
-    for accountName in list(accounts.keys()):
-        account = accounts.get(accountName)
-        account.updateGnuBalanceAndValue(book.getBalance(account.gnuAccount))
-    # accounts['riraGME'].updateGnuBalanceAndValue(book.getBalance(accounts['riraGME'].gnuAccount))
-    # accounts['riraVXUS'].updateGnuBalanceAndValue(book.getBalance(accounts['riraVXUS'].gnuAccount))
-    # accounts['riraVTI'].updateGnuBalanceAndValue(book.getBalance(accounts['riraVTI'].gnuAccount))
-    # accounts['riraSPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['riraSPAXX'].gnuAccount))
-    # accounts['rIRA'].updateGnuBalance(book.getBalance(accounts['rIRA'].gnuAccount))
-    # accounts['iraGME'].updateGnuBalanceAndValue(book.getBalance(accounts['iraGME'].gnuAccount))
-    # accounts['iraSPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['iraSPAXX'].gnuAccount))
-    # accounts['IRA'].updateGnuBalance(book.getBalance(accounts['IRA'].gnuAccount))
-    # accounts['brGME'].updateGnuBalanceAndValue(book.getBalance(accounts['brGME'].gnuAccount))
-    # accounts['brSPAXX'].updateGnuBalanceAndValue(book.getBalance(accounts['brSPAXX'].gnuAccount))
-    # accounts['Brokerage'].updateGnuBalance(book.getBalance(accounts['Brokerage'].gnuAccount))
+# def runFidelity(driver, accounts, book):
+#     locateFidelityWindow(driver)
+#     getFidelityBalance(driver, accounts)
+#     getFidelityPricesSharesAndCost(driver, accounts, book)
+#     prepFidelityTransactionSearch(driver, True)
+#     fidelityActivity = captureFidelityTransactions(driver, getStartAndEndOfDateRange(timeSpan="month"))
+#     book.importGnuTransaction(accounts, fidelityActivity, driver, 0)
+#     for accountName in list(accounts.keys()):
+#         account = accounts.get(accountName)
+#         account.updateGnuBalanceAndValue(book.getBalance(account.gnuAccount))
 
-def runFidelityDaily(driver, accounts, book):
+def runFidelityDaily(driver, accounts, book, gnuCashTransactions, dateRange):
     locateFidelityWindow(driver)
-    dateRange = getStartAndEndOfDateRange(timeSpan=7)
-    gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
     getFidelityBalance(driver, accounts)
     getFidelityPricesSharesAndCost(driver, accounts, book)
     prepFidelityTransactionSearch(driver, True)
     baseAccounts = getFidelityBaseAccounts(accounts)
-    for accountName in list(baseAccounts.keys()):
+    for accountName in list(baseAccounts.keys()): # get transactions per account (x3)
         account = baseAccounts.get(accountName)
         fidelityActivity = captureFidelityTransactions(driver, dateRange, accountName)
         importFidelityTransactions(account, fidelityActivity, book, gnuCashTransactions)
-    for accountName in list(accounts.keys()):
+    for accountName in list(accounts.keys()): # update balances for ALL
         account = accounts.get(accountName)
         balance = book.getGnuAccountBalance(account.gnuAccount)
         if hasattr(account, 'symbol'):  account.updateGnuBalanceAndValue(balance)
         else:                           account.updateGnuBalance(balance)
     writeFidelityOptionMarketChangeTransaction(accounts, book)
 
-
-
-# if __name__ == '__main__':
-#     driver = Driver("Chrome")
-#     book = GnuCash('Finance')
-#     accounts = getFidelityAccounts(book)
-#     runFidelity(driver, accounts, book)
-#     book.closeBook()
-
-# if __name__ == '__main__':
-#     driver = Driver("Chrome")
-#     book = GnuCash('Finance')
-#     accounts = getFidelityAccounts(book)
-#     runFidelityDaily(driver, accounts, book)
-#     book.closeBook()
-
-
-
-
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
     accounts = getFidelityAccounts(book)
-    getFidelityPricesSharesAndCost(driver, accounts, book)
-    writeFidelityOptionMarketChangeTransaction(accounts, book)
-    book.closeBook() 
-
+    runFidelityDaily(driver, accounts, book)
+    book.closeBook()

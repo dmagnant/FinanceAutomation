@@ -1,5 +1,6 @@
-import os, time
-import time
+import os, time, csv
+from decimal import Decimal
+from datetime import datetime
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
@@ -8,11 +9,11 @@ if __name__ == '__main__' or __name__ == "Amex":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
-    from Functions.GeneralFunctions import (getPassword, getUsername, getPaycheckDates)
+    from Functions.GeneralFunctions import (getPassword, getUsername, getStartAndEndOfDateRange)
 else:
     from .Classes.Asset import USD
     from .Classes.GnuCash import GnuCash
-    from .Functions.GeneralFunctions import (getPassword, getUsername, getPaycheckDates)
+    from .Functions.GeneralFunctions import (getPassword, getUsername, getStartAndEndOfDateRange)
 
 def getAmexBasePath():  return '/html/body/div[1]/div[2]/main/section/div[3]/div/div/div/div/div/div/div[2]/div/div[2]/div/div/div'
             
@@ -61,12 +62,33 @@ def claimAmexRewards(driver, account):
     print('balance: ' + account.balance)
     print('value: ' + account.value)
 
+def importAmexTransactions(account, book, gnuCashTransactions):
+    existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
+    num=0
+    for row in csv.reader(open(r'C:\Users\dmagn\Downloads\activity.csv'), delimiter=','):
+        if num <1: num+=1; continue # skip header
+        postDate = datetime.strptime(row[0], '%m/%d/%Y').date()
+        rawDescription = row[1]
+        amount = -Decimal(row[2])
+        fromAccount = account.gnuAccount
+        if "AUTOPAY PAYMENT" in rawDescription.upper():                             continue
+        elif "YOUR CASH REWARD/REFUND IS" in rawDescription.upper():                description = "Amex CC Rewards"
+        else:                                                                       description = rawDescription
+        toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
+        if toAccount == 'Expenses:Other':   account.setReviewTransactions(str(postDate) + ", " + description + ", " + str(amount))
+        splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
+        book.writeUniqueTransaction(existingTransactions, postDate, description, splits)
+
 def runAmex(driver, account, book):
     locateAmexWindow(driver)
     account.setBalance(getAmexBalance(driver))
+    dateRange = getStartAndEndOfDateRange(timeSpan=60)
+    gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
     exportAmexTransactions(driver.webDriver)
     claimAmexRewards(driver, account)
-    book.importGnuTransaction(account, r'C:\Users\dmagn\Downloads\activity.csv', driver)
+    importAmexTransactions(account, book, gnuCashTransactions)
+    account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
+    # book.importGnuTransaction(account, r'C:\Users\dmagn\Downloads\activity.csv', driver)
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:  book.openGnuCashUI()
 

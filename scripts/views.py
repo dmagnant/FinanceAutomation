@@ -239,7 +239,7 @@ def dailyMR(request):
         elif "paidviewpointMain" in request.POST:       runPaidviewpoint(driver, mrAccounts['Paidviewpoint'])
         elif "paidviewpointSurvey" in request.POST:     completePaidviewpointSurvey(driver)
         elif "paidviewpointLogin" in request.POST:      paidviewpointLogin(driver)        
-        elif "paidviewpointBalance" in request.POST:    mrAccounts['Paidviewpoint'].setBalance(getPaidviewpointBalance(driver));    personalBook.overwriteBalance(mrAccounts['Paidviewpoint'])
+        elif "paidviewpointBalance" in request.POST:    updatePaidViewPointBalance(driver, account, book)
         elif "paidviewpointRewards" in request.POST:    redeemPaidviewpointRewards(driver)            
         elif "close windows" in request.POST:           driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/dailyMR"))
     context = {'mrAccounts': mrAccounts}
@@ -340,8 +340,8 @@ def monthly(request):
     personalBook, jointBook = GnuCash('Finance'), GnuCash('Home')
     usdAccounts, cryptoAccounts = getMonthlyAccounts('USD', personalBook, jointBook), getMonthlyAccounts('Crypto', personalBook, jointBook)
     if request.method == 'POST':
-        driver, today = Driver("Chrome"), datetime.today().date()
-        if "USD" in request.POST:                   runUSD(driver, today, usdAccounts, personalBook)
+        driver = Driver("Chrome")
+        if "USD" in request.POST:                   runUSD(driver, usdAccounts, personalBook)
         elif "Crypto" in request.POST:              runCrypto(driver, cryptoAccounts, personalBook)
         elif "HEMain" in request.POST:              runHealthEquity(driver, usdAccounts['HealthEquity'], personalBook)
         elif "HELogin" in request.POST:             locateHealthEquityWindow(driver)

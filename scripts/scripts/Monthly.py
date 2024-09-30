@@ -51,6 +51,7 @@ def monthlyRoundUp(account, myBook, date):
     
 def updateEnergyBillAmounts(driver, book, amount):
     driver.openNewWindow('https://www.we-energies.com/secure/auth/l/acct/summary_accounts.aspx')
+    today = datetime.today()
     time.sleep(2)
     try:
         # driver.webDriver.find_element(By.XPATH, "//*[@id='signInName']").send_keys(getUsername('WE-Energies (Home)'))
@@ -72,9 +73,18 @@ def updateEnergyBillAmounts(driver, book, amount):
     billColumn -= 2
     weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
     electricity = Decimal(driver.webDriver.find_element(By.XPATH, weAmountPath).text.strip('$'))
-    book.writeUtilityTransaction({'electricity': electricity, 'gas': gas, 'total': amount})
-    print(f'posted transaction: \n' f'date: {str(datetime.today().date())} \n' f'total: {str(amount)} \n' f'electricity: {str(electricity)}\n' f'gas: {str(gas)}')
-    today = datetime.today()
+    splits = []
+    splits.append(book.createSplit(electricity, "Expenses:Utilities:Electricity"))
+    splits.append(book.createSplit(gas, "Expenses:Utilities:Gas"))
+    splits.append(book.createSplit(-round(Decimal(amount),2), book.getGnuAccountName('Ally')))
+    book.writeTransaction(today.date().replace(day=24), 'WE ENERGIES PAYMENT', splits)
+    print(f'posted transaction: \n' f'date: {str(today.date())} \n' f'total: {str(amount)} \n' f'electricity: {str(electricity)}\n' f'gas: {str(gas)}')
+    # book.writeUtilityTransaction({'electricity': electricity, 'gas': gas, 'total': amount})
+    # splits=[Split(value=transactionInfo['electricity'], account=self.getGnuAccount("Expenses:Utilities:Electricity")),
+    #     Split(value=transactionInfo['gas'], account=self.getGnuAccount("Expenses:Utilities:Gas")),
+    #     Split(value=-round(Decimal(transactionInfo['total']), 2), account=self.getGnuAccount("Assets:Ally Checking Account"))]
+    # Transaction(post_date=today.date().replace(day=24), currency=book.currencies(mnemonic="USD"), description='WE ENERGIES PAYMENT', splits=splits)
+    book.flush()
     updateSpreadsheet('Home', str(today.year) + ' Balance', 'Energy Bill', today.month, -float(amount))
     openSpreadsheet(driver, 'Home', str(today.year) + ' Balance')
     driver.findWindowByUrl("/scripts/ally")
@@ -102,7 +112,12 @@ def payWaterBill(driver, book):
     driver.webDriver.find_element(By.ID, 'txtEmailAddress').send_keys(os.environ.get('Email'))
     driver.webDriver.find_element(By.ID, 'chkTermsAgree').click() # agree to T&C
     driver.webDriver.find_element(By.ID, 'btnSubmit').click() # Make a Payment
-    book.writeWaterBillTransaction(round(Decimal(billTotal), 2))
+    splits = [book.createSplit(round(Decimal(billTotal), 2), "Expenses:Utilities:Water"), book.createSplit(-round(Decimal(billTotal), 2), 'Ally')]
+    book.writeTransaction(datetime.today().date(), 'Water Bill', splits)
+    # splits=[Split(value=amount, account=self.getGnuAccount("Expenses:Utilities:Water")),
+    #         Split(value=-amount, account=self.getGnuAccount("Assets:Ally Checking Account"))]
+    # Transaction(post_date=datetime.today().date(), currency=book.currencies(mnemonic="USD"), description='Water Bill', splits=splits)
+    # book.writeWaterBillTransaction(round(Decimal(billTotal), 2))
     updateSpreadsheet('Home', str(today.year) + ' Balance', 'Water Bill', today.month, -float(billTotal))
     openSpreadsheet(driver, 'Home', str(today.year) + ' Balance')
     driver.findWindowByUrl("/scripts/ally")
@@ -117,12 +132,13 @@ def loginToCryptoAccounts(driver):
     locateEternlWindow(driver)
     locateIoPayWindow(driver)
     
-def runUSD(driver, today, accounts, personalBook):
+def runUSD(driver, accounts, personalBook):
     loginToUSDAccounts(driver)
-    lastMonth = getStartAndEndOfDateRange(today, "month")
+    lastMonth = getStartAndEndOfDateRange(timeSpan="month")
+    gnuCashTransactions = personalBook.getTransactionsByDateRange(lastMonth)
     getWorthyBalance(driver, accounts['Worthy'])
     monthlyRoundUp(accounts['Worthy'], personalBook, lastMonth['endDate'])
-    runHealthEquity(driver, accounts['HealthEquity'], personalBook)
+    runHealthEquity(driver, accounts['HealthEquity'], personalBook, gnuCashTransactions, lastMonth)
     runOptum(driver, accounts['Optum'], personalBook)
     runVanguard401k(driver, accounts['Vanguard'], personalBook)
     accounts['Pension'].setCost(accounts['Pension'].gnuBalance - accounts['Pension'].getInterestTotalForDateRange(personalBook))
@@ -138,11 +154,10 @@ def runCrypto(driver, accounts, personalBook):
     driver.findWindowByUrl("/scripts/monthly")
 
 def runMonthlyBank(personalBook, jointBook):
-    today = datetime.today().date()
     driver = Driver("Chrome")
     usdAccounts = getMonthlyAccounts('USD', personalBook, jointBook)
     cryptoAccounts = getMonthlyAccounts('Crypto', personalBook, jointBook)
-    runUSD(driver, today, usdAccounts, personalBook)
+    runUSD(driver, usdAccounts, personalBook)
     runCrypto(driver, cryptoAccounts, personalBook)
 
 # if __name__ == '__main__': # USD

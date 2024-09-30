@@ -90,18 +90,73 @@ def captureAllyTransactions(driver, dateRange):
         except (NoSuchElementException):    insideDateRange = False
     return allyActivity
 
-def runAlly(driver, account, book):
-    dateRange = getStartAndEndOfDateRange(datetime.today().date(), 7)
+def importAllyTransactions(account, allyActivity, book, gnuCashTransactions):
+    existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
+    for row in csv.reader(open(allyActivity), delimiter=','):
+        postDate = datetime.strptime(row[0], '%Y-%m-%d').date()
+        rawDescription = row[1]
+        amount = Decimal(row[2])
+        fromAccount = account.gnuAccount
+        if "SAVINGS ACCOUNT XXXXXX9703" in rawDescription.upper():                  description = "Tessa Deposit"
+        elif "ALLY BANK TRANSFER" in description.upper():                           description = "Dan Deposit"
+        elif "BK OF AMER VISA" in description.upper():                              description = "BoA CC"
+        elif "CITY OF MILWAUKE B2P*MILWWA" in description.upper():                  description = "Water Bill"
+        elif "COOPER NSM" in description.upper():                                   description = "Mortgage Payment"
+        elif 'WE ENERGIES' in description.upper():
+            energyBillAmounts = getEnergyBillAmounts(driver, amount, 1)
+            description = 'WE ENERGIES PAYMENT'
+        else:                                                                       description = rawDescription
+        toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
+        if toAccount == 'Expenses:Other':   account.setReviewTransactions(str(postDate) + ", " + description + ", " + str(amount))
+        if 'WE ENERGIES' in description.upper(): 
+            splits = [{'amount': energyBillAmounts['electricity'], 'account': "Expenses:Utilities:Electricity"},
+                      {'amount': energyBillAmounts['gas'], 'account': "Expenses:Utilities:Gas"},
+                      {'amount': amount, 'account': account.gnuAccount}
+                    ]
+        else:
+            splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
+        book.writeUniqueTransaction(existingTransactions, postDate, description, splits)
+
+def getEnergyBillAmounts(driver, amount, energyBillNum):
+    if energyBillNum == 1:
+        driver.openNewWindow('https://www.we-energies.com/secure/auth/l/acct/summary_accounts.aspx')
+        time.sleep(2)
+        try:
+            # driver.webDriver.find_element(By.XPATH, "//*[@id='signInName']").send_keys(getUsername('WE-Energies (Home)'))
+            # driver.webDriver.find_element(By.XPATH, "//*[@id='password']").send_keys(getPassword('WE-Energies (Home)'))
+            driver.webDriver.find_element(By.XPATH, "//*[@id='next']").click() # login
+            time.sleep(4)
+            driver.webDriver.find_element(By.XPATH, "//*[@id='notInterested']/a").click # close out of app notice
+        except NoSuchElementException:  exception = "caught"
+        driver.webDriver.find_element(By.XPATH, "//*[@id='mainContentCopyInner']/ul/li[2]/a").click();  time.sleep(4) # view bill history
+    billRow, billColumn, billFound = 2, 7, False
+    while not billFound: # find bill based on comparing amount from Arcadia (weBill)
+        weBillPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span/span"
+        weBillAmount = driver.webDriver.find_element(By.XPATH, weBillPath).text.replace('$', '')
+        if str(abs(amount)) == weBillAmount:    billFound = True
+        else:                                   billRow += 1
+    billColumn -= 2
+    weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
+    gas = Decimal(driver.webDriver.find_element(By.XPATH, weAmountPath).text.strip('$'))
+    billColumn -= 2
+    weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
+    electricity = Decimal(driver.webDriver.find_element(By.XPATH, weAmountPath).text.strip('$'))
+    return {'electricity': electricity, 'gas': gas, 'total': amount}
+
+def runAlly(driver, account, book, gnuCashTransactions, dateRange):
     locateAllyWindow(driver)
     account.setBalance(getAllyBalance(driver))
     allyActivity = captureAllyTransactions(driver, dateRange)
-    book.importUniqueTransactionsToGnuCash(account, allyActivity, driver, dateRange, 0)
+    importAllyTransactions(account, allyActivity, book, gnuCashTransactions)
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Home')
     Ally = USD("Ally", book)
-    runAlly(driver, Ally, book)
+    dateRange = getStartAndEndOfDateRange(timeSpan=7)
+    gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
+    runAlly(driver, Ally, book, gnuCashTransactions, dateRange)
     Ally.getData()
     # allyLogout(driver)
     book.closeBook()
+

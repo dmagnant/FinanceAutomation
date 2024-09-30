@@ -1,4 +1,5 @@
-import time
+import time, csv
+from decimal import Decimal
 from datetime import datetime
 
 from selenium.common.exceptions import (ElementClickInterceptedException,
@@ -10,11 +11,11 @@ if __name__ == '__main__' or __name__ == "Discover":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash    
-    from Functions.GeneralFunctions import getPassword
+    from Functions.GeneralFunctions import getPassword, getStartAndEndOfDateRange
 else:
     from .Classes.Asset import USD
     from .Classes.GnuCash import GnuCash
-    from .Functions.GeneralFunctions import getPassword
+    from .Functions.GeneralFunctions import getPassword, getStartAndEndOfDateRange
 
 def locateDiscoverWindow(driver):
     found = driver.findWindowByUrl("discover.com")
@@ -65,13 +66,34 @@ def claimDiscoverRewards(driver, account):
     print('balance: ' + account.balance)
     print('value: ' + account.value)
 
+def importDiscoverTransactions(account, discoverActivity, book, gnuCashTransactions):
+    existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
+    num=0
+    for row in csv.reader(open(discoverActivity), delimiter=','):
+        if num <1: num+=1; continue # skip header
+        postDate = datetime.strptime(row[1], '%m/%d/%Y').date()
+        rawDescription = row[2]
+        amount = -Decimal(row[3])
+        fromAccount = account.gnuAccount
+        if "DIRECTPAY FULL BALANCE" in rawDescription.upper():                  continue
+        elif "AUTOMATIC STATEMENT CREDIT" in description.upper():               description = "Discover CC Rewards"        
+        else:                                                                   description = rawDescription
+        toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
+        if toAccount == 'Expenses:Other':   account.setReviewTransactions(str(postDate) + ", " + description + ", " + str(amount))
+        splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
+        book.writeUniqueTransaction(existingTransactions, postDate, description, splits)
+
 def runDiscover(driver, account, book):
     today = datetime.today()
     locateDiscoverWindow(driver)
     account.setBalance(getDiscoverBalance(driver))
-    transactionsCSV = exportDiscoverTransactions(driver.webDriver, today)
+    dateRange = getStartAndEndOfDateRange(timeSpan=60)
+    gnuCashTransactions = book.getTransactionsByDateRange(dateRange)    
+    discoverActivity = exportDiscoverTransactions(driver.webDriver, today)
     claimDiscoverRewards(driver, account)
-    book.importGnuTransaction(account, transactionsCSV, driver)
+    importDiscoverTransactions(account, discoverActivity, book, gnuCashTransactions)
+    account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
+    # book.importGnuTransaction(account, discoverActivity, driver)
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions: book.openGnuCashUI()
 

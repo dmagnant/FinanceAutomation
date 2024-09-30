@@ -55,10 +55,13 @@ def getHealthEquityBalances(driver, accounts):
     accounts['VIIIX'].setBalance(driver.webDriver.find_element(By.ID,'desktopSharesHeld0').text)
     driver.webDriver.find_element(By.XPATH,"//*[@id='topmenu']/div[2]/a/span").click() # Home Button
 
-def captureHealthEquityInvestmentTransactionsAndBalances(driver, accounts, book):
+def getHealthEquityCSVFile(account):
+    accountName = account.name.replace(' ','').lower()
+    return setDirectory() + f"\Projects\Coding\Python\FinanceAutomation\Resources\{accountName}.csv"
+
+def captureHealthEquityInvestmentTransactionsAndBalances(driver, account, book, lastMonth):
     locateHealthEquityWindow(driver)
-    lastMonth = getStartAndEndOfDateRange(datetime.today().date(), "month")
-    investmentActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\hsainvestment.csv"
+    investmentActivity = getHealthEquityCSVFile(account)
     open(investmentActivity, 'w', newline='').truncate()
     time.sleep(5)
     driver.webDriver.find_element(By.XPATH, "//*[@id='hsaInvestment']/div/div/a").click() # Manage HSA Investments
@@ -95,19 +98,18 @@ def captureHealthEquityInvestmentTransactionsAndBalances(driver, accounts, book)
             csv.writer(open(investmentActivity, 'a', newline='', encoding="utf-8")).writerow(transaction)
             row+=1
         elif 'Ending Balance' in description:
-            accounts['VIIIX'].price = Decimal(driver.webDriver.find_element(By.ID, "desktopPrice" + str(row)).text.replace('$', ''))
-            book.updatePriceInGnucash(accounts['VIIIX'].symbol, accounts['VIIIX'].price)
-            accounts['VIIIX'].setBalance(driver.webDriver.find_element(By.XPATH, "//*[@id='desktopTotalShares" + str(row) + "']/span").text)
-            accounts['VIIIX'].value = driver.webDriver.find_element(By.XPATH, "//*[@id='desktopTotalValue" + str(row) + "']/span").text.replace('$', '').replace(',','')
+            account.price = Decimal(driver.webDriver.find_element(By.ID, "desktopPrice" + str(row)).text.replace('$', ''))
+            book.updatePriceInGnucash(account.symbol, account.price)
+            account.setBalance(driver.webDriver.find_element(By.XPATH, "//*[@id='desktopTotalShares" + str(row) + "']/span").text)
+            account.value = driver.webDriver.find_element(By.XPATH, "//*[@id='desktopTotalValue" + str(row) + "']/span").text.replace('$', '').replace(',','')
             break
         else:   showMessage('Unknown Transaction: ' + description, "check Investment transaction list for undefined transaction")
     return investmentActivity
 
-def captureHealthEquityCashTransactionsAndBalance(driver, accounts):
+def captureHealthEquityCashTransactionsAndBalance(driver, account, lastMonth):
     locateHealthEquityWindow(driver)
     driver.webDriver.get('https://my.healthequity.com/Member/MemberTransactions.aspx?Subaccount=HSA')
-    lastMonth = getStartAndEndOfDateRange(datetime.today().date(), "month")
-    cashActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\hsacash.csv"
+    cashActivity = getHealthEquityCSVFile(account)
     open(cashActivity, 'w', newline='').truncate()
     driver.webDriver.find_element(By.XPATH, "/html/body/form/div[3]/div/div/div[1]/div/div[2]/span/div[2]/section/section[2]/div/div[2]/select").click() # Date range drop-down
     driver.webDriver.find_element(By.XPATH, "/html/body/form/div[3]/div/div/div[1]/div/div[2]/span/div[2]/section/section[2]/div/div[2]/select/option[1]").click() # All dates
@@ -129,7 +131,7 @@ def captureHealthEquityCashTransactionsAndBalance(driver, accounts):
                 csv.writer(open(cashActivity, 'a', newline='', encoding="utf-8")).writerow(transaction)
                 if "Interest" in description:
                     column+=1
-                    accounts['HECash'].setBalance(driver.webDriver.find_element(By.XPATH,"//*[@id='ctl00_modulePageContent_MemberTransactionsStyled_gvTransferLines']/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/span").text.replace('$','').replace(',',''))
+                    account.setBalance(driver.webDriver.find_element(By.XPATH,"//*[@id='ctl00_modulePageContent_MemberTransactionsStyled_gvTransferLines']/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/span").text.replace('$','').replace(',',''))
             elif 'Employee Contribution' in description or 'Investment: ' in description:   continue
             else:   showMessage('Unknown Transaction: ' + description, "check Cash transaction list for undefined transaction"); break
         elif postDate.month < lastMonth['endDate'].month or postDate.year < lastMonth['endDate'].year: break
@@ -138,30 +140,43 @@ def captureHealthEquityCashTransactionsAndBalance(driver, accounts):
 def getHealthEquityAccounts(book):
     return {'VIIIX': Security("HE Investment", book), 'HECash': USD("HE Cash", book)}
 
-def runHealthEquity(driver, accounts, book):
+def importHealthEquityTransactions(account, HEActivity, book, gnuCashTransactions):
+    existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
+    for row in csv.reader(open(HEActivity), delimiter=','):
+        postDate = datetime.strptime(row[0], '%Y-%m-%d').date()
+        rawDescription = row[1]
+        amount = Decimal(row[2])
+        try:                shares = float(row[3])
+        except IndexError:  exception = 'no shares found in transaction'
+        fromAccount = account.gnuAccount
+        if "VIIIX: Buy" in rawDescription:                                          description = "HSA VIIIX Investment"
+        elif "VIIIX: Dividend" in rawDescription:                                   description = "HSA Dividend"
+        elif "Employer Contribution" in rawDescription:                             description = 'HSA Employer Contribution'
+        elif "Interest" in rawDescription:                                          description = 'Interest Earned'
+        else:                                                                       description = rawDescription
+        toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
+        if 'HSA' in description:    splits = [{'amount': -amount, 'account':toAccount},{'amount': amount, 'account':fromAccount, 'quantity': round(Decimal(shares),3)}]
+        else:                       splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
+        book.writeUniqueTransaction(existingTransactions, postDate, description, splits)
+
+def runHealthEquity(driver, accounts, book, gnuCashTransactions, lastMonth):
     locateHealthEquityWindow(driver)
     getHealthEquityBalances(driver, accounts)
-    investmentActivity = captureHealthEquityInvestmentTransactionsAndBalances(driver, accounts, book)
-    book.importGnuTransaction(accounts['VIIIX'], investmentActivity, driver, 0)
-    cashActivity = captureHealthEquityCashTransactionsAndBalance(driver, accounts)
-    book.importGnuTransaction(accounts['HECash'], cashActivity, driver, 0)
-    accounts['VIIIX'].updateGnuBalanceAndValue(book.getBalance(accounts['VIIIX'].gnuAccount))
-    accounts['HECash'].updateGnuBalance(book.getBalance(accounts['HECash'].gnuAccount))
+    for accountName in list(accounts.keys()):
+        account = accounts.get(accountName)
+        if accountName == 'VIIIX':
+            HEactivity = captureHealthEquityInvestmentTransactionsAndBalances(driver, account, book, lastMonth)
+        elif accountName == 'HECash':
+            HEactivity = captureHealthEquityCashTransactionsAndBalance(driver, account, lastMonth)
+    importHealthEquityTransactions(account, HEactivity, book, gnuCashTransactions)
+    balance = book.getGnuAccountBalance(account.gnuAccount)
+    if hasattr(account, 'symbol'):  account.updateGnuBalanceAndValue(balance)
+    else:                           account.updateGnuBalance(balance)
 
 if __name__ == '__main__':
     driver, book = Driver("Chrome"), GnuCash('Finance')
     HEaccounts = getHealthEquityAccounts(book)
-    runHealthEquity(driver, HEaccounts, book)
+    lastMonth = getStartAndEndOfDateRange(timeSpan="month")
+    gnuCashTransactions = book.getTransactionsByDateRange(lastMonth)
+    runHealthEquity(driver, HEaccounts, book, gnuCashTransactions, lastMonth)
     book.closeBook()
-
-# if __name__ == '__main__':
-#     driver = Driver("Chrome")
-#     book = GnuCash('Finance')
-#     VIIIX = Security("HSA Investment", book)
-#     HECash = USD("HSA Cash", book)
-#     HEaccounts = {'VIIIX': VIIIX, 'HECash': HECash}
-#     captureHealthEquityCashTransactionsAndBalance(driver, HEaccounts)
-#     book.closeBook()
-
-if __name__ == '__main__':
-    locateHealthEquityWindow(driver)

@@ -1,4 +1,5 @@
-import os, time
+import os, time, csv
+from decimal import Decimal
 from datetime import datetime
 from selenium.common.exceptions import (ElementNotInteractableException,
                                         NoSuchElementException)
@@ -9,11 +10,11 @@ if __name__ == '__main__' or __name__ == "BoA":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
-    from Functions.GeneralFunctions import (getPassword, getUsername, showMessage, getAnswerForSecurityQuestion)
+    from Functions.GeneralFunctions import (getPassword, getUsername, showMessage, getAnswerForSecurityQuestion, getStartAndEndOfDateRange)
 else:
     from .Classes.Asset import USD
     from .Classes.GnuCash import GnuCash
-    from .Functions.GeneralFunctions import (getPassword, getUsername, showMessage, getAnswerForSecurityQuestion)
+    from .Functions.GeneralFunctions import (getPassword, getUsername, showMessage, getAnswerForSecurityQuestion, getStartAndEndOfDateRange)
 
 def locateBoAWindowAndOpenAccount(driver, account):
     found = driver.findWindowByUrl("secure.bankofamerica.com")
@@ -117,12 +118,34 @@ def claimBoARewards(driver, account):
             driver.webDriver.find_element(By.ID, "complete-otr-confirm").click() # compltete redemption
         except ElementNotInteractableException: exception = "caught"
 
+def importBoATransactions(account, boAActivity, book, gnuCashTransactions):
+    existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
+    num = 0
+    for row in csv.reader(open(boAActivity), delimiter=','):
+        if num <1: num+=1; continue # skip header
+        postDate = datetime.strptime(row[0], '%m/%d/%Y').date()
+        rawDescription = row[2]
+        amount = Decimal(row[4])
+        fromAccount = account.gnuAccount
+        if "BA ELECTRONIC PAYMENT" in description.upper():                          continue
+        elif "CASH REWARDS STATEMENT CREDIT" in description.upper():                description = "BoA CC Rewards"
+        elif "SPECTRUM" in description.upper():                                     description = "Internet Bill"
+        else:                                                                       description = rawDescription
+        toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
+        if toAccount == 'Expenses:Other':   account.setReviewTransactions(str(postDate) + ", " + description + ", " + str(amount))
+        splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
+        book.writeUniqueTransaction(existingTransactions, postDate, description, splits)
+
 def runBoA(driver, account, book):
     locateBoAWindowAndOpenAccount(driver, account.name)
+    dateRange = getStartAndEndOfDateRange(timeSpan=60)
+    gnuCashTransactions = book.getTransactionsByDateRange(dateRange)    
     account.setBalance(getBoABalance(driver, account.name))
-    transactionsCSV = exportBoATransactions(driver.webDriver, account.name, datetime.today())
+    boAActivity = exportBoATransactions(driver.webDriver, account.name, datetime.today())
     claimBoARewards(driver, account.name)
-    book.importGnuTransaction(account, transactionsCSV, driver)
+    importBoATransactions(account, boAActivity, book, gnuCashTransactions)
+    account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
+    # book.importGnuTransaction(account, boAActivity, driver)
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:  book.openGnuCashUI()
 
