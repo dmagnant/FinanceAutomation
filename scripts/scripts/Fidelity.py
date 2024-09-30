@@ -332,6 +332,8 @@ def runFidelityDaily(driver, accounts, book, gnuCashTransactions, dateRange):
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
+    dateRange = getStartAndEndOfDateRange(timeSpan=7)
+    gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
     accounts = getFidelityAccounts(book)
-    runFidelityDaily(driver, accounts, book)
+    runFidelityDaily(driver, accounts, book, gnuCashTransactions, dateRange)
     book.closeBook()

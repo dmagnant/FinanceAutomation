@@ -285,7 +285,7 @@ def fidelity(request):
     accounts = getFidelityAccounts(book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "main" in request.POST:              runFidelity(driver, accounts, book)
+        if "main" in request.POST:              runFidelityDaily(driver, accounts, book, gnuCashTransactions, dateRange)
         elif "balance" in request.POST:         getFidelityBalance(driver, accounts)
         elif "login" in request.POST:           locateFidelityWindow(driver)
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/fidelity"))
