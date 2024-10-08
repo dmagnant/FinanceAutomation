@@ -103,13 +103,14 @@ def presearchRewardsRedemptionAndBalanceUpdates(driver, account, book):
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
-    locatePresearchWindow(driver)
+    # locatePresearchWindow(driver)
     Presearch = Security("Presearch", book)
-    presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book)
-    Presearch.getData()
-    book.closeBook()
+    # presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book)
+    # Presearch.getData()
+    # book.closeBook()
     
-
-
+    Bitcoin = Security("Bitcoin", book)
+    Presearch.setPrice(Presearch.getPriceFromCoinGecko())
+    print(Presearch.price)
     
     

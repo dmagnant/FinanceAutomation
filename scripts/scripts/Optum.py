@@ -49,8 +49,8 @@ def getOptumBalance(driver, accounts):
     locateOptumWindow(driver)
     optumPostLoginPageURL = "https://secure.optumfinancial.com/portal/CC/cdhportal"
     if not driver.webDriver.current_url == optumPostLoginPageURL:   driver.webDriver.get(optumPostLoginPageURL)
-    accounts['OptumCash'].setBalance(driver.webDriver.find_element(By.ID,"availableToSpendBoxValue").text.replace("$","").replace(",",""))
-    accounts['VFIAX'].setValue(driver.webDriver.find_element(By.ID,"investmentBalance").text.replace("$","").replace(",",""))
+    accounts['OptumCash'].setBalance(driver.getIDElementTextOnceAvailable("availableToSpendBoxValue").replace("$","").replace(",",""))
+    accounts['VFIAX'].setValue(driver.getIDElementTextOnceAvailable("investmentBalance").replace("$","").replace(",",""))
 
 def getOptumPricesSharesAndCost(driver, accounts, book):
     locateOptumWindow(driver)
@@ -70,9 +70,9 @@ def captureOptumTransactions(driver, lastMonth):
     open(optumActivity, 'w', newline='').truncate()
     row = 0
     if "investcenter" not in driver.webDriver.current_url:
-        driver.clickXPATHElementOnceAvaiable("//*[@id='investmentBox']/a") # Investments
-    driver.clickXPATHElementOnceAvaiable("//*[@id='invest-center-submenu']/li[2]/a") # Investment Transactions
-    driver.clickXPATHElementOnceAvaiable("//*[@id='investCenter']/div[3]/div[1]/div/div/a") # View all settled Transactions
+        driver.clickXPATHElementOnceAvailable("//*[@id='investmentBox']/a") # Investments
+    driver.clickXPATHElementOnceAvailable("//*[@id='invest-center-submenu']/li[2]/a") # Investment Transactions
+    driver.clickXPATHElementOnceAvailable("//*[@id='investCenter']/div[3]/div[1]/div/div/a") # View all settled Transactions
     driver.webDriver.find_element(By.ID,"startDate").send_keys(lastMonth['startDate'].strftime('%m/%d/%Y'))
     driver.webDriver.find_element(By.ID,"endDate").send_keys(lastMonth['endDate'].strftime('%m/%d/%Y'))
     driver.webDriver.find_element(By.XPATH,"//*[@id='customDates']/div[4]/input").click() # Search
@@ -113,7 +113,7 @@ def importOptumTransactions(account, optumActivity, book, gnuCashTransactions):
         else:                                               description = rawDescription
         toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
         splits = [{'amount': -amount, 'account':toAccount},{'amount': amount, 'account':fromAccount, 'quantity': round(Decimal(shares),3)}]
-        book.writeUniqueTransaction(existingTransactions, postDate, description, splits)
+        book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits)
 
 def runOptum(driver, accounts, book, gnuCashTransactions, lastMonth):
     locateOptumWindow(driver)

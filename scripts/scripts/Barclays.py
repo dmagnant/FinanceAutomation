@@ -100,18 +100,19 @@ def importBarclaysTransactions(account, barclaysActivity, book, gnuCashTransacti
     existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
     num=0
     for row in csv.reader(open(barclaysActivity), delimiter=','):
+        reviewTransaction = False
         if num <5: num+=1; continue # skip header lines
         postDate = datetime.strptime(row[0], '%m/%d/%Y').date()
         rawDescription = row[1]
         amount = Decimal(row[3])
         fromAccount = account.gnuAccount
-        if "PAYMENT RECEIVED" in description.upper():   continue
-        elif "BARCLAYCARD US" in description.upper() and float(amount) > 0:         description = "Barclays CC Rewards"
+        if "PAYMENT RECEIVED" in rawDescription.upper():   continue
+        elif "BARCLAYCARD US" in rawDescription.upper() and float(amount) > 0:         description = "Barclays CC Rewards"
         else:                                                                       description = rawDescription
         toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
-        if toAccount == 'Expenses:Other':   account.setReviewTransactions(str(postDate) + ", " + description + ", " + str(amount))
+        if toAccount == 'Expenses:Other':   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
-        book.writeUniqueTransaction(existingTransactions, postDate, description, splits)
+        book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)
         account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
 
 

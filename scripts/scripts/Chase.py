@@ -75,7 +75,7 @@ def claimChaseRewards(driver):
     balance = driver.webDriver.find_element(By.XPATH,"//*[@id='pointsBalanceId']/div/span[1]").text
     if float(balance) > 0:
         n=1
-        while n<=5:
+        while n<=12:
             pyautogui.press('tab'); time.sleep(1);  n+=1
         for num in balance: pyautogui.press(num)
         pyautogui.press('tab'); pyautogui.press('tab')
@@ -94,18 +94,22 @@ def importChaseTransactions(account, chaseActivity, book, gnuCashTransactions):
     existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
     num = 0
     for row in csv.reader(open(chaseActivity), delimiter=','):
+        reviewTransaction = False
         if num <1: num+=1; continue # skip header
         postDate = datetime.strptime(row[1], '%m/%d/%Y').date()
         rawDescription = row[2]
+        transactionType = row[3]        
         amount = Decimal(row[5])
         fromAccount = account.gnuAccount
         if "AUTOMATIC PAYMENT" in rawDescription.upper():                           continue
         elif "REDEMPTION CREDIT" in rawDescription.upper() and float(amount) > 0:   description = "Chase CC Rewards"
         else:                                                                       description = rawDescription
-        toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
-        if toAccount == 'Expenses:Other':   account.setReviewTransactions(str(postDate) + ", " + description + ", " + str(amount))
+        if transactionType == "Food & Drink":   toAccount = book.getGnuAccountName('Bars & Restaurants')
+        elif transactionType == 'Groceries':    toAccount = book.getGnuAccountName('Groceries')
+        else:                                   toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
+        if toAccount == 'Expenses:Other':   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
-        book.writeUniqueTransaction(existingTransactions, postDate, description, splits)
+        book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)
 
 def runChase(driver, account, book):
     locateChaseWindow(driver)
@@ -113,7 +117,6 @@ def runChase(driver, account, book):
     gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
     account.setBalance(getChaseBalance(driver))
     chaseActivity = exportChaseTransactions(driver, datetime.today())
-    chaseActivity = r'C:\Users\dmagn\Downloads\Chase2715_Activity20240707_20240806_20240808' + '.csv'
     claimChaseRewards(driver)
     importChaseTransactions(account, chaseActivity, book, gnuCashTransactions)
     account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
@@ -128,7 +131,6 @@ if __name__ == '__main__':
     runChase(driver, Chase, book)
     Chase.getData()
     book.closeBook()
-    
     
 # if __name__ == '__main__':
 #     driver = Driver("Chrome")

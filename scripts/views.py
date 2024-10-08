@@ -15,6 +15,7 @@ from scripts.scripts.Discover import *
 from scripts.scripts.Eternl import *
 from scripts.scripts.Exodus import *
 from scripts.scripts.Fidelity import *
+from scripts.scripts.
 from scripts.scripts.HealthEquity import *
 from scripts.scripts.IoPay import *
 from scripts.scripts.Kraken import *
@@ -50,9 +51,11 @@ def scripts(request):
 def ally(request):
     book = GnuCash('Home')
     Ally = USD("Ally", book)
+    dateRange = getStartAndEndOfDateRange(timeSpan=7)
+    gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "main" in request.POST:runAlly(driver, Ally, book)
+        if "main" in request.POST:runAlly(driver, Ally, book, gnuCashTransactions, dateRange)
         elif "energy" in request.POST:  updateEnergyBillAmounts(driver, book, request.POST['energyTotal'])        
         elif "login" in request.POST:   locateAllyWindow(driver)
         elif "logout" in request.POST:  allyLogout(driver)
@@ -188,17 +191,19 @@ def creditCards(request):
 def dailyBank(request):
     personalBook, jointBook = GnuCash('Finance'), GnuCash('Home')
     bankAccounts = getDailyBankAccounts(personalBook, jointBook)
+    dateRange = getStartAndEndOfDateRange(timeSpan=7)
+    gnuCashTransactions = personalBook.getTransactionsByDateRange(dateRange)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "bank" in request.POST:           runDailyBank(bankAccounts, personalBook, jointBook)
-        elif "allyMain" in request.POST:        runAlly(driver, bankAccounts['Ally'], jointBook)
+        if "bank" in request.POST:              runDailyBank(bankAccounts, personalBook, jointBook, gnuCashTransactions, dateRange)
+        elif "allyMain" in request.POST:        runAlly(driver, bankAccounts['Ally'], jointBook, gnuCashTransactions, dateRange)
         elif "allyLogin" in request.POST:       locateAllyWindow(driver)
         elif "allyLogout" in request.POST:      allyLogout(driver)        
         elif "allyBalance" in request.POST:     bankAccounts['Ally'].setBalance(getAllyBalance(driver))
         elif "paypal" in request.POST:          runPaypal(driver)
         elif "tearDown" in request.POST:        tearDown(driver)
         elif "paypalAdjust" in request.POST:    checkUncategorizedPaypalTransactions(driver, personalBook, bankAccounts['Paypal'], getStartAndEndOfDateRange(timeSpan=7))
-        elif "sofiMain" in request.POST:        runSofi(driver, bankAccounts['Sofi'], personalBook)
+        elif "sofiMain" in request.POST:        runSofi(driver, bankAccounts['Sofi'], personalBook, gnuCashTransactions, dateRange)
         elif "sofiLogin" in request.POST:       locateSofiWindow(driver)
         elif "sofiLogout" in request.POST:      sofiLogout(driver)
         elif "sofiBalances" in request.POST:    getSofiBalanceAndOrientPage(driver, bankAccounts['Sofi']['Checking']); getSofiBalanceAndOrientPage(driver, bankAccounts['Sofi']['Savings'])
@@ -225,7 +230,7 @@ def dailyMR(request):
         elif "presearchRewards" in request.POST:        presearchRewardsRedemptionAndBalanceUpdates(driver, mrAccounts['Presearch'], personalBook)
         elif "swagbucksMain" in request.POST:           runSwagbucks(driver, True, mrAccounts['Swagbucks'], personalBook) if "Run Alu" in request.POST else runSwagbucks(driver, False, mrAccounts['Swagbucks'], personalBook)
         elif "swagbucksLogin" in request.POST:          locateSwagBucksWindow(driver)
-        elif "swagbucksAlu" in request.POST:            runAlusRevenge(driver.webDriver)
+        elif "swagbucksAlu" in request.POST:            runAlusRevenge(driver)
         elif 'swagbucksBalance' in request.POST:        mrAccounts['Swagbucks'].setBalance(getSwagBucksBalance(driver))
         elif "swagbucksContent" in request.POST:        swagBuckscontentDiscovery(driver)
         elif "swabucksSearch" in request.POST:          swagbucksSearch(driver)
@@ -291,7 +296,20 @@ def fidelity(request):
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/fidelity"))
     book.closeBook()
     context = {'accounts': accounts};   return returnRender(request, "banking/fidelity.html", context)
-    
+
+def gamestopCC(request):
+    book = GnuCash('Finance')
+    GamestopCC = USD("GamestopCC", book)
+    if request.method == 'POST':
+        driver = Driver("Chrome")
+        if "main" in request.POST:              runGamestopCC(driver, GamestopCC, book)
+        elif "login" in request.POST:           locateGamestopCCWindow(driver)
+        elif "balance" in request.POST:         GamestopCC.setBalance(getGamestopCCBalance(driver))
+        elif "rewards" in request.POST:         claimGamestopCCRewards(driver, GamestopCC)   
+        elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/gamestopCC"))
+    context = {'account': GamestopCC}
+    book.closeBook();   return returnRender(request, "banking/creditcard.html", context)
+  
 def healthEquity(request):
     book = GnuCash('Finance')
     VIIIX, HECash, V401k = Security("HE Investment", book), USD("HE Cash", book), USD("Vanguard401k", book)
@@ -379,10 +397,12 @@ def myConstant(request):
 def optum(request):
     book = GnuCash('Finance')
     VFIAX, OptumCash = Security("VFIAX", book), USD("Optum Cash", book)
+    lastMonth = getStartAndEndOfDateRange(timeSpan="month")
+    gnuCashTransactions = book.getTransactionsByDateRange(lastMonth)
     OptumAccounts = {'VFIAX': VFIAX, 'OptumCash': OptumCash}
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "main" in request.POST:              runOptum(driver, OptumAccounts, book)
+        if "main" in request.POST:              runOptum(driver, OptumAccounts, book, gnuCashTransactions, lastMonth)
         elif "login" in request.POST:           locateOptumWindow(driver)
         elif "balance" in request.POST:         getOptumBalance(driver, OptumAccounts, book)
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/optum"))
@@ -447,9 +467,11 @@ def psCoupons(request):
 def sofi(request):
     book = GnuCash('Finance')
     accounts = getSofiAccounts(book)
+    dateRange = getStartAndEndOfDateRange(timeSpan=7)
+    gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "main" in request.POST:              runSofi(driver, accounts, book)
+        if "main" in request.POST:              runSofi(driver, accounts, book, gnuCashTransactions, dateRange)
         elif "login" in request.POST:           locateSofiWindow(driver)
         elif "logout" in request.POST:          sofiLogout(driver)            
         elif "balances" in request.POST:        getSofiBalanceAndOrientPage(driver, accounts['Checking']);  getSofiBalanceAndOrientPage(driver, accounts['Savings'])
@@ -464,7 +486,7 @@ def swagbucks(request):
         driver = Driver("Chrome")
         if "main" in request.POST:                  runSwagbucks(driver, True, Swagbucks, book) if "Run Alu" in request.POST else runSwagbucks(driver, False, Swagbucks, book)
         elif "login" in request.POST:               locateSwagBucksWindow(driver)
-        elif "alu" in request.POST:                 runAlusRevenge(driver.webDriver)
+        elif "alu" in request.POST:                 runAlusRevenge(driver)
         elif 'balance' in request.POST:             Swagbucks.setBalance(getSwagBucksBalance(driver))           
         elif "content" in request.POST:             swagBuckscontentDiscovery(driver)
         elif "search" in request.POST:              swagbucksSearch(driver)

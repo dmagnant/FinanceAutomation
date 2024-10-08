@@ -11,7 +11,7 @@ if __name__ == '__main__' or __name__ == "Monthly":
     from Ledger import runLedger, getLedgerAccounts
     from HealthEquity import runHealthEquity, locateHealthEquityWindow, getHealthEquityAccounts
     from IoPay import runIoPay, locateIoPayWindow
-    from Worthy import getWorthyBalance, locateWorthyWindow
+    from Worthy import runWorthy, locateWorthyWindow
     from Vanguard import runVanguard401k, locateVanguardWindow, getVanguardAccounts
     from Optum import runOptum, locateOptumWindow, getOptumAccounts
 else:
@@ -22,7 +22,7 @@ else:
     from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentsMonthly
     from .HealthEquity import runHealthEquity, locateHealthEquityWindow, getHealthEquityAccounts
     from .IoPay import runIoPay, locateIoPayWindow
-    from .Worthy import getWorthyBalance, locateWorthyWindow
+    from .Worthy import runWorthy, locateWorthyWindow
     from .Vanguard import runVanguard401k, locateVanguardWindow, getVanguardAccounts
     from .Optum import runOptum, locateOptumWindow, getOptumAccounts
     
@@ -42,52 +42,6 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         IoTex = Security("IoTex", personalBook)   
         accounts = {'CryptoPortfolio': CryptoPortfolio, 'Cardano': Cardano,'IoTex': IoTex, 'ledgerAccounts': ledgerAccounts}
     return accounts
-
-def monthlyRoundUp(account, myBook, date):
-    change = round(Decimal(account.balance - float(account.gnuBalance)), 2)
-    if account.name == "MyConstant" or account.name == "Worthy":    transactionVariables = {'postDate': date, 'description': "Interest", 'amount': -change, 'fromAccount': "Income:Investments:Interest"}
-    myBook.writeGnuTransaction(transactionVariables, account.gnuAccount)
-    account.updateGnuBalance(myBook.getGnuAccountBalance(account.gnuAccount))
-    
-def updateEnergyBillAmounts(driver, book, amount):
-    driver.openNewWindow('https://www.we-energies.com/secure/auth/l/acct/summary_accounts.aspx')
-    today = datetime.today()
-    time.sleep(2)
-    try:
-        # driver.webDriver.find_element(By.XPATH, "//*[@id='signInName']").send_keys(getUsername('WE-Energies (Home)'))
-        # driver.webDriver.find_element(By.XPATH, "//*[@id='password']").send_keys(getPassword('WE-Energies (Home)'))
-        driver.webDriver.find_element(By.XPATH, "//*[@id='next']").click() # login
-        time.sleep(4)
-        driver.webDriver.find_element(By.XPATH, "//*[@id='notInterested']/a").click # close out of app notice
-    except NoSuchElementException:  exception = "caught"
-    driver.webDriver.find_element(By.XPATH, "//*[@id='mainContentCopyInner']/ul/li[2]/a").click() # view bill history
-    time.sleep(4)
-    billRow, billColumn, billNotFound = 2, 7, True
-    while billNotFound:
-        weBillAmount = driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span/span").text.replace('$', '')
-        if amount == weBillAmount:  billNotFound = False
-        else:   billRow += 1
-    billColumn -= 2
-    weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
-    gas = Decimal(driver.webDriver.find_element(By.XPATH, weAmountPath).text.strip('$'))
-    billColumn -= 2
-    weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
-    electricity = Decimal(driver.webDriver.find_element(By.XPATH, weAmountPath).text.strip('$'))
-    splits = []
-    splits.append(book.createSplit(electricity, "Expenses:Utilities:Electricity"))
-    splits.append(book.createSplit(gas, "Expenses:Utilities:Gas"))
-    splits.append(book.createSplit(-round(Decimal(amount),2), book.getGnuAccountName('Ally')))
-    book.writeTransaction(today.date().replace(day=24), 'WE ENERGIES PAYMENT', splits)
-    print(f'posted transaction: \n' f'date: {str(today.date())} \n' f'total: {str(amount)} \n' f'electricity: {str(electricity)}\n' f'gas: {str(gas)}')
-    # book.writeUtilityTransaction({'electricity': electricity, 'gas': gas, 'total': amount})
-    # splits=[Split(value=transactionInfo['electricity'], account=self.getGnuAccount("Expenses:Utilities:Electricity")),
-    #     Split(value=transactionInfo['gas'], account=self.getGnuAccount("Expenses:Utilities:Gas")),
-    #     Split(value=-round(Decimal(transactionInfo['total']), 2), account=self.getGnuAccount("Assets:Ally Checking Account"))]
-    # Transaction(post_date=today.date().replace(day=24), currency=book.currencies(mnemonic="USD"), description='WE ENERGIES PAYMENT', splits=splits)
-    book.flush()
-    updateSpreadsheet('Home', str(today.year) + ' Balance', 'Energy Bill', today.month, -float(amount))
-    openSpreadsheet(driver, 'Home', str(today.year) + ' Balance')
-    driver.findWindowByUrl("/scripts/ally")
     
 def payWaterBill(driver, book):
     paymentAccountDetails = json.loads(getNotes('Ally Bank'))
@@ -136,11 +90,10 @@ def runUSD(driver, accounts, personalBook):
     loginToUSDAccounts(driver)
     lastMonth = getStartAndEndOfDateRange(timeSpan="month")
     gnuCashTransactions = personalBook.getTransactionsByDateRange(lastMonth)
-    getWorthyBalance(driver, accounts['Worthy'])
-    monthlyRoundUp(accounts['Worthy'], personalBook, lastMonth['endDate'])
+    runWorthy(driver, accounts['Worthy'], personalBook, gnuCashTransactions, lastMonth['endDate'])
     runHealthEquity(driver, accounts['HealthEquity'], personalBook, gnuCashTransactions, lastMonth)
-    runOptum(driver, accounts['Optum'], personalBook)
-    runVanguard401k(driver, accounts['Vanguard'], personalBook)
+    runOptum(driver, accounts['Optum'], personalBook, gnuCashTransactions, lastMonth)
+    runVanguard401k(driver, accounts['Vanguard'], personalBook, gnuCashTransactions, lastMonth)
     accounts['Pension'].setCost(accounts['Pension'].gnuBalance - accounts['Pension'].getInterestTotalForDateRange(personalBook))
     accounts['Savings'].setCost(accounts['Savings'].gnuBalance - accounts['Savings'].getInterestTotalForDateRange(personalBook))
     updateInvestmentsMonthly(driver,personalBook,accounts)

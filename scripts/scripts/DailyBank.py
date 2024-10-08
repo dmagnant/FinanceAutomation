@@ -5,7 +5,7 @@ if __name__ == '__main__' or __name__ == "Daily":
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import getStartAndEndOfDateRange
-    from Functions.SpreadsheetFunctions import openSpreadsheet, updateInvestmentsDaily, updateInvestmentsDailyAmended
+    from Functions.SpreadsheetFunctions import openSpreadsheet, updateInvestmentsDailyAmended
     from Paypal import runPaypal, checkUncategorizedPaypalTransactions
     from Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from Sofi import runSofi, sofiLogout, getSofiAccounts
@@ -16,7 +16,7 @@ else:
     from .Classes.WebDriver import Driver
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import getStartAndEndOfDateRange
-    from .Functions.SpreadsheetFunctions import openSpreadsheet, updateInvestmentsDaily, updateInvestmentsDailyAmended
+    from .Functions.SpreadsheetFunctions import openSpreadsheet, updateInvestmentsDailyAmended
     from .Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from .Sofi import runSofi, sofiLogout, getSofiAccounts
     from. Paypal import runPaypal, checkUncategorizedPaypalTransactions
@@ -31,11 +31,9 @@ def getDailyBankAccounts(personalBook, jointBook=''):
     Fidelity = getFidelityAccounts(personalBook)
     return {'CryptoPortfolio': CryptoPortfolio, 'Sofi':Sofi, 'Ally': Ally, 'Presearch': Presearch, 'Paypal': Paypal, 'Fidelity': Fidelity}
 
-def runDailyBank(accounts, personalBook, jointBook):
+def runDailyBank(accounts, personalBook, jointBook, gnuCashTransactions, dateRange):
     driver = Driver("Chrome")
-    dateRange = getStartAndEndOfDateRange(timeSpan=7)
-    gnuCashTransactions = personalBook.getTransactionsByDateRange(dateRange)
-    runSofi(driver, accounts['Sofi'], personalBook)
+    runSofi(driver, accounts['Sofi'], personalBook, gnuCashTransactions, dateRange)
     runFidelityDaily(driver, accounts['Fidelity'], personalBook, gnuCashTransactions, dateRange)
     # runAlly(driver, accounts['Ally'], jointBook, gnuCashTransactions, dateRange)
     presearchRewardsRedemptionAndBalanceUpdates(driver, accounts['Presearch'], personalBook)
@@ -47,6 +45,7 @@ def runDailyBank(accounts, personalBook, jointBook):
     personalBook.purgeOldGnucashFiles()
     jointBook.purgeOldGnucashFiles()
     driver.findWindowByUrl("/scripts/daily")
+    
 def tearDown(driver):
     sofiLogout(driver)
     # allyLogout(driver)        
@@ -56,6 +55,8 @@ def tearDown(driver):
 #     personalBook = GnuCash('Finance')
 #     jointBook = GnuCash('Home')
 #     accounts = getDailyBankAccounts(personalBook, jointBook)
+#     dateRange = getStartAndEndOfDateRange(timeSpan=7)
+#     gnuCashTransactions = personalBook.getTransactionsByDateRange(dateRange)
 #     GME = runDailyBank(accounts, personalBook, jointBook)
 #     personalBook.closeBook()
 #     jointBook.closeBook()

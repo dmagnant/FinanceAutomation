@@ -59,7 +59,15 @@ def getHealthEquityCSVFile(account):
     accountName = account.name.replace(' ','').lower()
     return setDirectory() + f"\Projects\Coding\Python\FinanceAutomation\Resources\{accountName}.csv"
 
-def captureHealthEquityInvestmentTransactionsAndBalances(driver, account, book, lastMonth):
+def clearHEDate(dates):
+    for d in dates:
+        num = 0
+        while num < 10:
+            d.click()
+            d.send_keys(Keys.BACKSPACE)
+            num += 1  
+
+def captureHealthEquityInvestmentTransactionsBalanceAndCost(driver, account, book, lastMonth):
     locateHealthEquityWindow(driver)
     investmentActivity = getHealthEquityCSVFile(account)
     open(investmentActivity, 'w', newline='').truncate()
@@ -69,22 +77,26 @@ def captureHealthEquityInvestmentTransactionsAndBalances(driver, account, book, 
     driver.webDriver.find_element(By.ID, "EditPortfolioTab").click() # Portfolio performance
     time.sleep(4)
     driver.webDriver.find_element(By.ID, "fundSelection").click() # Click Investment Fund Option
-    num = 1
+    num = 0
+    startDateElement = driver.webDriver.find_element(By.ID, "startDate")
+    endDateElement = driver.webDriver.find_element(By.ID, "endDate")
+    clearHEDate([startDateElement, endDateElement])  
+    startDateElement.send_keys(datetime.strftime(datetime(2021,1,1,0,0).date(), '%m/%d/%Y'))
+    endDateElement.send_keys(datetime.strftime(lastMonth['endDate'], '%m/%d/%Y'))
+    driver.webDriver.find_element(By.ID, "fundPerformanceRefresh").click() # Refresh
+    costHeader = driver.webDriver.find_element(By.XPATH, "//*[@id='EditPortfolioTab-panel']/member-portfolio-edit-display/member-overall-portfolio-performance-display/div[1]/div/div[2]").text
+    if 'Trades' in costHeader:
+        cost = driver.webDriver.find_element(By.XPATH, "//*[@id='EditPortfolioTab-panel']/member-portfolio-edit-display/member-overall-portfolio-performance-display/div[1]/div/div[2]/div/span").text.replace('$', '').replace(',','')
+        print(cost)
+        account.setCost(cost)
+    num = 1        
     while True:
         element = driver.webDriver.find_element(By.XPATH, "//*[@id='fundSelection']/option[" + str(num) + "]")
         if element.text == 'VIIIX': element.click(); break
         else:   num+=1
-    num = 0
-    startDateElement = driver.webDriver.find_element(By.ID, "startDate")
-    endDateElement = driver.webDriver.find_element(By.ID, "endDate")
-    while num < 10:     # enter Start Date and End Date
-        startDateElement.click()
-        startDateElement.send_keys(Keys.BACKSPACE)
-        endDateElement.click()
-        endDateElement.send_keys(Keys.BACKSPACE)  
-        num += 1
+    clearHEDate([startDateElement])  
     startDateElement.send_keys(datetime.strftime(lastMonth['startDate'], '%m/%d/%Y'))
-    endDateElement.send_keys(datetime.strftime(lastMonth['endDate'], '%m/%d/%Y'))
+    # endDateElement.send_keys(datetime.strftime(lastMonth['endDate'], '%m/%d/%Y'))
     driver.webDriver.find_element(By.ID, "fundPerformanceRefresh").click() # Refresh
     time.sleep(1)
     row = 1 # Skip 0 which should be "Starting Balance"
@@ -104,6 +116,7 @@ def captureHealthEquityInvestmentTransactionsAndBalances(driver, account, book, 
             account.value = driver.webDriver.find_element(By.XPATH, "//*[@id='desktopTotalValue" + str(row) + "']/span").text.replace('$', '').replace(',','')
             break
         else:   showMessage('Unknown Transaction: ' + description, "check Investment transaction list for undefined transaction")
+
     return investmentActivity
 
 def captureHealthEquityCashTransactionsAndBalance(driver, account, lastMonth):
@@ -157,7 +170,7 @@ def importHealthEquityTransactions(account, HEActivity, book, gnuCashTransaction
         toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
         if 'HSA' in description:    splits = [{'amount': -amount, 'account':toAccount},{'amount': amount, 'account':fromAccount, 'quantity': round(Decimal(shares),3)}]
         else:                       splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
-        book.writeUniqueTransaction(existingTransactions, postDate, description, splits)
+        book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits)
 
 def runHealthEquity(driver, accounts, book, gnuCashTransactions, lastMonth):
     locateHealthEquityWindow(driver)
@@ -165,13 +178,13 @@ def runHealthEquity(driver, accounts, book, gnuCashTransactions, lastMonth):
     for accountName in list(accounts.keys()):
         account = accounts.get(accountName)
         if accountName == 'VIIIX':
-            HEactivity = captureHealthEquityInvestmentTransactionsAndBalances(driver, account, book, lastMonth)
+            HEactivity = captureHealthEquityInvestmentTransactionsBalanceAndCost(driver, account, book, lastMonth)
         elif accountName == 'HECash':
             HEactivity = captureHealthEquityCashTransactionsAndBalance(driver, account, lastMonth)
-    importHealthEquityTransactions(account, HEactivity, book, gnuCashTransactions)
-    balance = book.getGnuAccountBalance(account.gnuAccount)
-    if hasattr(account, 'symbol'):  account.updateGnuBalanceAndValue(balance)
-    else:                           account.updateGnuBalance(balance)
+        importHealthEquityTransactions(account, HEactivity, book, gnuCashTransactions)
+        balance = book.getGnuAccountBalance(account.gnuAccount)
+        if hasattr(account, 'symbol'):  account.updateGnuBalanceAndValue(balance)
+        else:                           account.updateGnuBalance(balance)
 
 if __name__ == '__main__':
     driver, book = Driver("Chrome"), GnuCash('Finance')

@@ -70,105 +70,99 @@
                             <button type="submit" name="fidelityLogin">Login</button>
                             <button type="submit" name="fidelityBalance">Balance</button>
                         </form><br>
-                        <div style="display: table-row;">
-                            <div style="display:table-cell;text-align:right">
-                                {{bankAccounts.Fidelity.rIRA.name}} balance: &thinsp; <br>
-                                gnuBalance: &thinsp; <br><br>
-                                {{bankAccounts.Fidelity.riraSPAXX.symbol}} balance: &thinsp; <br>
-                                gnuBalance: &thinsp; <br><br>
-                                {{bankAccounts.Fidelity.riraVTI.symbol}} shares: &thinsp; <br>
-                                gnuBalance shares: &thinsp; <br>
-                                {{bankAccounts.Fidelity.riraVTI.symbol}} value: &thinsp; <br>
-                                ${{bankAccounts.Fidelity.riraVTI.price}} x shares: &thinsp; <br><br>
-                                {{bankAccounts.Fidelity.riraVXUS.symbol}} shares: &thinsp; <br>
-                                gnuBalance shares: &thinsp; <br>
-                                {{bankAccounts.Fidelity.riraVXUS.symbol}} value: &thinsp; <br>
-                                ${{bankAccounts.Fidelity.riraVXUS.price}} x shares: &thinsp; <br><br>
-                                {{bankAccounts.Fidelity.riraGME.symbol}} shares: &thinsp; <br>
-                                gnuBalance shares: &thinsp; <br>
-                                {{bankAccounts.Fidelity.riraGME.symbol}} value: &thinsp; <br>
-                                ${{bankAccounts.Fidelity.riraGME.price}} x shares: &thinsp; <br><br>
-                                {{bankAccounts.Fidelity.riraOptions.name}}: &thinsp; <br>
-                                gnuBalance: &thinsp; <br><br>
-                            </div>
-                            <div style="display:table-cell;text-align:left">
-                                <b>${{bankAccounts.Fidelity.rIRA.balance}}<br>
-                                ${{bankAccounts.Fidelity.rIRA.gnuBalance}}<br><br>
-                                ${{bankAccounts.Fidelity.riraSPAXX.balance}}<br>
-                                ${{bankAccounts.Fidelity.riraSPAXX.gnuBalance}}<br><br>
-                                {{bankAccounts.Fidelity.riraVTI.balance}} {{bankAccounts.Fidelity.riraVTI.symbol}}<br>
-                                {{bankAccounts.Fidelity.riraVTI.gnuBalance}} {{bankAccounts.Fidelity.riraVTI.symbol}}<br>
-                                ${{bankAccounts.Fidelity.riraVTI.value}}<br>
-                                ${{bankAccounts.Fidelity.riraVTI.gnuValue}}<br><br>
-                                {{bankAccounts.Fidelity.riraVXUS.balance}} {{bankAccounts.Fidelity.riraVXUS.symbol}}<br>
-                                {{bankAccounts.Fidelity.riraVXUS.gnuBalance}} {{bankAccounts.Fidelity.riraVXUS.symbol}}<br>
-                                ${{bankAccounts.Fidelity.riraVXUS.value}}<br>
-                                ${{bankAccounts.Fidelity.riraVXUS.gnuValue}}<br><br>
-                                {{bankAccounts.Fidelity.riraGME.balance}} {{bankAccounts.Fidelity.riraGME.symbol}}<br>
-                                {{bankAccounts.Fidelity.riraGME.gnuBalance}} {{bankAccounts.Fidelity.riraGME.symbol}}<br>
-                                ${{bankAccounts.Fidelity.riraGME.value}}<br>
-                                ${{bankAccounts.Fidelity.riraGME.gnuValue}}<br><br>
-                                ${{bankAccounts.Fidelity.riraOptions.balance}}<br>
-                                ${{bankAccounts.Fidelity.riraOptions.gnuBalance}}<br><br></b>
-                            </div>
-                        </div>  
-                    </div>
-                    <div style="width: 18%; display:table-cell">
-                        <br><br><br><br>
-                        <div style="display: table-row;">
-                            <div style="display:table-cell;text-align:right">
-                                {{bankAccounts.Fidelity.Brokerage.name}} balance: &thinsp; <br>
-                                gnuBalance: &thinsp; <br><br>
-                                {{bankAccounts.Fidelity.brSPAXX.symbol}} balance: &thinsp; <br>
-                                gnuBalance: &thinsp; <br><br>
-                                {{bankAccounts.Fidelity.brGME.symbol}} shares: &thinsp; <br>
-                                gnuBalance shares: &thinsp; <br>
-                                {{bankAccounts.Fidelity.brGME.symbol}} value: &thinsp; <br>
-                                ${{bankAccounts.Fidelity.brGME.price}} x shares: &thinsp; <br><br>
-                                {{bankAccounts.Fidelity.brOptions.name}}: &thinsp; <br>
-                                gnuBalance: &thinsp; <br><br>
-                            </div>
-                            <div style="display:table-cell;text-align:left">
-                                <b>${{bankAccounts.Fidelity.Brokerage.balance}}<br>
-                                ${{bankAccounts.Fidelity.Brokerage.gnuBalance}}<br><br>
-                                ${{bankAccounts.Fidelity.brSPAXX.balance}}<br>
-                                ${{bankAccounts.Fidelity.brSPAXX.gnuBalance}}<br><br>
-                                {{bankAccounts.Fidelity.brGME.balance}} {{bankAccounts.Fidelity.brGME.symbol}}<br>
-                                {{bankAccounts.Fidelity.brGME.gnuBalance}} {{bankAccounts.Fidelity.brGME.symbol}}<br>
-                                ${{bankAccounts.Fidelity.brGME.value}}<br>
-                                ${{bankAccounts.Fidelity.brGME.gnuValue}}<br><br>
-                                ${{bankAccounts.Fidelity.brOptions.balance}}<br>
-                                ${{bankAccounts.Fidelity.brOptions.gnuBalance}}<br><br></b>
-                            </div>
+                        <div style="display:table-cell;text-align:right">
+                            {{bankAccounts.Fidelity.Brokerage.name}} balance: &thinsp; <br>
+                            gnuBalance: &thinsp; <br><br>
+                            {{bankAccounts.Fidelity.brGME.symbol}} shares: &thinsp; <br>
+                            gnuBalance shares: &thinsp; <br>
+                            {{bankAccounts.Fidelity.brGME.symbol}} value: &thinsp; <br>
+                            ${{bankAccounts.Fidelity.brGME.price}} x shares: &thinsp; <br><br>
+                            {{bankAccounts.Fidelity.brOptions.name}}: &thinsp; <br>
+                            gnuBalance: &thinsp; <br><br>
+                            {{bankAccounts.Fidelity.brSPAXX.symbol}} balance: &thinsp; <br>
+                            gnuBalance: &thinsp; <br><br>
+                        </div>
+                        <div style="display:table-cell;text-align:left">
+                            <b>${{bankAccounts.Fidelity.Brokerage.balance}}<br>
+                            ${{bankAccounts.Fidelity.Brokerage.gnuBalance}}<br><br>
+                            {{bankAccounts.Fidelity.brGME.balance}} {{bankAccounts.Fidelity.brGME.symbol}}<br>
+                            {{bankAccounts.Fidelity.brGME.gnuBalance}} {{bankAccounts.Fidelity.brGME.symbol}}<br>
+                            ${{bankAccounts.Fidelity.brGME.value}}<br>
+                            ${{bankAccounts.Fidelity.brGME.gnuValue}}<br><br>
+                            ${{bankAccounts.Fidelity.brOptions.balance}}<br>
+                            ${{bankAccounts.Fidelity.brOptions.gnuBalance}}<br><br>
+                            ${{bankAccounts.Fidelity.brSPAXX.balance}}<br>
+                            ${{bankAccounts.Fidelity.brSPAXX.gnuBalance}}<br><br></b>                       
                         </div>
                     </div>
                     <div style="width: 18%; display:table-cell">
                         <br><br><br><br>
-                        <div style="display: table-row;">
-                            <div style="display:table-cell;text-align:right">
-                                {{bankAccounts.Fidelity.IRA.name}} balance: &thinsp; <br>
-                                gnuBalance: &thinsp; <br><br>
-                                {{bankAccounts.Fidelity.iraSPAXX.symbol}} balance: &thinsp; <br>
-                                gnuBalance: &thinsp; <br><br>
-                                {{bankAccounts.Fidelity.iraGME.symbol}} shares: &thinsp; <br>
-                                gnuBalance shares: &thinsp; <br><br>
-                                {{bankAccounts.Fidelity.iraGME.symbol}} value: &thinsp; <br>
-                                ${{bankAccounts.Fidelity.iraGME.price}} x shares: &thinsp; <br><br>
-                                {{bankAccounts.Fidelity.iraOptions.name}}: &thinsp; <br>
-                                gnuBalance: &thinsp; <br><br>
-                            </div>
-                            <div style="display:table-cell;text-align:left">
-                                <b>${{bankAccounts.Fidelity.IRA.balance}}<br>
-                                ${{bankAccounts.Fidelity.IRA.gnuBalance}}<br><br>
-                                ${{bankAccounts.Fidelity.iraSPAXX.balance}}<br>
-                                ${{bankAccounts.Fidelity.iraSPAXX.gnuBalance}}<br><br>
-                                {{bankAccounts.Fidelity.iraGME.balance}} {{bankAccounts.Fidelity.iraGME.symbol}}<br>
-                                {{bankAccounts.Fidelity.iraGME.gnuBalance}} {{bankAccounts.Fidelity.iraGME.symbol}}<br><br>
-                                ${{bankAccounts.Fidelity.iraGME.value}}<br>
-                                ${{bankAccounts.Fidelity.iraGME.gnuValue}}<br><br>
-                                ${{bankAccounts.Fidelity.iraOptions.balance}}<br>
-                                ${{bankAccounts.Fidelity.iraOptions.gnuBalance}}<br><br></b>
-                            </div>
+                        <div style="display:table-cell;text-align:right">
+                            {{bankAccounts.Fidelity.IRA.name}} balance: &thinsp; <br>
+                            gnuBalance: &thinsp; <br><br>
+                            {{bankAccounts.Fidelity.iraGME.symbol}} shares: &thinsp; <br>
+                            gnuBalance shares: &thinsp; <br>
+                            {{bankAccounts.Fidelity.iraGME.symbol}} value: &thinsp; <br>
+                            ${{bankAccounts.Fidelity.iraGME.price}} x shares: &thinsp; <br><br>
+                            {{bankAccounts.Fidelity.iraOptions.name}}: &thinsp; <br>
+                            gnuBalance: &thinsp; <br><br>
+                            {{bankAccounts.Fidelity.iraSPAXX.symbol}} balance: &thinsp; <br>
+                            gnuBalance: &thinsp; <br><br>                            
+                        </div>
+                        <div style="display:table-cell;text-align:left">
+                            <b>${{bankAccounts.Fidelity.IRA.balance}}<br>
+                            ${{bankAccounts.Fidelity.IRA.gnuBalance}}<br><br>
+                            {{bankAccounts.Fidelity.iraGME.balance}} {{bankAccounts.Fidelity.iraGME.symbol}}<br>
+                            {{bankAccounts.Fidelity.iraGME.gnuBalance}} {{bankAccounts.Fidelity.iraGME.symbol}}<br>
+                            ${{bankAccounts.Fidelity.iraGME.value}}<br>
+                            ${{bankAccounts.Fidelity.iraGME.gnuValue}}<br><br>
+                            ${{bankAccounts.Fidelity.iraOptions.balance}}<br>
+                            ${{bankAccounts.Fidelity.iraOptions.gnuBalance}}<br><br>
+                            ${{bankAccounts.Fidelity.iraSPAXX.balance}}<br>
+                            ${{bankAccounts.Fidelity.iraSPAXX.gnuBalance}}<br><br></b>
+                        </div>
+                    </div>
+                    <div style="width: 18%; display:table-cell">
+                        <br><br><br><br>
+                        <div style="display:table-cell;text-align:right">
+                            {{bankAccounts.Fidelity.rIRA.name}} balance: &thinsp; <br>
+                            gnuBalance: &thinsp; <br><br>
+                            {{bankAccounts.Fidelity.riraGME.symbol}} shares: &thinsp; <br>
+                            gnuBalance shares: &thinsp; <br>
+                            {{bankAccounts.Fidelity.riraGME.symbol}} value: &thinsp; <br>
+                            ${{bankAccounts.Fidelity.riraGME.price}} x shares: &thinsp; <br><br>
+                            {{bankAccounts.Fidelity.riraOptions.name}}: &thinsp; <br>
+                            gnuBalance: &thinsp; <br><br>
+                            {{bankAccounts.Fidelity.riraSPAXX.symbol}} balance: &thinsp; <br>
+                            gnuBalance: &thinsp; <br><br>
+                            {{bankAccounts.Fidelity.riraVTI.symbol}} shares: &thinsp; <br>
+                            gnuBalance shares: &thinsp; <br>
+                            {{bankAccounts.Fidelity.riraVTI.symbol}} value: &thinsp; <br>
+                            ${{bankAccounts.Fidelity.riraVTI.price}} x shares: &thinsp; <br><br>
+                            {{bankAccounts.Fidelity.riraVXUS.symbol}} shares: &thinsp; <br>
+                            gnuBalance shares: &thinsp; <br>
+                            {{bankAccounts.Fidelity.riraVXUS.symbol}} value: &thinsp; <br>
+                            ${{bankAccounts.Fidelity.riraVXUS.price}} x shares: &thinsp; <br><br>                            
+                        </div>
+                        <div style="display:table-cell;text-align:left">
+                            <b>${{bankAccounts.Fidelity.rIRA.balance}}<br>
+                            ${{bankAccounts.Fidelity.rIRA.gnuBalance}}<br><br>
+                            {{bankAccounts.Fidelity.riraGME.balance}} {{bankAccounts.Fidelity.riraGME.symbol}}<br>
+                            {{bankAccounts.Fidelity.riraGME.gnuBalance}} {{bankAccounts.Fidelity.riraGME.symbol}}<br>
+                            ${{bankAccounts.Fidelity.riraGME.value}}<br>
+                            ${{bankAccounts.Fidelity.riraGME.gnuValue}}<br><br>
+                            ${{bankAccounts.Fidelity.riraOptions.balance}}<br>
+                            ${{bankAccounts.Fidelity.riraOptions.gnuBalance}}<br><br>
+                            ${{bankAccounts.Fidelity.riraSPAXX.balance}}<br>
+                            ${{bankAccounts.Fidelity.riraSPAXX.gnuBalance}}<br><br>
+                            {{bankAccounts.Fidelity.riraVTI.balance}} {{bankAccounts.Fidelity.riraVTI.symbol}}<br>
+                            {{bankAccounts.Fidelity.riraVTI.gnuBalance}} {{bankAccounts.Fidelity.riraVTI.symbol}}<br>
+                            ${{bankAccounts.Fidelity.riraVTI.value}}<br>
+                            ${{bankAccounts.Fidelity.riraVTI.gnuValue}}<br><br>
+                            {{bankAccounts.Fidelity.riraVXUS.balance}} {{bankAccounts.Fidelity.riraVXUS.symbol}}<br>
+                            {{bankAccounts.Fidelity.riraVXUS.gnuBalance}} {{bankAccounts.Fidelity.riraVXUS.symbol}}<br>
+                            ${{bankAccounts.Fidelity.riraVXUS.value}}<br>
+                            ${{bankAccounts.Fidelity.riraVXUS.gnuValue}}<br><br></b>
                         </div>
                     </div>
                 </div>

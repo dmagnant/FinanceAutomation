@@ -76,7 +76,7 @@ def claimBoARewards(driver, account):
     locateBoAWindowAndOpenAccount(driver, account)
     if 'joint' in account:
         driver.webDriver.find_element(By.XPATH," /html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[2]/a").click() # view/redeem
-        driver.clickIDElementOnceAvaiable("redeemButton") # redeem points
+        driver.clickIDElementOnceAvailable("redeemButton") # redeem points
         driver.switchToLastWindow()
         time.sleep(1)
         driver.webDriver.find_element(By.XPATH,"/html/body/main/div/div[2]/div[1]/div[1]/div/div[2]/div/div[1]/div[3]/a").click() # redeem
@@ -105,7 +105,7 @@ def claimBoARewards(driver, account):
         time.sleep(5)
         driver.webDriver.execute_script("window.scrollTo(0, 300)")
         time.sleep(3)
-        driver.clickIDElementOnceAvaiable('rewardsRedeembtn') # redeem cash rewards
+        driver.clickIDElementOnceAvailable('rewardsRedeembtn') # redeem cash rewards
         driver.switchToLastWindow()
         try:    driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div/button").click() # close pop-up
         except NoSuchElementException:  exception = "caught"
@@ -122,19 +122,20 @@ def importBoATransactions(account, boAActivity, book, gnuCashTransactions):
     existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
     num = 0
     for row in csv.reader(open(boAActivity), delimiter=','):
+        reviewTransaction = False
         if num <1: num+=1; continue # skip header
         postDate = datetime.strptime(row[0], '%m/%d/%Y').date()
         rawDescription = row[2]
         amount = Decimal(row[4])
         fromAccount = account.gnuAccount
-        if "BA ELECTRONIC PAYMENT" in description.upper():                          continue
-        elif "CASH REWARDS STATEMENT CREDIT" in description.upper():                description = "BoA CC Rewards"
-        elif "SPECTRUM" in description.upper():                                     description = "Internet Bill"
-        else:                                                                       description = rawDescription
+        if "BA ELECTRONIC PAYMENT" in rawDescription.upper():                           continue
+        elif "CASH REWARDS STATEMENT CREDIT" in rawDescription.upper():                 description = "BoA CC Rewards"
+        elif "SPECTRUM" in rawDescription.upper():                                         description = "Internet Bill"
+        else:                                                                           description = rawDescription
         toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
-        if toAccount == 'Expenses:Other':   account.setReviewTransactions(str(postDate) + ", " + description + ", " + str(amount))
+        if toAccount == 'Expenses:Other':   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
-        book.writeUniqueTransaction(existingTransactions, postDate, description, splits)
+        book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)
 
 def runBoA(driver, account, book):
     locateBoAWindowAndOpenAccount(driver, account.name)

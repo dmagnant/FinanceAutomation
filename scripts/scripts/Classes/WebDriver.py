@@ -2,7 +2,7 @@ import os, shutil, time, zipfile, sys
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import (InvalidArgumentException,
-                                        WebDriverException)
+                                        WebDriverException, TimeoutException)
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -119,21 +119,35 @@ class Driver:
     def switchToLastWindow(self):
         self.webDriver.switch_to.window(self.webDriver.window_handles[len(self.webDriver.window_handles)-1])
 
-    def clickXPATHElementOnceAvaiable(self, xpath, wait=10):
-        element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.XPATH,xpath)))
-        time.sleep(1)
-        element.click()
-        time.sleep(1)
+    def clickXPATHElementOnceAvailable(self, xpath, wait=10):
+        try:
+            element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.XPATH,xpath)))
+            time.sleep(1)
+            element.click()
+            time.sleep(1)
+        except TimeoutException: return False
         
-    def clickIDElementOnceAvaiable(self, id, wait=10):
-        element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.ID,id)))
-        element.click()
-        time.sleep(1)
+    def clickIDElementOnceAvailable(self, id, wait=10):
+        try:
+            element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.ID,id)))
+            element.click()
+            time.sleep(1)
+        except TimeoutException: return False
     
     def getXPATHElementOnceAvailable(self, xpath, wait=10):
-        element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.XPATH,xpath)))
-        return element
+        try:
+            element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.XPATH,xpath)))
+            return element
+        except TimeoutException: return False
 
     def getXPATHElementTextOnceAvailable(self, xpath, wait=10):
-        element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.XPATH,xpath)))
-        return element.text
+        try:
+            element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.XPATH,xpath)))
+            return element.text
+        except TimeoutException: return False
+
+    def getIDElementTextOnceAvailable(self, id, wait=10):
+        try:
+            element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.ID,id)))
+            return element.text
+        except TimeoutException: return False

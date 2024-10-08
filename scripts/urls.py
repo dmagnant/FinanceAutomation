@@ -19,6 +19,7 @@ urlpatterns = [
     path('eternl', views.eternl, name="Eternl"),
     path('exodus', views.exodus, name="Exodus"),
     path('fidelity', views.fidelity, name="Fidelity"),
+    path('gamestopCC', views.gamestopCC, name="GamestopCC"),
     path('healthEquity', views.healthEquity , name="HealthEquity"),
     path('ioPay', views.ioPay, name="IoPay"),
     path('kraken', views.kraken, name="Kraken"),

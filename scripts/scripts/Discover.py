@@ -70,6 +70,7 @@ def importDiscoverTransactions(account, discoverActivity, book, gnuCashTransacti
     existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
     num=0
     for row in csv.reader(open(discoverActivity), delimiter=','):
+        reviewTransaction = False
         if num <1: num+=1; continue # skip header
         postDate = datetime.strptime(row[1], '%m/%d/%Y').date()
         rawDescription = row[2]
@@ -79,9 +80,9 @@ def importDiscoverTransactions(account, discoverActivity, book, gnuCashTransacti
         elif "AUTOMATIC STATEMENT CREDIT" in description.upper():               description = "Discover CC Rewards"        
         else:                                                                   description = rawDescription
         toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
-        if toAccount == 'Expenses:Other':   account.setReviewTransactions(str(postDate) + ", " + description + ", " + str(amount))
+        if toAccount == 'Expenses:Other': reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
-        book.writeUniqueTransaction(existingTransactions, postDate, description, splits)
+        book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)
 
 def runDiscover(driver, account, book):
     today = datetime.today()

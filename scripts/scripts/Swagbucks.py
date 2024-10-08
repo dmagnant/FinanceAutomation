@@ -69,7 +69,7 @@ def runAlusRevenge(driver):
     time.sleep(2)
     Alu = pygetwindow.getWindowsWithTitle("Alu's Revenge 2 - Free Online Games | Swagbucks - Google Chrome")[0] # move window to primary monitor
     Alu.moveTo(10, 10); Alu.resizeTo(100, 100); Alu.maximize()
-    driver.clickIDElementOnceAvaiable('gamesItemBtn', 20) # Play for Free
+    driver.clickIDElementOnceAvailable('gamesItemBtn', 20) # Play for Free
     time.sleep(3)
     element = driver.webDriver.find_element(By.XPATH,"/html/body")
     element.send_keys(Keys.DOWN);   element.send_keys(Keys.DOWN);   element.send_keys(Keys.DOWN)

@@ -31,8 +31,8 @@ def writeAmazonGCTransactionFromUI(book, account, requestInfo):
     else:   showMessage('Error', 'Missing proper header to submit this transaction from UI')
     description = requestInfo['description'] if requestInfo['description'] else requestInfo['source']
     splits = []
-    splits.append(book.createSplit(amount), account.gnuAccount.fullname)
-    splits.append(book.createSplit(-amount), source)
+    splits.append(book.createSplit(amount, account.gnuAccount))
+    splits.append(book.createSplit(-amount, source))
     book.writeTransaction(datetime.today().date(), description, splits)
     account.reviewTransactions = [source + ': ' + str(amount)]
     account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))

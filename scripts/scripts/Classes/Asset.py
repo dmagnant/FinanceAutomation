@@ -28,10 +28,12 @@ def getSymbolByName(self):
         case 'ira spaxx' | 'roth ira spaxx' | 'brokerage spaxx':    return 'SPAXX'
         case _:                                                     print(f'Security: {self.name} not found in "getSymbolByName" function')
 
-def updateCoinQuantityFromStakingInGnuCash(self, myBook):
-    coinDifference = Decimal(self.balance) - Decimal(self.gnuBalance)
+def updateCoinQuantityFromStakingInGnuCash(self, book):
+    coinDifference = round(Decimal(self.balance) - Decimal(self.gnuBalance),3)
     amount = round(self.price * coinDifference, 3)
-    if coinDifference > 0.001:  myBook.writeStakingTransaction({'amount': amount, 'toAccount': self.gnuAccount, 'coinDifference': round(Decimal(coinDifference), 6), 'description': self.symbol + ' staking'})
+    if coinDifference > 0.001:
+            splits = [book.createSplit(-amount, 'Income:Investments:Staking'), book.createSplit(amount, self.gnuAccount, quantity=coinDifference)]
+            book.writeTransaction(datetime.today().date(), self.symbol + ' staking', splits)
     elif coinDifference < 0:
         print(f'given balance of {self.balance} {self.symbol} '
         f'minus gnuCash balance of {self.gnuBalance} '

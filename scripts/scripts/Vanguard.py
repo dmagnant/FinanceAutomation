@@ -53,14 +53,14 @@ def getVanguard401kPriceSharesAndCost(driver, account, book, planId):
     driver.webDriver.get('https://retirementplans.vanguard.com/VGApp/pe/faces/PersonalPerformance.xhtml?SelectedPlanId=' + planId)
     account.cost = driver.getXPATHElementTextOnceAvailable("//*[@id='planDetailmyPerformanceForm:dataTabBox:accountActivityNetCashFlowRowSinceInception']/td[2]").replace('$','',).replace(',','')
 
-def captureVanguard401kTransactions(driver, planId):
+def captureVanguard401kTransactions(driver, planId, lastMonth):
     locateVanguardWindow(driver)
     driver.webDriver.get('https://retirementplans.vanguard.com/VGApp/pe/faces/TransactionHistory.xhtml?SelectedPlanId=' + planId)
-    lastMonth = getStartAndEndOfDateRange(datetime.today().date(), "month")
     v401kActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\401k.csv"
     open(v401kActivity, 'w', newline='').truncate()
-    driver.webDriver.find_element(By.ID,"TransactionHistoryTabBox:transHistoryForm:viewByDate_main").click() # View history from: option
-    driver.clickIDElementOnceAvaiable("TransactionHistoryTabBox:transHistoryForm:viewByDate:historyItemLabel2") # View last 3 months to ensure all transactions are visible
+    driver.clickXPATHElementOnceAvailable("//*[@id='TransactionHistoryTabBox_tabBoxItemLink0']/span/h2") # Transactions
+    driver.clickIDElementOnceAvailable("TransactionHistoryTabBox:transHistoryForm:viewByDate_main") # View history from: option:
+    driver.clickIDElementOnceAvailable("TransactionHistoryTabBox:transHistoryForm:viewByDate:historyItemLabel2") # View last 3 months to ensure all transactions are visible
     time.sleep(1)
     row, transactionTable = 1, "//*[@id='TransactionHistoryTabBox:transHistoryForm:transactionHistoryDataTabletbody0']/tr["
     while True:
@@ -104,7 +104,7 @@ def importVanguardTransactions(account, vanguardActivity, book, gnuCashTransacti
         if not shares: shares = amount
         splits.append({'amount': -amount, 'account': toAccount})
         splits.append({'amount': amount, 'account': fromAccount, 'quantity': shares})
-        book.writeUniqueTransaction(existingTransactions, postDate, description, splits)
+        book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits)
 
 def runVanguardPension(driver, accounts, book):
     locateVanguardWindow(driver)
@@ -143,17 +143,15 @@ def writePensionTransaction(book, today, account, interestYTD):
 #     book.importGnuTransaction(baseAccount, v401kActivity, driver, 0)
 #     accountToUpdate.updateGnuBalanceAndValue(book.getBalance(accountToUpdate.gnuAccount))
     
-def runVanguard401k(driver, accounts, book):
+def runVanguard401k(driver, accounts, book, gnuCashTransactions, lastMonth):
     locateVanguardWindow(driver)
     planIDs = json.loads(getNotes('Vanguard'))
-    dateRange = getStartAndEndOfDateRange(timeSpan='month')
-    gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
     for accountName in list(accounts.keys()):
         account = accounts.get(accountName)
         if accountName != 'V401k':
             planID = str(planIDs[accountName])
             getVanguard401kPriceSharesAndCost(driver, account, book, planID)
-            v401kActivity = captureVanguard401kTransactions(driver, planID)
+            v401kActivity = captureVanguard401kTransactions(driver, planID, lastMonth)
             importVanguardTransactions(account, v401kActivity, book, gnuCashTransactions)
             account.updateGnuBalanceAndValue(book.getGnuAccountBalance(account.gnuAccount))
         else:
@@ -166,8 +164,10 @@ def runVanguard401k(driver, accounts, book):
     
 if __name__ == '__main__':
     driver, book = Driver("Chrome"), GnuCash('Finance')
+    lastMonth = getStartAndEndOfDateRange(timeSpan="month")
+    gnuCashTransactions = book.getTransactionsByDateRange(lastMonth)
     accounts = getVanguardAccounts(book)
-    runVanguard401k(driver, accounts, book)
+    runVanguard401k(driver, accounts, book, gnuCashTransactions, lastMonth)
     book.closeBook()
 
 # if __name__ == '__main__':

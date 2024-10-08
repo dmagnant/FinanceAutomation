@@ -1,4 +1,4 @@
-import csv, time
+import csv, time, importlib
 from datetime import datetime
 from decimal import Decimal
 from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
@@ -9,12 +9,14 @@ if __name__ == '__main__' or __name__ == "Ally":
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getPassword,
-                                            getStartAndEndOfDateRange, setDirectory, showMessage, modifyTransactionDescription)
+                                            getStartAndEndOfDateRange, setDirectory, showMessage)
+    from Functions.SpreadsheetFunctions import openSpreadsheet, updateSpreadsheet
 else:
     from .Classes.Asset import USD
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import (getPassword,
-                                             getStartAndEndOfDateRange, showMessage, setDirectory, modifyTransactionDescription)
+                                             getStartAndEndOfDateRange, showMessage, setDirectory)
+    from .Functions.SpreadsheetFunctions import openSpreadsheet, updateSpreadsheet    
 
 def locateAllyWindow(driver):
     found = driver.findWindowByUrl("secure.ally.com")
@@ -81,7 +83,6 @@ def captureAllyTransactions(driver, dateRange):
                 element = setAllyTransactionElementRoot(row, column)
                 amount = driver.webDriver.find_element(By.XPATH, element + "span").text.replace('$', '').replace(',', '')
                 if not amount[0].isnumeric():   amount = -Decimal(amount.replace(amount[0], ''))
-                description = modifyTransactionDescription(description)
                 transaction = str(date), description, amount
                 csv.writer(open(allyActivity, 'a', newline='', encoding="utf-8")).writerow(transaction)
                 row += 1
@@ -90,7 +91,7 @@ def captureAllyTransactions(driver, dateRange):
         except (NoSuchElementException):    insideDateRange = False
     return allyActivity
 
-def importAllyTransactions(account, allyActivity, book, gnuCashTransactions):
+def importAllyTransactions(driver, account, allyActivity, book, gnuCashTransactions):
     existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
     for row in csv.reader(open(allyActivity), delimiter=','):
         postDate = datetime.strptime(row[0], '%Y-%m-%d').date()
@@ -115,7 +116,7 @@ def importAllyTransactions(account, allyActivity, book, gnuCashTransactions):
                     ]
         else:
             splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
-        book.writeUniqueTransaction(existingTransactions, postDate, description, splits)
+        book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits)
 
 def getEnergyBillAmounts(driver, amount, energyBillNum):
     if energyBillNum == 1:
@@ -143,12 +144,52 @@ def getEnergyBillAmounts(driver, amount, energyBillNum):
     electricity = Decimal(driver.webDriver.find_element(By.XPATH, weAmountPath).text.strip('$'))
     return {'electricity': electricity, 'gas': gas, 'total': amount}
 
+def updateEnergyBillAmounts(driver, book, amount):
+    driver.openNewWindow('https://www.we-energies.com/secure/auth/l/acct/summary_accounts.aspx')
+    today = datetime.today()
+    time.sleep(2)
+    try:
+        # driver.webDriver.find_element(By.XPATH, "//*[@id='signInName']").send_keys(getUsername('WE-Energies (Home)'))
+        # driver.webDriver.find_element(By.XPATH, "//*[@id='password']").send_keys(getPassword('WE-Energies (Home)'))
+        driver.webDriver.find_element(By.XPATH, "//*[@id='next']").click() # login
+        time.sleep(4)
+        driver.webDriver.find_element(By.XPATH, "//*[@id='notInterested']/a").click # close out of app notice
+    except NoSuchElementException:  exception = "caught"
+    driver.webDriver.find_element(By.XPATH, "//*[@id='mainContentCopyInner']/ul/li[2]/a").click() # view bill history
+    time.sleep(4)
+    billRow, billColumn, billNotFound = 2, 7, True
+    while billNotFound:
+        weBillAmount = driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span/span").text.replace('$', '')
+        if amount == weBillAmount:  billNotFound = False
+        else:   billRow += 1
+    billColumn -= 2
+    weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
+    gas = Decimal(driver.webDriver.find_element(By.XPATH, weAmountPath).text.strip('$'))
+    billColumn -= 2
+    weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
+    electricity = Decimal(driver.webDriver.find_element(By.XPATH, weAmountPath).text.strip('$'))
+    splits = []
+    splits.append(book.createSplit(electricity, "Expenses:Utilities:Electricity"))
+    splits.append(book.createSplit(gas, "Expenses:Utilities:Gas"))
+    splits.append(book.createSplit(-round(Decimal(amount),2), book.getGnuAccountName('Ally')))
+    book.writeTransaction(today.date().replace(day=24), 'WE ENERGIES PAYMENT', splits)
+    print(f'posted transaction: \n' f'date: {str(today.date())} \n' f'total: {str(amount)} \n' f'electricity: {str(electricity)}\n' f'gas: {str(gas)}')
+    # book.writeUtilityTransaction({'electricity': electricity, 'gas': gas, 'total': amount})
+    # splits=[Split(value=transactionInfo['electricity'], account=self.getGnuAccount("Expenses:Utilities:Electricity")),
+    #     Split(value=transactionInfo['gas'], account=self.getGnuAccount("Expenses:Utilities:Gas")),
+    #     Split(value=-round(Decimal(transactionInfo['total']), 2), account=self.getGnuAccount("Assets:Ally Checking Account"))]
+    # Transaction(post_date=today.date().replace(day=24), currency=book.currencies(mnemonic="USD"), description='WE ENERGIES PAYMENT', splits=splits)
+    updateSpreadsheet('Home', str(today.year) + ' Balance', 'Energy Bill', today.month, -float(amount))
+    openSpreadsheet(driver, 'Home', str(today.year) + ' Balance')
+    driver.findWindowByUrl("/scripts/ally")
+
 def runAlly(driver, account, book, gnuCashTransactions, dateRange):
     locateAllyWindow(driver)
     account.setBalance(getAllyBalance(driver))
     allyActivity = captureAllyTransactions(driver, dateRange)
-    importAllyTransactions(account, allyActivity, book, gnuCashTransactions)
-    
+    importAllyTransactions(driver, account, allyActivity, book, gnuCashTransactions)
+    account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
+
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Home')
@@ -159,4 +200,3 @@ if __name__ == '__main__':
     Ally.getData()
     # allyLogout(driver)
     book.closeBook()
-

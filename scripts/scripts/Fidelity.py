@@ -44,19 +44,23 @@ def fidelityLogin(driver):
 
 def selectFidelityAccount(driver, account='all'):
     accountNum = str(json.loads(getNotes('Fidelity'))[account]) if account != 'all' else 'allaccounts'
-    try:    driver.clickXPATHElementOnceAvaiable(f"//*[@id='{accountNum}']/span/s-slot/s-assigned-wrapper/div/div/div[1]/span[2]") # Account2]
+    try:    driver.clickXPATHElementOnceAvailable(f"//*[@id='{accountNum}']/span/s-slot/s-assigned-wrapper/div/div/div[1]/span[2]") # Account2]
     except ElementClickInterceptedException:    exception = "already on all accounts"
     driver.webDriver.execute_script("window.scrollTo(0, 0)") #scroll to top of page
     
-def clickHistoryButton(driver): driver.clickXPATHElementOnceAvaiable("//*[@id='accountDetails']/div/div[2]/div/new-tab-group/new-tab-group-ui/div[2]/activity-orders-shell/div/ap143528-portsum-dashboard-activity-orders-home-root/div/div/account-activity-container/div/div[1]/div[2]/apex-kit-field-group/s-root/div/div/s-slot/s-assigned-wrapper/div/core-filter-button[2]/pvd3-button/s-root/button/div/span/s-slot/s-assigned-wrapper") # History
-
+def clickHistoryButton(driver): 
+    while True:
+        driver.clickXPATHElementOnceAvailable("//*[@id='accountDetails']/div/div[2]/div/new-tab-group/new-tab-group-ui/div[2]/activity-orders-shell/div/ap143528-portsum-dashboard-activity-orders-home-root/div/div/account-activity-container/div/div[1]/div[2]/apex-kit-field-group/s-root/div/div/s-slot/s-assigned-wrapper/div/core-filter-button[2]/pvd3-button/s-root/button/div/span/s-slot/s-assigned-wrapper") # History
+        if driver.getXPATHElementOnceAvailable("//*[@id='ao-pending-table']/s-root/button/div/span/s-slot/s-assigned-wrapper/span") == False:
+            break
+               
 def prepFidelityTransactionSearch(driver, formatting=False):
     locateFidelityWindow(driver)
     driver.webDriver.find_element(By.XPATH, "//*[@id='portsum-tab-activity']/a/span").click() # Activity & Orders
     if formatting: # the following not necessary when capturing deposits to Fidelity
-        driver.clickXPATHElementOnceAvaiable("//*[@id='timeperiod-select-button']/span[1]") #Timeframe
-        driver.clickXPATHElementOnceAvaiable("//*[@id='60']/s-root/div/label") # past 60 days
-        driver.clickXPATHElementOnceAvaiable("//*[@id='timeperiod-select-container']/div/div/apex-kit-button/s-root/button/div/span/s-slot/s-assigned-wrapper") # Apply
+        driver.clickXPATHElementOnceAvailable("//*[@id='timeperiod-select-button']/span[1]") #Timeframe
+        driver.clickXPATHElementOnceAvailable("//*[@id='60']/s-root/div/label") # past 60 days
+        driver.clickXPATHElementOnceAvailable("//*[@id='timeperiod-select-container']/div/div/apex-kit-button/s-root/button/div/span/s-slot/s-assigned-wrapper") # Apply
         clickHistoryButton(driver)
     time.sleep(1)
 
@@ -112,8 +116,8 @@ def getCost(driver, row):
 def getFidelityPricesSharesAndCost(driver, allAccounts, book, accountToGet='all'):
     locateFidelityWindow(driver)
     accountNum = str(json.loads(getNotes('Fidelity'))[accountToGet]) if accountToGet != 'all' else 'allaccounts'
-    driver.clickXPATHElementOnceAvaiable(f"//*[@id='{accountNum}']/span/s-slot/s-assigned-wrapper/div/div") # Account
-    driver.clickXPATHElementOnceAvaiable("//*[@id='portsum-tab-positions']/a/span") # Positions
+    driver.clickXPATHElementOnceAvailable(f"//*[@id='{accountNum}']/span/s-slot/s-assigned-wrapper/div/div") # Account
+    driver.clickXPATHElementOnceAvailable("//*[@id='portsum-tab-positions']/a/span") # Positions
     driver.webDriver.implicitly_wait(1)
     row = 0
     while True:
@@ -178,7 +182,7 @@ def captureFidelityTransactions(driver, dateRange, account='all'):
         except NoSuchElementException:
             if row==1:  showMessage('Error finding Date Element', 'Element path for date element has changed, please update.')
             else: 
-                try: driver.clickXPATHElementOnceAvaiable("//*[@id='ao-history-list']/div[3]/div/div/apex-kit-button/s-root/button/div/span/s-slot/s-assigned-wrapper") # load more results
+                try: driver.clickXPATHElementOnceAvailable("//*[@id='ao-history-list']/div[3]/div/div/apex-kit-button/s-root/button/div/span/s-slot/s-assigned-wrapper") # load more results
                 except NoSuchElementException:  break
         date = datetime.strptime(dateElement.text, '%b-%d-%Y').date()
         if date >= dateRange['startDate'] and date <= dateRange['endDate']:
@@ -239,15 +243,18 @@ def formatFidelityOptionTransactionDescription(rawDescription, accountName):
     return accountName + ' ' + finalDescription
 
 def writeFidelityOptionMarketChangeTransaction(accounts, book):
-    splits=[]
+    splits, createdSplits=[], []
     marketChange = 0
     for account in [accounts['riraOptions'], accounts['brOptions'], accounts['iraOptions']]:
-        print('balance for: ' + account.name + ' is: ' + str(account.balance))
+        account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
         change = Decimal(account.balance) - account.gnuBalance
-        splits.append(book.createSplit(change, account.gnuAccount))
+        splits.append({'amount': change, 'account': account.gnuAccount})
+        # splits.append(book.createSplit(change, account.gnuAccount))
         marketChange += change
-    splits.append(book.createSplit(-marketChange, "Income:Investments:Market Change"))
-    book.writeTransaction(datetime.today().date(), "Options Market Change", splits)
+    splits.append({'amount': -marketChange, 'account': "Income:Investments:Market Change"})
+    # splits.append(book.createSplit(-marketChange, "Income:Investments:Market Change"))
+    for spl in splits:  createdSplits.append(book.createSplit(spl['amount'], spl['account']))
+    book.writeTransaction(datetime.today().date(), "Options Market Change", createdSplits)
 
 def importFidelityTransactions(account, fidelityActivity, book, gnuCashTransactions):
     existingTransactions = book.getTransactionsByGnuAccountIncludingChildren(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
@@ -255,7 +262,7 @@ def importFidelityTransactions(account, fidelityActivity, book, gnuCashTransacti
         postDate = datetime.strptime(row[0], '%Y-%m-%d').date()
         rawDescription = row[1] # determine fromAccount based on raw description
         amount = Decimal(row[2])
-        shares = float(row[3])
+        shares = Decimal(row[3])
         accountinTrans = row[4]
         fees = round(Decimal(row[5]),2)
         fromAccount = account.gnuAccount
@@ -276,12 +283,13 @@ def importFidelityTransactions(account, fidelityActivity, book, gnuCashTransacti
             shares = -shares
             description = accountinTrans + " Investment"
         elif "YOU SOLD" in rawDescription:
-            shares = shares
+            if float(amount)>1 and float(shares)<1:
+                shares = -shares
             description = accountinTrans + " Sale"
         if "VXUS" in rawDescription and "DIVIDEND" not in rawDescription and "TRANSACTION" not in rawDescription:           fromAccount += ":VXUS"
         elif "VTI" in rawDescription and "DIVIDEND" not in rawDescription and "TRANSACTION" not in rawDescription:          fromAccount += ":VTI"                                     
         elif "GME" in rawDescription and "DIVIDEND" not in rawDescription and "TRANSACTION" not in rawDescription:          fromAccount += ":GME"
-        toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
+        toAccount = book.getGnuAccountName(fromAccount, description=description)
         if not shares: shares = amount
         if fees:
             splits.append({'amount': amount, 'account': toAccount, 'quantity': shares})
@@ -291,15 +299,14 @@ def importFidelityTransactions(account, fidelityActivity, book, gnuCashTransacti
                 splits.append({'amount':-amount, 'account':account.gnuAccount + ":Options"})
                 splits.append({'amount':amount, 'account':'Income:Investments:Market Change'})
             else: # sell shares
-                splits.append({'amount':-(amount+fees), 'account':fromAccount, 'quantity':round(Decimal(shares),2)})
+                splits.append({'amount':-(amount+fees), 'account':fromAccount, 'quantity':-round(Decimal(shares),2)})
         elif "Margin Interest" in description:
             splits.append({'amount':amount, 'account':fromAccount, 'quantity':shares})
             splits.append({'amount':-amount, 'account':toAccount, 'quantity':-round(Decimal(shares),2)})
         else: # dividends # buy/sell shares 
             splits.append({'amount':amount, 'account':toAccount, 'quantity':Decimal(shares)})
             splits.append({'amount':-amount, 'account':fromAccount, 'quantity':-round(Decimal(shares),2)})
-        
-        book.writeUniqueTransaction(existingTransactions, postDate, description, splits)
+        book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits)
 
 # def runFidelity(driver, accounts, book):
 #     locateFidelityWindow(driver)
@@ -322,18 +329,37 @@ def runFidelityDaily(driver, accounts, book, gnuCashTransactions, dateRange):
         account = baseAccounts.get(accountName)
         fidelityActivity = captureFidelityTransactions(driver, dateRange, accountName)
         importFidelityTransactions(account, fidelityActivity, book, gnuCashTransactions)
+    writeFidelityOptionMarketChangeTransaction(accounts, book)        
     for accountName in list(accounts.keys()): # update balances for ALL
         account = accounts.get(accountName)
         balance = book.getGnuAccountBalance(account.gnuAccount)
         if hasattr(account, 'symbol'):  account.updateGnuBalanceAndValue(balance)
         else:                           account.updateGnuBalance(balance)
-    writeFidelityOptionMarketChangeTransaction(accounts, book)
+
+
+# if __name__ == '__main__':
+#     driver = Driver("Chrome")
+#     book = GnuCash('Test')
+#     dateRange = getStartAndEndOfDateRange(timeSpan=20)
+#     gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
+#     accounts = getFidelityAccounts(book)
+#     runFidelityDaily(driver, accounts, book, gnuCashTransactions, dateRange)
+#     book.closeBook()
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = GnuCash('Finance')
-    dateRange = getStartAndEndOfDateRange(timeSpan=7)
-    gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
+    book = GnuCash('Test')
+    dateRange = getStartAndEndOfDateRange(timeSpan=3)
     accounts = getFidelityAccounts(book)
-    runFidelityDaily(driver, accounts, book, gnuCashTransactions, dateRange)
-    book.closeBook()
+    gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
+    existingTransactions = book.getTransactionsByGnuAccountIncludingChildren(accounts['brOptions'].gnuAccount, transactionsToFilter=gnuCashTransactions)
+    splits = []
+    amount = round(Decimal(69.99),2)
+    splits.append({'amount':amount, 'account':"Income:Investments:Market Change"})
+    splits.append({'amount':-amount, 'account':accounts['brOptions'].gnuAccount})
+    book.writeUniqueTransaction(accounts['brOptions'], existingTransactions, datetime.today().date(), "TESTING", splits)
+    balance = book.getGnuAccountBalance(accounts['brOptions'].gnuAccount)
+    print('BALANCE 1: ' + str(balance))
+    accounts['brOptions'].updateGnuBalance(balance)
+    print(accounts['brOptions'].getData())
+    book.closeBook()    
