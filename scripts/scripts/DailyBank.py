@@ -5,7 +5,7 @@ if __name__ == '__main__' or __name__ == "Daily":
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import getStartAndEndOfDateRange
-    from Functions.SpreadsheetFunctions import openSpreadsheet, updateInvestmentsDaily
+    from Functions.SpreadsheetFunctions import openSpreadsheet, updateInvestmentsDailyAmended
     from Paypal import runPaypal, checkUncategorizedPaypalTransactions
     from Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from Sofi import runSofi, sofiLogout, getSofiAccounts
@@ -16,7 +16,7 @@ else:
     from .Classes.WebDriver import Driver
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import getStartAndEndOfDateRange
-    from .Functions.SpreadsheetFunctions import openSpreadsheet, updateInvestmentsDaily
+    from .Functions.SpreadsheetFunctions import openSpreadsheet, updateInvestmentsDailyAmended
     from .Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from .Sofi import runSofi, sofiLogout, getSofiAccounts
     from. Paypal import runPaypal, checkUncategorizedPaypalTransactions
@@ -38,7 +38,7 @@ def runDailyBank(accounts, personalBook, jointBook, gnuCashTransactions, dateRan
     # runAlly(driver, accounts['Ally'], jointBook, gnuCashTransactions, dateRange)
     presearchRewardsRedemptionAndBalanceUpdates(driver, accounts['Presearch'], personalBook)
     openSpreadsheet(driver, 'Finances', str(datetime.today().year))
-    updateInvestmentsDaily(driver, personalBook, accounts)
+    updateInvestmentsDailyAmended(driver, personalBook, accounts)
     accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getGnuAccountBalance(accounts['CryptoPortfolio'].gnuAccount))
     checkUncategorizedPaypalTransactions(driver, personalBook, accounts['Paypal'], getStartAndEndOfDateRange(timeSpan=7))
     openSpreadsheet(driver, 'Home', '2024 Balance')
