@@ -109,7 +109,7 @@ def importBarclaysTransactions(account, barclaysActivity, book, gnuCashTransacti
         if "PAYMENT RECEIVED" in rawDescription.upper():   continue
         elif "BARCLAYCARD US" in rawDescription.upper() and float(amount) > 0:         description = "Barclays CC Rewards"
         else:                                                                       description = rawDescription
-        toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
+        toAccount = book.getGnuAccountFullName(fromAccount, description=description)
         if toAccount == 'Expenses:Other':   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)
@@ -127,7 +127,6 @@ def runBarclays(driver, account, book):
     if rewardsBalance >= float(50): claimBarclaysRewards(driver)
     importBarclaysTransactions(account, barclaysActivity, book, gnuCashTransactions)
     account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
-    # book.importGnuTransaction(account, barclaysActivity, driver, 5)
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:  book.openGnuCashUI()
 

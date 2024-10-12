@@ -13,6 +13,7 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
                 case 'BoA-joint':   return ['K16', 'S16', 'C52', 'K52', 'S52', 'C88', 'K88', 'S88', 'C124', 'K124', 'S124', 'C16']
                 case 'Energy Bill': return ['F27', 'N27', 'V27', 'F63', 'N63', 'V63', 'F99', 'N99', 'V99', 'F135', 'N135', 'V135']
                 case 'Water Bill':  return ['F25', 'N25', 'V25', 'F61', 'N61', 'V61', 'F97', 'N97', 'V97', 'F133', 'N133', 'V133']
+                case 'Mortgage':    return ['F17', 'N17', 'V17', 'F53', 'N53', 'V53', 'F89', 'N89', 'V89', 'F125', 'N125', 'V125']
                 ## Cryptocurrency
                 case 'BTC':         return [sharesColumn+'2', priceColumn+'2']
                 case 'ADA-Eternl':  return [sharesColumn+'3', priceColumn+'3']
@@ -34,9 +35,6 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
         worksheetKey = worksheet.acell(keyColumn + cellToUpdate[1:]).value
         return worksheetKey
     sheet = getInvestmentsSpreadsheetDetails(False)
-    # jsonCreds = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
-    # sheet = gspread.service_account(filename=jsonCreds).open(sheetTitle)
-    # worksheet = sheet.worksheet(str(tabTitle))
     cell = getCell(account, month, sheet)
     sheetKey = getSheetKey(sheetTitle, tabTitle, sheet['worksheet'], cell)
     if symbol == "$" or symbol == sheetKey: 
@@ -45,6 +43,9 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
         if account == 'Water Bill':
             sheet['worksheet'].update_acell(cell.replace(cell[0], chr(ord(cell[0]) - 1)), account)
             sheet['worksheet'].update_acell(cell.replace(cell[0], chr(ord(cell[0]) - 4)), '')
+        if account == 'Mortgage':
+            sheet['worksheet'].update_acell(cell.replace(cell[0], chr(ord(cell[0]) - 1)), account)
+            sheet['worksheet'].update_acell(cell.replace(cell[0], chr(ord(cell[0]) - 4)), '')            
     else:
         showMessage('Key Mismatch',     
         f'the given key: {symbol} does not match the sheet key: {sheetKey} for the cell that is being updated: {cell} \n'
@@ -52,7 +53,6 @@ def updateSpreadsheet(sheetTitle, tabTitle, account, month, value, symbol="$", m
         f'Check spreadsheet and verify the getCell method is getting the correct Cell')
 
 def updateCheckingBalanceSpreadsheet(sheetTitle, tabTitle, accountName, month, value):
-    # projectedRows = [4,4,39,39,39,74,74,74,109,109,109,4]
     projectedRows = [3,3,38,38,38,73,73,73,108,108,108,3]
     projectedColumns = ['J','R','B','J','R','B','J','R','B','J','R','B']
     row=projectedRows[month-1]
@@ -69,44 +69,23 @@ def updateCheckingBalanceSpreadsheet(sheetTitle, tabTitle, accountName, month, v
     worksheet.update_acell(chr(ord(column) + 1) + str(row), value)
     worksheet.update_acell(chr(ord(column) + 4) + str(row), value)
 
+def getMortgageSpreadSheetDetails(driver=False):
+    if driver:
+        spreadsheetWindow = driver.findWindowByUrl("gid=1692958526")
+        if not spreadsheetWindow:   openSpreadsheet(driver, 'Mortgage', 'Mortgage'); spreadsheetWindow = driver.webDriver.current_window_handle
+        else:   driver.webDriver.switch_to.window(spreadsheetWindow)
+    worksheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Mortgage').worksheet('Mortgage')
+    return {'worksheet': worksheet, 'firstRowOfThisYear': 79, 'interestColumn':'E', 'dateColumn':'B'}
+ 
 def getInvestmentsSpreadsheetDetails(driver=False):
     if driver:
-        spreadsheetWindow = driver.findWindowByUrl("edit#gid=361024172")
+        spreadsheetWindow = driver.findWindowByUrl("gid=361024172")
         if not spreadsheetWindow:   openSpreadsheet(driver, 'Finances', 'Investments'); spreadsheetWindow = driver.webDriver.current_window_handle
         else:   driver.webDriver.switch_to.window(spreadsheetWindow)
     worksheet = gspread.service_account(filename=setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json").open('Finances').worksheet('Investments')
     return {'worksheet': worksheet, 'row': 2, 'firstRowAfterCrypto':8, 'nameColumn': 'A','symbolColumn': 'B', 'bankColumn': 'C', 'accountColumn': 'D', 'sharesColumn': 'E', 'priceColumn': 'F', 'costColumn':'G', 'profitLossColumn':'I'}
 
-# def updateInvestmentsDaily(driver, book):
-#     spreadsheet = getInvestmentsSpreadsheetDetails(driver)
-#     symbolsToUpdate = ['GME', 'VIIIX', 'VXUS', 'VTI', 'VFIAX']
-#     coinsToUpdate = {}
-#     stillInvestments = True
-#     row = spreadsheet['row']
-#     while stillInvestments:
-#         symbol = spreadsheet['worksheet'].acell(spreadsheet['symbolColumn']+str(row)).value
-#         if symbol != None:
-#             if symbol in symbolsToUpdate:
-#                 price = getStockPrice(symbol)
-#                 book.updatePriceInGnucash(symbol, price)
-#                 spreadsheet['worksheet'].update_acell(spreadsheet['priceColumn'] + str(row), float(price))
-#                 symbolsToUpdate.remove(symbol)
-#             elif spreadsheet['worksheet'].acell(spreadsheet['accountColumn']+str(row)).value == "Crypto":
-#                 coinName = spreadsheet['worksheet'].acell(spreadsheet['nameColumn']+str(row)).value.lower()
-#                 if coinName not in list(coinsToUpdate.keys()):  coinsToUpdate[coinName] = {'symbol': symbol, 'row': row}
-#             elif symbol == 'Options': 
-#                 row+=1
-#                 continue
-#             row += 1
-#         else:          
-#             stillInvestments = False
-#     coinPrices = getCryptocurrencyPrice(list(coinsToUpdate.keys()))     # get prices from coingecko in a single call
-#     for coin in list(coinsToUpdate.keys()):
-#         price = format(coinPrices[coin]["usd"], ".2f")
-#         book.updatePriceInGnucash(coinsToUpdate.get(coin).get('symbol'), price)
-#         spreadsheet['worksheet'].update_acell((spreadsheet['priceColumn'] + str(coinsToUpdate.get(coin).get('row'))), float(price))
-
-def updateInvestmentsDailyAmended(driver, book, accounts):
+def updateInvestmentsDaily(driver, book, accounts):
     spreadsheet = getInvestmentsSpreadsheetDetails(driver)
     symbolsWithPricesUpdated = ['SPAXX', 'Options']
     symbolsToAvoid = ['8585', 'M038']
@@ -154,10 +133,10 @@ def updateFidelityInvestments(symbol, symbolsWithPricesUpdated, accountID, accou
         book.updatePriceInGnucash(symbol, price)
         spreadsheet['worksheet'].update_acell(spreadsheet['priceColumn'] + str(row), float(price))
         symbolsWithPricesUpdated.append(symbol)
-    if accountID == 'Brokerage':  accountPrefix = 'br'
-    elif accountID == 'rIRA':     accountPrefix = 'rira'
-    elif accountID == 'IRA':      accountPrefix = 'ira'
-    account = accounts[accountPrefix + symbol]
+    # if accountID == 'Brokerage':  accountPrefix = 'Brokerage'
+    # elif accountID == 'rIRA':     accountPrefix = 'rIRA'
+    # elif accountID == 'IRA':      accountPrefix = 'IRA'
+    account = accounts[accountID + symbol]
     if account.balance:  spreadsheet['worksheet'].update_acell(spreadsheet.get('sharesColumn') + str(row), float(account.balance))
     if account.cost:    spreadsheet['worksheet'].update_acell(spreadsheet.get('costColumn') + str(row), float(account.cost))
 
@@ -207,6 +186,8 @@ def getSheetGIDSuffix(sheet, tab=''):
     elif sheet == 'Home':
         if tab == '2024 Balance':       GID= '565871395'
         elif tab == 'Finances':         GID= '1436385671'
+    elif sheet == 'Mortgage':
+        if tab == 'Mortgage':           GID='1692958526'
     return f'edit?gid={GID}#gid={GID}'
 
 def openSpreadsheet(driver, sheet, tab=''):
@@ -221,4 +202,7 @@ def openSpreadsheet(driver, sheet, tab=''):
         url += '1oP3U7y8qywvXG9U_zYXgjFfqHrCyPtUDl4zPDftFCdM/'
         if tab == '2024 Balance':       url += getSheetGIDSuffix(sheet, tab)
         elif tab == 'Finances':         url += getSheetGIDSuffix(sheet, tab)
+    elif sheet == 'Mortgage':
+        url += '1uzX0Wn0xSHzJAwf4M_xsG8AkFMK_iClYxRYBv7NP4OQ/edit?gid=1692958526/'
+        if tab == 'Mortgage':           url += getSheetGIDSuffix(sheet, tab)
     if not driver.findWindowByUrl(url): driver.openNewWindow(url)

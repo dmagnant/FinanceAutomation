@@ -167,7 +167,7 @@ def importHealthEquityTransactions(account, HEActivity, book, gnuCashTransaction
         elif "Employer Contribution" in rawDescription:                             description = 'HSA Employer Contribution'
         elif "Interest" in rawDescription:                                          description = 'Interest Earned'
         else:                                                                       description = rawDescription
-        toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
+        toAccount = book.getGnuAccountFullName(fromAccount, description=description, row=row)
         if 'HSA' in description:    splits = [{'amount': -amount, 'account':toAccount},{'amount': amount, 'account':fromAccount, 'quantity': round(Decimal(shares),3)}]
         else:                       splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits)

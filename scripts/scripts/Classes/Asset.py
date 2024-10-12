@@ -45,7 +45,7 @@ class Asset:
     def getName(self):              return self.name
     def getBalance(self):           return self.balance
     def setBalance(self, balance):  self.balance = balance
-    def getGnuAccount(self):        return self.getGnuAccountName(self.name)
+    # def getGnuAccount(self):        return self.getGnuAccountFullName(self.name)
     def getGnuBalance(self):        return self.gnuBalance
     def setValue(self, value):      self.value = value
     def setCost(self, cost):        self.cost = cost
@@ -56,7 +56,7 @@ class Security(Asset):    # this is a class for tracking security information
         self.balance = self.value = self.cost = ''
         self.symbol = getSymbolByName(self)
         self.price = book.getPriceInGnucash(self.symbol, datetime.today().date())
-        self.gnuAccount = book.getGnuAccountName(name, account)
+        self.gnuAccount = book.getGnuAccountFullName(name, account)
         self.gnuBalance = Decimal(book.getGnuAccountBalance(self.gnuAccount))
         self.gnuValue = self.getGnuValue()
     def getPrice(self):                     return self.price
@@ -100,7 +100,8 @@ class USD(Asset):
     def __init__(self, name, book):
         self.balance = self.value = self.cost = ''
         self.name, self.units, self.currency, self.reviewTransactions, self.account = name, 0, 'USD', [], None
-        self.gnuAccount = book.getGnuAccountName(name)
+        self.gnuAccount = book.getGnuAccountFullName(name)
+        self.gnuCashAccount = book.getGnuAccountByFullName(self.gnuAccount)
         balance = book.getGnuAccountBalance(self.gnuAccount)
         self.gnuBalance = round(balance, 2) if float(balance)>0 else 0
     def getReviewTransactions(self):                return self.reviewTransactions
@@ -129,7 +130,7 @@ class USD(Asset):
             updateCheckingBalanceSpreadsheet('Finances', year, self.name, month, balance)
     
     def getInterestTotalForDateRange(self, book):
-        interestAccount = book.getGnuAccountName('Interest')
+        interestAccount = book.getGnuAccountFullName('Interest')
         dateRange = getStartAndEndOfDateRange(timeSpan='all', minDate=datetime(2022,1,1,0,0,0).date())
         allInvestmentTransactions = book.getTransactionsByGnuAccountAndDateRange(self.gnuAccount, dateRange)
         savingsTransactions = book.getTransactionsByGnuAccount(self.gnuAccount, transactionsToFilter=allInvestmentTransactions)

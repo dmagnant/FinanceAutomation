@@ -5,22 +5,22 @@ if __name__ == '__main__' or __name__ == "Daily":
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import getStartAndEndOfDateRange
-    from Functions.SpreadsheetFunctions import openSpreadsheet, updateInvestmentsDailyAmended
+    from Functions.SpreadsheetFunctions import openSpreadsheet, updateInvestmentsDaily
     from Paypal import runPaypal, checkUncategorizedPaypalTransactions
     from Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from Sofi import runSofi, sofiLogout, getSofiAccounts
-    from Fidelity import runFidelityDaily, getFidelityAccounts
+    from Fidelity import runFidelityDaily, getFidelityAccounts, getFidelityAccounts
 else:
     from .Ally import allyLogout, runAlly
     from .Classes.Asset import USD, Security
     from .Classes.WebDriver import Driver
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import getStartAndEndOfDateRange
-    from .Functions.SpreadsheetFunctions import openSpreadsheet, updateInvestmentsDailyAmended
+    from .Functions.SpreadsheetFunctions import openSpreadsheet, updateInvestmentsDaily
     from .Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from .Sofi import runSofi, sofiLogout, getSofiAccounts
     from. Paypal import runPaypal, checkUncategorizedPaypalTransactions
-    from .Fidelity import runFidelityDaily, getFidelityAccounts
+    from .Fidelity import runFidelityDaily, getFidelityAccounts, getFidelityAccounts
 
 def getDailyBankAccounts(personalBook, jointBook=''):
     CryptoPortfolio = USD("Crypto", personalBook)
@@ -38,7 +38,7 @@ def runDailyBank(accounts, personalBook, jointBook, gnuCashTransactions, dateRan
     # runAlly(driver, accounts['Ally'], jointBook, gnuCashTransactions, dateRange)
     presearchRewardsRedemptionAndBalanceUpdates(driver, accounts['Presearch'], personalBook)
     openSpreadsheet(driver, 'Finances', str(datetime.today().year))
-    updateInvestmentsDailyAmended(driver, personalBook, accounts)
+    updateInvestmentsDaily(driver, personalBook, accounts)
     accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getGnuAccountBalance(accounts['CryptoPortfolio'].gnuAccount))
     checkUncategorizedPaypalTransactions(driver, personalBook, accounts['Paypal'], getStartAndEndOfDateRange(timeSpan=7))
     openSpreadsheet(driver, 'Home', '2024 Balance')

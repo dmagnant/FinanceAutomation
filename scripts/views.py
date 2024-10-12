@@ -15,7 +15,7 @@ from scripts.scripts.Discover import *
 from scripts.scripts.Eternl import *
 from scripts.scripts.Exodus import *
 from scripts.scripts.Fidelity import *
-from scripts.scripts.
+from scripts.scripts.GamestopCC import *
 from scripts.scripts.HealthEquity import *
 from scripts.scripts.IoPay import *
 from scripts.scripts.Kraken import *
@@ -244,7 +244,7 @@ def dailyMR(request):
         elif "paidviewpointMain" in request.POST:       runPaidviewpoint(driver, mrAccounts['Paidviewpoint'])
         elif "paidviewpointSurvey" in request.POST:     completePaidviewpointSurvey(driver)
         elif "paidviewpointLogin" in request.POST:      paidviewpointLogin(driver)        
-        elif "paidviewpointBalance" in request.POST:    updatePaidViewPointBalance(driver, account, book)
+        elif "paidviewpointBalance" in request.POST:    updatePaidViewPointBalance(driver, mrAccounts['Paidviewpoint'], personalBook)
         elif "paidviewpointRewards" in request.POST:    redeemPaidviewpointRewards(driver)            
         elif "close windows" in request.POST:           driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/dailyMR"))
     context = {'mrAccounts': mrAccounts}
@@ -288,6 +288,8 @@ def exodus(request):
 def fidelity(request):
     book = GnuCash('Finance')
     accounts = getFidelityAccounts(book)
+    dateRange = getStartAndEndOfDateRange(timeSpan=7)
+    gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:              runFidelityDaily(driver, accounts, book, gnuCashTransactions, dateRange)
@@ -299,13 +301,12 @@ def fidelity(request):
 
 def gamestopCC(request):
     book = GnuCash('Finance')
-    GamestopCC = USD("GamestopCC", book)
+    GamestopCC = USD("Gamestop CC", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
         if "main" in request.POST:              runGamestopCC(driver, GamestopCC, book)
         elif "login" in request.POST:           locateGamestopCCWindow(driver)
         elif "balance" in request.POST:         GamestopCC.setBalance(getGamestopCCBalance(driver))
-        elif "rewards" in request.POST:         claimGamestopCCRewards(driver, GamestopCC)   
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/gamestopCC"))
     context = {'account': GamestopCC}
     book.closeBook();   return returnRender(request, "banking/creditcard.html", context)

@@ -10,13 +10,13 @@ if __name__ == '__main__' or __name__ == "Ally":
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getPassword,
                                             getStartAndEndOfDateRange, setDirectory, showMessage)
-    from Functions.SpreadsheetFunctions import openSpreadsheet, updateSpreadsheet
+    from Functions.SpreadsheetFunctions import openSpreadsheet, updateSpreadsheet, getMortgageSpreadSheetDetails
 else:
     from .Classes.Asset import USD
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import (getPassword,
                                              getStartAndEndOfDateRange, showMessage, setDirectory)
-    from .Functions.SpreadsheetFunctions import openSpreadsheet, updateSpreadsheet    
+    from .Functions.SpreadsheetFunctions import openSpreadsheet, updateSpreadsheet, getMortgageSpreadSheetDetails
 
 def locateAllyWindow(driver):
     found = driver.findWindowByUrl("secure.ally.com")
@@ -107,7 +107,7 @@ def importAllyTransactions(driver, account, allyActivity, book, gnuCashTransacti
             energyBillAmounts = getEnergyBillAmounts(driver, amount, 1)
             description = 'WE ENERGIES PAYMENT'
         else:                                                                       description = rawDescription
-        toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
+        toAccount = book.getGnuAccountFullName(fromAccount, description=description, row=row)
         if toAccount == 'Expenses:Other':   account.setReviewTransactions(str(postDate) + ", " + description + ", " + str(amount))
         if 'WE ENERGIES' in description.upper(): 
             splits = [{'amount': energyBillAmounts['electricity'], 'account': "Expenses:Utilities:Electricity"},
@@ -171,15 +171,35 @@ def updateEnergyBillAmounts(driver, book, amount):
     splits = []
     splits.append(book.createSplit(electricity, "Expenses:Utilities:Electricity"))
     splits.append(book.createSplit(gas, "Expenses:Utilities:Gas"))
-    splits.append(book.createSplit(-round(Decimal(amount),2), book.getGnuAccountName('Ally')))
+    splits.append(book.createSplit(-round(Decimal(amount),2), book.getGnuAccountFullName('Ally')))
     book.writeTransaction(today.date().replace(day=24), 'WE ENERGIES PAYMENT', splits)
     print(f'posted transaction: \n' f'date: {str(today.date())} \n' f'total: {str(amount)} \n' f'electricity: {str(electricity)}\n' f'gas: {str(gas)}')
-    # book.writeUtilityTransaction({'electricity': electricity, 'gas': gas, 'total': amount})
-    # splits=[Split(value=transactionInfo['electricity'], account=self.getGnuAccount("Expenses:Utilities:Electricity")),
-    #     Split(value=transactionInfo['gas'], account=self.getGnuAccount("Expenses:Utilities:Gas")),
-    #     Split(value=-round(Decimal(transactionInfo['total']), 2), account=self.getGnuAccount("Assets:Ally Checking Account"))]
-    # Transaction(post_date=today.date().replace(day=24), currency=book.currencies(mnemonic="USD"), description='WE ENERGIES PAYMENT', splits=splits)
     updateSpreadsheet('Home', str(today.year) + ' Balance', 'Energy Bill', today.month, -float(amount))
+    openSpreadsheet(driver, 'Home', str(today.year) + ' Balance')
+    driver.findWindowByUrl("/scripts/ally")
+
+def mortgageBill(driver, book):
+    today = datetime.today()
+    total = round(Decimal(2000.00),2)
+    # get amounts from home mortgage calculator # 
+    mortgageSheet = getMortgageSpreadSheetDetails(driver)
+    row = mortgageSheet['firstRowOfThisYear']
+    while True:
+        paymentDate = datetime.strptime(mortgageSheet['worksheet'].acell(mortgageSheet['dateColumn']+str(row)).value, '%m/%d/%Y').date()
+        print(paymentDate)
+        if paymentDate.month == today.month:
+            interest = round(Decimal(mortgageSheet['worksheet'].acell(mortgageSheet['interestColumn']+str(row)).value),2)
+            break
+        else:
+            row+=1
+    # write transaction # 
+    splits = []
+    splits.append(book.createSplit(interest, "Expenses:Home Expenses:Mortgage Interest"))
+    splits.append(book.createSplit(total - interest, "Liabilities:Mortgage Loan"))
+    splits.append(book.createSplit(-total, book.getGnuAccountFullName('Ally')))
+    book.writeTransaction(today.date(), 'Mortgage Payment', splits)
+    # update Home spreadsheet # 
+    updateSpreadsheet('Home', str(today.year) + ' Balance', 'Mortgage', today.month, -float(total))
     openSpreadsheet(driver, 'Home', str(today.year) + ' Balance')
     driver.findWindowByUrl("/scripts/ally")
 
@@ -190,13 +210,20 @@ def runAlly(driver, account, book, gnuCashTransactions, dateRange):
     importAllyTransactions(driver, account, allyActivity, book, gnuCashTransactions)
     account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
 
+# if __name__ == '__main__':
+#     driver = Driver("Chrome")
+#     book = GnuCash('Home')
+#     Ally = USD("Ally", book)
+#     dateRange = getStartAndEndOfDateRange(timeSpan=7)
+#     gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
+#     runAlly(driver, Ally, book, gnuCashTransactions, dateRange)
+#     Ally.getData()
+#     # allyLogout(driver)
+#     book.closeBook()
+
+
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Home')
-    Ally = USD("Ally", book)
-    dateRange = getStartAndEndOfDateRange(timeSpan=7)
-    gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
-    runAlly(driver, Ally, book, gnuCashTransactions, dateRange)
-    Ally.getData()
-    # allyLogout(driver)
+    mortgageBill(driver, book)
     book.closeBook()

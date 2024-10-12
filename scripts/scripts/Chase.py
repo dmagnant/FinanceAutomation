@@ -104,9 +104,9 @@ def importChaseTransactions(account, chaseActivity, book, gnuCashTransactions):
         if "AUTOMATIC PAYMENT" in rawDescription.upper():                           continue
         elif "REDEMPTION CREDIT" in rawDescription.upper() and float(amount) > 0:   description = "Chase CC Rewards"
         else:                                                                       description = rawDescription
-        if transactionType == "Food & Drink":   toAccount = book.getGnuAccountName('Bars & Restaurants')
-        elif transactionType == 'Groceries':    toAccount = book.getGnuAccountName('Groceries')
-        else:                                   toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
+        if transactionType == "Food & Drink":   toAccount = book.getGnuAccountFullName('Bars & Restaurants')
+        elif transactionType == 'Groceries':    toAccount = book.getGnuAccountFullName('Groceries')
+        else:                                   toAccount = book.getGnuAccountFullName(fromAccount, description=description)
         if toAccount == 'Expenses:Other':   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)
@@ -120,7 +120,6 @@ def runChase(driver, account, book):
     claimChaseRewards(driver)
     importChaseTransactions(account, chaseActivity, book, gnuCashTransactions)
     account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
-    # book.importGnuTransaction(account, chaseActivity, driver)
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:  book.openGnuCashUI()
     

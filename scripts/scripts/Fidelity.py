@@ -14,15 +14,21 @@ else:
     from .Classes.Asset import USD, Security
     from .Classes.GnuCash import GnuCash, createNewTestBook
     from .Functions.GeneralFunctions import (showMessage, getPassword, getStartAndEndOfDateRange, setDirectory, getNotes)    
-    
+
 def getFidelityAccounts(book):
-    IRA, iraSPAXX, iraGME, iraOptions = USD("IRA", book), Security('IRA SPAXX', book), Security('IRA GME', book), USD("IRA Options", book)
-    rIRA, riraVXUS, riraVTI, riraSPAXX, riraGME, riraOptions = USD("Roth IRA", book), Security('Roth IRA VXUS', book), Security('Roth IRA VTI', book), Security('Roth IRA SPAXX', book), Security('Roth IRA GME', book), USD("Roth IRA Options", book)
-    Brokerage, brSPAXX, brGME, brOptions = USD("Brokerage", book), Security('Brokerage SPAXX', book), Security('Brokerage GME', book), USD("Brokerage Options", book)
-    return {'rIRA':rIRA,'riraVXUS':riraVXUS,'riraVTI':riraVTI,'riraSPAXX':riraSPAXX,'riraGME':riraGME, 'riraOptions':riraOptions, 
-            'Brokerage':Brokerage,'brSPAXX':brSPAXX,'brGME':brGME, 'brOptions':brOptions,
-            'IRA':IRA,'iraSPAXX':iraSPAXX,'iraGME':iraGME, 'iraOptions':iraOptions}
-    
+    accounts = {}
+    accounts['IRA'] = USD('IRA', book)
+    accounts['rIRA'] = USD('Roth IRA', book)
+    accounts['Brokerage'] = USD('Brokerage', book)
+    for accountName in list(accounts.keys()):
+        account = accounts.get(accountName)
+        for child in account.gnuCashAccount.children:
+            if child.name == 'Options' or child.name == 'SPAXX':
+                accounts[accountName + child.name] = USD(account.name + ' ' + child.name, book)                
+            else:
+                accounts[accountName + child.name] = Security(account.name + ' ' + child.name, book)                
+    return accounts
+
 def getFidelityBaseAccounts(fidelityAccounts):  return {'rIRA':fidelityAccounts['rIRA'], 'Brokerage':fidelityAccounts['Brokerage'],'IRA':fidelityAccounts['IRA']}
 
 def getFidelityCSVFile(account):
@@ -98,7 +104,8 @@ def getFidelityElementPathRoot():   return "//*[@id='accountDetails']/div/div[2]
 
 def getFidelityBalance(driver, allAccounts, accountBalanceToGet='all'):
     locateFidelityWindow(driver)
-    accountsToUpdate = ['Brokerage', 'IRA', 'rIRA'] if accountBalanceToGet == 'all' else [accountBalanceToGet]
+    # accountsToUpdate = ['Brokerage', 'IRA', 'rIRA'] if accountBalanceToGet == 'all' else [accountBalanceToGet]
+    accountsToUpdate = list(getFidelityBaseAccounts(allAccounts).keys()) if accountBalanceToGet == 'all' else [accountBalanceToGet]
     accountNums = json.loads(getNotes('Fidelity'))
     for account in accountsToUpdate:
         accountNum = str(accountNums[account])
@@ -111,7 +118,9 @@ def getCurrentValue(driver, row):
 
 def getCost(driver, row):
     cost = driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[11]/div/span").text.replace('$', '').replace(',','').replace('c','')
-    return Decimal(cost)
+    if '--' in cost:    
+        return Decimal(0.00)
+    else:               return Decimal(cost)
 
 def getFidelityPricesSharesAndCost(driver, allAccounts, book, accountToGet='all'):
     locateFidelityWindow(driver)
@@ -122,29 +131,30 @@ def getFidelityPricesSharesAndCost(driver, allAccounts, book, accountToGet='all'
     row = 0
     while True:
         row += 1
+        cost = 0
         try:    
             accountName = driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[1]/div[1]/div["+ str(row) +"]/div/div/span/div/div[2]/h3").text
         except  NoSuchElementException:
             try:
                 symbol = driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div[2]/div[2]/div[2]/div[3]/div[1]/div[1]/div["+ str(row) +"]/div/div/span/div/div[2]/div/button").text.replace('$','')
                 if symbol == 'VXUS':
-                    if 'ROTH' in accountName:           account = allAccounts['riraVXUS']
+                    if 'ROTH' in accountName:           account = allAccounts['rIRAVXUS']
                 elif symbol == 'VTI':
-                    if 'ROTH' in accountName:           account = allAccounts['riraVTI']
-                    elif 'Individual' in accountName:   account = allAccounts['brVTI']
-                    elif 'Traditional' in accountName:  account = allAccounts['iraVTI']
+                    if 'ROTH' in accountName:           account = allAccounts['rIRAVTI']
+                    elif 'Individual' in accountName:   account = allAccounts['BrokerageVTI']
+                    elif 'Traditional' in accountName:  account = allAccounts['IRAVTI']
                 elif symbol == 'Cash':
-                    if 'ROTH' in accountName:           account = allAccounts['riraSPAXX']
-                    elif 'Individual' in accountName:   account = allAccounts['brSPAXX']
-                    elif 'Traditional' in accountName:  account = allAccounts['iraSPAXX'] 
+                    if 'ROTH' in accountName:           account = allAccounts['rIRASPAXX']
+                    elif 'Individual' in accountName:   account = allAccounts['BrokerageSPAXX']
+                    elif 'Traditional' in accountName:  account = allAccounts['IRASPAXX'] 
                 elif symbol == 'GME':
-                    if 'ROTH' in accountName:           account = allAccounts['riraGME']
-                    elif 'Individual' in accountName:   account = allAccounts['brGME']
-                    elif 'Traditional' in accountName:  account = allAccounts['iraGME']
+                    if 'ROTH' in accountName:           account = allAccounts['rIRAGME']
+                    elif 'Individual' in accountName:   account = allAccounts['BrokerageGME']
+                    elif 'Traditional' in accountName:  account = allAccounts['IRAGME']
                 elif 'Call' in symbol or 'Put' in symbol:
-                    if 'ROTH' in accountName:           account = allAccounts['riraOptions']
-                    elif "Individual" in accountName:   account = allAccounts['brOptions']
-                    elif 'Traditional' in accountName:  account = allAccounts['iraOptions']
+                    if 'ROTH' in accountName:           account = allAccounts['rIRAOptions']
+                    elif "Individual" in accountName:   account = allAccounts['BrokerageOptions']
+                    elif 'Traditional' in accountName:  account = allAccounts['IRAOptions']
                     balance = account.balance + getCurrentValue(driver, row) if account.balance else getCurrentValue(driver, row)
                     account.setBalance(balance)
                     cost = account.cost + getCost(driver, row) if account.cost else getCost(driver, row)
@@ -157,7 +167,9 @@ def getFidelityPricesSharesAndCost(driver, allAccounts, book, accountToGet='all'
                     book.updatePriceInGnucash(account.symbol, account.price)
                     account.setBalance(driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[9]/div/span").text.replace('$', '').replace(',',''))                    
                     account.value = getCurrentValue(driver, row)
-                    account.setCost(getCost(driver, row))
+                    cost = getCost(driver, row)
+                    if cost:
+                        account.setCost(cost)
             except NoSuchElementException:
                 if accountToGet != 'all':
                     if row==2:  showMessage('Failed to Find Individual Account Share/Price Info', 'Need to update element information for prices and shares in Fidelity')
@@ -245,14 +257,12 @@ def formatFidelityOptionTransactionDescription(rawDescription, accountName):
 def writeFidelityOptionMarketChangeTransaction(accounts, book):
     splits, createdSplits=[], []
     marketChange = 0
-    for account in [accounts['riraOptions'], accounts['brOptions'], accounts['iraOptions']]:
+    for account in [accounts['rIRAOptions'], accounts['BrokerageOptions'], accounts['IRAOptions']]:
         account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
         change = Decimal(account.balance) - account.gnuBalance
         splits.append({'amount': change, 'account': account.gnuAccount})
-        # splits.append(book.createSplit(change, account.gnuAccount))
         marketChange += change
     splits.append({'amount': -marketChange, 'account': "Income:Investments:Market Change"})
-    # splits.append(book.createSplit(-marketChange, "Income:Investments:Market Change"))
     for spl in splits:  createdSplits.append(book.createSplit(spl['amount'], spl['account']))
     book.writeTransaction(datetime.today().date(), "Options Market Change", createdSplits)
 
@@ -289,7 +299,7 @@ def importFidelityTransactions(account, fidelityActivity, book, gnuCashTransacti
         if "VXUS" in rawDescription and "DIVIDEND" not in rawDescription and "TRANSACTION" not in rawDescription:           fromAccount += ":VXUS"
         elif "VTI" in rawDescription and "DIVIDEND" not in rawDescription and "TRANSACTION" not in rawDescription:          fromAccount += ":VTI"                                     
         elif "GME" in rawDescription and "DIVIDEND" not in rawDescription and "TRANSACTION" not in rawDescription:          fromAccount += ":GME"
-        toAccount = book.getGnuAccountName(fromAccount, description=description)
+        toAccount = book.getGnuAccountFullName(fromAccount, description=description)
         if not shares: shares = amount
         if fees:
             splits.append({'amount': amount, 'account': toAccount, 'quantity': shares})
@@ -304,20 +314,9 @@ def importFidelityTransactions(account, fidelityActivity, book, gnuCashTransacti
             splits.append({'amount':amount, 'account':fromAccount, 'quantity':shares})
             splits.append({'amount':-amount, 'account':toAccount, 'quantity':-round(Decimal(shares),2)})
         else: # dividends # buy/sell shares 
-            splits.append({'amount':amount, 'account':toAccount, 'quantity':Decimal(shares)})
+            splits.append({'amount':amount, 'account':toAccount, 'quantity':round(Decimal(amount),2)})
             splits.append({'amount':-amount, 'account':fromAccount, 'quantity':-round(Decimal(shares),2)})
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits)
-
-# def runFidelity(driver, accounts, book):
-#     locateFidelityWindow(driver)
-#     getFidelityBalance(driver, accounts)
-#     getFidelityPricesSharesAndCost(driver, accounts, book)
-#     prepFidelityTransactionSearch(driver, True)
-#     fidelityActivity = captureFidelityTransactions(driver, getStartAndEndOfDateRange(timeSpan="month"))
-#     book.importGnuTransaction(accounts, fidelityActivity, driver, 0)
-#     for accountName in list(accounts.keys()):
-#         account = accounts.get(accountName)
-#         account.updateGnuBalanceAndValue(book.getBalance(account.gnuAccount))
 
 def runFidelityDaily(driver, accounts, book, gnuCashTransactions, dateRange):
     locateFidelityWindow(driver)
@@ -329,7 +328,7 @@ def runFidelityDaily(driver, accounts, book, gnuCashTransactions, dateRange):
         account = baseAccounts.get(accountName)
         fidelityActivity = captureFidelityTransactions(driver, dateRange, accountName)
         importFidelityTransactions(account, fidelityActivity, book, gnuCashTransactions)
-    writeFidelityOptionMarketChangeTransaction(accounts, book)        
+    writeFidelityOptionMarketChangeTransaction(accounts, book)
     for accountName in list(accounts.keys()): # update balances for ALL
         account = accounts.get(accountName)
         balance = book.getGnuAccountBalance(account.gnuAccount)
@@ -347,19 +346,8 @@ def runFidelityDaily(driver, accounts, book, gnuCashTransactions, dateRange):
 #     book.closeBook()
 
 if __name__ == '__main__':
-    driver = Driver("Chrome")
-    book = GnuCash('Test')
-    dateRange = getStartAndEndOfDateRange(timeSpan=3)
-    accounts = getFidelityAccounts(book)
-    gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
-    existingTransactions = book.getTransactionsByGnuAccountIncludingChildren(accounts['brOptions'].gnuAccount, transactionsToFilter=gnuCashTransactions)
-    splits = []
-    amount = round(Decimal(69.99),2)
-    splits.append({'amount':amount, 'account':"Income:Investments:Market Change"})
-    splits.append({'amount':-amount, 'account':accounts['brOptions'].gnuAccount})
-    book.writeUniqueTransaction(accounts['brOptions'], existingTransactions, datetime.today().date(), "TESTING", splits)
-    balance = book.getGnuAccountBalance(accounts['brOptions'].gnuAccount)
-    print('BALANCE 1: ' + str(balance))
-    accounts['brOptions'].updateGnuBalance(balance)
-    print(accounts['brOptions'].getData())
-    book.closeBook()    
+    book = GnuCash('Finance')
+    print("ORIGINAL")
+    print(getFidelityAccounts(book))
+    print("REVISED VERSION: ")
+    print(getFidelityAccounts(book))

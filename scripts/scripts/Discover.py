@@ -79,7 +79,7 @@ def importDiscoverTransactions(account, discoverActivity, book, gnuCashTransacti
         if "DIRECTPAY FULL BALANCE" in rawDescription.upper():                  continue
         elif "AUTOMATIC STATEMENT CREDIT" in description.upper():               description = "Discover CC Rewards"        
         else:                                                                   description = rawDescription
-        toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
+        toAccount = book.getGnuAccountFullName(fromAccount, description=description)
         if toAccount == 'Expenses:Other': reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)
@@ -94,7 +94,6 @@ def runDiscover(driver, account, book):
     claimDiscoverRewards(driver, account)
     importDiscoverTransactions(account, discoverActivity, book, gnuCashTransactions)
     account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
-    # book.importGnuTransaction(account, discoverActivity, driver)
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions: book.openGnuCashUI()
 

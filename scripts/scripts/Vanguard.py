@@ -100,7 +100,7 @@ def importVanguardTransactions(account, vanguardActivity, book, gnuCashTransacti
         elif "Dividend" in rawDescription:                          description = "401k Dividend"
         elif "Fee" in rawDescription:                               description = "401k Fee"
         else:                                                       description = rawDescription
-        toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
+        toAccount = book.getGnuAccountFullName(fromAccount, description=description, row=row)
         if not shares: shares = amount
         splits.append({'amount': -amount, 'account': toAccount})
         splits.append({'amount': amount, 'account': fromAccount, 'quantity': shares})
@@ -132,8 +132,8 @@ def writePensionTransaction(book, today, account, interestYTD):
     accountChange = Decimal(account.balance) - account.gnuBalance
     interest = Decimal(interestYTD) - interestAmount
     splits = []
-    splits.append({'amount': -interest, 'account': book.getGnuAccountName('Interest')})
-    splits.append({'amount': -(accountChange - interest), 'account': book.getGnuAccountName('Pension Contributions')})
+    splits.append({'amount': -interest, 'account': book.getGnuAccountFullName('Interest')})
+    splits.append({'amount': -(accountChange - interest), 'account': book.getGnuAccountFullName('Pension Contributions')})
     splits.append({'amount': accountChange, 'account': account.gnuAccount})
     book.writeTransaction(lastMonth['endDate'], 'Contribution + Interest', splits)
 

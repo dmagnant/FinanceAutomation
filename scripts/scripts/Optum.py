@@ -111,7 +111,7 @@ def importOptumTransactions(account, optumActivity, book, gnuCashTransactions):
         amount = Decimal(row[3])
         if "Vanguard 500 Index Admiral" in rawDescription:  description = "HSA VFIAX Investment"
         else:                                               description = rawDescription
-        toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
+        toAccount = book.getGnuAccountFullName(fromAccount, description=description, row=row)
         splits = [{'amount': -amount, 'account':toAccount},{'amount': amount, 'account':fromAccount, 'quantity': round(Decimal(shares),3)}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits)
 

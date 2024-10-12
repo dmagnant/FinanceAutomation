@@ -132,7 +132,7 @@ def importBoATransactions(account, boAActivity, book, gnuCashTransactions):
         elif "CASH REWARDS STATEMENT CREDIT" in rawDescription.upper():                 description = "BoA CC Rewards"
         elif "SPECTRUM" in rawDescription.upper():                                         description = "Internet Bill"
         else:                                                                           description = rawDescription
-        toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
+        toAccount = book.getGnuAccountFullName(fromAccount, description=description)
         if toAccount == 'Expenses:Other':   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)
@@ -146,7 +146,6 @@ def runBoA(driver, account, book):
     claimBoARewards(driver, account.name)
     importBoATransactions(account, boAActivity, book, gnuCashTransactions)
     account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
-    # book.importGnuTransaction(account, boAActivity, driver)
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:  book.openGnuCashUI()
 

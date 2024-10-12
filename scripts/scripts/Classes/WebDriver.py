@@ -140,6 +140,13 @@ class Driver:
             return element
         except TimeoutException: return False
 
+    def getIDElementOnceAvailable(self, id, wait=10):
+        try:
+            element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.ID,id)))
+            return element
+        except TimeoutException: return False
+
+
     def getXPATHElementTextOnceAvailable(self, xpath, wait=10):
         try:
             element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.XPATH,xpath)))

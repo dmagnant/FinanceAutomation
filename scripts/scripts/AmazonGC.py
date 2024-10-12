@@ -21,8 +21,11 @@ def locateAmazonWindow(driver):
     else:           driver.webDriver.switch_to.window(found); time.sleep(1)
 
 def writeAmazonGCTransactionFromUI(book, account, requestInfo):
+    print('original method: ')
+    print(book.getGnuAccountBalance(account.gnuAccount))
+    print('new method: ')
+    print(book.getGnuCashAccountBalance(account.gnuCashAccount))
     if 'earn' in requestInfo:
-        print('test')
         amount = Decimal(requestInfo['amount'])
         source = 'Income:Market Research:' + requestInfo['source']
     elif 'spend' in requestInfo:
@@ -39,10 +42,14 @@ def writeAmazonGCTransactionFromUI(book, account, requestInfo):
     if 'Joint' in requestInfo['source']:
         jointBook = GnuCash('Home')
         splits = []
-        splits.append(book.createSplit(amount), jointBook.getGnuAccountName("Dan's Contributions"))
-        splits.append(book.createSplit(-amount), jointBook.getGnuAccountName('Amazon'))
+        splits.append(book.createSplit(amount), jointBook.getGnuAccountFullName("Dan's Contributions"))
+        splits.append(book.createSplit(-amount), jointBook.getGnuAccountFullName('Amazon'))
         jointBook.writeTransaction(datetime.today().date(), description, splits)
         jointBook.closeBook()
+    print('original method: ')
+    print(book.getGnuAccountBalance(account.gnuAccount))
+    print('new method: ')
+    print(book.getGnuCashAccountBalance(account.gnuCashAccount))        
     confirmAmazonGCBalance(Driver("Chrome"), account)
 
 def confirmAmazonGCBalance(driver, account):
@@ -63,6 +70,6 @@ def confirmAmazonGCBalance(driver, account):
 if __name__ == '__main__':
     book = GnuCash('Finance')
     AmazonGC = USD("Amazon GC", book)
-    AmazonGC.getData()
-#     # addAmazonGCAmount(book, AmazonGC, Decimal(10.00), 'Pinecone'), book.closeBook()
-    
+    AmazonGC.getData()    
+
+    print(AmazonGC.gnuCashAccount.fullname)

@@ -18,54 +18,32 @@ else:
 def getGamestopCCBasePath():  return '/html/body/div[1]/div[2]/main/section/div[3]/div/div/div/div/div/div/div[2]/div/div[2]/div/div/div'
             
 def locateGamestopCCWindow(driver):
-    found = driver.findWindowByUrl("americanexpress.com")
+    found = driver.findWindowByUrl("comenity.net")
     if not found:   gamestopCCLogin(driver)
     else:           driver.webDriver.switch_to.window(found); time.sleep(1) 
         
 def gamestopCCLogin(driver):
-    driver.openNewWindow('https://www.americanexpress.com/en-us/account/login?inav=iNavLnkLog')
-    # driver.webDriver.find_element(By.ID, "eliloUserID").send_keys(getUsername('GamestopCC'))
-    # driver.webDriver.find_element(By.ID, "eliloPassword").send_keys(getPassword('GamestopCC'))
-    driver.webDriver.find_element(By.ID, "loginSubmit").click()
-    try: driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[5]/div/div/div/div/div/div[2]/div/div/div/div/div[1]/div/a/span/span").click() # close pop-up
-    except NoSuchElementException:  exception = "caught"
+    driver.openNewWindow('https://d.comenity.net/ac/gamestop/public/home')
+    driver.clickIDElementOnceAvailable("existing-cardmember-sign-in-button-link")
+    # driver.getIDElementOnceAvailable("username-data-field").send_keys(getUsername('Comenity'))
+    driver.getIDElementOnceAvailable("password-data-field").send_keys(getPassword('Comenity'))
+    driver.clickIDElementOnceAvailable("sign-in-button-link")
     time.sleep(1)
 
 def getGamestopCCBalance(driver):
     locateGamestopCCWindow(driver)
-    return driver.webDriver.find_element(By.XPATH, "//*[@id='axp-balance-payment']/div[1]/div[1]/div/div[1]/div/div/span[1]/div").text.replace('$', '')
+    for element in driver.webDriver.find_elements(By.XPATH,"//p[@class='" + 'due' + "']"):
+        if "Statement Balance" in element.text:
+            return element.text.replace('Statement Balance: $', '')
 
 def exportGamestopCCTransactions(driver):
-    driver.find_element(By.XPATH, "//*[@id='axp-balance-payment']/div[2]/div[2]/div/div[1]/div[1]/div/a").click() # view transactions
-    try: driver.find_element(By.XPATH, "//*[@id='root']/div[1]/div/div[2]/div/div/div[4]/div/div[3]/div/div/div/div/div/div/div[2]/div/div/div[5]/div/div[2]/div/div[2]/a/span").click() # view activity
-    except NoSuchElementException:exception = "caught"
-    time.sleep(6) 
-    driver.find_element(By.XPATH, getGamestopCCBasePath() + "/div[1]/div[1]/div/div/div[1]/div[2]/div[1]/div/button/div/p").click() # download arrow
-    driver.find_element(By.XPATH, getGamestopCCBasePath() + "[1]/div/div/div/div/div/div[2]/div/div/div[1]/div/fieldset/div[2]/label").click() # CSV Option    
-    try: os.remove(r"C:\Users\dmagn\Downloads\activity.csv")
-    except FileNotFoundError:   exception = "caught"
-    driver.find_element(By.XPATH, getGamestopCCBasePath() + "[1]/div/div/div/div/div/div[3]/div/a/span").click() # Download
-    time.sleep(3)
-
-def claimGamestopCCRewards(driver, account):
-    locateGamestopCCWindow(driver)   
-    driver.webDriver.get("https://global.americanexpress.com/rewards")
-    rewardsBalance = driver.webDriver.find_element(By.ID, "globalmrnavpointbalance").text.replace('$', '')
-    if float(rewardsBalance) > 0:
-        driver.webDriver.find_element(By.ID, "rewardsInput").send_keys(rewardsBalance)
-        driver.webDriver.find_element(By.ID, "rewardsInput").send_keys(Keys.TAB)
-        driver.webDriver.find_element(By.XPATH, "//*[@id='continue-btn']/span").click()
-        driver.webDriver.find_element(By.XPATH, "//*[@id='use-dollars-btn']/span").click()
-    account.setValue(float(rewardsBalance))
-    if account.value:
-        account.value = account.balance - account.value
-    print('balance: ' + account.balance)
-    print('value: ' + account.value)
+    locateGamestopCCWindow(driver)
+    driver.clickIDElementOnceAvailable("account-activity-header")
 
 def importGamestopCCTransactions(account, book, gnuCashTransactions):
     existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
     num=0
-    for row in csv.reader(open(r'C:\Users\dmagn\Downloads\activity.csv'), delimiter=','):
+    for row in csv.reader(open(r'C:\Users\dmagn\Downloads\TITLE FOR GME CC STATEMENT FILE.csv'), delimiter=','):
         reviewTransaction = False
         if num <1: num+=1; continue # skip header
         postDate = datetime.strptime(row[0], '%m/%d/%Y').date()
@@ -73,9 +51,9 @@ def importGamestopCCTransactions(account, book, gnuCashTransactions):
         amount = -Decimal(row[2])
         fromAccount = account.gnuAccount
         if "AUTOPAY PAYMENT" in rawDescription.upper():                             continue
-        elif "YOUR CASH REWARD/REFUND IS" in rawDescription.upper():                description = "GamestopCC CC Rewards"
+        elif "YOUR CASH REWARD/REFUND IS" in rawDescription.upper():                description = "Gamestop CC Rewards"
         else:                                                                       description = rawDescription
-        toAccount = book.getGnuAccountName(fromAccount, description=description, row=row)
+        toAccount = book.getGnuAccountFullName(fromAccount, description=description, row=row)
         if toAccount == 'Expenses:Other':   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)
@@ -86,10 +64,8 @@ def runGamestopCC(driver, account, book):
     dateRange = getStartAndEndOfDateRange(timeSpan=60)
     gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
     exportGamestopCCTransactions(driver.webDriver)
-    claimGamestopCCRewards(driver, account)
     importGamestopCCTransactions(account, book, gnuCashTransactions)
     account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
-    # book.importGnuTransaction(account, r'C:\Users\dmagn\Downloads\activity.csv', driver)
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:  book.openGnuCashUI()
 
@@ -101,9 +77,29 @@ def runGamestopCC(driver, account, book):
 #     GamestopCC.getData()
 #     book.closeBook()
 
+# if __name__ == '__main__':
+#     driver = Driver("Chrome")
+#     book = GnuCash('Finance')
+#     GamestopCC = USD("Gamestop CC", book)
+#     GamestopCC.setBalance(getGamestopCCBalance(driver))
+#     # claimGamestopCCRewards(driver, GamestopCC)
+#     book.closeBook()
+
 if __name__ == '__main__':
-    driver = Driver("Chrome")
     book = GnuCash('Finance')
-    GamestopCC = USD("GamestopCC", book)
-    GamestopCC.setBalance(getGamestopCCBalance(driver))
-    claimGamestopCCRewards(driver, GamestopCC)
+    # CC = USD("Credit Cards", book)
+    GamestopCC = USD("Gamestop CC", book)
+    gnuAccount = book.getGnuAccountByFullName('Liabilities:Credit Cards')
+    accounts = {}
+    for child in gnuAccount.children:
+        print(child.name)
+        accounts[child.name] = USD(child.name, book)
+
+    print(accounts)
+    # account = book.accounts(fullname='Test') # Key error
+    # print(account)
+    # for spl in account.splits:
+    #     print(spl)
+
+    book.closeBook()
+
