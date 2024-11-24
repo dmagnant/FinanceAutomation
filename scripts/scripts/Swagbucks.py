@@ -178,7 +178,7 @@ def swagbucksSearch(driver):
             while search_term1 is None: search_term1 = RandomWords().get_random_word()
             driver.find_element(By.ID, "sbGlobalNavSearchInputWeb").send_keys(search_term1)
             driver.find_element(By.ID, "sbGlobalNavSearchInputWeb").send_keys(Keys.ENTER)
-            time.sleep(random.choice([2, 3, 4]))
+            time.sleep(random.choice([3, 4, 5]))
         except (NoSuchWindowException, WebDriverException): num = 3
 
 def getSwagBucksBalance(driver):
@@ -207,9 +207,18 @@ def runSwagbucks(driver, runAlu, account, book):
     swagbucksSearch(driver)
     if int(account.balance) > 1000: claimSwagBucksRewards(driver)
     
+# if __name__ == '__main__':
+#     driver = Driver("Chrome")
+#     book = GnuCash('Finance')
+#     Swagbucks = Security("Swagbucks", book)
+#     runSwagbucks(driver, False, Swagbucks, book)
+#     book.closeBook()
+
+
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
     Swagbucks = Security("Swagbucks", book)
-    runSwagbucks(driver, False, Swagbucks, book)
+    Swagbucks.setBalance(getSwagBucksBalance(driver))
+    book.updateMRBalance(Swagbucks)
     book.closeBook()

@@ -130,7 +130,8 @@ def importBoATransactions(account, boAActivity, book, gnuCashTransactions):
         fromAccount = account.gnuAccount
         if "BA ELECTRONIC PAYMENT" in rawDescription.upper():                           continue
         elif "CASH REWARDS STATEMENT CREDIT" in rawDescription.upper():                 description = "BoA CC Rewards"
-        elif "SPECTRUM" in rawDescription.upper():                                         description = "Internet Bill"
+        elif "SPECTRUM" in rawDescription.upper():                                      description = "Internet Bill"
+        elif "HOMEDEPOT" in rawDescription.upper().replace(' ',''):                     description = 'Home Depot'
         else:                                                                           description = rawDescription
         toAccount = book.getGnuAccountFullName(fromAccount, description=description)
         if toAccount == 'Expenses:Other':   reviewTransaction = True

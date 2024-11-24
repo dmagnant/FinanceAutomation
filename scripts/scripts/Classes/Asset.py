@@ -14,6 +14,7 @@ def getSymbolByName(self):
         case "ethereum":                                            return 'ETH'
         case 'he investment':                                       return "VIIIX"        
         case 'vfiax':                                               return "VFIAX"
+        case 'vbirx':                                               return "VBIRX"
         case "iotex":                                               return 'IOTX'
         case "presearch":                                           return 'PRE'
         case "bing":                                                return 'BNG'
@@ -52,7 +53,8 @@ class Asset:
     
 class Security(Asset):    # this is a class for tracking security information
     def __init__(self, name, book, account=None):
-        self.name, self.account = name, account
+        self.name = name
+        # self.account = account
         self.balance = self.value = self.cost = ''
         self.symbol = getSymbolByName(self)
         self.price = book.getPriceInGnucash(self.symbol, datetime.today().date())
@@ -77,29 +79,30 @@ class Security(Asset):    # this is a class for tracking security information
                 f'price: {self.price}')
     
     def updateSpreadsheetAndGnuCash(self, book):
-        account = self.symbol if self.account == None else self.account
-        updateSpreadsheet('Finances', 'Investments', account, 1, self.balance, self.symbol)
-        updateSpreadsheet('Finances', 'Investments', account, 2, float(self.price), self.symbol)
+        # account = self.symbol if self.account == None else self.account
+        updateSpreadsheet('Finances', 'Investments', self.symbol, 1, self.balance, self.symbol)
+        updateSpreadsheet('Finances', 'Investments', self.symbol, 2, float(self.price), self.symbol)
         updateCoinQuantityFromStakingInGnuCash(self, book)
         self.updateGnuBalance(book.getGnuAccountBalance(self.gnuAccount))
 
-    def updateBalanceInSpreadSheet(self, account=None):
-        account = self.symbol if account == None else account
-        updateSpreadsheet('Finances', 'Investments', account, 1, self.balance, self.symbol)
+    def updateBalanceInSpreadSheet(self):
+        # account = self.symbol if account == None else account
+        updateSpreadsheet('Finances', 'Investments', self.symbol, 1, self.balance, self.symbol)
 
-    def updatePriceInSpreadSheet(self, account=None):
-        account = self.symbol if account == None else account
-        updateSpreadsheet('Finances', 'Investments', account, 2, self.price, self.symbol)
+    def updatePriceInSpreadSheet(self):
+        # account = self.symbol if account == None else account
+        updateSpreadsheet('Finances', 'Investments', self.symbol, 2, self.price, self.symbol)
 
-    def updateBalanceInGnuCash(self, book, account=None):
-        account = self.symbol if account == None else account
+    def updateBalanceInGnuCash(self, book):
+        # account = self.symbol if account == None else account
         updateCoinQuantityFromStakingInGnuCash(self, book)
 
 class USD(Asset):
     "this is a class for tracking USD information"
     def __init__(self, name, book):
         self.balance = self.value = self.cost = ''
-        self.name, self.units, self.currency, self.reviewTransactions, self.account = name, 0, 'USD', [], None
+        self.name, self.units, self.currency, self.reviewTransactions = name, 0, 'USD', []
+        # self.account = None
         self.gnuAccount = book.getGnuAccountFullName(name)
         self.gnuCashAccount = book.getGnuAccountByFullName(self.gnuAccount)
         balance = book.getGnuAccountBalance(self.gnuAccount)
@@ -117,7 +120,6 @@ class USD(Asset):
     def locateAndUpdateSpreadsheet(self, driver):
         balance = 0.00 if float(self.balance) < 0 else float(self.balance) * -1
         if self.value: balance = self.value
-        print('updated cc balance in Asset.locateandupdatespreadsheet to account for credit received.')
         today = datetime.today()
         month, year = today.month, today.year
         # switch worksheets if running in December (to next year's worksheet)
@@ -140,4 +142,4 @@ class USD(Asset):
                 if spl.account.fullname == interestAccount:
                     totalInterest += abs(spl.value)
         print('total interest for: ' + self.name + ' is: ' + str(totalInterest))
-        return totalInterest
+        return round(Decimal(totalInterest),2)

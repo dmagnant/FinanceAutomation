@@ -23,7 +23,7 @@ class Node(object):
     def __init__(self, num, name, reliabilityScore):    self.num,self.name, self.reliabilityScore = num, name, reliabilityScore
     
     def stakePRE(self, driver, stakeAmount):
-        availToStake = float(driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
+        availToStake = float(driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.replace(',','').replace(' PRE',''))
         driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '6]/div/table/tbody/tr[' + str(self.num) + ']/td[12]/a[1]').click() # stake button
         time.sleep(1)
         if availToStake < stakeAmount:  stakeAmount = availToStake
@@ -51,7 +51,7 @@ def claimPresearchRewards(driver):
     try:    float(driver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
     except NoSuchElementException:
         showMessage('Presearch fail', 'Check Presearch. May need to login or check element. Click OK once logged in to continue')
-        driver.get("https://nodes.presearch.org/dashboard")
+        return False
     unclaimed = driver.find_element(By.XPATH, getPresearchBasePath() + '2]/div[3]/div[2]/div/div/div[1]/h2').text.strip(' PRE')
     if float(unclaimed) > 0:
         driver.find_element(By.XPATH, getPresearchBasePath() + '2]/div[3]/div[2]/div/div/div[2]/div/a').click() # claim
@@ -95,10 +95,11 @@ def getPresearchBalance(driver):
 
 def presearchRewardsRedemptionAndBalanceUpdates(driver, account, book):
     preAvailableToStake = claimPresearchRewards(driver)
-    if preAvailableToStake: stakePresearchRewards(driver, preAvailableToStake)
-    account.setBalance(getPresearchBalance(driver))
-    account.setPrice(account.getPriceFromCoinGecko())
-    account.updateSpreadsheetAndGnuCash(book)
+    if preAvailableToStake: 
+        stakePresearchRewards(driver, preAvailableToStake)
+        account.setBalance(getPresearchBalance(driver))
+        account.setPrice(account.getPriceFromCoinGecko())
+        account.updateSpreadsheetAndGnuCash(book)
     
 if __name__ == '__main__':
     driver = Driver("Chrome")

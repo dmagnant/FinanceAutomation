@@ -6,19 +6,19 @@ if __name__ == '__main__' or __name__ == "UpdateGoals":
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                             setDirectory, showMessage)
-    from Functions.SpreadsheetFunctions import openSpreadsheet
+    from Functions.SpreadsheetFunctions import openSpreadsheet, getWorkSheet
 else:
     from .Classes.WebDriver import Driver
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                              setDirectory, showMessage)
-    from .Functions.SpreadsheetFunctions import openSpreadsheet
+    from .Functions.SpreadsheetFunctions import openSpreadsheet, getWorkSheet
 
 def getTotalForIncomeExpenseAccounts(accountList, mybook, transactions, timeframe, date, accounts, accountsType, worksheet):
     for i in accountList:
         print(i)
         total, readBook = 0, mybook.readBook
-        accountsToUpdate = [readBook.accounts(fullname=mybook.getGnuAccount(i))]
+        accountsToUpdate = [readBook.accounts(fullname=mybook.getGnuAccountFullName(i))]
         for acc in accountsToUpdate[0].children:    accountsToUpdate.append(acc)
         for acc in accountsToUpdate:
             for tr in transactions:
@@ -33,13 +33,14 @@ def getTotalForIncomeExpenseAccounts(accountList, mybook, transactions, timefram
     return accounts
 
 def getContributionsForRetirementAccounts(accountList, mybook, transactions, accountsContext, date, worksheet):
-    accountsContext['HSAPersonalContributions'], accountsContext['IRAContributions'], accountsContext['401kPersonalContributions'], accountsContext['BrokerageContributions'] = 0, 0, 0, 0
+    accountsContext['HSAPersonalContributions'], accountsContext['IRAContributions'], accountsContext['RothIRAContributions'], accountsContext['401kPersonalContributions'], accountsContext['Roth401kContributions'], accountsContext['BrokerageContributions'], accountsContext['RothIRAContributions']=0,0,0,0,0
     for account in accountList:
         total = 0
+        roth401kTotal = 0
         for tr in transactions:
             for spl in tr.splits:
                 value = 0
-                if spl.account.fullname == mybook.getGnuAccount(account):
+                if spl.account.fullname == mybook.getGnuAccountFullName(account):
                     if "Paycheck" in tr.description:
                         if account == 'Optum Cash':
                             value = spl.value - 25
@@ -48,14 +49,23 @@ def getContributionsForRetirementAccounts(accountList, mybook, transactions, acc
                         else:
                             value = spl.value
                     elif "Transfer" in tr.description:              value = spl.value
-                    if value:                                       total += float(format(value, ".2f"))
-        if account in ['Optum Cash', 'HE Cash']:            accountsContext['HSAPersonalContributions'] += round(total, 2)
-        elif account in ['IRA SPAXX', 'Roth IRA SPAXX']:    accountsContext['IRAContributions'] += round(total, 2)
-        elif account == 'Vanguard401k':                     accountsContext['401kPersonalContributions'] += round(total, 2)
-        elif account == 'Brokerage SPAXX':                  accountsContext['BrokerageContributions'] += round(total, 2)
+                    if value:                                       
+                        if 'roth' in spl.memo: 
+                            roth401kTotal += float(format(value, ".2f"))
+                        else:
+                            total += float(format(value, ".2f"))
+        if account in ['Optum Cash', 'HE Cash']:                    accountsContext['HSAPersonalContributions'] += round(total, 2)
+        elif account == 'IRA SPAXX':                                accountsContext['IRAContributions'] += round(total, 2)
+        elif account == 'Roth IRA SPAXX':                           accountsContext['RothIRAContributions'] += round(total, 2)
+        elif account in ['Brokerage SPAXX', 'GME']:                 accountsContext['BrokerageContributions'] += round(total, 2)
+        elif account == 'Vanguard401k':                             
+            accountsContext['401kPersonalContributions'] += round(total, 2)
+            accountsContext['Roth401kContributions'] += round(roth401kTotal, 2)
     updateSpreadsheet(worksheet, '401k Contributions Personal', date, accountsContext['401kPersonalContributions'], 'Personal', 'YTD')
+    updateSpreadsheet(worksheet, 'Roth 401k Contributions', date, accountsContext['Roth401kContributions'], 'Personal', 'YTD')
     updateSpreadsheet(worksheet, 'HSA Contributions Personal', date, accountsContext['HSAPersonalContributions'], 'Personal', 'YTD')
     updateSpreadsheet(worksheet, 'IRA Contributions', date, accountsContext['IRAContributions'], 'Personal', 'YTD')
+    updateSpreadsheet(worksheet, 'Roth IRA Contributions', date, accountsContext['RothIRAContributions'], 'Personal', 'YTD')
     updateSpreadsheet(worksheet, 'Brokerage Contributions', date, accountsContext['BrokerageContributions'], 'Personal', 'YTD')
     
 def getContributionsForCryptoCurrency(mybook, transactions, accountsContext, date, worksheet):
@@ -75,14 +85,15 @@ def getContributionsForCryptoCurrency(mybook, transactions, accountsContext, dat
 
 def getAssetAccountBalances(date, accountList, book, accountsType, timeframe, worksheet):
     for account in accountList:
+        value = float(book.getGnuAccountBalance(book.getGnuAccountFullName(account), date))
         if account == 'IRA':
-            value = float(book.getBalance(book.getGnuAccount(account), date) + book.getBalance(book.getGnuAccount('Roth IRA'), date))
-        else:
-            value = float(book.getBalance(book.getGnuAccount(account), date))
+            value += float(book.getGnuAccountBalance(book.getGnuAccountFullName('Roth IRA'), date))
+        elif account == 'Brokerage':
+            value += float(book.getGnuAccountBalance(book.getGnuAccountFullName('GME'), date) * book.getPriceInGnucash('GME'))
         updateSpreadsheet(worksheet, account, date, round(value,2), accountsType, timeframe)
 
 def getCellForMonthly(account, month, accounts='Personal'):
-    rowStart = 71 if accounts == 'Personal' else 25
+    rowStart = 76 if accounts == 'Personal' else 25
     row = str(rowStart + (month - 1))
     match account:
         case 'Amazon':                  return 'C' + row if accounts == 'Personal' else 'B' + row
@@ -110,39 +121,43 @@ def getCellForMonthly(account, month, accounts='Personal'):
 def getCellForYTD(account, accountsType):
     column = 'G' if accountsType == 'Personal' else 'F'   
     match account:
-        case 'Amazon':                          return column + str(20) if accountsType == 'Personal' else column + str(7)
-        case 'Bars & Restaurants':              return column + str(22) if accountsType == 'Personal' else column + str(8)
-        case 'Entertainment':                   return column + str(24) if accountsType == 'Personal' else column + str(9)
-        case 'Groceries':                       return column + str(25) if accountsType == 'Personal' else column + str(10)
-        case 'Other':                           return column + str(29) if accountsType == 'Personal' else column + str(15)
+        # Joint and Personal
+        case 'Amazon':                          return column + str(22) if accountsType == 'Personal' else column + str(7)
+        case 'Bars & Restaurants':              return column + str(24) if accountsType == 'Personal' else column + str(8)
+        case 'Entertainment':                   return column + str(26) if accountsType == 'Personal' else column + str(9)
+        case 'Groceries':                       return column + str(27) if accountsType == 'Personal' else column + str(10)
+        case 'Other':                           return column + str(31) if accountsType == 'Personal' else column + str(15)
         # Personal
         case '401k Contributions':              return column + str(2)
         case 'Dividends':                       return column + str(3)
         case 'HSA Contributions':               return column + str(4)
         case 'Interest':                        return column + str(5)
-        case 'Pension Contributions':           return column + str(6) 
+        case 'Pension Contributions':           return column + str(6)
         case 'Market Research':                 return column + str(7)
         case 'Salary':                          return column + str(8)
         case '401k Contributions Personal':     return column + str(12)
-        case 'Brokerage Contributions':         return column + str(13)        
+        case 'Brokerage Contributions':         return column + str(13) 
         case 'Crypto Contributions':            return column + str(14)
         case 'HSA Contributions Personal':      return column + str(15)
         case 'IRA Contributions':               return column + str(16)
-        case 'Bank Fees':                       return column + str(21)
-        case 'Clothing/Apparel':                return column + str(23)
-        case 'Income Taxes':                    return column + str(26)
-        case 'Joint Expenses':                  return column + str(27)
-        case 'Medical':                         return column + str(28)
-        case 'Loan Interest':                   return column + str(30) 
-        case 'Loan Principle':                  return column + str(31)         
-        case 'Transportation':                  return column + str(32)
-        case 'Vanguard401k':                    return column + str(58)
-        case 'Brokerage':                       return column + str(59)
-        case 'Crypto':                          return column + str(60)
-        case 'HSA':                             return column + str(61)
-        case 'IRA':                             return column + str(62)
-        case 'Liquid Assets':                   return column + str(63)
-        case 'VanguardPension':                 return column + str(64)
+        case 'Roth 401k Contributions':         return column + str(17)
+        case 'Roth IRA Contributions':          return column + str(18)
+        case 'Bank Fees':                       return column + str(23)
+        case 'Clothing/Apparel':                return column + str(25)
+        case 'Income Taxes':                    return column + str(28)
+        case 'Joint Expenses':                  return column + str(29)
+        case 'Medical':                         return column + str(30)
+        case 'Loan Interest':                   return column + str(32) 
+        case 'Loan Principle':                  return column + str(33)         
+        case 'Transportation':                  return column + str(34)
+        case 'Vanguard401k':                    return column + str(62)
+        case 'Brokerage':                       return column + str(63)
+        case 'Crypto':                          return column + str(64)
+        case 'HSA':                             return column + str(65)
+        case 'IRA':                             return column + str(66)
+        case 'Liquid Assets':                   return column + str(67)
+        case 'Pension':                         return column + str(68)
+        case 'Roth IRA':                        return column + str(69)
         # Joint
         case "Dan's Contributions":             return column + str(2)                 
         case "Tessa's Contributions":           return column + str(3)         
@@ -156,12 +171,12 @@ def getCellForYTD(account, accountsType):
         
         case _:                                 print('YTD cell not found for: ' + account)
 
-def getWorkSheet(accountsType):
-    jsonCreds = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
-    sheetTitle = 'Finances' if accountsType == 'Personal' else 'Home'
-    sheet = gspread.service_account(filename=jsonCreds).open(sheetTitle)
-    worksheetTitle = 'Goals' if accountsType == 'Personal' else 'Finances'
-    return sheet.worksheet(worksheetTitle)
+# def getWorkSheet(accountsType):
+#     jsonCreds = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\creds.json"
+#     sheetTitle = 'Finances' if accountsType == 'Personal' else 'Home'
+#     sheet = gspread.service_account(filename=jsonCreds).open(sheetTitle)
+#     worksheetTitle = 'Goals' if accountsType == 'Personal' else 'Finances'
+#     return sheet.worksheet(worksheetTitle)
 
 def updateSpreadsheet(worksheet, account, date, value, accountsType, timeframe):
     cell = getCellForMonthly(account, date.month, accountsType) if timeframe == 'Month' else getCellForYTD(account, accountsType)
@@ -169,12 +184,16 @@ def updateSpreadsheet(worksheet, account, date, value, accountsType, timeframe):
 
 def runUpdateGoals(accountsType, timeframe, book):
     driver = Driver("Chrome")
-    readBook = book.readBook
-    openSpreadsheet(driver, 'Finances', 'Goals') if accountsType == "Personal" else openSpreadsheet(driver, 'Home', 'Finances')
-    worksheet = getWorkSheet(accountsType)
+    if accountsType == 'Personal':
+        sheetTitle = 'Finances'
+        tabTitle = 'Goals'
+    else:
+        sheetTitle = 'Home'
+        tabTitle = 'Finances'
+    openSpreadsheet(driver, sheetTitle, tabTitle)
+    worksheet = getWorkSheet(sheetTitle, tabTitle)
     dateRange = getStartAndEndOfDateRange(datetime.today().date(), timeframe)
-    transactions = [tr for tr in readBook.transactions
-                if tr.post_date >= dateRange['startDate'] and tr.post_date <= dateRange['endDate']]
+    transactions = book.getTransactionsByDateRange(dateRange)
     incomeAndExpenseAccounts, incomeQuarterlyAccounts, expenseQuarterlyAccounts, retirementContributionAccounts = [], [], [], []
     accountsContext = {}
     commonExpenseAccounts = ['Amazon', 'Bars & Restaurants', 'Entertainment', 'Other', 'Groceries']
@@ -184,8 +203,8 @@ def runUpdateGoals(accountsType, timeframe, book):
         if timeframe == 'YTD':
             incomeQuarterlyAccounts = ['401k Contributions', 'HSA Contributions', 'Pension Contributions', 'Salary']
             expenseQuarterlyAccounts = ['Bank Fees', 'Clothing/Apparel', 'Income Taxes', 'Medical', 'Loan Interest', 'Loan Principle', 'Transportation']
-            retirementContributionAccounts = ['Vanguard401k', 'Optum Cash', 'HE Cash', 'IRA SPAXX', 'Roth IRA SPAXX', 'Brokerage SPAXX']
-            assetAccounts = ['Vanguard401k', 'Crypto', 'Liquid Assets', 'VanguardPension', 'HSA', 'IRA', 'Brokerage']
+            retirementContributionAccounts = ['Vanguard401k', 'Optum Cash', 'HE Cash', 'IRA SPAXX', 'Roth IRA SPAXX', 'Brokerage SPAXX', 'GME']
+            assetAccounts = ['Vanguard401k', 'Crypto', 'Liquid Assets', 'Pension', 'HSA', 'IRA', 'Brokerage', 'Roth IRA']
         else:   commonExpenseAccounts.remove('Groceries')
     elif accountsType == 'Joint':
         specificIncomeAccounts = ["Dan's Contributions", "Tessa's Contributions"]
@@ -208,6 +227,8 @@ if __name__ == '__main__':
     # runUpdateGoals(accounts, timeframe, book)
     # book.closeBook()
     
+    date = datetime.today().date()
     book = GnuCash('Finance')
-    dateRange = getStartAndEndOfDateRange(datetime.today().date(), 'YTD')
-    getAssetAccountBalances(dateRange['endDate'], ['IRA'], book, 'Personal', 'YTD')
+    print(float(book.getGnuAccountBalance(book.getGnuAccountFullName('GME'), date) * book.getPriceInGnucash('GME')))
+
+

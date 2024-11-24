@@ -20,15 +20,15 @@ else:
                                              getUsername, showMessage, setDirectory, getNotes)
 
 def getVanguardAccounts(book):
-    return {'V401k': USD("Vanguard401k", book), 'TSM401k': Security("Total Stock Market(401k)", book), 'EBI': Security("Employee Benefit Index", book)}
+    return {'V401k': USD("Vanguard401k", book), 'TSM401k': Security("Total Stock Market(401k)", book), '401kCash':USD('NM Asset Fund', book), 'EBI': Security("Employee Benefit Index", book)}
 
 def vanguardLogin(driver):
     driver.openNewWindow('https://logon.vanguard.com/logon?site=pi')
-    time.sleep(2)
     # driver.webDriver.find_element(By.ID, "USER").send_keys(getUsername('Vanguard'))
+    time.sleep(2)
     # driver.webDriver.find_element(By.ID, "PASSWORD-blocked").send_keys(getPassword('Vanguard'))
     if 'ownyourfuture' not in driver.webDriver.current_url: # check if already logged in
-        driver.webDriver.find_element(By.XPATH, "//*[@id='username-password-submit-btn-1']/span").click() # log in 
+        driver.clickXPATHElementOnceAvailable("//*[@id='username-password-submit-btn-1']/span") # log in
         try:     # handle security code
             driver.webDriver.find_element(By.ID, 'CODE')
             showMessage('Security Code', "Enter Security code, then click OK")
@@ -46,12 +46,27 @@ def locateVanguardWindow(driver):
 def getVanguard401kPriceSharesAndCost(driver, account, book, planId):
     locateVanguardWindow(driver)
     driver.webDriver.get('https://retirementplans.vanguard.com/VGApp/pe/faces/Investments.xhtml?SelectedPlanId=' + planId)
-    account.balance = driver.getXPATHElementTextOnceAvailable("//*[@id='investmentsForm:allFundsTabletbody0']/tr[2]/td[3]")
-    account.price = driver.webDriver.find_element(By.XPATH, "//*[@id='investmentsForm:allFundsTabletbody0']/tr[2]/td[4]").text.replace('$', '')
-    book.updatePriceInGnucash(account.symbol, Decimal(account.price))
-    account.value = driver.webDriver.find_element(By.XPATH,"//*[@id='investmentsForm:allFundsTabletbody0']/tr[2]/td[5]").text.replace('$','',).replace(',','')
-    driver.webDriver.get('https://retirementplans.vanguard.com/VGApp/pe/faces/PersonalPerformance.xhtml?SelectedPlanId=' + planId)
-    account.cost = driver.getXPATHElementTextOnceAvailable("//*[@id='planDetailmyPerformanceForm:dataTabBox:accountActivityNetCashFlowRowSinceInception']/td[2]").replace('$','',).replace(',','')
+    row = 2
+    while True:
+        try:
+            fundNum = driver.getXPATHElementTextOnceAvailable(getVanguardBalanceTableElement(row, 'td[1]'))
+        except NoSuchElementException:
+            break
+        if hasattr(account, 'symbol') and fundNum==account.symbol:
+            account.balance = driver.getXPATHElementTextOnceAvailable(getVanguardBalanceTableElement(row, 'td[3]')).replace(',','')
+            account.price = driver.webDriver.find_element(By.XPATH, getVanguardBalanceTableElement(row, 'td[4]')).text.replace('$', '')
+            book.updatePriceInGnucash(account.symbol, Decimal(account.price))
+            account.value = driver.webDriver.find_element(By.XPATH,getVanguardBalanceTableElement(row, 'td[5]')).text.replace('$','',).replace(',','')
+            driver.webDriver.get('https://retirementplans.vanguard.com/VGApp/pe/faces/PersonalPerformance.xhtml?SelectedPlanId=' + planId)
+            account.cost = driver.getXPATHElementTextOnceAvailable("//*[@id='planDetailmyPerformanceForm:dataTabBox:accountActivityNetCashFlowRowSinceInception']/td[2]").replace('$','',).replace(',','')
+            break
+        elif account.name == 'NM Asset Fund' and fundNum == '4769':
+            account.balance = driver.getXPATHElementTextOnceAvailable(getVanguardBalanceTableElement(row, 'td[3]')).replace(',','')
+            break
+        row+=1
+
+def getVanguardBalanceTableElement(row, suffix):
+    return f"//*[@id='investmentsForm:allFundsTabletbody0']/tr[{str(row)}]/{suffix}"
 
 def captureVanguard401kTransactions(driver, planId, lastMonth):
     locateVanguardWindow(driver)
@@ -96,11 +111,18 @@ def importVanguardTransactions(account, vanguardActivity, book, gnuCashTransacti
         amount = Decimal(row[3])
         fromAccount = account.gnuAccount
         splits = []
-        if "Plan Contribution" in rawDescription:                   description = "401k Investment"
+        if 'NM Annual Fixed Rate Fund' in rawDescription:           continue
+        elif "Plan Contribution" in rawDescription:                   description = "401k Investment"
         elif "Dividend" in rawDescription:                          description = "401k Dividend"
         elif "Fee" in rawDescription:                               description = "401k Fee"
+        elif "Fund to Fund Out" in rawDescription:                  
+            description = "401k Transfer Out"
+            shares = -shares
+            amount = -amount
+        elif "Fund to Fund In" in rawDescription:                  
+            description = "401k Transfer In"
         else:                                                       description = rawDescription
-        toAccount = book.getGnuAccountFullName(fromAccount, description=description, row=row)
+        toAccount = book.getGnuAccountFullName(fromAccount, description=description)
         if not shares: shares = amount
         splits.append({'amount': -amount, 'account': toAccount})
         splits.append({'amount': amount, 'account': fromAccount, 'quantity': shares})
@@ -137,30 +159,32 @@ def writePensionTransaction(book, today, account, interestYTD):
     splits.append({'amount': accountChange, 'account': account.gnuAccount})
     book.writeTransaction(lastMonth['endDate'], 'Contribution + Interest', splits)
 
-# def runVanguard401kAccount(driver, book, baseAccount, accountToUpdate, planID):
-#     getVanguard401kPriceSharesAndCost(driver, accountToUpdate, book, planID)
-#     v401kActivity = captureVanguard401kTransactions(driver, planID)
-#     book.importGnuTransaction(baseAccount, v401kActivity, driver, 0)
-#     accountToUpdate.updateGnuBalanceAndValue(book.getBalance(accountToUpdate.gnuAccount))
+def writeAssetFundTransaction(book, account, change, lastMonth):
+    splits = []
+    splits.append({'amount': -change, 'account': book.getGnuAccountFullName('Interest')})
+    splits.append({'amount': change, 'account': account.gnuAccount})
+    book.writeTransaction(lastMonth['endDate'], 'NM Asset Fund Interest', splits)
     
 def runVanguard401k(driver, accounts, book, gnuCashTransactions, lastMonth):
     locateVanguardWindow(driver)
     planIDs = json.loads(getNotes('Vanguard'))
     for accountName in list(accounts.keys()):
         account = accounts.get(accountName)
-        if accountName != 'V401k':
+        if hasattr(account, 'symbol'):
             planID = str(planIDs[accountName])
             getVanguard401kPriceSharesAndCost(driver, account, book, planID)
             v401kActivity = captureVanguard401kTransactions(driver, planID, lastMonth)
             importVanguardTransactions(account, v401kActivity, book, gnuCashTransactions)
             account.updateGnuBalanceAndValue(book.getGnuAccountBalance(account.gnuAccount))
         else:
+            if accountName == '401kCash': 
+                getVanguard401kPriceSharesAndCost(driver, account, book, planID)
+                print('account balance is: ' + account.balance)
+                change = round(Decimal(account.balance) - Decimal(account.gnuBalance),2)
+                if change > 0:
+                    writeAssetFundTransaction(book, account, change)
             account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
             account.setBalance(account.gnuBalance) 
-    # runVanguard401kAccount(driver, book, accounts['V401k'], accounts['TSM401k'], str(planIDs['TSM401k']))
-    # runVanguard401kAccount(driver, book, accounts['V401k'], accounts['EBI'], str(planIDs['EBI']))
-    # accounts['V401k'].updateGnuBalance(book.getBalance(accounts['V401k'].gnuAccount))
-    # accounts['V401k'].setBalance(accounts['V401k'].gnuBalance)
     
 if __name__ == '__main__':
     driver, book = Driver("Chrome"), GnuCash('Finance')

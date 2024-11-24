@@ -24,13 +24,12 @@ def locateWorthyWindow(driver):
 
 def worthyLogin(driver):
     driver.openNewWindow('https://worthy.capital/auth/login/')
-    driver = driver.webDriver
     time.sleep(1)
     try:
         # driver.find_element(By.ID, "email").send_keys(getUsername('Worthy'))
         # driver.find_element(By.ID, "password").send_keys(getPassword('Worthy'))
-        driver.find_element(By.ID, "password").click() # password box to activate page
-        driver.find_element(By.XPATH, "//*[@id='__next']/div/div/main/div/form/div[3]/button").click() # sign in
+        driver.clickIDElementOnceAvailable('password') # to activate page
+        driver.webDriver.find_element(By.XPATH, "//*[@id='__next']/div/div/main/div/form/div[3]/button").click() # sign in
     except NoSuchElementException:  exception = "already logged in"
     time.sleep(3)
 

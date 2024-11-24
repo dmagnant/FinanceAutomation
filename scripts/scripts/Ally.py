@@ -1,22 +1,24 @@
-import csv, time, importlib
+import csv, time, json, os
 from datetime import datetime
 from decimal import Decimal
 from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+
 
 if __name__ == '__main__' or __name__ == "Ally":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getPassword,
-                                            getStartAndEndOfDateRange, setDirectory, showMessage)
-    from Functions.SpreadsheetFunctions import openSpreadsheet, updateSpreadsheet, getMortgageSpreadSheetDetails
+                                            getStartAndEndOfDateRange, setDirectory, showMessage, getUsername, getNotes)
+    from Functions.SpreadsheetFunctions import openSpreadsheet, updateSpreadsheet, getSheetAndDetails
 else:
     from .Classes.Asset import USD
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import (getPassword,
-                                             getStartAndEndOfDateRange, showMessage, setDirectory)
-    from .Functions.SpreadsheetFunctions import openSpreadsheet, updateSpreadsheet, getMortgageSpreadSheetDetails
+                                             getStartAndEndOfDateRange, showMessage, setDirectory, getUsername, getNotes)
+    from .Functions.SpreadsheetFunctions import openSpreadsheet, updateSpreadsheet, getSheetAndDetails
 
 def locateAllyWindow(driver):
     found = driver.findWindowByUrl("secure.ally.com")
@@ -90,6 +92,35 @@ def captureAllyTransactions(driver, dateRange):
                 element = setAllyTransactionElementRoot(row, column)
         except (NoSuchElementException):    insideDateRange = False
     return allyActivity
+
+def payWaterBill(driver, book):
+    paymentAccountDetails = json.loads(getNotes('Ally Bank'))
+    today = datetime.today()
+    driver.openNewWindow('https://paywater.milwaukee.gov/webclient/user/login.seam')
+    try:
+        driver.webDriver.find_element(By.ID, 'account').send_keys(getUsername('Water'))
+        driver.webDriver.find_element(By.XPATH, "//*[@id='anonymous-form']/div[2]/button").click() # login
+    except NoSuchElementException:  exception = "already logged in"
+    billAmount = driver.getIDElementTextOnceAvailable("dashboardMyAccountsShowBalances").replace('$','')
+    driver.webDriver.get(f'https://paywater.milwaukee.gov/app/PaymentGateway?ccpa={billAmount}')
+    driver.webDriver.find_element(By.ID,'txtUserField1').send_keys(os.environ.get('firstName') + " " + os.environ.get('lastName'))
+    driver.webDriver.find_element(By.ID, 'txtPhone').send_keys(os.environ.get('Phone'))
+    driver.webDriver.find_element(By.ID, 'btnSubmit').click() # Continue
+    driver.webDriver.find_element(By.ID, 'txtNameonBankAccount').send_keys(os.environ.get('firstName') + " " + os.environ.get('lastName'))
+    driver.webDriver.find_element(By.ID, 'ddlBankAccountType').send_keys(Keys.DOWN)
+    driver.webDriver.find_element(By.ID, 'txtBankRoutingNumber').send_keys(paymentAccountDetails['routing'])
+    driver.webDriver.find_element(By.ID, 'txtBankAccountNumber').send_keys(paymentAccountDetails['account'])
+    driver.webDriver.find_element(By.ID, 'txtBankAccountNumber2').send_keys(paymentAccountDetails['account'])
+    driver.webDriver.find_element(By.ID, 'btnSubmitAch').click() # Continue
+    billTotal = driver.getXPATHElementTextOnceAvailable("//*[@id='tblAccountInfo']/tbody/tr[7]/td[2]").replace('$','')
+    driver.webDriver.find_element(By.ID, 'txtEmailAddress').send_keys(os.environ.get('Email'))
+    driver.webDriver.find_element(By.ID, 'chkTermsAgree').click() # agree to T&C
+    driver.webDriver.find_element(By.ID, 'btnSubmit').click() # Make a Payment
+    splits = [book.createSplit(round(Decimal(billTotal), 2), "Expenses:Utilities:Water"), book.createSplit(-round(Decimal(billTotal), 2), 'Ally')]
+    book.writeTransaction(datetime.today().date(), 'Water Bill', splits)
+    updateSpreadsheet('Home', str(today.year) + ' Balance', 'Water Bill', today.month, -float(billTotal))
+    openSpreadsheet(driver, 'Home', str(today.year) + ' Balance')
+    driver.findWindowByUrl("/scripts/ally")
 
 def importAllyTransactions(driver, account, allyActivity, book, gnuCashTransactions):
     existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
@@ -182,16 +213,14 @@ def mortgageBill(driver, book):
     today = datetime.today()
     total = round(Decimal(2000.00),2)
     # get amounts from home mortgage calculator # 
-    mortgageSheet = getMortgageSpreadSheetDetails(driver)
+    mortgageSheet = getSheetAndDetails('Mortgage', 'Mortgage')
     row = mortgageSheet['firstRowOfThisYear']
     while True:
         paymentDate = datetime.strptime(mortgageSheet['worksheet'].acell(mortgageSheet['dateColumn']+str(row)).value, '%m/%d/%Y').date()
-        print(paymentDate)
         if paymentDate.month == today.month:
             interest = round(Decimal(mortgageSheet['worksheet'].acell(mortgageSheet['interestColumn']+str(row)).value),2)
             break
-        else:
-            row+=1
+        else:   row+=1
     # write transaction # 
     splits = []
     splits.append(book.createSplit(interest, "Expenses:Home Expenses:Mortgage Interest"))
@@ -201,6 +230,7 @@ def mortgageBill(driver, book):
     # update Home spreadsheet # 
     updateSpreadsheet('Home', str(today.year) + ' Balance', 'Mortgage', today.month, -float(total))
     openSpreadsheet(driver, 'Home', str(today.year) + ' Balance')
+    openSpreadsheet(driver, 'Mortgage', 'Mortgage')
     driver.findWindowByUrl("/scripts/ally")
 
 def runAlly(driver, account, book, gnuCashTransactions, dateRange):
@@ -220,10 +250,24 @@ def runAlly(driver, account, book, gnuCashTransactions, dateRange):
 #     Ally.getData()
 #     # allyLogout(driver)
 #     book.closeBook()
-
-
+    
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Home')
-    mortgageBill(driver, book)
-    book.closeBook()
+    driver.findWindowByUrl("paywater.milwaukee.gov")
+    # billAmount = driver.getIDElementTextOnceAvailable("paymentAmountValue")
+    # print(billAmount)
+    import os, shutil, time, zipfile, sys
+    from selenium import webdriver
+    from selenium.webdriver.common.keys import Keys
+    from selenium.common.exceptions import (InvalidArgumentException,
+                                            WebDriverException, TimeoutException)
+    from selenium.webdriver.chrome.service import Service
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.wait import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    # try:
+    #     element = WebDriverWait(driver.webDriver, 5).until(EC.element_to_be_clickable((By.XPATH,"//*[@id='billTable']/tbody/tr[1]/td[3]/div")))
+    #     print(element.text)
+    # except TimeoutException:
+    #     print('FALSE')

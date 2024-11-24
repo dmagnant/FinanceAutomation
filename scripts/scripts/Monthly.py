@@ -1,12 +1,9 @@
-import time, os, json;    from datetime import datetime;  from decimal import Decimal
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
+from decimal import Decimal
 
 if __name__ == '__main__' or __name__ == "Monthly":
     from Classes.Asset import USD, Security;    from Classes.WebDriver import Driver;   from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import getStartAndEndOfDateRange, getUsername, getNotes, setDirectory
-    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentsMonthly
+    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentsMonthly, getSheetAndDetails
     from Eternl import runEternl, locateEternlWindow
     from Ledger import runLedger, getLedgerAccounts
     from HealthEquity import runHealthEquity, locateHealthEquityWindow, getHealthEquityAccounts
@@ -19,7 +16,7 @@ else:
     from .Eternl import runEternl, locateEternlWindow
     from .Ledger import runLedger, getLedgerAccounts
     from .Functions.GeneralFunctions import getStartAndEndOfDateRange, getUsername, getNotes, setDirectory
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentsMonthly
+    from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentsMonthly, getSheetAndDetails
     from .HealthEquity import runHealthEquity, locateHealthEquityWindow, getHealthEquityAccounts
     from .IoPay import runIoPay, locateIoPayWindow
     from .Worthy import runWorthy, locateWorthyWindow
@@ -42,39 +39,31 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         IoTex = Security("IoTex", personalBook)   
         accounts = {'CryptoPortfolio': CryptoPortfolio, 'Cardano': Cardano,'IoTex': IoTex, 'ledgerAccounts': ledgerAccounts}
     return accounts
-    
-def payWaterBill(driver, book):
-    paymentAccountDetails = json.loads(getNotes('Ally Bank'))
-    today = datetime.today()
-    driver.openNewWindow('https://paywater.milwaukee.gov/webclient/user/login.seam')
-    try:
-        driver.webDriver.find_element(By.ID, 'login:j_id209:accountNumber').send_keys(getUsername('Water'))
-        driver.webDriver.find_element(By.ID, 'login:submitAccountEnabled').click() # login
-    except NoSuchElementException:  exception = "already logged in"
-    driver.webDriver.find_element(By.ID, 'j_id172:j_id372').click() # make payment
-    driver.findWindowByUrl('pay.bill2pay.com')
-    driver.webDriver.find_element(By.ID,'txtUserField1').send_keys(os.environ.get('firstName') + " " + os.environ.get('lastName'))
-    driver.webDriver.find_element(By.ID, 'txtPhone').send_keys(os.environ.get('Phone'))
-    driver.webDriver.find_element(By.ID, 'btnSubmit').click() # Continue
-    driver.webDriver.find_element(By.ID, 'txtNameonBankAccount').send_keys(os.environ.get('firstName') + " " + os.environ.get('lastName'))
-    driver.webDriver.find_element(By.ID, 'ddlBankAccountType').send_keys(Keys.DOWN)
-    driver.webDriver.find_element(By.ID, 'txtBankRoutingNumber').send_keys(paymentAccountDetails['routing'])
-    driver.webDriver.find_element(By.ID, 'txtBankAccountNumber').send_keys(paymentAccountDetails['account'])
-    driver.webDriver.find_element(By.ID, 'txtBankAccountNumber2').send_keys(paymentAccountDetails['account'])
-    driver.webDriver.find_element(By.ID, 'btnSubmitAch').click() # Continue
-    billTotal = driver.getXPATHElementTextOnceAvailable("//*[@id='tblAccountInfo']/tbody/tr[7]/td[2]").replace('$','')
-    driver.webDriver.find_element(By.ID, 'txtEmailAddress').send_keys(os.environ.get('Email'))
-    driver.webDriver.find_element(By.ID, 'chkTermsAgree').click() # agree to T&C
-    driver.webDriver.find_element(By.ID, 'btnSubmit').click() # Make a Payment
-    splits = [book.createSplit(round(Decimal(billTotal), 2), "Expenses:Utilities:Water"), book.createSplit(-round(Decimal(billTotal), 2), 'Ally')]
-    book.writeTransaction(datetime.today().date(), 'Water Bill', splits)
-    # splits=[Split(value=amount, account=self.getGnuAccount("Expenses:Utilities:Water")),
-    #         Split(value=-amount, account=self.getGnuAccount("Assets:Ally Checking Account"))]
-    # Transaction(post_date=datetime.today().date(), currency=book.currencies(mnemonic="USD"), description='Water Bill', splits=splits)
-    # book.writeWaterBillTransaction(round(Decimal(billTotal), 2))
-    updateSpreadsheet('Home', str(today.year) + ' Balance', 'Water Bill', today.month, -float(billTotal))
-    openSpreadsheet(driver, 'Home', str(today.year) + ' Balance')
-    driver.findWindowByUrl("/scripts/ally")
+
+def updatePensionBalanceAndCost(driver, book, newBalance):
+    Pension = USD('Pension', book)
+    newBalance = round(Decimal(newBalance),2)
+    # gather amounts
+    monthGain = newBalance - Pension.gnuBalance
+    employerContributionPerMonth = round(Decimal(813.40),2)
+    # write transaction
+    splits = [
+        book.createSplit(-(monthGain - employerContributionPerMonth),book.getGnuAccountFullName('Interest')), 
+        book.createSplit(-employerContributionPerMonth,book.getGnuAccountFullName('Pension Contributions')),
+        book.createSplit(monthGain, Pension.gnuAccount)
+        ]
+    book.writeTransaction(getStartAndEndOfDateRange(timeSpan='month')['endDate'], 'Contribution + Interest', splits)
+    # update spreadsheet
+    investmentsSheet = getSheetAndDetails('Finances', 'Investments')
+    openSpreadsheet(driver, 'Finances', 'Investments')
+    row = investmentsSheet['firstRowAfterCrypto']
+    while True:
+        if investmentsSheet['worksheet'].acell(investmentsSheet['bankColumn']+str(row)).value == 'Pension':
+            investmentsSheet['worksheet'].update_acell(investmentsSheet['sharesColumn'] + str(row), float(newBalance))
+            investmentsSheet['worksheet'].update_acell(investmentsSheet['costColumn'] + str(row), float(newBalance - Pension.getInterestTotalForDateRange(book)))
+            break
+        else:
+            row+=1
     
 def loginToUSDAccounts(driver):
     locateWorthyWindow(driver)
@@ -94,8 +83,6 @@ def runUSD(driver, accounts, personalBook):
     runHealthEquity(driver, accounts['HealthEquity'], personalBook, gnuCashTransactions, lastMonth)
     runOptum(driver, accounts['Optum'], personalBook, gnuCashTransactions, lastMonth)
     runVanguard401k(driver, accounts['Vanguard'], personalBook, gnuCashTransactions, lastMonth)
-    accounts['Pension'].setCost(accounts['Pension'].gnuBalance - accounts['Pension'].getInterestTotalForDateRange(personalBook))
-    accounts['Savings'].setCost(accounts['Savings'].gnuBalance - accounts['Savings'].getInterestTotalForDateRange(personalBook))
     updateInvestmentsMonthly(driver,personalBook,accounts)
     driver.findWindowByUrl("/scripts/monthly")
 

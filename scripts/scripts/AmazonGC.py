@@ -21,16 +21,12 @@ def locateAmazonWindow(driver):
     else:           driver.webDriver.switch_to.window(found); time.sleep(1)
 
 def writeAmazonGCTransactionFromUI(book, account, requestInfo):
-    print('original method: ')
-    print(book.getGnuAccountBalance(account.gnuAccount))
-    print('new method: ')
-    print(book.getGnuCashAccountBalance(account.gnuCashAccount))
     if 'earn' in requestInfo:
         amount = Decimal(requestInfo['amount'])
         source = 'Income:Market Research:' + requestInfo['source']
     elif 'spend' in requestInfo:
         amount = -Decimal(requestInfo['amount'])
-        source = book.getGnuAccount('Amazon') if 'Joint' not in requestInfo['source'] else book.getGnuAccount('Joint Expenses')
+        source = book.getGnuAccountFullName('Amazon') if 'Joint' not in requestInfo['source'] else book.getGnuAccountFullName('Joint Expenses')
     else:   showMessage('Error', 'Missing proper header to submit this transaction from UI')
     description = requestInfo['description'] if requestInfo['description'] else requestInfo['source']
     splits = []
@@ -42,14 +38,11 @@ def writeAmazonGCTransactionFromUI(book, account, requestInfo):
     if 'Joint' in requestInfo['source']:
         jointBook = GnuCash('Home')
         splits = []
-        splits.append(book.createSplit(amount), jointBook.getGnuAccountFullName("Dan's Contributions"))
-        splits.append(book.createSplit(-amount), jointBook.getGnuAccountFullName('Amazon'))
+        splits.append(jointBook.createSplit(amount, jointBook.getGnuAccountFullName("Dan's Contributions")))
+        splits.append(jointBook.createSplit(-amount, jointBook.getGnuAccountFullName('Amazon')))
         jointBook.writeTransaction(datetime.today().date(), description, splits)
         jointBook.closeBook()
-    print('original method: ')
-    print(book.getGnuAccountBalance(account.gnuAccount))
-    print('new method: ')
-    print(book.getGnuCashAccountBalance(account.gnuCashAccount))        
+    book.getGnuCashAccountBalance(account.gnuCashAccount) 
     confirmAmazonGCBalance(Driver("Chrome"), account)
 
 def confirmAmazonGCBalance(driver, account):

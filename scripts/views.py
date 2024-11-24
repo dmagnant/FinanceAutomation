@@ -61,6 +61,7 @@ def ally(request):
         elif "logout" in request.POST:  allyLogout(driver)
         elif "balance" in request.POST: Ally.setBalance(getAllyBalance(driver))
         elif "water" in request.POST:   payWaterBill(driver, book)
+        elif "mortgage" in request.POST: mortgageBill(driver, book)
     context = {'account': Ally}
     book.closeBook();   return returnRender(request, "banking/ally.html", context)
 
@@ -313,11 +314,12 @@ def gamestopCC(request):
   
 def healthEquity(request):
     book = GnuCash('Finance')
-    VIIIX, HECash, V401k = Security("HE Investment", book), USD("HE Cash", book), USD("Vanguard401k", book)
-    HEaccounts = {'VIIIX': VIIIX, 'HECash': HECash, 'V401k': V401k}
+    HEaccounts = getHealthEquityAccounts(book)
+    lastMonth = getStartAndEndOfDateRange(timeSpan="month")
+    gnuCashTransactions = book.getTransactionsByDateRange(lastMonth)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "main" in request.POST:              runHealthEquity(driver, HEaccounts, book)
+        if "main" in request.POST:              runHealthEquity(driver, HEaccounts, book, gnuCashTransactions, lastMonth)
         elif "login" in request.POST:           locateHealthEquityWindow(driver)
         elif "balance" in request.POST:         getHealthEquityBalances(driver, HEaccounts)
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/healthEquity"))
@@ -376,7 +378,8 @@ def monthly(request):
         elif "eternlBalance" in request.POST:       cryptoAccounts['Cardano'].setBalance(getEternlBalance(driver))
         elif "eternlLogin" in request.POST:         locateEternlWindow(driver)
         elif "ioPayMain" in request.POST:           runIoPay(driver, cryptoAccounts['IoTex'])
-        elif "ledgerMain" in request.POST:          runLedger(cryptoAccounts['ledgerAccounts'], personalBook)            
+        elif "ledgerMain" in request.POST:          runLedger(cryptoAccounts['ledgerAccounts'], personalBook)          
+        elif "Pension" in request.POST:             updatePensionBalanceAndCost(driver, personalBook, request.POST['newPensionBalance'])
         elif "close windows" in request.POST:       driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/monthly"))
     context = {'usdAccounts': usdAccounts, 'cryptoAccounts': cryptoAccounts}
     personalBook.closeBook();   jointBook.closeBook();    return returnRender(request, "monthly.html", context)
@@ -525,11 +528,12 @@ def updateGoals(request):
 
 def vanguard(request):
     book = GnuCash('Finance')
-    V401k, TSM401k, EBI = USD("Vanguard401k", book), Security("Total Stock Market(401k)", book), Security("Employee Benefit Index", book)
-    accounts = {'V401k': V401k,'TSM401k': TSM401k,'EBI':EBI}
+    accounts = getVanguardAccounts(book)
+    lastMonth = getStartAndEndOfDateRange(timeSpan="month")
+    gnuCashTransactions = book.getTransactionsByDateRange(lastMonth)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "401k" in request.POST:              runVanguard401k(driver, accounts, book)
+        if "401k" in request.POST:              runVanguard401k(driver, accounts, book, gnuCashTransactions, lastMonth)
         elif "login" in request.POST:           locateVanguardWindow(driver)
         elif "balance" in request.POST:         getVanguardBalancesAndPensionInterestYTD(driver, accounts)
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/vanguard"))

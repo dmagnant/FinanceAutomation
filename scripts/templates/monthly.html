@@ -4,7 +4,12 @@
     <h2>Monthly USD</h2>
     <form method="post">
         {% csrf_token %}
-        <button type="submit" name="USD">USD</button><br><br>
+        <button type="submit" name="USD">USD</button>
+    </form><br>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" placeholder="enter new pension balance" name="newPensionBalance">
+        <button type="submit" name="Pension">Pension</button><br><br>
     </form>
     <div style="width: 100%; display: table;">
         <div style="display: table-row;">
@@ -23,15 +28,15 @@
                         HSA Investment shares: &thinsp; <br>
                         gnuBalance shares: &thinsp; <br><br>
                         HSA Investment Value: &thinsp; <br>
-                        ${{usdAccounts.HealthEquity.VIIIX.price}} x shares: &thinsp; <br>
+                        ${{usdAccounts.HealthEquity.VBIRX.price}} x shares: &thinsp; <br>
                     </div>
                     <div style="display:table-cell;text-align:left">
                         <b>${{usdAccounts.HealthEquity.HECash.balance}}<br>
                         ${{usdAccounts.HealthEquity.HECash.gnuBalance}}<br><br>
-                        {{usdAccounts.HealthEquity.VIIIX.balance}} {{usdAccounts.HealthEquity.VIIIX.symbol}}<br>
-                        {{usdAccounts.HealthEquity.VIIIX.gnuBalance}} {{usdAccounts.HealthEquity.VIIIX.symbol}}<br><br>
-                        ${{usdAccounts.HealthEquity.VIIIX.value}}<br>
-                        ${{usdAccounts.HealthEquity.VIIIX.gnuValue}}</b><br><br>
+                        {{usdAccounts.HealthEquity.VBIRX.balance}} {{usdAccounts.HealthEquity.VBIRX.symbol}}<br>
+                        {{usdAccounts.HealthEquity.VBIRX.gnuBalance}} {{usdAccounts.HealthEquity.VBIRX.symbol}}<br><br>
+                        ${{usdAccounts.HealthEquity.VBIRX.value}}<br>
+                        ${{usdAccounts.HealthEquity.VBIRX.gnuValue}}</b><br><br>
                     </div>
                 </div>
             </div>
@@ -82,6 +87,8 @@
                         gnuBalance shares: &thinsp; <br> 
                         EBI Value: &thinsp; <br>
                         ${{usdAccounts.Vanguard.EBI.price}} x shares: &thinsp; <br><br>
+                        401k Cash: &thinsp; <br>
+                        gnubalance: &thinsp; <br><br>
                     </div>
                     <div style="display:table-cell;text-align:left">
                         <b>${{usdAccounts.Vanguard.V401k.balance}}<br>
@@ -93,7 +100,9 @@
                         {{usdAccounts.Vanguard.EBI.balance}} ({{usdAccounts.Vanguard.EBI.symbol}})<br>
                         {{usdAccounts.Vanguard.EBI.gnuBalance}} ({{usdAccounts.Vanguard.EBI.symbol}})<br>
                         ${{usdAccounts.Vanguard.EBI.value}}<br>
-                        ${{usdAccounts.Vanguard.EBI.gnuValue}}</b><br><br>
+                        ${{usdAccounts.Vanguard.EBI.gnuValue}}<br><br>
+                        ${{usdAccounts.Vanguard.401kCash.balance}}<br>
+                        ${{usdAccounts.Vanguard.401kCash.gnuBalance}}</b><br><br>
                     </div>
                 </div>
             </div>

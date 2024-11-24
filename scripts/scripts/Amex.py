@@ -70,15 +70,17 @@ def claimAmexRewards(driver, account):
     try:
         rewardsBalance = driver.getIDElementTextOnceAvailable('globalmrnavpointbalance').replace('$', '')
         if float(rewardsBalance) > 0:
-            driver.webDriver.find_element(By.ID, "rewardsInput").send_keys(rewardsBalance)
-            driver.webDriver.find_element(By.ID, "rewardsInput").send_keys(Keys.TAB)
-            driver.webDriver.execute_script("window.scrollTo(0, 1300)")
+            driver.webDriver.find_element(By.XPATH,"//*[@id='recommendations-CTA']/a").click() # redeem now link
+            rewardsInputElement = driver.getIDElementOnceAvailable('rewardsInput')
+            rewardsInputElement.send_keys(rewardsBalance)
+            rewardsInputElement.send_keys(Keys.TAB)
+            # driver.webDriver.execute_script("window.scrollTo(0, 1300)")
             driver.webDriver.find_element(By.XPATH, "//*[@id='continue-btn']/span").click()
             driver.webDriver.find_element(By.XPATH, "//*[@id='use-dollars-btn']/span").click()
         account.setValue(float(rewardsBalance))
     except StaleElementReferenceException: exception = 'rewards likely already redeemed'
     if account.value:
-        account.value = account.balance - account.value
+        account.value = float(account.balance) - account.value
 
 def importAmexTransactions(account, book, gnuCashTransactions):
     existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)

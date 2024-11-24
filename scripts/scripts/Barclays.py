@@ -85,16 +85,16 @@ def exportBarclaysTransactions(driver, today):
 
 def claimBarclaysRewards(driver):
     locateBarclaysWindow(driver)
-    driver = driver.webDriver
-    driver.get("https://www.barclaycardus.com/servicing/cashBack?__fsk=337615032#!/redeem")
-    driver.find_element(By.ID,"redeem-continue").click() # continue
-    driver.find_element(By.ID, "mor_dropDown0").click() # reward method
-    driver.find_element(By.ID, "mor_dropDown0").send_keys(Keys.DOWN)
-    driver.find_element(By.ID, "mor_dropDown0").send_keys(Keys.ENTER)
+    driver.webDriver.get("https://www.barclaycardus.com/servicing/cashBack?__fsk=332216775#!/redeem")
     time.sleep(1)
-    driver.find_element(By.ID, "achModal-continue").click()
+    driver.clickIDElementOnceAvailable("redeem-continue") # continue 
+    driver.webDriver.find_element(By.ID, "mor_dropDown0").click() # reward method
+    driver.webDriver.find_element(By.ID, "mor_dropDown0").send_keys(Keys.DOWN)
+    driver.webDriver.find_element(By.ID, "mor_dropDown0").send_keys(Keys.ENTER)
     time.sleep(1)
-    driver.find_element(By.ID, "redeem-continue").click() # redeem now
+    driver.webDriver.find_element(By.ID, "achModal-continue").click()
+    time.sleep(1)
+    driver.webDriver.find_element(By.ID, "redeem-continue").click() # redeem now
 
 def importBarclaysTransactions(account, barclaysActivity, book, gnuCashTransactions):
     existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
@@ -107,7 +107,7 @@ def importBarclaysTransactions(account, barclaysActivity, book, gnuCashTransacti
         amount = Decimal(row[3])
         fromAccount = account.gnuAccount
         if "PAYMENT RECEIVED" in rawDescription.upper():   continue
-        elif "BARCLAYCARD US" in rawDescription.upper() and float(amount) > 0:         description = "Barclays CC Rewards"
+        # elif "BARCLAYCARD US" in rawDescription.upper() and float(amount) > 0:      description = "Barclays CC Rewards"
         else:                                                                       description = rawDescription
         toAccount = book.getGnuAccountFullName(fromAccount, description=description)
         if toAccount == 'Expenses:Other':   reviewTransaction = True

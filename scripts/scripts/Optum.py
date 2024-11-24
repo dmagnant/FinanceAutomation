@@ -109,9 +109,15 @@ def importOptumTransactions(account, optumActivity, book, gnuCashTransactions):
         fromAccount = account.gnuAccount
         shares = float(row[2])
         amount = Decimal(row[3])
-        if "Vanguard 500 Index Admiral" in rawDescription:  description = "HSA VFIAX Investment"
-        else:                                               description = rawDescription
-        toAccount = book.getGnuAccountFullName(fromAccount, description=description, row=row)
+        if "Vanguard 500 Index Admiral" in rawDescription:  
+            if "FEE" in rawDescription.upper():
+                description = "HSA Fee"
+                amount,shares = -amount,-shares
+            elif "DIVIDEND" in rawDescription.upper():
+                description = "HSA Dividend"
+            else:   description = "HSA VFIAX Investment"
+        else:       description = rawDescription
+        toAccount = book.getGnuAccountFullName(fromAccount, description=description)
         splits = [{'amount': -amount, 'account':toAccount},{'amount': amount, 'account':fromAccount, 'quantity': round(Decimal(shares),3)}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits)
 
@@ -125,11 +131,17 @@ def runOptum(driver, accounts, book, gnuCashTransactions, lastMonth):
     accounts['OptumCash'].updateGnuBalance(book.getGnuAccountBalance(accounts['OptumCash'].gnuAccount))
     accounts['VFIAX'].updateGnuBalanceAndValue(book.getGnuAccountBalance(accounts['VFIAX'].gnuAccount))
     
+# if __name__ == '__main__':
+#     driver = Driver("Chrome")
+#     book = GnuCash('Finance')
+#     accounts = getOptumAccounts(book)
+#     lastMonth = getStartAndEndOfDateRange(timeSpan="month")
+#     gnuCashTransactions = book.getTransactionsByDateRange(lastMonth)
+#     runOptum(driver, accounts, book, gnuCashTransactions, lastMonth)
+#     book.closeBook()
+
 if __name__ == '__main__':
-    driver = Driver("Chrome")
-    book = GnuCash('Test')
+    book = GnuCash('Finance')
     accounts = getOptumAccounts(book)
-    lastMonth = getStartAndEndOfDateRange(timeSpan="month")
-    gnuCashTransactions = book.getTransactionsByDateRange(lastMonth)
-    runOptum(driver, accounts, book, gnuCashTransactions, lastMonth)
-    book.closeBook()
+    accounts['VFIAX'].cost = book.getDollarsInvestedPerSecurity(accounts['VFIAX'])
+    print(accounts['VFIAX'].cost)

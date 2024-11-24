@@ -24,14 +24,14 @@ def locateTellWutWindow(driver):
 def tellwutLogin(driver):
     driver.openNewWindow('https://www.tellwut.com/')
     try:
-        driver.webDriver.find_element(By.XPATH,'/html/body/main/header/button[2]').click() # LOGIN button
+        driver.clickXPATHElementOnceAvailable('/html/body/main/header/div[4]/button') # LOGIN button           
         time.sleep(1)
-        driver.webDriver.find_element(By.XPATH,"//*[@id='loginForm']/button").click() # LOGIN button (again)
+        driver.clickXPATHElementOnceAvailable("/html/body/div[1]/div/div/div/div[2]/form/button") # LOGIN button (again)
     except NoSuchElementException:  exception = 'already logged in'
         
 def getTellWutBalance(driver):
     locateTellWutWindow(driver)
-    return driver.webDriver.find_element(By.XPATH, "/html/body/main/header/a[2]/div/div[2]/span").text
+    return driver.webDriver.find_element(By.XPATH, "/html/body/main/header/div[4]/a/div/div[2]/span").text                            
 
 def clickButtons(driver, type):
     # findSubmitButton(driver)
@@ -95,23 +95,10 @@ def runTellwut(driver, account, book):
     book.updateMRBalance(account)
     if int(account.balance) >= 4000:    redeemTellWutRewards(driver)
 
-# if __name__ == '__main__':
-#     driver = Driver("Chrome")
-#     book = GnuCash('Finance')
-#     Tellwut = Security("Tellwut", book)
-#     # runTellwut(driver, Tellwut, book)
-#     # book.closeBook()
-    
-#     balance = getTellWutBalance(driver)
-#     print(balance)
-#     Tellwut.getData()
-
-
-
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    driver.findWindowByUrl('tellwut.com')
-    # driver.webDriver.find_element(By.PARTIAL_LINK_TEXT,'NEXT').send_keys(Keys.ENTER)
-    # , 'NEXT').send_keys(Keys.ENTER)
-    # driver.webDriver.find_element(By.CSS_SELECTOR, 'btn btn-primary pm-btn nextQuestion nextQuestionPagebreak').send_keys(Keys.ENTER)
-    # driver.webDriver.find_element(By.CSS_SELECTOR,"button.btn btn-primary pm-btn nextQuestion nextQuestionPagebreak").click()
+    book = GnuCash('Finance')
+    Tellwut = Security("Tellwut", book)
+    runTellwut(driver, Tellwut, book)
+    book.closeBook()
+    
