@@ -3,7 +3,6 @@ from datetime import datetime
 from selenium.webdriver.common.by import By
 from decimal import Decimal
 
-
 if __name__ == '__main__' or __name__ == "AmazonGC":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver

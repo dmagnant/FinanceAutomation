@@ -9,27 +9,29 @@ if __name__ == '__main__' or __name__ == "Fidelity":
     from Classes.Asset import USD, Security
     from Classes.GnuCash import GnuCash, createNewTestBook
     from Classes.WebDriver import Driver
+    from Classes.Spreadsheet import Spreadsheet
     from Functions.GeneralFunctions import (showMessage, getPassword, getStartAndEndOfDateRange, setDirectory, getNotes, getOTP)    
 else:
     from .Classes.Asset import USD, Security
     from .Classes.GnuCash import GnuCash, createNewTestBook
+    from .Classes.Spreadsheet import Spreadsheet
     from .Functions.GeneralFunctions import (showMessage, getPassword, getStartAndEndOfDateRange, setDirectory, getNotes, getOTP)    
 
 def getFidelityAccounts(book):
     accounts = {}
-    accounts['IRA'] = USD('IRA', book)
-    accounts['rIRA'] = USD('Roth IRA', book)
-    accounts['Brokerage'] = USD('Brokerage', book)
+    accounts['FidelityIRA'] = USD('FidelityIRA', book)
+    accounts['FidelityRothIRA'] = USD('FidelityRothIRA', book)
+    accounts['FidelityBrokerage'] = USD('FidelityBrokerage', book)
     for accountName in list(accounts.keys()):
         account = accounts.get(accountName)
         for child in account.gnuCashAccount.children:
             if child.name == 'Options' or child.name == 'SPAXX':
-                accounts[accountName + child.name] = USD(account.name + ' ' + child.name, book)                
+                accounts[accountName + child.name] = USD(account.name + child.name, book)
             else:
-                accounts[accountName + child.name] = Security(account.name + ' ' + child.name, book)                
+                accounts[accountName + child.name] = Security(account.name + child.name, book)
     return accounts
 
-def getFidelityBaseAccounts(fidelityAccounts):  return {'rIRA':fidelityAccounts['rIRA'], 'Brokerage':fidelityAccounts['Brokerage'],'IRA':fidelityAccounts['IRA']}
+def getFidelityBaseAccounts(fidelityAccounts):  return {'FidelityRothIRA':fidelityAccounts['FidelityRothIRA'], 'FidelityBrokerage':fidelityAccounts['FidelityBrokerage'],'FidelityIRA':fidelityAccounts['FidelityIRA']}
 
 def getFidelityCSVFile(account):
     accountSuffix = f"fidelity{account}"
@@ -90,9 +92,9 @@ def getFidelityTransferAccount(driver, sofiAmount, sofiDate):
                 amount = driver.webDriver.find_element(By.XPATH,getFidelityTransactionElementPath(row,'/div[5]')).text.replace('$','').replace(',','').replace('-','').replace('+','')
                 if sofiAmount == amount:
                     accountName = driver.webDriver.find_element(By.XPATH,getFidelityTransactionElementPath(row,'/div[3]/span/span')).text
-                    if 'ROTH' in accountName:           return 'rIRA'
-                    elif 'Individual' in accountName:   return 'Brokerage'
-                    elif 'Traditional' in accountName:  return 'IRA'
+                    if 'ROTH' in accountName:           return 'FidelityRothIRA'
+                    elif 'Individual' in accountName:   return 'FidelityBrokerage'
+                    elif 'Traditional' in accountName:  return 'FidelityIRA'
 
 def getFidelityTransactionElementPath(eRow, suffix):    return f"//*[@id='ao-history-list']/div[2]/div[{str(eRow)}]/div{suffix}"
 
@@ -107,9 +109,9 @@ def getFidelityBalance(driver, allAccounts, accountBalanceToGet='all'):
     i = 0
     if len(accounts) == len(balances):
         while i < len(accounts):
-            if 'ROTH' in accounts[i].text:           account = allAccounts['rIRA']
-            elif 'Individual' in accounts[i].text:   account = allAccounts['Brokerage']
-            elif 'Traditional' in accounts[i].text:  account = allAccounts['IRA']
+            if 'ROTH' in accounts[i].text:           account = allAccounts['FidelityRothIRA']
+            elif 'Individual' in accounts[i].text:   account = allAccounts['FidelityBrokerage']
+            elif 'Traditional' in accounts[i].text:  account = allAccounts['FidelityIRA']
             account.setBalance(balances[i].text.replace('$','').replace(',',''))
             print(f'set balance for {accounts[i].text} to: {str(balances[i].text)}')
             i+=1
@@ -142,23 +144,23 @@ def getFidelityPricesSharesAndCost(driver, allAccounts, book, accountToGet='all'
             try:
                 symbol = driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div[3]/div[2]/div[2]/div[3]/div[1]/div[1]/div["+ str(row) +"]/div/div/span/div/div[2]/button/div/span").text.replace('$','')
                 if symbol == 'VXUS':
-                    if 'ROTH' in accountName:           account = allAccounts['rIRAVXUS']
+                    if 'ROTH' in accountName:           account = allAccounts['FidelityRothIRAVXUS']
                 elif symbol == 'VTI':
-                    if 'ROTH' in accountName:           account = allAccounts['rIRAVTI']
-                    elif 'Individual' in accountName:   account = allAccounts['BrokerageVTI']
-                    elif 'Traditional' in accountName:  account = allAccounts['IRAVTI']
+                    if 'ROTH' in accountName:           account = allAccounts['FidelityRothIRAVTI']
+                    elif 'Individual' in accountName:   account = allAccounts['FidelityBrokerageVTI']
+                    elif 'Traditional' in accountName:  account = allAccounts['FidelityIRAVTI']
                 elif symbol == 'Cash':
-                    if 'ROTH' in accountName:           account = allAccounts['rIRASPAXX']
-                    elif 'Individual' in accountName:   account = allAccounts['BrokerageSPAXX']
-                    elif 'Traditional' in accountName:  account = allAccounts['IRASPAXX'] 
+                    if 'ROTH' in accountName:           account = allAccounts['FidelityRothIRASPAXX']
+                    elif 'Individual' in accountName:   account = allAccounts['FidelityBrokerageSPAXX']
+                    elif 'Traditional' in accountName:  account = allAccounts['FidelityIRASPAXX'] 
                 elif symbol == 'GME':
-                    if 'ROTH' in accountName:           account = allAccounts['rIRAGME']
-                    elif 'Individual' in accountName:   account = allAccounts['BrokerageGME']
-                    elif 'Traditional' in accountName:  account = allAccounts['IRAGME']
+                    if 'ROTH' in accountName:           account = allAccounts['FidelityRothIRAGME']
+                    elif 'Individual' in accountName:   account = allAccounts['FidelityBrokerageGME']
+                    elif 'Traditional' in accountName:  account = allAccounts['FidelityIRAGME']
                 elif 'Call' in symbol or 'Put' in symbol:
-                    if 'ROTH' in accountName:           account = allAccounts['rIRAOptions']
-                    elif "Individual" in accountName:   account = allAccounts['BrokerageOptions']
-                    elif 'Traditional' in accountName:  account = allAccounts['IRAOptions']
+                    if 'ROTH' in accountName:           account = allAccounts['FidelityRothIRAOptions']
+                    elif "Individual" in accountName:   account = allAccounts['FidelityBrokerageOptions']
+                    elif 'Traditional' in accountName:  account = allAccounts['FidelityIRAOptions']
                     balance = account.balance + getCurrentValue(driver, row) if account.balance else getCurrentValue(driver, row)
                     account.setBalance(balance)
                     cost = account.cost + getCost(driver, row) if account.cost else getCost(driver, row)
@@ -230,9 +232,9 @@ def captureFidelityTransactions(driver, dateRange, account='all'):
             else:   shares = amount
             if account == 'all':
                 accountName = driver.webDriver.find_element(By.XPATH,getFidelityTransactionElementPath(row,'/div[3]/span/span')).text
-                if 'ROTH' in accountName:           accountName = 'rIRA'
-                elif 'Individual' in accountName:   accountName = 'Brokerage'
-                elif 'Traditional' in accountName:  accountName = 'IRA'
+                if 'ROTH' in accountName:           accountName = 'FidelityRothIRA'
+                elif 'Individual' in accountName:   accountName = 'FidelityBrokerage'
+                elif 'Traditional' in accountName:  accountName = 'FidelityIRA'
             transaction = date, description, amount, shares, accountName, fees
             csv.writer(open(fidelityActivity, 'a', newline='', encoding="utf-8")).writerow(transaction)
         else:  break
@@ -264,7 +266,7 @@ def formatFidelityOptionTransactionDescription(rawDescription, accountName):
 
 def writeFidelityOptionMarketChangeTransaction(accounts, book):
     splits, createdSplits=[], []
-    optionsAccounts = [accounts['rIRAOptions'], accounts['BrokerageOptions'], accounts['IRAOptions']]
+    optionsAccounts = [accounts['FidelityRothIRAOptions'], accounts['FidelityBrokerageOptions'], accounts['FidelityIRAOptions']]
     marketChange = 0
     for account in optionsAccounts:
         if account.balance:
@@ -375,17 +377,23 @@ def runFidelityDaily(driver, accounts, book, gnuCashTransactions, dateRange):
 #     book.closeBook()
 
 
+# if __name__ == '__main__':
+#     driver = Driver("Chrome")
+#     book = GnuCash('Finance')
+#     accounts = getFidelityAccounts(book)
+#     dateRange = getStartAndEndOfDateRange(timeSpan=20)
+#     locateFidelityWindow(driver)
+#     prepFidelityTransactionSearch(driver, True)
+#     baseAccounts = getFidelityBaseAccounts(accounts)
+#     for accountName in list(baseAccounts.keys()): # get transactions per account (x3)
+#         account = baseAccounts.get(accountName)
+#         print(f'account is {str(accountName)}')
+#         if accountName == 'FidelityBrokerage':
+#             print('starting search')
+#             fidelityActivity = captureFidelityTransactions(driver, dateRange, accountName)  
+
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = GnuCash('Finance')
-    accounts = getFidelityAccounts(book)
-    dateRange = getStartAndEndOfDateRange(timeSpan=20)
-    locateFidelityWindow(driver)
-    prepFidelityTransactionSearch(driver, True)
-    baseAccounts = getFidelityBaseAccounts(accounts)
-    for accountName in list(baseAccounts.keys()): # get transactions per account (x3)
-        account = baseAccounts.get(accountName)
-        print(f'account is {str(accountName)}')
-        if accountName == 'Brokerage':
-            print('starting search')
-            fidelityActivity = captureFidelityTransactions(driver, dateRange, accountName)  
+    Finances = Spreadsheet('Finances', 'Investments', driver)
+
+            
