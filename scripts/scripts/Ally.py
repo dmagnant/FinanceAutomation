@@ -10,15 +10,16 @@ if __name__ == '__main__' or __name__ == "Ally":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
+    from Classes.Spreadsheet import Spreadsheet
     from Functions.GeneralFunctions import (getPassword,
                                             getStartAndEndOfDateRange, setDirectory, showMessage, getUsername, getNotes)
-    from Functions.SpreadsheetFunctions import openSpreadsheet, updateSpreadsheet, getSheetAndDetails
 else:
     from .Classes.Asset import USD
     from .Classes.GnuCash import GnuCash
+    from .Classes.Spreadsheet import Spreadsheet
+
     from .Functions.GeneralFunctions import (getPassword,
                                              getStartAndEndOfDateRange, showMessage, setDirectory, getUsername, getNotes)
-    from .Functions.SpreadsheetFunctions import openSpreadsheet, updateSpreadsheet, getSheetAndDetails
 
 def locateAllyWindow(driver):
     found = driver.findWindowByUrl("secure.ally.com")
@@ -94,6 +95,7 @@ def captureAllyTransactions(driver, dateRange):
     return allyActivity
 
 def payWaterBill(driver, book):
+    Home = Spreadsheet('Home', str(today.year) + ' Balance', driver)
     paymentAccountDetails = json.loads(getNotes('Ally Bank'))
     today = datetime.today()
     driver.openNewWindow('https://paywater.milwaukee.gov/webclient/user/login.seam')
@@ -117,9 +119,8 @@ def payWaterBill(driver, book):
     driver.webDriver.find_element(By.ID, 'chkTermsAgree').click() # agree to T&C
     driver.webDriver.find_element(By.ID, 'btnSubmit').click() # Make a Payment
     splits = [book.createSplit(round(Decimal(billTotal), 2), "Expenses:Utilities:Water"), book.createSplit(-round(Decimal(billTotal), 2), 'Ally')]
-    book.writeTransaction(datetime.today().date(), 'Water Bill', splits)
-    updateSpreadsheet('Home', str(today.year) + ' Balance', 'Water Bill', today.month, -float(billTotal))
-    openSpreadsheet(driver, 'Home', str(today.year) + ' Balance')
+    book.writeTransaction(today.date(), 'Water Bill', splits)
+    Home.updateSpreadsheet('Water Bill', today.month, -float(billTotal))
     driver.findWindowByUrl("/scripts/ally")
 
 def importAllyTransactions(driver, account, allyActivity, book, gnuCashTransactions):
@@ -129,20 +130,31 @@ def importAllyTransactions(driver, account, allyActivity, book, gnuCashTransacti
         rawDescription = row[1]
         amount = Decimal(row[2])
         fromAccount = account.gnuAccount
-        if "SAVINGS ACCOUNT XXXXXX9703" in rawDescription.upper():                  description = "Tessa Deposit"
-        elif "ALLY BANK TRANSFER" in description.upper():                           description = "Dan Deposit"
-        elif "BK OF AMER VISA" in description.upper():                              description = "BoA CC"
-        elif "CITY OF MILWAUKE B2P*MILWWA" in description.upper():                  description = "Water Bill"
-        elif "COOPER NSM" in description.upper():                                   description = "Mortgage Payment"
-        elif 'WE ENERGIES' in description.upper():
+        description = rawDescription
+        toAccount = book.getGnuAccountFullName('Other')
+        if "SAVINGS ACCOUNT XXXXXX9703" in rawDescription.upper():                  
+            description = "Tessa Deposit"
+            toAccount = book.getGnuAccountFullName("Tessa's Contributions")
+        elif "ALLY BANK TRANSFER" in rawDescription.upper():                           
+            description = "Dan Deposit"
+            toAccount = book.getGnuAccountFullName("Dan's Contributions")
+        elif "BK OF AMER VISA" in rawDescription.upper():                              
+            description = "BoA CC"
+            toAccount = book.getGnuAccountFullName("BoA-joint")
+        elif "CITY OF MILWAUKE B2P*MILWWA" in rawDescription.upper():                  
+            description = "Water Bill"
+            toAccount = book.getGnuAccountFullName("Water")
+        elif "COOPER NSM" in rawDescription.upper():                                   
+            description = "Mortgage Payment"
+            toAccount = book.getGnuAccountFullName("Liabilities") + ":Mortgage Loan"
+        elif 'WE ENERGIES' in rawDescription.upper():
             energyBillAmounts = getEnergyBillAmounts(driver, amount, 1)
             description = 'WE ENERGIES PAYMENT'
-        else:                                                                       description = rawDescription
-        toAccount = book.getGnuAccountFullName(fromAccount, description=description, row=row)
+        # toAccount = book.getGnuAccountFullName(fromAccount, description=description, row=row)
         if toAccount == 'Expenses:Other':   account.setReviewTransactions(str(postDate) + ", " + description + ", " + str(amount))
         if 'WE ENERGIES' in description.upper(): 
-            splits = [{'amount': energyBillAmounts['electricity'], 'account': "Expenses:Utilities:Electricity"},
-                      {'amount': energyBillAmounts['gas'], 'account': "Expenses:Utilities:Gas"},
+            splits = [{'amount': energyBillAmounts['electricity'], 'account': book.getGnuAccountFullName("Electricity")},
+                      {'amount': energyBillAmounts['gas'], 'account': book.getGnuAccountFullName("Gas")},
                       {'amount': amount, 'account': account.gnuAccount}
                     ]
         else:
@@ -176,8 +188,9 @@ def getEnergyBillAmounts(driver, amount, energyBillNum):
     return {'electricity': electricity, 'gas': gas, 'total': amount}
 
 def updateEnergyBillAmounts(driver, book, amount):
-    driver.openNewWindow('https://www.we-energies.com/secure/auth/l/acct/summary_accounts.aspx')
-    today = datetime.today()
+    driver.openNewWindow('https://www.we-energies.com/secure/auth/l/acct/summary_accounts.aspx')    
+    today = datetime.today().date()
+    Home = Spreadsheet('Home', str(today.year) + ' Balance', driver)
     time.sleep(2)
     try:
         # driver.webDriver.find_element(By.XPATH, "//*[@id='signInName']").send_keys(getUsername('WE-Energies (Home)'))
@@ -203,22 +216,21 @@ def updateEnergyBillAmounts(driver, book, amount):
     splits.append(book.createSplit(electricity, "Expenses:Utilities:Electricity"))
     splits.append(book.createSplit(gas, "Expenses:Utilities:Gas"))
     splits.append(book.createSplit(-round(Decimal(amount),2), book.getGnuAccountFullName('Ally')))
-    book.writeTransaction(today.date().replace(day=24), 'WE ENERGIES PAYMENT', splits)
-    print(f'posted transaction: \n' f'date: {str(today.date())} \n' f'total: {str(amount)} \n' f'electricity: {str(electricity)}\n' f'gas: {str(gas)}')
-    updateSpreadsheet('Home', str(today.year) + ' Balance', 'Energy Bill', today.month, -float(amount))
-    openSpreadsheet(driver, 'Home', str(today.year) + ' Balance')
+    book.writeTransaction(today.replace(day=24), 'WE ENERGIES PAYMENT', splits)
+    print(f'posted transaction: \n' f'date: {str(today)} \n' f'total: {str(amount)} \n' f'electricity: {str(electricity)}\n' f'gas: {str(gas)}')
+    Home.updateSpreadsheet('Energy Bill', today.month, -float(amount))
     driver.findWindowByUrl("/scripts/ally")
 
 def mortgageBill(driver, book):
     today = datetime.today()
     total = round(Decimal(2000.00),2)
-    # get amounts from home mortgage calculator # 
-    mortgageSheet = getSheetAndDetails('Mortgage', 'Mortgage')
-    row = mortgageSheet['firstRowOfThisYear']
+    Home = Spreadsheet('Home', str(today.year) + ' Balance', driver)
+    Mortgage = Spreadsheet('Mortgage', 'Mortgage', driver)
+    row = Mortgage.firstRowOfThisYear
     while True:
-        paymentDate = datetime.strptime(mortgageSheet['worksheet'].acell(mortgageSheet['dateColumn']+str(row)).value, '%m/%d/%Y').date()
+        paymentDate = datetime.strptime(Mortgage.readCell(Mortgage.dateColumn+str(row)), '%m/%d/%Y').date()
         if paymentDate.month == today.month:
-            interest = round(Decimal(mortgageSheet['worksheet'].acell(mortgageSheet['interestColumn']+str(row)).value),2)
+            interest = round(Decimal(Mortgage.readCell(Mortgage.interestColumn+str(row))),2)
             break
         else:   row+=1
     # write transaction # 
@@ -228,9 +240,7 @@ def mortgageBill(driver, book):
     splits.append(book.createSplit(-total, book.getGnuAccountFullName('Ally')))
     book.writeTransaction(today.date(), 'Mortgage Payment', splits)
     # update Home spreadsheet # 
-    updateSpreadsheet('Home', str(today.year) + ' Balance', 'Mortgage', today.month, -float(total))
-    openSpreadsheet(driver, 'Home', str(today.year) + ' Balance')
-    openSpreadsheet(driver, 'Mortgage', 'Mortgage')
+    Home.updateSpreadsheet('Mortgage', today.month, -float(total))
     driver.findWindowByUrl("/scripts/ally")
 
 def runAlly(driver, account, book, gnuCashTransactions, dateRange):
@@ -251,23 +261,29 @@ def runAlly(driver, account, book, gnuCashTransactions, dateRange):
 #     # allyLogout(driver)
 #     book.closeBook()
     
-if __name__ == '__main__':
-    driver = Driver("Chrome")
-    book = GnuCash('Home')
-    driver.findWindowByUrl("paywater.milwaukee.gov")
-    # billAmount = driver.getIDElementTextOnceAvailable("paymentAmountValue")
-    # print(billAmount)
-    import os, shutil, time, zipfile, sys
-    from selenium import webdriver
-    from selenium.webdriver.common.keys import Keys
-    from selenium.common.exceptions import (InvalidArgumentException,
-                                            WebDriverException, TimeoutException)
-    from selenium.webdriver.chrome.service import Service
-    from selenium.webdriver.common.by import By
-    from selenium.webdriver.support.wait import WebDriverWait
-    from selenium.webdriver.support import expected_conditions as EC
+# if __name__ == '__main__':
+#     driver = Driver("Chrome")
+#     book = GnuCash('Home')
+#     driver.findWindowByUrl("paywater.milwaukee.gov")
+#     # billAmount = driver.getIDElementTextOnceAvailable("paymentAmountValue")
+#     # print(billAmount)
+#     import os, shutil, time, zipfile, sys
+#     from selenium import webdriver
+#     from selenium.webdriver.common.keys import Keys
+#     from selenium.common.exceptions import (InvalidArgumentException,
+#                                             WebDriverException, TimeoutException)
+#     from selenium.webdriver.chrome.service import Service
+#     from selenium.webdriver.common.by import By
+#     from selenium.webdriver.support.wait import WebDriverWait
+#     from selenium.webdriver.support import expected_conditions as EC
     # try:
     #     element = WebDriverWait(driver.webDriver, 5).until(EC.element_to_be_clickable((By.XPATH,"//*[@id='billTable']/tbody/tr[1]/td[3]/div")))
     #     print(element.text)
     # except TimeoutException:
     #     print('FALSE')
+
+if __name__ == '__main__':
+    driver = Driver("Chrome")
+    Mortgage = Spreadsheet('Mortgage', 'Mortgage', driver)
+    row = Mortgage.firstRowOfThisYear
+    print(row)

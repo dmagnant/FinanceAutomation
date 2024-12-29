@@ -37,5 +37,6 @@ urlpatterns = [
     path('tellwut', views.tellwut, name="Tellwut"),
     path('updateGoals', views.updateGoals , name="UpdateGoals"),
     path('vanguard', views.vanguard , name="Vanguard"),
-    path('worthy', views.worthy , name="Worthy")
+    path('worthy', views.worthy , name="Worthy"),
+    path('webull', views.webull, name='Webull')
 ]

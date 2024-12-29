@@ -1,11 +1,13 @@
 from datetime import datetime;  from decimal import Decimal
 
 if __name__ == "Classes.Asset":
+    from Classes.Spreadsheet import Spreadsheet
     from Functions.GeneralFunctions import getCryptocurrencyPrice, getStartAndEndOfDateRange
-    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateCheckingBalanceSpreadsheet
+    # from Functions.SpreadsheetFunctions import updateSpreadsheet
 else:
+    from scripts.scripts.Classes.Spreadsheet import Spreadsheet
     from scripts.scripts.Functions.GeneralFunctions import getCryptocurrencyPrice, getStartAndEndOfDateRange
-    from scripts.scripts.Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateCheckingBalanceSpreadsheet
+    # from scripts.scripts.Functions.SpreadsheetFunctions import updateSpreadsheet
 
 def getSymbolByName(self):
     match self.name.lower():
@@ -78,24 +80,20 @@ class Security(Asset):    # this is a class for tracking security information
                 f'gnuBalance: {self.gnuBalance} \n'
                 f'price: {self.price}')
     
-    def updateSpreadsheetAndGnuCash(self, book):
-        # account = self.symbol if self.account == None else self.account
-        updateSpreadsheet('Finances', 'Investments', self.symbol, 1, self.balance, self.symbol)
-        updateSpreadsheet('Finances', 'Investments', self.symbol, 2, float(self.price), self.symbol)
+    def updateSpreadsheetAndGnuCash(self, spreadsheet, book):
+        spreadsheet.updateSpreadsheet(self.symbol, 1, self.balance, self.symbol)
+        spreadsheet.updateSpreadsheet(self.symbol, 2, float(self.price), self.symbol)
         updateCoinQuantityFromStakingInGnuCash(self, book)
         self.updateGnuBalance(book.getGnuAccountBalance(self.gnuAccount))
 
-    def updateBalanceInSpreadSheet(self):
-        # account = self.symbol if account == None else account
-        updateSpreadsheet('Finances', 'Investments', self.symbol, 1, self.balance, self.symbol)
+    # def updateBalanceInSpreadSheet(self):
+    #     updateSpreadsheet('Finances', 'Investments', self.symbol, 1, self.balance, self.symbol)
 
-    def updatePriceInSpreadSheet(self):
-        # account = self.symbol if account == None else account
-        updateSpreadsheet('Finances', 'Investments', self.symbol, 2, self.price, self.symbol)
+    # def updatePriceInSpreadSheet(self):
+    #     updateSpreadsheet('Finances', 'Investments', self.symbol, 2, self.price, self.symbol)
 
-    def updateBalanceInGnuCash(self, book):
-        # account = self.symbol if account == None else account
-        updateCoinQuantityFromStakingInGnuCash(self, book)
+    # def updateBalanceInGnuCash(self, book):
+    #     updateCoinQuantityFromStakingInGnuCash(self, book)
 
 class USD(Asset):
     "this is a class for tracking USD information"
@@ -125,11 +123,19 @@ class USD(Asset):
         # switch worksheets if running in December (to next year's worksheet)
         if month == 12: year = year + 1
         if self.name == 'BoA-joint':
-            openSpreadsheet(driver, 'Home', str(year) + ' Balance')
-            updateSpreadsheet('Home', str(year) + ' Balance', self.name, month, balance, modifiedCC=True)
+            Home = Spreadsheet('Home', str(year) + ' Balance', driver)
+            Home.updateSpreadsheet(self.name, month, balance, modifiedCC=True)
         else:
-            openSpreadsheet(driver, 'Finances', str(year))
-            updateCheckingBalanceSpreadsheet('Finances', year, self.name, month, balance)
+            CheckingBalance = Spreadsheet('Finances', str(year))
+            column = CheckingBalance.projectedColumns[month-1]
+            row = CheckingBalance.projectedRows[month-1]
+            while True:
+                description = CheckingBalance.readCell(column+str(row))
+                if description and self.name in description:
+                    break
+                else:   row+=1
+            CheckingBalance.writeCell(chr(ord(column) + 1) + str(row), balance)
+            CheckingBalance.writeCell(chr(ord(column) + 4) + str(row), balance)
     
     def getInterestTotalForDateRange(self, book):
         interestAccount = book.getGnuAccountFullName('Interest')

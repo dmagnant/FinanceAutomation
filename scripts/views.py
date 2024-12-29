@@ -33,6 +33,7 @@ from scripts.scripts.Swagbucks import *
 from scripts.scripts.Tellwut import *
 from scripts.scripts.UpdateGoals import *
 from scripts.scripts.Vanguard import *
+from scripts.scripts.Webull import *
 from scripts.scripts.Worthy import *
 from scripts.scripts.Classes.WebDriver import Driver
 from scripts.scripts.Classes.Asset import USD, Security
@@ -40,7 +41,7 @@ from scripts.scripts.Classes.GnuCash import GnuCash
 from scripts.scripts.Functions.GeneralFunctions import returnRender
 
 def scripts(request):
-    bank = ['Ally', 'Sofi', 'Fidelity', 'HealthEquity', 'Optum', 'Vanguard', 'Worthy']; bank.sort()
+    bank = ['Ally', 'Sofi', 'Fidelity', 'HealthEquity', 'Optum', 'Vanguard', 'Webull', 'Worthy']; bank.sort()
     cc = ['Amex', 'Barclays', 'BoA', 'Chase', 'Discover']; cc.sort();
     crypto = ['Coinbase', 'Eternl', 'IoPay', 'Ledger', 'Presearch']; crypto.sort()
     mr = ['AmazonGC', 'Bing', 'Paidviewpoint', 'Paypal', 'Pinecone', 'PSCoupons', 'Swagbucks', 'Tellwut']; mr.sort()
@@ -452,10 +453,11 @@ def presearch(request):
     Presearch = Security("Presearch", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "main" in request.POST:              presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book)
+        Finances = Spreadsheet('Finances', 'Investments', driver)
+        if "main" in request.POST:              presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book, Finances)
         elif "login" in request.POST:           locatePresearchWindow(driver)          
         elif "balance" in request.POST:         Presearch.setBalance(getPresearchBalance(driver))
-        elif "rewards" in request.POST:         presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch)
+        elif "rewards" in request.POST:         presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book, Finances)
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/presearch"))
     context = {'account': Presearch}
     book.closeBook();   return returnRender(request, "crypto/presearch.html", context)
@@ -519,9 +521,9 @@ def updateGoals(request):
     if request.method == 'POST':
         driver, body = Driver("Chrome"), request.POST.copy()
         if "main" in request.POST:
-            account, timeFrame = body.get("accounts"), body.get("TimeFrame")
+            account = body.get("accounts")
             book = GnuCash('Finance') if account == 'Personal' else GnuCash('Home')
-            context = runUpdateGoals(account, timeFrame, book)
+            context = runUpdateGoals(account, book)
             print(context)
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/updateGoals"))
     return returnRender(request, "updateGoals.html", context)
@@ -539,6 +541,20 @@ def vanguard(request):
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/vanguard"))
     context = {'accounts': accounts}
     book.closeBook();   return returnRender(request, "banking/vanguard.html", context)
+
+def webull(request):
+    book = GnuCash('Finance')
+    accounts = getWebullAccounts(book)
+    lastMonth = getStartAndEndOfDateRange(timeSpan=7)
+    gnuCashTransactions = book.getTransactionsByDateRange(lastMonth)
+    if request.method == 'POST':
+        driver = Driver("Chrome")
+        if "main" in request.POST:              runWebullDaily(driver, accounts, book, gnuCashTransactions, lastMonth)
+        elif "login" in request.POST:           locateWebullWindow(driver)
+        elif "balance" in request.POST:         getWebullBalance(driver, accounts)
+        elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/webull"))
+    context = {'accounts': accounts}
+    book.closeBook();   return returnRender(request, "banking/webull.html", context)
 
 def worthy(request):
     book = GnuCash('Finance')

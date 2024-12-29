@@ -5,8 +5,11 @@
     <form method="post">
         {% csrf_token %}
         <button type="submit" name="bank">Daily Banking</button>
-        <button type="submit" name="paypal">Paypal</button>
-        <button type="submit" name="tearDown">teardown</button><br><br>
+        <button type="submit" name="crypto">Crypto Portfolio Total</button>
+        <button type="submit" name="tearDown">teardown</button>
+        <br><br>
+        &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<b>${{bankAccounts.CryptoPortfolio.gnuBalance}}</b>
+        <br><br>
     </form>
     <div style="width: 100%; display: table;">
         <div style="display: table-row;">
@@ -15,9 +18,8 @@
                     <form method="post">
                         {% csrf_token %}
                         <button type="submit" name="sofiMain">Main</button>
-                        <button type="submit" name="sofi" value="login">Login</button>
+                        <button type="submit" name="sofiLogin" value="login">Login</button>
                         <button type="submit" name="sofiBalances">Balances</button>
-                        <button type="submit" name="sofiLogout">Logout</button>
                     </form><br>
                 <div style="display: table-row;">
                     <div class="test" style="display:table-cell;text-align:right">
@@ -135,10 +137,6 @@
                             gnuBalance: &thinsp; <br><br>
                             {{bankAccounts.Fidelity.FidelityRothIRASPAXX.name}} balance: &thinsp; <br>
                             gnuBalance: &thinsp; <br><br>
-                            {{bankAccounts.Fidelity.FidelityRothIRAVTI.symbol}} shares: &thinsp; <br>
-                            gnuBalance shares: &thinsp; <br>
-                            {{bankAccounts.Fidelity.FidelityRothIRAVTI.symbol}} value: &thinsp; <br>
-                            ${{bankAccounts.Fidelity.FidelityRothIRAVTI.price}} x shares: &thinsp; <br><br>
                             {{bankAccounts.Fidelity.FidelityRothIRAVXUS.symbol}} shares: &thinsp; <br>
                             gnuBalance shares: &thinsp; <br>
                             {{bankAccounts.Fidelity.FidelityRothIRAVXUS.symbol}} value: &thinsp; <br>
@@ -155,10 +153,6 @@
                             ${{bankAccounts.Fidelity.FidelityRothIRAOptions.gnuBalance}}<br><br>
                             ${{bankAccounts.Fidelity.FidelityRothIRASPAXX.balance}}<br>
                             ${{bankAccounts.Fidelity.FidelityRothIRASPAXX.gnuBalance}}<br><br>
-                            {{bankAccounts.Fidelity.FidelityRothIRAVTI.balance}} {{bankAccounts.Fidelity.FidelityRothIRAVTI.symbol}}<br>
-                            {{bankAccounts.Fidelity.FidelityRothIRAVTI.gnuBalance}} {{bankAccounts.Fidelity.FidelityRothIRAVTI.symbol}}<br>
-                            ${{bankAccounts.Fidelity.FidelityRothIRAVTI.value}}<br>
-                            ${{bankAccounts.Fidelity.FidelityRothIRAVTI.gnuValue}}<br><br>
                             {{bankAccounts.Fidelity.FidelityRothIRAVXUS.balance}} {{bankAccounts.Fidelity.FidelityRothIRAVXUS.symbol}}<br>
                             {{bankAccounts.Fidelity.FidelityRothIRAVXUS.gnuBalance}} {{bankAccounts.Fidelity.FidelityRothIRAVXUS.symbol}}<br>
                             ${{bankAccounts.Fidelity.FidelityRothIRAVXUS.value}}<br>
@@ -166,27 +160,47 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div style="width: 10%; display:table-cell">
-                <br><br><form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="crypto">Crypto Portfolio Total</button><br><br>
-                    &emsp;&emsp;<b>${{bankAccounts.CryptoPortfolio.gnuBalance}}</b><br>
-                </form>
-            </div>
-            <div style="width: 10%; display:table-cell">
-                <br><br><form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="paypalAdjust">Paypal Recategorize</button><br><br>
-                    {%for tr in bankAccounts.Paypal.reviewTransactions %}
-                    <div style="display: table-row;">
-                        <div style="width: 20%; display:table-cell">
-                            {{tr}}
-                        </div>
+            </div> 
+            <div style="width: 20%; display:table-cell">
+                <b><a href="{% url 'Webull' %}" target="_blank">Webull</a></b><br><br>
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" name="webullMain">Main</button>
+                        <button type="submit" name="webullLogin">Login</button>
+                        <button type="submit" name="webullBalances">Balances</button>
+                    </form><br>
+                <div style="display: table-row;">
+                    <div class="test" style="display:table-cell;text-align:right">
+                        Webull Brokerage Balance: &thinsp; <br>
+                        gnuCash Balance: &thinsp; <br><br>
+                        Webull Cash balance: &thinsp; <br>
+                        gnuCash Balance: &thinsp; <br><br>
+                        Webull Options balance: &thinsp; <br>
+                        gnuCash Balance: &thinsp; <br><br>                        
                     </div>
-                    {% endfor %}
-                </form>
-            </div>            
+                    <div style="display:table-cell;text-align:left">
+                        <b>${{bankAccounts.Webull.WebullBrokerage.balance}}<br>
+                        ${{bankAccounts.Webull.WebullBrokerage.gnuBalance}}<br><br>
+                        ${{bankAccounts.Webull.WebullBrokerageCash.balance}} <br>
+                        ${{bankAccounts.Webull.WebullBrokerageCash.gnuBalance}}<br><br>
+                        ${{bankAccounts.Webull.WebullBrokerageOptions.balance}} <br>
+                        ${{bankAccounts.Webull.WebullBrokerageOptions.gnuBalance}}</b><br><br>
+                    </div>
+                </div>
+            </div>        
         </div>
+        <div style="width: 10%; display:table-cell">
+            <br><br><form method="post">
+                {% csrf_token %}
+                <button type="submit" name="paypalAdjust">Paypal Recategorize</button><br><br>
+                {%for tr in bankAccounts.Paypal.reviewTransactions %}
+                <div style="display: table-row;">
+                    <div style="width: 20%; display:table-cell">
+                        {{tr}}
+                    </div>
+                </div>
+                {% endfor %}
+            </form>
+        </div>   
     </div>
 {% endblock %}

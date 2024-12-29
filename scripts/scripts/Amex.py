@@ -42,7 +42,7 @@ def getAmexBalance(driver):
     if 'activity' not in driver.webDriver.current_url:
         clickAmexHome(driver)
         clickViewAmexTransactions(driver)
-    return driver.webDriver.find_element(By.XPATH, "//*[@id='root']/div[2]/main/section/div[3]/div/div/div/div/div/div/div[2]/div/div[1]/div/div/section/div[2]/div[5]/div[3]").text.replace('$', '')
+    return driver.webDriver.find_element(By.XPATH, "//*[@id='root']/div[2]/main/section/div[3]/div/div/div/div/div/div/div[2]/div/div[1]/div/div/section/div[2]/div[4]/div[3]/span[1]").text.replace('$', '')
 
 def exportAmexTransactions(driver):
     if 'activity' not in driver.webDriver.current_url:
@@ -67,8 +67,8 @@ def exportAmexTransactions(driver):
 def claimAmexRewards(driver, account):
     locateAmexWindow(driver)   
     driver.webDriver.get("https://global.americanexpress.com/rewards")
-    try:
-        rewardsBalance = driver.getIDElementTextOnceAvailable('globalmrnavpointbalance').replace('$', '')
+    rewardsBalance = driver.getIDElementTextOnceAvailable('globalmrnavpointbalance').replace('$', '')
+    if rewardsBalance:
         if float(rewardsBalance) > 0:
             driver.webDriver.find_element(By.XPATH,"//*[@id='recommendations-CTA']/a").click() # redeem now link
             rewardsInputElement = driver.getIDElementOnceAvailable('rewardsInput')
@@ -77,10 +77,7 @@ def claimAmexRewards(driver, account):
             # driver.webDriver.execute_script("window.scrollTo(0, 1300)")
             driver.webDriver.find_element(By.XPATH, "//*[@id='continue-btn']/span").click()
             driver.webDriver.find_element(By.XPATH, "//*[@id='use-dollars-btn']/span").click()
-        account.setValue(float(rewardsBalance))
-    except StaleElementReferenceException: exception = 'rewards likely already redeemed'
-    if account.value:
-        account.value = float(account.balance) - account.value
+            account.value = float(account.balance) - float(rewardsBalance)
 
 def importAmexTransactions(account, book, gnuCashTransactions):
     existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
@@ -90,12 +87,20 @@ def importAmexTransactions(account, book, gnuCashTransactions):
         if num <1: num+=1; continue # skip header
         postDate = datetime.strptime(row[0], '%m/%d/%Y').date()
         rawDescription = row[1]
+        description = rawDescription
         amount = -Decimal(row[2])
         fromAccount = account.gnuAccount
-        if "AUTOPAY PAYMENT" in rawDescription.upper():                             continue
-        elif "YOUR CASH REWARD/REFUND IS" in rawDescription.upper():                description = "Amex CC Rewards"
-        else:                                                                       description = rawDescription
-        toAccount = book.getGnuAccountFullName(fromAccount, description=description)
+        toAccount = book.getGnuAccountFullName('Other')
+        if "AUTOPAY PAYMENT" in rawDescription.upper():                             
+            continue
+        elif "YOUR CASH REWARD/REFUND IS" in rawDescription.upper():                
+            description = "Amex CC Rewards"
+            toAccount = book.getGnuAccountFullName('CC Rewards')
+        elif "BP#" in rawDescription.upper():                         
+            toAccount = book.getGnuAccountFullName('Transportation') + ':Gas'
+        elif 'PICK N SAVE' in rawDescription.upper():
+            toAccount = book.getGnuAccountFullName('Groceries')
+        # toAccount = book.getGnuAccountFullName(fromAccount, description=description)
         if toAccount == 'Expenses:Other':   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)

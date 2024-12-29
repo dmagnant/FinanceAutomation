@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Webull{% endblock %}
+{% block content %}
+    <h1>Webull</h1>
+    <div style="width: 100%; display: table;">
+        <div style="display: table-row;">
+            <div style="width: 20%; display:table-cell">
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="main">Main</button><br>
+                    <button type="submit" name="login">Login</button><br>
+                    <button type="submit" name="balance">Balance</button><br>
+                </form>
+            </div>
+            <div style="width: 80%; display:table-cell">
+                <b><a href="{% url 'Webull' %}" target="_blank">Webull</a></b><br><br>
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" name="webullMain">Main</button>
+                        <button type="submit" name="webullLogin">Login</button>
+                        <button type="submit" name="webullBalances">Balances</button>
+                    </form><br>
+                <div style="display: table-row;">
+                    <div class="test" style="display:table-cell;text-align:right">
+                        Webull Brokerage Balance: &thinsp; <br>
+                        gnuCash Balance: &thinsp; <br><br>
+                        Webull Cash balance: &thinsp; <br>
+                        gnuCash Balance: &thinsp; <br><br>
+                        Webull Options balance: &thinsp; <br>
+                        gnuCash Balance: &thinsp; <br><br>                        
+                    </div>
+                    <div style="display:table-cell;text-align:left">
+                        <b>${{accounts.WebullBrokerage.balance}}<br>
+                        ${{accounts.WebullBrokerage.gnuBalance}}<br><br>
+                        ${{accounts.WebullBrokerageCash.balance}} <br>
+                        ${{accounts.WebullBrokerageCash.gnuBalance}}<br><br>
+                        ${{accounts.WebullBrokerageOptions.balance}} <br>
+                        ${{accounts.WebullBrokerageOptions.gnuBalance}}</b><br><br>
+                    </div>
+                </div>
+            </div>   
+        </div>
+    </div>
+{% endblock %}

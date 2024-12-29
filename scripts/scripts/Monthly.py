@@ -1,9 +1,8 @@
 from decimal import Decimal
 
 if __name__ == '__main__' or __name__ == "Monthly":
-    from Classes.Asset import USD, Security;    from Classes.WebDriver import Driver;   from Classes.GnuCash import GnuCash
+    from Classes.Asset import USD, Security; from Classes.WebDriver import Driver; from Classes.Spreadsheet import Spreadsheet
     from Functions.GeneralFunctions import getStartAndEndOfDateRange, getUsername, getNotes, setDirectory
-    from Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentsMonthly, getSheetAndDetails
     from Eternl import runEternl, locateEternlWindow
     from Ledger import runLedger, getLedgerAccounts
     from HealthEquity import runHealthEquity, locateHealthEquityWindow, getHealthEquityAccounts
@@ -12,11 +11,10 @@ if __name__ == '__main__' or __name__ == "Monthly":
     from Vanguard import runVanguard401k, locateVanguardWindow, getVanguardAccounts
     from Optum import runOptum, locateOptumWindow, getOptumAccounts
 else:
-    from .Classes.Asset import USD, Security;   from .Classes.WebDriver import Driver;  from .Classes.GnuCash import GnuCash
+    from .Classes.Asset import USD, Security; from .Classes.WebDriver import Driver; from .Classes.Spreadsheet import Spreadsheet 
     from .Eternl import runEternl, locateEternlWindow
     from .Ledger import runLedger, getLedgerAccounts
     from .Functions.GeneralFunctions import getStartAndEndOfDateRange, getUsername, getNotes, setDirectory
-    from .Functions.SpreadsheetFunctions import updateSpreadsheet, openSpreadsheet, updateInvestmentsMonthly, getSheetAndDetails
     from .HealthEquity import runHealthEquity, locateHealthEquityWindow, getHealthEquityAccounts
     from .IoPay import runIoPay, locateIoPayWindow
     from .Worthy import runWorthy, locateWorthyWindow
@@ -42,6 +40,7 @@ def getMonthlyAccounts(type, personalBook, jointBook):
 
 def updatePensionBalanceAndCost(driver, book, newBalance):
     Pension = USD('Pension', book)
+    Finances = Spreadsheet('Finances', 'Investments', driver)
     newBalance = round(Decimal(newBalance),2)
     # gather amounts
     monthGain = newBalance - Pension.gnuBalance
@@ -53,14 +52,10 @@ def updatePensionBalanceAndCost(driver, book, newBalance):
         book.createSplit(monthGain, Pension.gnuAccount)
         ]
     book.writeTransaction(getStartAndEndOfDateRange(timeSpan='month')['endDate'], 'Contribution + Interest', splits)
-    # update spreadsheet
-    investmentsSheet = getSheetAndDetails('Finances', 'Investments')
-    openSpreadsheet(driver, 'Finances', 'Investments')
-    row = investmentsSheet['firstRowAfterCrypto']
     while True:
-        if investmentsSheet['worksheet'].acell(investmentsSheet['bankColumn']+str(row)).value == 'Pension':
-            investmentsSheet['worksheet'].update_acell(investmentsSheet['sharesColumn'] + str(row), float(newBalance))
-            investmentsSheet['worksheet'].update_acell(investmentsSheet['costColumn'] + str(row), float(newBalance - Pension.getInterestTotalForDateRange(book)))
+        if Finances.readCell(Finances.bankColumn+str(row)) == 'Pension':
+            Finances.writeCell(Finances.sharesColumn+str(row), str(row), float(newBalance))
+            Finances.writeCell(Finances.costColumn+str(row), str(row), float(newBalance - Pension.getInterestTotalForDateRange(book)))
             break
         else:
             row+=1
@@ -77,13 +72,14 @@ def loginToCryptoAccounts(driver):
     
 def runUSD(driver, accounts, personalBook):
     loginToUSDAccounts(driver)
+    Finances = Spreadsheet('Finances', 'Investments', driver)
     lastMonth = getStartAndEndOfDateRange(timeSpan="month")
     gnuCashTransactions = personalBook.getTransactionsByDateRange(lastMonth)
     runWorthy(driver, accounts['Worthy'], personalBook, gnuCashTransactions, lastMonth['endDate'])
     runHealthEquity(driver, accounts['HealthEquity'], personalBook, gnuCashTransactions, lastMonth)
     runOptum(driver, accounts['Optum'], personalBook, gnuCashTransactions, lastMonth)
     runVanguard401k(driver, accounts['Vanguard'], personalBook, gnuCashTransactions, lastMonth)
-    updateInvestmentsMonthly(driver,personalBook,accounts)
+    Finances.updateInvestmentsMonthly(personalBook,accounts)
     driver.findWindowByUrl("/scripts/monthly")
 
 def runCrypto(driver, accounts, personalBook):

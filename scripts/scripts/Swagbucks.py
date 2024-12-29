@@ -166,7 +166,6 @@ def swagbucksSearch(driver):
         search_term1 = None
         try:
             driver.find_element(By.XPATH, "//*[@id='tblAwardBannerAA']/div[2]/div/div[1]/form/input[2]")
-            driver
             num += 1
             driver.find_element(By.ID, "claimSearchWinButton").click()
         except NoSuchElementException:
@@ -207,18 +206,9 @@ def runSwagbucks(driver, runAlu, account, book):
     swagbucksSearch(driver)
     if int(account.balance) > 1000: claimSwagBucksRewards(driver)
     
-# if __name__ == '__main__':
-#     driver = Driver("Chrome")
-#     book = GnuCash('Finance')
-#     Swagbucks = Security("Swagbucks", book)
-#     runSwagbucks(driver, False, Swagbucks, book)
-#     book.closeBook()
-
-
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
     Swagbucks = Security("Swagbucks", book)
-    Swagbucks.setBalance(getSwagBucksBalance(driver))
-    book.updateMRBalance(Swagbucks)
+    runSwagbucks(driver, False, Swagbucks, book)
     book.closeBook()

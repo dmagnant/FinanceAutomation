@@ -98,15 +98,24 @@ def importChaseTransactions(account, chaseActivity, book, gnuCashTransactions):
         if num <1: num+=1; continue # skip header
         postDate = datetime.strptime(row[1], '%m/%d/%Y').date()
         rawDescription = row[2]
+        description = rawDescription
         transactionType = row[3]        
         amount = Decimal(row[5])
         fromAccount = account.gnuAccount
-        if "AUTOMATIC PAYMENT" in rawDescription.upper():                           continue
-        elif "REDEMPTION CREDIT" in rawDescription.upper() and float(amount) > 0:   description = "Chase CC Rewards"
-        else:                                                                       description = rawDescription
-        if transactionType == "Food & Drink":   toAccount = book.getGnuAccountFullName('Bars & Restaurants')
-        elif transactionType == 'Groceries':    toAccount = book.getGnuAccountFullName('Groceries')
-        else:                                   toAccount = book.getGnuAccountFullName(fromAccount, description=description)
+        toAccount = book.getGnuAccountFullName('Other')
+        if "AUTOMATIC PAYMENT" in rawDescription.upper():                           
+            continue
+        elif "REDEMPTION CREDIT" in rawDescription.upper() and float(amount) > 0:   
+            description = "Chase CC Rewards"
+            toAccount = book.getGnuAccountFullName('CC Rewards')  
+        elif "BP#" in rawDescription.upper():                         
+            toAccount = book.getGnuAccountFullName('Transportation') + ':Gas'            
+        elif transactionType == "Food & Drink":   
+            toAccount = book.getGnuAccountFullName('Bars & Restaurants')
+        elif transactionType == 'Groceries':    
+            toAccount = book.getGnuAccountFullName('Groceries')
+        # else:                                   
+        #     toAccount = book.getGnuAccountFullName(fromAccount, description=description)
         if toAccount == 'Expenses:Other':   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)

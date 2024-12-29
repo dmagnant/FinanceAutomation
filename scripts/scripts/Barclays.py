@@ -104,12 +104,23 @@ def importBarclaysTransactions(account, barclaysActivity, book, gnuCashTransacti
         if num <5: num+=1; continue # skip header lines
         postDate = datetime.strptime(row[0], '%m/%d/%Y').date()
         rawDescription = row[1]
+        description = rawDescription
         amount = Decimal(row[3])
         fromAccount = account.gnuAccount
-        if "PAYMENT RECEIVED" in rawDescription.upper():   continue
-        # elif "BARCLAYCARD US" in rawDescription.upper() and float(amount) > 0:      description = "Barclays CC Rewards"
-        else:                                                                       description = rawDescription
-        toAccount = book.getGnuAccountFullName(fromAccount, description=description)
+        toAccount = book.getGnuAccountFullName('Other')
+        if "PAYMENT RECEIVED" in rawDescription.upper():   
+            continue
+        elif "TECH WAY AUTO SERV" in rawDescription.upper():   
+            toAccount = book.getGnuAccountFullName('Transportation') + ':Car Maintenance'
+        elif "BP#" in rawDescription.upper():                         
+            toAccount = book.getGnuAccountFullName('Transportation') + ':Gas'
+        elif 'PROGRESSIVE' in rawDescription.upper():
+            toAccount = book.getGnuAccountFullName('Transportation') + ':Car Insurance'
+        elif "SPOTHERO" in rawDescription.upper() or 'PARKMOBILE' in rawDescription.upper():                      
+            toAccount = book.getGnuAccountFullName('Transportation') + ':Parking'
+        elif 'UBER' in rawDescription.upper() or 'LYFT' in rawDescription.upper():                     
+            toAccount = book.getGnuAccountFullName('Transportation') + ':Ride Services'
+        # toAccount = book.getGnuAccountFullName(fromAccount, description=description)
         if toAccount == 'Expenses:Other':   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)

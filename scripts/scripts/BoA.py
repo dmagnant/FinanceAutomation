@@ -126,14 +126,48 @@ def importBoATransactions(account, boAActivity, book, gnuCashTransactions):
         if num <1: num+=1; continue # skip header
         postDate = datetime.strptime(row[0], '%m/%d/%Y').date()
         rawDescription = row[2]
+        description = rawDescription
         amount = Decimal(row[4])
         fromAccount = account.gnuAccount
-        if "BA ELECTRONIC PAYMENT" in rawDescription.upper():                           continue
-        elif "CASH REWARDS STATEMENT CREDIT" in rawDescription.upper():                 description = "BoA CC Rewards"
-        elif "SPECTRUM" in rawDescription.upper():                                      description = "Internet Bill"
-        elif "HOMEDEPOT" in rawDescription.upper().replace(' ',''):                     description = 'Home Depot'
-        else:                                                                           description = rawDescription
-        toAccount = book.getGnuAccountFullName(fromAccount, description=description)
+        toAccount = book.getGnuAccountFullName('Other')
+        if "BA ELECTRONIC PAYMENT" in rawDescription.upper():                           
+            continue
+        elif 'AMAZON' in rawDescription.upper() or 'AMZN' in rawDescription.upper():
+            toAccount = book.getGnuAccountFullName('Amazon')
+
+        if toAccount != 'Expenses:Other':
+            for i in ['PICK N SAVE', 'KETTLE RANGE', 'WHOLE FOODS', 'WHOLEFDS', 'TARGET', 'MINI MARKET MILWAUKEE', 'KAINTH']:
+                if i in rawDescription.upper():                        
+                    toAccount = book.getGnuAccountFullName('Groceries')
+                    break
+            for i in ['MCDONALD', 'JIMMY JOHN', 'COLECTIVO', "KOPP'S CUSTARD", 'MAHARAJA', 'STARBUCKS']:
+                if i in rawDescription.upper():                        
+                    toAccount = book.getGnuAccountFullName("Bars & Restaurants")
+                    break
+                
+        if toAccount != 'Expenses:Other':
+            if account.name == 'BoA':
+                if "CASH REWARDS STATEMENT CREDIT" in rawDescription.upper():                 
+                    description = "BoA CC Rewards"
+                    toAccount = book.getGnuAccountFullName('Credit Card Rewards')
+            elif account.name == 'BoA-joint':
+                if "HOMEDEPOT" in rawDescription.upper().replace(' ',''):
+                    description = 'Home Depot'
+                    toAccount = book.getGnuAccountFullName(description)
+                elif "SPECTRUM" in rawDescription.upper():                                      
+                    description = "Internet Bill"
+                    toAccount = book.getGnuAccountFullName('Internet')
+                elif 'TRAVEL CREDIT' in rawDescription.upper():                               
+                    toAccount = 'Income:Credit Card Rewards'
+                elif "GOOGLE FI" in description.upper() or "GOOGLE *FI" in description.upper():             
+                    toAccount = book.getGnuAccountFullName('Phone')
+                elif "MILWAUKEE ELECTRIC TO" in description:
+                    toAccount = book.getGnuAccountFullName('Home Expenses') + ':Home Maintenance'
+                elif 'UBER' in description.upper():
+                    toAccount = book.getGnuAccountFullName('Travel') + ':Ride Services'
+                elif 'CHEWY' in description.upper():
+                    toAccount = book.getGnuAccountFullName('Pet')
+        # toAccount = book.getGnuAccountFullName(account.name, description=description)
         if toAccount == 'Expenses:Other':   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)

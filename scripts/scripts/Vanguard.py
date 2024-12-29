@@ -20,7 +20,7 @@ else:
                                              getUsername, showMessage, setDirectory, getNotes)
 
 def getVanguardAccounts(book):
-    return {'V401k': USD("Vanguard401k", book), 'TSM401k': Security("Total Stock Market(401k)", book), '401kCash':USD('NM Asset Fund', book), 'EBI': Security("Employee Benefit Index", book)}
+    return {'V401k': USD("401k", book), 'TSM401k': Security("Total Stock Market", book), '401kCash':USD('NM Asset Fund', book), 'EBI': Security("Employee Benefit Index", book)}
 
 def vanguardLogin(driver):
     driver.openNewWindow('https://logon.vanguard.com/logon?site=pi')
@@ -107,22 +107,30 @@ def importVanguardTransactions(account, vanguardActivity, book, gnuCashTransacti
     for row in csv.reader(open(vanguardActivity), delimiter=','):
         postDate = datetime.strptime(row[0], '%Y-%m-%d').date()
         rawDescription = row[1]
+        description = rawDescription
         shares = round(Decimal(row[2]),3)
         amount = Decimal(row[3])
         fromAccount = account.gnuAccount
+        toAccount = book.getGnuAccountFullName('Other')
         splits = []
-        if 'NM Annual Fixed Rate Fund' in rawDescription:           continue
-        elif "Plan Contribution" in rawDescription:                   description = "401k Investment"
-        elif "Dividend" in rawDescription:                          description = "401k Dividend"
-        elif "Fee" in rawDescription:                               description = "401k Fee"
+        if 'NM Annual Fixed Rate Fund' in rawDescription:           
+            continue
+        elif "Plan Contribution" in rawDescription:                  
+            description = "401k Investment"
+            toAccount = book.getGnuAccountFullName('Vanguard401k')
+        elif "Dividend" in rawDescription:                          
+            description = "401k Dividend"
+            toAccount = book.getGnuAccountFullName('Dividends')
+        elif "Fee" in rawDescription:                               
+            description = "401k Fee"
+            toAccount = book.getGnuAccountFullName('Bank Fees')
         elif "Fund to Fund Out" in rawDescription:                  
             description = "401k Transfer Out"
             shares = -shares
             amount = -amount
         elif "Fund to Fund In" in rawDescription:                  
             description = "401k Transfer In"
-        else:                                                       description = rawDescription
-        toAccount = book.getGnuAccountFullName(fromAccount, description=description)
+        # toAccount = book.getGnuAccountFullName(fromAccount, description=description)
         if not shares: shares = amount
         splits.append({'amount': -amount, 'account': toAccount})
         splits.append({'amount': amount, 'account': fromAccount, 'quantity': shares})

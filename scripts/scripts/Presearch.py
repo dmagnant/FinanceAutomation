@@ -24,7 +24,7 @@ class Node(object):
     
     def stakePRE(self, driver, stakeAmount):
         availToStake = float(driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.replace(',','').replace(' PRE',''))
-        driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '6]/div/table/tbody/tr[' + str(self.num) + ']/td[12]/a[1]').click() # stake button
+        driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '5]/div/table/tbody/tr[' + str(self.num) + ']/td[12]/a[1]').click() # stake button
         time.sleep(1)
         if availToStake < stakeAmount:  stakeAmount = availToStake
         while stakeAmount > 0:
@@ -33,7 +33,7 @@ class Node(object):
         driver.webDriver.find_element(By.XPATH, "//*[@id='editNodeForm']/div[9]/button").click() # update
         time.sleep(3)
         driver.webDriver.get('https://nodes.presearch.org/dashboard')
-    
+        
 def getPresearchBasePath():
     return '/html/body/div[2]/div[2]/div[5]/div[' 
 
@@ -63,12 +63,13 @@ def claimPresearchRewards(driver):
     return float(driver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
 
 def stakePresearchRewards(driver, availToStake):
+    print(f'avail to stake {str(availToStake)}')
     locatePresearchWindow(driver)
     num, stillNodes, nodes, reliabilityScores = 1, True, [], []
     while stillNodes:
         try:
-            name = driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '6]/div/table/tbody/tr[' + str(num) + ']/td[1]').text
-            reliabilityScore = driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '6]/div/table/tbody/tr[' + str(num) + ']/td[10]').text
+            name = driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '5]/div/table/tbody/tr[' + str(num) + ']/td[1]').text
+            reliabilityScore = driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '5]/div/table/tbody/tr[' + str(num) + ']/td[10]').text
             nodes.append(Node(num=num, name=name, reliabilityScore=reliabilityScore))
             reliabilityScores.append(reliabilityScore)
             num += 1
@@ -93,13 +94,13 @@ def getPresearchBalance(driver):
     driver.webDriver.get('https://nodes.presearch.org/dashboard')
     return searchStake + nodeStake
 
-def presearchRewardsRedemptionAndBalanceUpdates(driver, account, book):
+def presearchRewardsRedemptionAndBalanceUpdates(driver, account, book, spreadsheet):
     preAvailableToStake = claimPresearchRewards(driver)
     if preAvailableToStake: 
         stakePresearchRewards(driver, preAvailableToStake)
         account.setBalance(getPresearchBalance(driver))
         account.setPrice(account.getPriceFromCoinGecko())
-        account.updateSpreadsheetAndGnuCash(book)
+        account.updateSpreadsheetAndGnuCash(spreadsheet, book)
     
 if __name__ == '__main__':
     driver = Driver("Chrome")

@@ -74,12 +74,23 @@ def importDiscoverTransactions(account, discoverActivity, book, gnuCashTransacti
         if num <1: num+=1; continue # skip header
         postDate = datetime.strptime(row[1], '%m/%d/%Y').date()
         rawDescription = row[2]
+        description = rawDescription        
         amount = -Decimal(row[3])
         fromAccount = account.gnuAccount
-        if "DIRECTPAY FULL BALANCE" in rawDescription.upper():                  continue
-        elif "AUTOMATIC STATEMENT CREDIT" in description.upper():               description = "Discover CC Rewards"        
-        else:                                                                   description = rawDescription
-        toAccount = book.getGnuAccountFullName(fromAccount, description=description)
+        toAccount = book.getGnuAccountFullName('Other')
+        if "DIRECTPAY FULL BALANCE" in rawDescription.upper():                  
+            continue
+        elif "AUTOMATIC STATEMENT CREDIT" in rawDescription.upper():
+            description = "Discover CC Rewards"
+            toAccount = book.getGnuAccountFullName('CC Rewards')
+        elif "BP#" in rawDescription.upper():                         
+            toAccount = book.getGnuAccountFullName('Transportation') + ':Gas'
+        if toAccount == 'Expenses:Other':
+            for i in ['PICK N SAVE', 'KETTLE RANGE', 'WHOLE FOODS', 'WHOLEFDS', 'TARGET', 'MINI MARKET MILWAUKEE', 'KAINTH']:
+                if i in rawDescription.upper():                        
+                    toAccount = book.getGnuAccountFullName('Groceries')
+                    break
+        # toAccount = book.getGnuAccountFullName(fromAccount, description=description)
         if toAccount == 'Expenses:Other': reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)

@@ -106,18 +106,23 @@ def importOptumTransactions(account, optumActivity, book, gnuCashTransactions):
     for row in csv.reader(open(optumActivity), delimiter=','):
         postDate = datetime.strptime(row[0], '%Y-%m-%d').date()
         rawDescription = row[1]
+        description = rawDescription        
         fromAccount = account.gnuAccount
         shares = float(row[2])
         amount = Decimal(row[3])
+        toAccount = book.getGnuAccountFullName('Other')
         if "Vanguard 500 Index Admiral" in rawDescription:  
             if "FEE" in rawDescription.upper():
                 description = "HSA Fee"
                 amount,shares = -amount,-shares
+                toAccount = book.getGnuAccountFullName('Bank Fees')
             elif "DIVIDEND" in rawDescription.upper():
                 description = "HSA Dividend"
-            else:   description = "HSA VFIAX Investment"
-        else:       description = rawDescription
-        toAccount = book.getGnuAccountFullName(fromAccount, description=description)
+                toAccount = book.getGnuAccountFullName('Dividends')
+            else:   
+                description = "HSA VFIAX Investment"
+                toAccount = book.getGnuAccountFullName('Optum Cash')
+        # toAccount = book.getGnuAccountFullName(fromAccount, description=description)
         splits = [{'amount': -amount, 'account':toAccount},{'amount': amount, 'account':fromAccount, 'quantity': round(Decimal(shares),3)}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits)
 

@@ -156,18 +156,32 @@ def importHealthEquityTransactions(account, HEActivity, book, gnuCashTransaction
     for row in csv.reader(open(HEActivity), delimiter=','):
         postDate = datetime.strptime(row[0], '%Y-%m-%d').date()
         rawDescription = row[1]
+        description = rawDescription        
         amount = Decimal(row[2])
         shares = 0
         try:                shares = float(row[3])
         except IndexError:  exception = 'no shares found in transaction'
         fromAccount = account.gnuAccount
-        if "VIIIX: Buy" in rawDescription:                                          description = "HSA VIIIX Investment"
-        elif "VBIRX: Buy" in rawDescription:                                        description = "HSA VBIRX Investment"
-        elif "Dividend" in rawDescription:                                          description = "HSA Dividend"
-        elif "Employer Contribution" in rawDescription:                             description = 'HSA Employer Contribution'
-        elif "Interest" in rawDescription:                                          description = 'Interest Earned'
-        else:                                                                       description = rawDescription
-        toAccount = book.getGnuAccountFullName(fromAccount, description=description)
+        toAccount = book.getGnuAccountFullName('Other')
+        if "VIIIX: Buy" in rawDescription:
+            description = "HSA VIIIX Investment"
+            toAccount = book.getGnuAccountFullName('HE Cash')
+        elif "VBIRX: Buy" in rawDescription:                                        
+            description = "HSA VBIRX Investment"
+            toAccount = book.getGnuAccountFullName('HE Cash')
+        elif "Dividend" in rawDescription:                                          
+            description = "HSA Dividend"
+            toAccount = book.getGnuAccountFullName('Dividends')
+        elif "Employer Contribution" in rawDescription:                             
+            description = 'HSA Employer Contribution'
+            toAccount = book.getGnuAccountFullName('HSA Contributions')
+        elif "Interest" in rawDescription:                                          
+            description = 'Interest Earned'
+            toAccount = book.getGnuAccountFullName('Interest')
+        elif 'Investment Admin Fee ' in rawDescription:                              
+            description = 'HSA Fee'
+            toAccount = book.getGnuAccountFullName('Bank Fees')
+        # toAccount = book.getGnuAccountFullName(fromAccount, description=description)
         if shares:      splits = [{'amount': -amount, 'account':toAccount},{'amount': amount, 'account':fromAccount, 'quantity': round(Decimal(shares),3)}]
         else:           splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits)

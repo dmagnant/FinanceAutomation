@@ -126,6 +126,7 @@ class Driver:
             element.click()
             time.sleep(1)
         except TimeoutException: return False
+        return True
         
     def clickIDElementOnceAvailable(self, id, wait=10):
         try:
@@ -133,6 +134,7 @@ class Driver:
             element.click()
             time.sleep(1)
         except TimeoutException: return False
+        return True
     
     def getXPATHElementOnceAvailable(self, xpath, wait=10):
         try:
