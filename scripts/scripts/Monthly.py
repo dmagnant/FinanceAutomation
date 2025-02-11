@@ -31,8 +31,8 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         Pension = USD('Pension', personalBook)
         accounts = {'HealthEquity':HealthEquity,'Optum':Optum,'Vanguard':Vanguard,'Worthy': Worthy,'Savings': Savings, 'Pension': Pension}
     elif type == 'Crypto':
-        CryptoPortfolio = USD("Crypto", personalBook)
-        Cardano = Security("Cardano", personalBook, 'ADA-Eternl')
+        CryptoPortfolio = USD("CryptoCurrency", personalBook)
+        Cardano = Security("Cardano", personalBook)
         ledgerAccounts = getLedgerAccounts(personalBook)
         IoTex = Security("IoTex", personalBook)   
         accounts = {'CryptoPortfolio': CryptoPortfolio, 'Cardano': Cardano,'IoTex': IoTex, 'ledgerAccounts': ledgerAccounts}
@@ -47,15 +47,16 @@ def updatePensionBalanceAndCost(driver, book, newBalance):
     employerContributionPerMonth = round(Decimal(813.40),2)
     # write transaction
     splits = [
-        book.createSplit(-(monthGain - employerContributionPerMonth),book.getGnuAccountFullName('Interest')), 
-        book.createSplit(-employerContributionPerMonth,book.getGnuAccountFullName('Pension Contributions')),
+        book.createSplit(-(monthGain - employerContributionPerMonth), book.getGnuAccountFullName('Interest')), 
+        book.createSplit(-employerContributionPerMonth, book.getGnuAccountFullName('Pension Contributions')),
         book.createSplit(monthGain, Pension.gnuAccount)
         ]
     book.writeTransaction(getStartAndEndOfDateRange(timeSpan='month')['endDate'], 'Contribution + Interest', splits)
+    row = 2
     while True:
         if Finances.readCell(Finances.bankColumn+str(row)) == 'Pension':
-            Finances.writeCell(Finances.sharesColumn+str(row), str(row), float(newBalance))
-            Finances.writeCell(Finances.costColumn+str(row), str(row), float(newBalance - Pension.getInterestTotalForDateRange(book)))
+            Finances.writeCell(Finances.sharesColumn+str(row), float(newBalance))
+            Finances.writeCell(Finances.costColumn+str(row), float(newBalance - Pension.getInterestTotalForDateRange(book)))
             break
         else:
             row+=1
@@ -70,11 +71,9 @@ def loginToCryptoAccounts(driver):
     locateEternlWindow(driver)
     locateIoPayWindow(driver)
     
-def runUSD(driver, accounts, personalBook):
+def runUSD(driver, accounts, personalBook, gnuCashTransactions, lastMonth):
     loginToUSDAccounts(driver)
     Finances = Spreadsheet('Finances', 'Investments', driver)
-    lastMonth = getStartAndEndOfDateRange(timeSpan="month")
-    gnuCashTransactions = personalBook.getTransactionsByDateRange(lastMonth)
     runWorthy(driver, accounts['Worthy'], personalBook, gnuCashTransactions, lastMonth['endDate'])
     runHealthEquity(driver, accounts['HealthEquity'], personalBook, gnuCashTransactions, lastMonth)
     runOptum(driver, accounts['Optum'], personalBook, gnuCashTransactions, lastMonth)
@@ -84,8 +83,9 @@ def runUSD(driver, accounts, personalBook):
 
 def runCrypto(driver, accounts, personalBook):
     loginToCryptoAccounts(driver)
-    runEternl(driver, accounts['Cardano'], personalBook)
-    runIoPay(driver, accounts['IoTex'], personalBook)
+    Finances = Spreadsheet('Finances', 'Investments', driver)
+    runEternl(driver, accounts['Cardano'], personalBook, Finances)
+    runIoPay(driver, accounts['IoTex'], personalBook, Finances)
     accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getGnuAccountBalance(accounts['CryptoPortfolio'].gnuAccount))
     driver.findWindowByUrl("/scripts/monthly")
 

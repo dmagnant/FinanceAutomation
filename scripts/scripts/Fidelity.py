@@ -91,9 +91,9 @@ def getFidelityTransferAccount(driver, sofiAmount, sofiDate):
                 amount = driver.webDriver.find_element(By.XPATH,getFidelityTransactionElementPath(row,'/div[5]')).text.replace('$','').replace(',','').replace('-','').replace('+','')
                 if sofiAmount == amount:
                     accountName = driver.webDriver.find_element(By.XPATH,getFidelityTransactionElementPath(row,'/div[3]/span/span')).text
-                    if 'ROTH' in accountName:           return 'FidelityRothIRA'
-                    elif 'Individual' in accountName:   return 'FidelityBrokerage'
-                    elif 'Traditional' in accountName:  return 'FidelityIRA'
+                    if 'ROTH' in accountName:           return 'FidelityRothIRASPAXX'
+                    elif 'Individual' in accountName:   return 'FidelityBrokerageSPAXX'
+                    elif 'Traditional' in accountName:  return 'FidelityIRASPAXX'
 
 def getFidelityTransactionElementPath(eRow, suffix):    return f"//*[@id='ao-history-list']/div[2]/div[{str(eRow)}]/div{suffix}"
 
@@ -132,6 +132,7 @@ def getFidelityPricesSharesAndCost(driver, allAccounts, book, accountToGet='all'
     driver.clickXPATHElementOnceAvailable(f"//*[@id='{accountNum}']/span/s-slot/s-assigned-wrapper/div/div/span") # Account
     driver.clickXPATHElementOnceAvailable("//*[@id='portsum-tab-positions']/a/span") # Positions
     driver.webDriver.implicitly_wait(1)
+    symbolsWithPricesUpdated = ['GME']
     row = 0
     while True:
         row += 1
@@ -168,12 +169,18 @@ def getFidelityPricesSharesAndCost(driver, allAccounts, book, accountToGet='all'
                 if symbol == 'Cash': account.setBalance(getCurrentValue(driver, row))
                 else: # get equity positions
                     account.price = Decimal(driver.webDriver.find_element(By.XPATH, "//*[@id='posweb-grid']/div[3]/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[1]/div/span").text.replace('$', ''))
-                    book.updatePriceInGnucash(account.symbol, account.price)
-                    account.setBalance(driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div[3]/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[9]/div/span").text.replace('$', '').replace(',',''))
-                    account.value = getCurrentValue(driver, row)
-                    cost = getCost(driver, row)
-                    if cost:
-                        account.setCost(cost)
+                    if symbol not in symbolsWithPricesUpdated:
+                        book.updatePriceInGnucash(account.symbol, account.price)
+                        symbolsWithPricesUpdated.append(symbol)
+                    balance = float(driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div[3]/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[9]/div/span").text.replace('$', '').replace(',',''))
+                    balance = balance if not account.balance else balance + account.balance
+                    value = float(getCurrentValue(driver, row))
+                    value = value if not account.value else value + account.value
+                    cost = float(getCost(driver,row))
+                    cost = cost if not account.cost else cost + account.cost
+                    account.setBalance(balance)
+                    account.setCost(cost)
+                    account.setValue(value)
             except NoSuchElementException:
                 if accountToGet != 'all':
                     if row==2:  showMessage('Failed to Find Individual Account Share/Price Info', 'Need to update element information for prices and shares in Fidelity')
@@ -314,6 +321,7 @@ def importFidelityTransactions(account, fidelityActivity, book, gnuCashTransacti
                 amount,shares = -amount,-shares
         elif "YOU BOUGHT" in rawDescription: 
             description = accountinTrans + " Investment"
+            amount,shares = -amount,-shares
         elif "YOU SOLD" in rawDescription:
             if float(amount)>1 and float(shares)<1:
                 shares = -shares

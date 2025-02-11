@@ -212,7 +212,7 @@ def dailyBank(request):
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/']); driver.findWindowByUrl("scripts/daily")
     context = {'bankAccounts': bankAccounts}
     if bankAccounts['Sofi']['Checking'].reviewTransactions or bankAccounts['Sofi']['Savings'].reviewTransactions or bankAccounts['Paypal'].reviewTransactions:   personalBook.openGnuCashUI()
-    if bankAccounts['Ally'].reviewTransactions:                                                     jointBook.openGnuCashUI()
+    if bankAccounts['Ally'].reviewTransactions:                                                                                                                  jointBook.openGnuCashUI()
     personalBook.closeBook();   jointBook.closeBook();    return returnRender(request, "banking/dailyBank.html", context)
 
 def dailyMR(request):
@@ -361,11 +361,13 @@ def ledger(request):
 def monthly(request):
     personalBook, jointBook = GnuCash('Finance'), GnuCash('Home')
     usdAccounts, cryptoAccounts = getMonthlyAccounts('USD', personalBook, jointBook), getMonthlyAccounts('Crypto', personalBook, jointBook)
+    lastMonth = getStartAndEndOfDateRange(timeSpan="month")
+    gnuCashTransactions = personalBook.getTransactionsByDateRange(lastMonth)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "USD" in request.POST:                   runUSD(driver, usdAccounts, personalBook)
+        if "USD" in request.POST:                   runUSD(driver, usdAccounts, personalBook, gnuCashTransactions, lastMonth)
         elif "Crypto" in request.POST:              runCrypto(driver, cryptoAccounts, personalBook)
-        elif "HEMain" in request.POST:              runHealthEquity(driver, usdAccounts['HealthEquity'], personalBook)
+        elif "HEMain" in request.POST:              runHealthEquity(driver, usdAccounts['HealthEquity'], personalBook, gnuCashTransactions, lastMonth)
         elif "HELogin" in request.POST:             locateHealthEquityWindow(driver)
         elif "HEBalances" in request.POST:          getHealthEquityBalances(driver, usdAccounts['HealthEquity'])
         elif 'optumMain' in request.POST:           runOptum(driver, usdAccounts['Optum'], personalBook)    
@@ -409,7 +411,7 @@ def optum(request):
         driver = Driver("Chrome")
         if "main" in request.POST:              runOptum(driver, OptumAccounts, book, gnuCashTransactions, lastMonth)
         elif "login" in request.POST:           locateOptumWindow(driver)
-        elif "balance" in request.POST:         getOptumBalance(driver, OptumAccounts, book)
+        elif "balance" in request.POST:         getOptumBalance(driver, OptumAccounts)
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/optum"))
     context = {'OptumAccounts': OptumAccounts}
     book.closeBook();   return returnRender(request, "banking/optum.html", context)
@@ -545,11 +547,11 @@ def vanguard(request):
 def webull(request):
     book = GnuCash('Finance')
     accounts = getWebullAccounts(book)
-    lastMonth = getStartAndEndOfDateRange(timeSpan=7)
-    gnuCashTransactions = book.getTransactionsByDateRange(lastMonth)
+    dateRange = getStartAndEndOfDateRange(timeSpan=7)
+    gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "main" in request.POST:              runWebullDaily(driver, accounts, book, gnuCashTransactions, lastMonth)
+        if "main" in request.POST:              runWebullDaily(driver, accounts, book, gnuCashTransactions, dateRange)
         elif "login" in request.POST:           locateWebullWindow(driver)
         elif "balance" in request.POST:         getWebullBalance(driver, accounts)
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/webull"))

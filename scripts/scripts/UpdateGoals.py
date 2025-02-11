@@ -120,7 +120,7 @@ def getCellForMonthly(account, month, accounts='Personal'):
         case _:                         print('Month cell not found for: ' + account)
         
 def getCellForYTD(account, accountsType):
-    column = 'G' if accountsType == 'Personal' else 'F' # current YTD column
+    column = 'H' if accountsType == 'Personal' else 'G' # current YTD column
     match account:
         # Update Year % column:
         case 'PercentColumn':                   return chr(ord(column) + 1) + str(1)
@@ -162,7 +162,7 @@ def getCellForYTD(account, accountsType):
         # Asset Accounts
         case 'Vanguard401k':                    return column + str(67)
         case 'Brokerage':                       return column + str(68)
-        case 'Crypto':                          return column + str(69)
+        case 'CryptoCurrency':                  return column + str(69)
         case 'HSA':                             return column + str(70)
         case 'I Bonds':                         return column + str(71)
         case 'IRA':                             return column + str(72)
@@ -207,7 +207,7 @@ def runUpdateGoals(accountsType, book):
         specificIncomeAccounts = ['401k Contributions', 'Dividends', 'HSA Contributions', 'Interest', 'Market Change', 'Market Research','Pension Contributions', 'Premiums', 'Salary']
         specificExpenseAccounts = ['Bank Fees', 'Clothing/Apparel', 'Income Taxes', 'Joint Expenses', 'Medical', 'Loan Interest', 'Loan Principle', 'Transportation']
         retirementContributionAccounts = ['Vanguard401k', 'Optum Cash', 'HE Cash', 'FidelityIRASPAXX', 'FidelityRothIRASPAXX', 'FidelityBrokerageSPAXX', 'GME', 'WebullBrokerageCash']
-        assetAccounts = ['Vanguard401k', 'Brokerage', 'Crypto', 'HSA', 'IRA', 'Liquid Assets', 'Pension', 'Roth IRA']
+        assetAccounts = ['Vanguard401k', 'Brokerage', 'CryptoCurrency', 'HSA', 'IRA', 'Liquid Assets', 'Pension', 'Roth IRA']
         monthlyAccounts.remove('Groceries')
         monthlyAccounts.extend(['Dividends', 'Interest', 'Joint Expenses', 'Market Change', 'Market Research', 'Premiums'])
     elif accountsType == 'Joint':

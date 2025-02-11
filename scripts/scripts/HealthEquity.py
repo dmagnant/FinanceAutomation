@@ -47,10 +47,10 @@ def getHealthEquityBalances(driver, accounts):
     cashBalance = float(driver.webDriver.find_element(By.XPATH, "//*[@id='21895515-020']/div/hqy-hsa-tab/div/div[2]/div/span[1]").text.strip('$').replace(',',''))
     accounts['HECash'].setBalance(cashBalance)
     investValue = float(driver.webDriver.find_element(By.XPATH, "//*[@id='21895515-020']/div/hqy-hsa-tab/div/div[2]/span[2]/span[1]").text.strip('$').replace(',',''))
-    accounts['VBIRX'].value = investValue
+    accounts['VIIIX'].value = investValue
     driver.webDriver.find_element(By.LINK_TEXT, "Manage investments").click()
     time.sleep(5)
-    accounts['VBIRX'].setBalance(driver.webDriver.find_element(By.ID,'desktopSharesHeld0').text)
+    accounts['VIIIX'].setBalance(driver.webDriver.find_element(By.ID,'desktopSharesHeld0').text)
     driver.webDriver.find_element(By.XPATH,"//*[@id='topmenu']/div[2]/a/span").click() # Home Button
 
 def getHealthEquityCSVFile(account):
@@ -149,7 +149,7 @@ def captureHealthEquityCashTransactionsAndBalance(driver, account, lastMonth):
     return cashActivity
 
 def getHealthEquityAccounts(book):
-    return {'HECash': USD("HE Cash", book), 'VBIRX': Security("VBIRX", book)}
+    return {'HECash': USD("HE Cash", book), 'VIIIX': Security("VIIIX", book)}
 
 def importHealthEquityTransactions(account, HEActivity, book, gnuCashTransactions):
     existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
@@ -211,4 +211,4 @@ def runHealthEquity(driver, accounts, book, gnuCashTransactions, lastMonth):
 if __name__ == '__main__':
     driver, book = Driver("Chrome"), GnuCash('Finance')
     HEaccounts = getHealthEquityAccounts(book)
-    HEaccounts['VBIRX'].getData()
+    HEaccounts['VIIIX'].getData()

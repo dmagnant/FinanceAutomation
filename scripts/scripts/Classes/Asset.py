@@ -17,6 +17,7 @@ def getSymbolByName(self):
         case 'he investment':                                       return "VIIIX"        
         case 'vfiax':                                               return "VFIAX"
         case 'vbirx':                                               return "VBIRX"
+        case 'viiix':                                               return 'VIIIX'
         case "iotex":                                               return 'IOTX'
         case "presearch":                                           return 'PRE'
         case "bing":                                                return 'BNG'
@@ -24,7 +25,7 @@ def getSymbolByName(self):
         case "tellwut":                                             return 'TWT'
         case "swagbucks":                                           return 'SB'
         case 'employee benefit index':                              return 'M038'
-        case 'total stock market(401k)':                            return '8585'
+        case 'total stock market':                                  return '8585'
         case 'fidelityiragme' | 'fidelityrothiragme' | 'fidelitybrokeragegme':          return 'GME'
         case 'fidelityiravti' | 'fidelityrothiravti' | 'fidelitybrokeragevti':          return 'VTI'
         case 'fidelityiravxus' | 'fidelityrothiravxus':                                 return 'VXUS'        
@@ -56,7 +57,6 @@ class Asset:
 class Security(Asset):    # this is a class for tracking security information
     def __init__(self, name, book, account=None):
         self.name = name
-        # self.account = account
         self.balance = self.value = self.cost = ''
         self.symbol = getSymbolByName(self)
         self.price = book.getPriceInGnucash(self.symbol, datetime.today().date())
@@ -67,7 +67,9 @@ class Security(Asset):    # this is a class for tracking security information
     def getPriceFromCoinGecko(self):        return getCryptocurrencyPrice(self.name)[self.name.lower()]['usd']
     def setPrice(self, price):              self.price = Decimal(price)
     def getSymbol(self):                    return self.symbol      
-    def updateGnuBalance(self, balance):    self.gnuBalance = Decimal(balance)
+    def updateGnuBalance(self, balance):    
+        print(f'updating gnuBalance for {self.name} from {self.gnuBalance} to {balance}')
+        self.gnuBalance = Decimal(balance)
     
     def getGnuValue(self):  price = Decimal(self.price);    return round(self.gnuBalance * price, 2) if float(self.gnuBalance * price)>0 else 0
     
@@ -107,7 +109,9 @@ class USD(Asset):
         self.gnuBalance = round(balance, 2) if float(balance)>0 else 0
     def getReviewTransactions(self):                return self.reviewTransactions
     def setReviewTransactions(self, transactions):  self.reviewTransactions.append(transactions)
-    def updateGnuBalance(self, balance):            self.gnuBalance = round(Decimal(balance), 2)
+    def updateGnuBalance(self, balance):            
+        print(f'updating gnuBalance for {self.name} from {self.gnuBalance} to {balance}')
+        self.gnuBalance = round(Decimal(balance), 2)
     
     def getData(self):
         print(  f'name: {self.name} \n'

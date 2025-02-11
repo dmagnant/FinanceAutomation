@@ -2,9 +2,10 @@ import os, shutil, time, zipfile, sys
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import (InvalidArgumentException,
-                                        WebDriverException, TimeoutException)
+                                        WebDriverException, TimeoutException, ElementClickInterceptedException, ElementNotInteractableException)
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from selenium.webdriver import ActionChains
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -119,6 +120,41 @@ class Driver:
     def switchToLastWindow(self):
         self.webDriver.switch_to.window(self.webDriver.window_handles[len(self.webDriver.window_handles)-1])
 
+    def getElement(self, path, type, wait=10):
+        try:
+            element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((type,path)))
+            return element
+        except TimeoutException: 
+            print(f'Element not found: {path}')
+            return False
+
+    def getElementAndClick(self, path, type, wait=10):
+        element = self.getElement(path, type, wait).click()
+        if element:
+            try:
+                element.click()
+                return element
+            except ElementClickInterceptedException:
+                 print(f'ElementClickInterceptedException: {path}')
+                 return False
+            except ElementNotInteractableException:
+                print(f'ElementNotInteractableException: {path}')
+                return False
+        else:
+            return False
+        
+    def getElementText(self, path, type, wait=10):
+        element = self.getElement(path, type, wait)
+        if element: return element.text
+        else:       return False
+
+    def getElementTextAndLocate(self, path, type, wait=10):
+        element = self.getElement(path, type, wait)
+        if element: 
+            ActionChains(self.webDriver).move_to_element(element).perform()
+            return element.text
+        else:       return False
+
     def clickXPATHElementOnceAvailable(self, xpath, wait=10):
         try:
             element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.XPATH,xpath)))
@@ -147,7 +183,6 @@ class Driver:
             element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((By.ID,id)))
             return element
         except TimeoutException: return False
-
 
     def getXPATHElementTextOnceAvailable(self, xpath, wait=10):
         try:

@@ -42,7 +42,7 @@ def getAmexBalance(driver):
     if 'activity' not in driver.webDriver.current_url:
         clickAmexHome(driver)
         clickViewAmexTransactions(driver)
-    return driver.webDriver.find_element(By.XPATH, "//*[@id='root']/div[2]/main/section/div[3]/div/div/div/div/div/div/div[2]/div/div[1]/div/div/section/div[2]/div[4]/div[3]/span[1]").text.replace('$', '')
+    return driver.webDriver.find_element(By.XPATH, "//*[@id='root']/div[2]/main/section/div[3]/div/div/div/div/div/div/div[2]/div/div[1]/div/div/section/div[2]/div[5]/div[3]/span[1]").text.replace('$', '')
 
 def exportAmexTransactions(driver):
     if 'activity' not in driver.webDriver.current_url:
@@ -77,7 +77,7 @@ def claimAmexRewards(driver, account):
             # driver.webDriver.execute_script("window.scrollTo(0, 1300)")
             driver.webDriver.find_element(By.XPATH, "//*[@id='continue-btn']/span").click()
             driver.webDriver.find_element(By.XPATH, "//*[@id='use-dollars-btn']/span").click()
-            account.value = float(account.balance) - float(rewardsBalance)
+            account.value = (float(account.balance) - float(rewardsBalance))*-1
 
 def importAmexTransactions(account, book, gnuCashTransactions):
     existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
@@ -95,12 +95,11 @@ def importAmexTransactions(account, book, gnuCashTransactions):
             continue
         elif "YOUR CASH REWARD/REFUND IS" in rawDescription.upper():                
             description = "Amex CC Rewards"
-            toAccount = book.getGnuAccountFullName('CC Rewards')
+            toAccount = book.getGnuAccountFullName('Credit Card Rewards')
         elif "BP#" in rawDescription.upper():                         
             toAccount = book.getGnuAccountFullName('Transportation') + ':Gas'
         elif 'PICK N SAVE' in rawDescription.upper():
             toAccount = book.getGnuAccountFullName('Groceries')
-        # toAccount = book.getGnuAccountFullName(fromAccount, description=description)
         if toAccount == 'Expenses:Other':   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)

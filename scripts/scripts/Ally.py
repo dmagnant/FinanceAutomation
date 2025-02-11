@@ -188,14 +188,14 @@ def getEnergyBillAmounts(driver, amount, energyBillNum):
     return {'electricity': electricity, 'gas': gas, 'total': amount}
 
 def updateEnergyBillAmounts(driver, book, amount):
-    driver.openNewWindow('https://www.we-energies.com/secure/auth/l/acct/summary_accounts.aspx')    
     today = datetime.today().date()
     Home = Spreadsheet('Home', str(today.year) + ' Balance', driver)
+    driver.openNewWindow('https://www.we-energies.com/secure/auth/l/acct/summary_accounts.aspx')    
     time.sleep(2)
     try:
         # driver.webDriver.find_element(By.XPATH, "//*[@id='signInName']").send_keys(getUsername('WE-Energies (Home)'))
         # driver.webDriver.find_element(By.XPATH, "//*[@id='password']").send_keys(getPassword('WE-Energies (Home)'))
-        driver.webDriver.find_element(By.XPATH, "//*[@id='next']").click() # login
+        driver.webDriver.find_element(By.ID, "next").click() # login
         time.sleep(4)
         driver.webDriver.find_element(By.XPATH, "//*[@id='notInterested']/a").click # close out of app notice
     except NoSuchElementException:  exception = "caught"
@@ -229,7 +229,7 @@ def mortgageBill(driver, book):
     row = Mortgage.firstRowOfThisYear
     while True:
         paymentDate = datetime.strptime(Mortgage.readCell(Mortgage.dateColumn+str(row)), '%m/%d/%Y').date()
-        if paymentDate.month == today.month:
+        if paymentDate.month == today.month and paymentDate.year == today.year:
             interest = round(Decimal(Mortgage.readCell(Mortgage.interestColumn+str(row))),2)
             break
         else:   row+=1

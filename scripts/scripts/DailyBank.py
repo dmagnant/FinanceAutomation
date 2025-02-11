@@ -37,7 +37,7 @@ def getDailyBankAccounts(personalBook, jointBook=''):
 def runDailyBank(accounts, personalBook, jointBook, gnuCashTransactions, dateRange):
     driver = Driver("Chrome")
     Finances = Spreadsheet('Finances', 'Investments', driver)
-    Home = Spreadsheet('Home', '2024 Balance', driver)
+    Home = Spreadsheet('Home', '2025 Balance', driver)
     runSofi(driver, accounts['Sofi'], personalBook, gnuCashTransactions, dateRange)
     runFidelityDaily(driver, accounts['Fidelity'], personalBook, gnuCashTransactions, dateRange)
     runWebullDaily(driver, accounts['Webull'], personalBook, gnuCashTransactions, dateRange)
@@ -68,13 +68,16 @@ def tearDown(driver):
 
 
 if __name__ == '__main__':
-    driver = Driver("Chrome")
-    # personalBook = GnuCash('Finance')
+    # driver = Driver("Chrome")
+    personalBook = GnuCash('Finance')
     # jointBook = GnuCash('Home')
     # book = personalBook.getWriteBook()
     # from datetime import datetime
     # openSpreadsheet(driver, 'Home', '2024 Balance')
-    Finances = Spreadsheet('Finances', 'Investments', driver)
 
 
-    driver.findWindowByUrl(Finances.url)
+    today=datetime.today().date().replace(day=1,month=1,year=2024)
+    dateRange = getStartAndEndOfDateRange(minDate=today,maxDate=today.replace(month=12, day=31))
+    personalBook.getTotalOfMRAccountsByDateRange(dateRange)
+
+

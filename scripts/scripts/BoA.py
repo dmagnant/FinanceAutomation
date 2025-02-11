@@ -65,6 +65,7 @@ def getBoABalance(driver, account):
 def exportBoATransactions(driver, account, today):
     driver.find_element(By.PARTIAL_LINK_TEXT, "Previous transactions").click() # previous transactions
     driver.find_element(By.XPATH, "/html/body/div[1]/div/div[4]/div[1]/div/div[5]/div[2]/div[2]/div/div[1]/a").click() # download
+    time.sleep(1)
     driver.find_element(By.XPATH, "/html/body/div[1]/div/div[4]/div[1]/div/div[5]/div[2]/div[2]/div/div[3]/div/div[3]/div[1]/select").send_keys("m") # for microsoft excel
     driver.execute_script("window.scrollTo(0, 300)")
     driver.find_element(By.XPATH, "/html/body/div[1]/div/div[4]/div[1]/div/div[5]/div[2]/div[2]/div/div[3]/div/div[4]/div[2]/a/span").click() # download transactions
@@ -134,8 +135,7 @@ def importBoATransactions(account, boAActivity, book, gnuCashTransactions):
             continue
         elif 'AMAZON' in rawDescription.upper() or 'AMZN' in rawDescription.upper():
             toAccount = book.getGnuAccountFullName('Amazon')
-
-        if toAccount != 'Expenses:Other':
+        if toAccount == 'Expenses:Other':
             for i in ['PICK N SAVE', 'KETTLE RANGE', 'WHOLE FOODS', 'WHOLEFDS', 'TARGET', 'MINI MARKET MILWAUKEE', 'KAINTH']:
                 if i in rawDescription.upper():                        
                     toAccount = book.getGnuAccountFullName('Groceries')
@@ -144,10 +144,9 @@ def importBoATransactions(account, boAActivity, book, gnuCashTransactions):
                 if i in rawDescription.upper():                        
                     toAccount = book.getGnuAccountFullName("Bars & Restaurants")
                     break
-                
-        if toAccount != 'Expenses:Other':
+        if toAccount == 'Expenses:Other':
             if account.name == 'BoA':
-                if "CASH REWARDS STATEMENT CREDIT" in rawDescription.upper():                 
+                if "CASH REWARDS STATEMENT CREDIT" in rawDescription.upper():
                     description = "BoA CC Rewards"
                     toAccount = book.getGnuAccountFullName('Credit Card Rewards')
             elif account.name == 'BoA-joint':
@@ -167,7 +166,6 @@ def importBoATransactions(account, boAActivity, book, gnuCashTransactions):
                     toAccount = book.getGnuAccountFullName('Travel') + ':Ride Services'
                 elif 'CHEWY' in description.upper():
                     toAccount = book.getGnuAccountFullName('Pet')
-        # toAccount = book.getGnuAccountFullName(account.name, description=description)
         if toAccount == 'Expenses:Other':   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)
@@ -197,5 +195,15 @@ def runBoA(driver, account, book):
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
-    BoA = USD('BoA', book)
-    locateBoAWindowAndOpenAccount(driver, BoA)
+    account = USD('BoA', book)
+
+    locateBoAWindowAndOpenAccount(driver, account.name)
+    dateRange = getStartAndEndOfDateRange(timeSpan=60)
+    gnuCashTransactions = book.getTransactionsByDateRange(dateRange)    
+    account.setBalance(getBoABalance(driver, account.name))
+    boAActivity = exportBoATransactions(driver.webDriver, account.name, datetime.today())
+    # claimBoARewards(driver, account.name)
+    importBoATransactions(account, boAActivity, book, gnuCashTransactions)
+    account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
+    account.locateAndUpdateSpreadsheet(driver)
+    if account.reviewTransactions:  book.openGnuCashUI()

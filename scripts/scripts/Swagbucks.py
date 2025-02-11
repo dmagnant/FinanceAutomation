@@ -203,7 +203,7 @@ def runSwagbucks(driver, runAlu, account, book):
     swagBuckscontentDiscovery(driver)
     account.setBalance(getSwagBucksBalance(driver))
     book.updateMRBalance(account)
-    swagbucksSearch(driver)
+    # swagbucksSearch(driver)
     if int(account.balance) > 1000: claimSwagBucksRewards(driver)
     
 if __name__ == '__main__':

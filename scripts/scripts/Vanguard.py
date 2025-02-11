@@ -20,7 +20,7 @@ else:
                                              getUsername, showMessage, setDirectory, getNotes)
 
 def getVanguardAccounts(book):
-    return {'V401k': USD("401k", book), 'TSM401k': Security("Total Stock Market", book), '401kCash':USD('NM Asset Fund', book), 'EBI': Security("Employee Benefit Index", book)}
+    return {'V401k': USD("Vanguard401k", book), 'TSM401k': Security("Total Stock Market", book), 'EBI': Security("Employee Benefit Index", book)}
 
 def vanguardLogin(driver):
     driver.openNewWindow('https://logon.vanguard.com/logon?site=pi')
@@ -167,11 +167,11 @@ def writePensionTransaction(book, today, account, interestYTD):
     splits.append({'amount': accountChange, 'account': account.gnuAccount})
     book.writeTransaction(lastMonth['endDate'], 'Contribution + Interest', splits)
 
-def writeAssetFundTransaction(book, account, change, lastMonth):
+def writeAssetFundTransaction(book, account, change, postdate):
     splits = []
-    splits.append({'amount': -change, 'account': book.getGnuAccountFullName('Interest')})
-    splits.append({'amount': change, 'account': account.gnuAccount})
-    book.writeTransaction(lastMonth['endDate'], 'NM Asset Fund Interest', splits)
+    splits.append(book.createSplit(-change, book.getGnuAccountFullName('Interest')))
+    splits.append(book.createSplit(change, account.gnuAccount))
+    book.writeTransaction(postdate, 'NM Asset Fund Interest', splits)
     
 def runVanguard401k(driver, accounts, book, gnuCashTransactions, lastMonth):
     locateVanguardWindow(driver)
@@ -184,15 +184,6 @@ def runVanguard401k(driver, accounts, book, gnuCashTransactions, lastMonth):
             v401kActivity = captureVanguard401kTransactions(driver, planID, lastMonth)
             importVanguardTransactions(account, v401kActivity, book, gnuCashTransactions)
             account.updateGnuBalanceAndValue(book.getGnuAccountBalance(account.gnuAccount))
-        else:
-            if accountName == '401kCash': 
-                getVanguard401kPriceSharesAndCost(driver, account, book, planID)
-                print('account balance is: ' + account.balance)
-                change = round(Decimal(account.balance) - Decimal(account.gnuBalance),2)
-                if change > 0:
-                    writeAssetFundTransaction(book, account, change)
-            account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
-            account.setBalance(account.gnuBalance) 
     
 if __name__ == '__main__':
     driver, book = Driver("Chrome"), GnuCash('Finance')

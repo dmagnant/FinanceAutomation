@@ -22,7 +22,7 @@ def IoPayLogin(driver):
     driver.openNewWindow('https://stake.iotex.io/')
     time.sleep(1)
 
-def runIoPay(driver, account, book):
+def runIoPay(driver, account, book, spreadsheet):
     locateIoPayWindow(driver)
     showMessage('Open Ledger Wallet - IoPay App', 'Once Open, click OK')
     walletBalancePath = '/html/body/div[1]/section/div[3]/main/div/div[5]/div[2]/div[2]/div[3]/div[2]/div[2]/div[2]/p[2]'
@@ -36,20 +36,19 @@ def runIoPay(driver, account, book):
     time.sleep(1)
     walletBalance = Decimal(driver.getXPATHElementTextOnceAvailable(walletBalancePath, 15).replace(" IOTX", ""))
 
-    
-    if walletBalance > 5:
-        driver.clickXPATHElementOnceAvailable('/html/body/div[1]/section/div[3]/main/div/div[5]/div[2]/div[2]/div[3]/div[2]/div[1]/div[2]/div/div[2]/div[1]/div/div[2]/div[6]/div/button') # action
-        driver.webDriver.find_element(By.XPATH,'/html/body/div[4]/div/div/button[2]/div[1]').click() # add stake
-        driver.webDriver.find_element(By.XPATH,'/html/body/div[4]/div[2]/div[4]/div/section/div/div/div[1]/div/div[1]/div/div[1]/input').send_keys(str(math.floor(walletBalance))) # wallet balance
-        driver.webDriver.find_element(By.XPATH, '/html/body/div[4]/div[2]/div[4]/div/section/footer/button[2]').click() # OK
-        showMessage('Approve transaction on Ledger', 'Once complete, click OK')
+    # if walletBalance > 5: # staking not allowed without stake lock
+    #     driver.clickXPATHElementOnceAvailable('/html/body/div[1]/section/div[3]/main/div/div[5]/div[2]/div[2]/div[3]/div[2]/div[1]/div[2]/div/div[2]/div[1]/div/div[2]/div[6]/div/button') # action
+    #     driver.webDriver.find_element(By.XPATH,'/html/body/div[4]/div/div/button[2]/div[1]').click() # add stake
+    #     driver.webDriver.find_element(By.XPATH,'/html/body/div[4]/div[2]/div[4]/div/section/div/div/div[1]/div/div[1]/div/div[1]/input').send_keys(str(math.floor(walletBalance))) # wallet balance
+    #     driver.webDriver.find_element(By.XPATH, '/html/body/div[4]/div[2]/div[4]/div/section/footer/button[2]').click() # OK
+    #     showMessage('Approve transaction on Ledger', 'Once complete, click OK')
         
     walletBalance = Decimal(driver.getXPATHElementTextOnceAvailable(walletBalancePath, 15).replace(" IOTX", ""))
     stakedBalance = Decimal(driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/section/div[3]/main/div/div[5]/div[2]/div[2]/div[3]/div[2]/div[2]/div[3]/p[2]").text.replace(" IOTX", "").replace(',',''))
     iotxBalance = round(float(walletBalance + stakedBalance), 2)
     account.setBalance(iotxBalance)
     account.setPrice(account.getPriceFromCoinGecko())
-    account.updateSpreadsheetAndGnuCash(book)
+    account.updateSpreadsheetAndGnuCash(spreadsheet, book)
 
 # if __name__ == '__main__':                                                                  
 #     driver = Driver("Chrome")
