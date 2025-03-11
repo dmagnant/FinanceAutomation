@@ -2,9 +2,7 @@ import time, random
 from statistics import mode
 
 from random_word import RandomWords
-from selenium.common.exceptions import (NoSuchElementException,
-                                        WebDriverException)
-from selenium.webdriver.common.by import By
+
 from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Presearch":
@@ -23,14 +21,16 @@ class Node(object):
     def __init__(self, num, name, reliabilityScore):    self.num,self.name, self.reliabilityScore = num, name, reliabilityScore
     
     def stakePRE(self, driver, stakeAmount):
-        availToStake = float(driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.replace(',','').replace(' PRE',''))
-        driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '5]/div/table/tbody/tr[' + str(self.num) + ']/td[12]/a[1]').click() # stake button
+        rawStake = driver.getElementText('xpath', getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2', allowFail=False)
+        if rawStake:
+            availToStake = float(rawStake.replace(',','').replace(' PRE',''))
+        driver.getElementAndClick('xpath', getPresearchBasePath() + '5]/div/table/tbody/tr[' + str(self.num) + ']/td[12]/a[1]') # stake button
         time.sleep(1)
         if availToStake < stakeAmount:  stakeAmount = availToStake
         while stakeAmount > 0:
-            driver.webDriver.find_element(By.ID, 'stake_amount').send_keys(Keys.ARROW_UP)
+            driver.getElementAndSendKeys('id', 'stake_amount', Keys.ARROW_UP)
             stakeAmount -= 1        
-        driver.webDriver.find_element(By.XPATH, "//*[@id='editNodeForm']/div[9]/button").click() # update
+        driver.getElementAndClick('xpath', "//*[@id='editNodeForm']/div[9]/button") # update
         time.sleep(3)
         driver.webDriver.get('https://nodes.presearch.org/dashboard')
         
@@ -46,34 +46,37 @@ def presearchLogin(driver): driver.openNewWindow('https://presearch.com/')
 
 def claimPresearchRewards(driver):
     locatePresearchWindow(driver)
-    driver = driver.webDriver
-    driver.get("https://nodes.presearch.org/dashboard")   
-    try:    float(driver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
-    except NoSuchElementException:
+    driver.webDriver.get("https://nodes.presearch.org/dashboard")
+    unclaimedRaw = driver.getElementText('xpath', getPresearchBasePath() + '2]/div[3]/div[2]/div/div/div[1]/h2')
+    if unclaimedRaw:
+        unclaimed = float(unclaimedRaw.strip(' PRE'))
+    else:
         showMessage('Presearch fail', 'Check Presearch. May need to login or check element. Click OK once logged in to continue')
-        return False
-    unclaimed = driver.find_element(By.XPATH, getPresearchBasePath() + '2]/div[3]/div[2]/div/div/div[1]/h2').text.strip(' PRE')
-    if float(unclaimed) > 0:
-        driver.find_element(By.XPATH, getPresearchBasePath() + '2]/div[3]/div[2]/div/div/div[2]/div/a').click() # claim
+    if unclaimed > 0:
+        driver.getElementAndClick('xpath', getPresearchBasePath() + '2]/div[3]/div[2]/div/div/div[2]/div/a') # claim
         time.sleep(1)
-        driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div/div/div/div[2]/div/form/div/button').click() # claim reward
+        driver.getElementAndClick('xpath', '/html/body/div[2]/div[2]/div/div/div/div[2]/div/form/div/button') # claim reward
         time.sleep(5)
-        driver.refresh()
+        driver.webDriver.refresh()
         time.sleep(1)
-    return float(driver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2').text.strip(' PRE'))
+    availToStakeRaw = driver.getElementText('xpath', getPresearchBasePath() + '1]/div[2]/div/div[2]/div/h2')
+    if availToStakeRaw:
+        return float(availToStakeRaw.strip(' PRE'))
+    else:
+        return False
 
 def stakePresearchRewards(driver, availToStake):
     print(f'avail to stake {str(availToStake)}')
     locatePresearchWindow(driver)
     num, stillNodes, nodes, reliabilityScores = 1, True, [], []
     while stillNodes:
-        try:
-            name = driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '5]/div/table/tbody/tr[' + str(num) + ']/td[1]').text
-            reliabilityScore = driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '5]/div/table/tbody/tr[' + str(num) + ']/td[10]').text
-            nodes.append(Node(num=num, name=name, reliabilityScore=reliabilityScore))
-            reliabilityScores.append(reliabilityScore)
-            num += 1
-        except NoSuchElementException:  stillNodes = False
+        name = driver.getElementText('xpath', getPresearchBasePath() + '5]/div/table/tbody/tr[' + str(num) + ']/td[1]')
+        if not name:
+            break # no more nodes
+        reliabilityScore = driver.getElementText('xpath', getPresearchBasePath() + '5]/div/table/tbody/tr[' + str(num) + ']/td[10]')
+        nodes.append(Node(num=num, name=name, reliabilityScore=reliabilityScore))
+        reliabilityScores.append(reliabilityScore)
+        num += 1
     reliabilityScores.sort()
     rsMode = mode(reliabilityScores)
     rsMax = max(reliabilityScores)
@@ -88,11 +91,16 @@ def getPresearchBalance(driver):
     found = driver.findWindowByUrl("presearch.com/dashboard")
     if not found:   driver.openNewWindow('https://nodes.presearch.org/dashboard')
     else:           driver.webDriver.switch_to.window(found); time.sleep(1)
-    nodeStake = float(driver.webDriver.find_element(By.XPATH, getPresearchBasePath() + '1]/div[2]/div/div[1]/div/h2').text.strip(' PRE').replace(',', ''))
+    nodeStakeRaw = driver.getElementText('xpath', getPresearchBasePath() + '1]/div[2]/div/div[1]/div/h2', allowFail=False)
+    if nodeStakeRaw:
+        nodeStake = float(nodeStakeRaw.strip(' PRE').replace(',', ''))
     driver.webDriver.get('https://account.presearch.com/tokens/usage-rewards')
-    searchStake = float(driver.webDriver.find_element(By.XPATH,'/html/body/div[3]/div[3]/div[2]/div/section/dl[1]/div[1]/dd/p[1]').text.strip(' PRE').replace(',', ''))
+    searchStakeRaw = driver.getElementText('xpath', '/html/body/div[3]/div[3]/div[2]/div/section/dl[1]/div[1]/dd/p[1]', allowFail=False)
+    if searchStakeRaw:
+        searchStake = float(searchStakeRaw.strip(' PRE').replace(',', ''))    
     driver.webDriver.get('https://nodes.presearch.org/dashboard')
-    return searchStake + nodeStake
+    if (nodeStake and searchStake):
+        return searchStake + nodeStake
 
 def presearchRewardsRedemptionAndBalanceUpdates(driver, account, book, spreadsheet):
     preAvailableToStake = claimPresearchRewards(driver)

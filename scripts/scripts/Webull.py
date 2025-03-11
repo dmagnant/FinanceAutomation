@@ -1,32 +1,25 @@
-import time, csv, json, os
+import time, csv, json
 from datetime import datetime
 from decimal import Decimal
 
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
 from selenium.webdriver import ActionChains
 from selenium.webdriver import Keys
 
 
 if __name__ == '__main__' or __name__ == "Webull":
-    from Classes.Asset import USD, Security
-    from Classes.GnuCash import GnuCash, createNewTestBook
+    from Classes.Asset import USD
+    from Classes.GnuCash import GnuCash
     from Classes.WebDriver import Driver
-    from Classes.Spreadsheet import Spreadsheet
     from Functions.GeneralFunctions import (showMessage, getPassword, getStartAndEndOfDateRange, setDirectory, getNotes, getOTP)    
 else:
-    from .Classes.Asset import USD, Security
-    from .Classes.GnuCash import GnuCash, createNewTestBook
-    from .Classes.Spreadsheet import Spreadsheet
+    from .Classes.Asset import USD
+    from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import (showMessage, getPassword, getStartAndEndOfDateRange, setDirectory, getNotes, getOTP)    
 
 def unlockTrading(driver):
-    try:
-        driver.webDriver.find_element(By.PARTIAL_LINK_TEXT,'unlock').click()
-        time.sleep(1)
-        driver.webDriver.find_element(By.XPATH,'/html/body/div[5]/div[1]/div/div[2]/div[2]/div/input').send_keys(str(json.loads(getNotes('Webull'))['TradingPassword']))           
-    except NoSuchElementException:  
-        exception = 'trading unlocked'
+    if driver.getElementAndClick('partial_link_text', 'unlock', wait=2):
+        # time.sleep(2)
+        driver.getElementAndSendKeys('xpath', '/html/body', str(json.loads(getNotes('Webull'))['TradingPassword']), wait=2)
 
 def getWebullAccounts(book):
     accounts = {}
@@ -49,27 +42,22 @@ def locateWebullWindow(driver):
 
 def webullLogin(driver):
     driver.openNewWindow('https://www.webull.com')
-    login = driver.clickXPATHElementOnceAvailable('/html/body/div/section/header/div/div[2]/div/button[2]') # login
+    login = driver.getElementAndClick('xpath', '/html/body/div/section/header/div/div[2]/div/button[2]') # login
     if login:
         time.sleep(1)
-        # driver.webDriver.find_element(By.XPATH,'/html/body/div[1]/div/div[2]/div/div/div[5]/div[1]/div[2]/div/div/span/input').send_keys(os.environ.get('Phone')) # enter phone as user
-        driver.webDriver.find_element(By.XPATH,'/html/body/div[1]/div/div[2]/div/div/div[5]/div[3]/div/span/input').send_keys(getPassword('Webull')) # enter password
-        driver.webDriver.find_element(By.XPATH, '/html/body/div[1]/div/div[2]/div/div/div[5]/div[4]/button/span').click() # Log In
-        if driver.getXPATHElementOnceAvailable('/html/body/div[1]/div/div[2]/div/div/div/div/div[1]/div/div/input'): # 2FA Code
+        # driver.getElementAndSendKeys('xpath', '/html/body/div[1]/div/div[2]/div/div/div[5]/div[1]/div[2]/div/div/span/input', os.environ.get('Phone')) # enter phone as user
+        driver.getElementAndSendKeys('xpath', '/html/body/div[1]/div/div[2]/div/div/div[5]/div[3]/div/span/input',getPassword('Webull')) # enter password
+        driver.getElementAndClick('xpath', '/html/body/div[1]/div/div[2]/div/div/div[5]/div[4]/button/span') # Log In
+        if driver.getElement('xpath', '/html/body/div[1]/div/div[2]/div/div/div/div/div[1]/div/div/input'): # 2FA Code
             showMessage('Enter 2FA Code', 'Enter Code Manually, then click OK here')
-            driver.webDriver.find_element(By.XPATH,'/html/body/div[1]/div/div[2]/div/div/div/div/div[2]/button').click() # Next
+            driver.getElementAndClick('xpath', '/html/body/div[1]/div/div[2]/div/div/div/div/div[2]/button') # Next
     driver.webDriver.get('https://app.webull.com/account')
     unlockTrading(driver)
 
-def getWebullBrokerageTotalBalance(driver, path):
-    balance = driver.getXPATHElementTextOnceAvailable(path)
-    if balance:
-        balance = float(balance.replace(',',''))
-    return balance
-
 def getWebullBalanceByPath(driver, path):
-    balance = driver.getXPATHElementTextOnceAvailable(path)
+    balance = driver.getElementText('xpath', path)
     if balance:
+        print(balance)
         balance = float(balance.replace(',',''))
     return balance
 
@@ -79,7 +67,7 @@ def getWebullBalance(driver, accounts):
     accounts['WebullBrokerage'].balance = getWebullBalanceByPath(driver, "/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[1]/div/div[2]/div[1]/div[2]/span")
     if not accounts['WebullBrokerage'].balance:
         showMessage('Failed to find balance', 'No balance found for ' + accounts['WebullBrokerage'].name)
-    accounts['WebullBrokerageCash'].balance = getWebullBalanceByPath(driver, "/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[1]/div/div[2]/div[2]/li/span[2]/span")
+    accounts['WebullBrokerageCash'].balance = getWebullBalanceByPath(driver, "/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[1]/div/div[3]/div[3]/div/div/div[1]/div[2]/div/div/div/div/div/div[3]/div/div[2]/span")                                
     if not accounts['WebullBrokerageCash'].balance:
         showMessage('Failed to find balance', 'No balance found for ' + accounts['WebullBrokerageCash'].name)    
     accounts['WebullBrokerageOptions'].balance = round(accounts['WebullBrokerage'].balance - accounts['WebullBrokerageCash'].balance,2)
@@ -89,10 +77,10 @@ def getWebullOptionsCost(driver, allAccounts, accountToGet='all'):
     unlockTrading(driver)
     costTotal = 0
     row = 2
-    driver.clickXPATHElementOnceAvailable("//*[@id='tabs_lv2_0']/span") # Positions
-    driver.clickXPATHElementOnceAvailable("/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[1]/div/div/div/div[1]") # My Positions
+    driver.getElementAndClick('xpath', "//*[@id='tabs_lv2_0']/span") # Positions
+    driver.getElementText('xpath', "/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[1]/div/div/div/div[1]") # My Positions
     while True:
-        costAmount = driver.getXPATHElementTextOnceAvailable(f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[2]/div/div/div/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(row)}]/td[8]")
+        costAmount = driver.getElementText('xpath', f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[2]/div/div/div/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(row)}]/td[8]")
         if costAmount != False:
             costTotal += float(costAmount)
             row+=1
@@ -102,8 +90,8 @@ def getWebullOptionsCost(driver, allAccounts, accountToGet='all'):
 
 def webullTransactionMatchesBasedOnDetails(driver, ohDateTime, dateTime, description, ohRow, amount):
     if ohDateTime.date() == dateTime.date():
-        side = driver.getXPATHElementTextOnceAvailable(f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[3]") # Side (buy/sell)
-        ohSymbol = driver.getXPATHElementTextOnceAvailable(f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[2]")[:4].replace(' ', '') # Symbol
+        side = driver.getElementText('xpath', f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[3]") # Side (buy/sell)
+        ohSymbol = driver.getElementText('xpath', f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[2]")[:4].replace(' ', '') # Symbol
         if 'Bought' in description and side == 'Buy':
             description = description.replace('Bought ', '')
             symbol = description[:4].replace(' ', '')
@@ -113,8 +101,8 @@ def webullTransactionMatchesBasedOnDetails(driver, ohDateTime, dateTime, descrip
         else:
             return False
         if ohSymbol == symbol:
-            quantity = float(driver.getXPATHElementTextOnceAvailable(f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[8]")) # Filled Qty
-            price = float(driver.getXPATHElementTextOnceAvailable(f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[10]")) # Average Price
+            quantity = float(driver.getElementText('xpath', f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[8]")) # Filled Qty
+            price = float(driver.getElementText('xpath', f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[10]")) # Average Price
             ohAmount = quantity * price
             if 'Buy' in description:    ohAmount *= -1
             if 'Call' in description or 'Put' in description:   ohAmount *=100
@@ -132,32 +120,38 @@ def getWebullOrderHistoryDetails(driver, dateTime, description, amount, startRow
     amount = float(amount)
     while True:
         ohRow+=1
-        ohRawDateTime = driver.getElementTextAndLocate(f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[9]", By.XPATH, wait=2) # filled time
+        ohRawDateTime = driver.getElementTextAndLocate('xpath',f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[9]", wait=2) # filled time
         if ohRawDateTime == False:
+            print('FAILED TO FIND raw datetime')
             break
-        elif ohRawDateTime != '':   ohDateTime = datetime.strptime(ohRawDateTime[:-4], '%m/%d/%Y %H:%M:%S') # remove timezone
-        else:                       continue
+        elif ohRawDateTime != '':   
+            ohDateTime = datetime.strptime(ohRawDateTime[:-4], '%m/%d/%Y %H:%M:%S') # remove timezone
+        else:                       
+            continue
         if ohDateTime == dateTime or (firstCompletePassDone and webullTransactionMatchesBasedOnDetails(driver, ohDateTime, dateTime, description, ohRow, amount)):
             returnRow = ohRow
-            ohDescription = driver.getXPATHElementTextOnceAvailable(f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[2]", wait=2) # Symbol
+            ohDescription = driver.getElementText('xpath', f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[2]", wait=2) # Symbol
             if 'Put' in ohDescription or 'Call' in ohDescription:
-                description = driver.getXPATHElementTextOnceAvailable(f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[3]", wait=2) + ' ' + ohDescription # Side (buy/sell)
-            actionChains.context_click(driver.webDriver.find_element(By.XPATH,f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[3]")).perform() # right-click on row
-            driver.clickXPATHElementOnceAvailable("/html/body/div[4]/div/div/div/div[1]/div[2]/div/div/div/button[1]") # Order Details
+                description = driver.getElementText('xpath', f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[3]", wait=2) + ' ' + ohDescription # Side (buy/sell)
+            actionChains.context_click(driver.getElement('xpath', f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[3]")).perform() # right-click on row
+            time.sleep(1)
+            driver.getElementAndClick('xpath', "/html/body/div[4]/div/div/div/div[1]/div[2]/div/div/div/button[1]") # Order Details
             odRow = 1
             while True:
                 odRow+=1
-                feeDescription = driver.getXPATHElementTextOnceAvailable(f"/html/body/div[5]/div[2]/div/div[{str(odRow)}]/div[1]", wait=1)
+                feeDescription = driver.getElementText('xpath', f"/html/body/div[5]/div[2]/div/div[{str(odRow)}]/div[1]", wait=1)
+                print(f'fee description: {feeDescription}')
                 if feeDescription:
                     if feeDescription == 'Transaction Fee':
-                        feeText = driver.getXPATHElementTextOnceAvailable(f"/html/body/div[5]/div[2]/div/div[{str(odRow)}]/div[2]", wait=1).replace('$', '')
+                        feeText = driver.getElementText('xpath', f"/html/body/div[5]/div[2]/div/div[{str(odRow)}]/div[2]", wait=1).replace('$', '')
                         if feeText != '--':
+                            print(f'getting fee: {feeText}')
                             fee = float(feeText)
                         break
                     elif feeDescription == 'Order Status':
                         odRow+=1 # skip extra row which is divider between order status and transaction fee
                 else:   break
-            driver.getXPATHElementOnceAvailable('/html/body').send_keys(Keys.ESCAPE) # close pop-up window
+            driver.getElementAndSendKeys('xpath', '/html/body', Keys.ESCAPE) # close pop-up window
             break
         elif ohDateTime.date() < dateTime.date(): 
             if not firstCompletePassDone:
@@ -175,28 +169,28 @@ def captureWebullTransactions(driver, dateRange): # CAN IMPROVE THIS BY PULLING 
     WebullActivity = getWebullCSVFile("WebullOptions")
     open(WebullActivity, 'w', newline='').truncate()
     # check Account Details Page for true cash amount of transaction
-    accountDetails = driver.clickXPATHElementOnceAvailable("//*[@id='tabs_lv2_1']/span") # Account Details
+    accountDetails = driver.getElementAndClick('xpath', "//*[@id='tabs_lv2_1']/span") # Account Details
     if accountDetails == False:
         showMessage('Error', 'Account Details button not found')
         return
-    driver.clickXPATHElementOnceAvailable('/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[1]/div[1]/div[2]/span/div/span', wait=2) # Date Range
-    driver.clickXPATHElementOnceAvailable('/html/body/div[4]/div/div/div/div[1]/div[2]/div/div/div/button[3]/span', wait=2) # 3M
+    driver.getElementAndClick('xpath', '/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[1]/div[1]/div[2]/span/div/span', wait=2) # Date Range
+    driver.getElementAndClick('xpath', '/html/body/div[4]/div/div/div/div[1]/div[2]/div/div/div/button[3]/span', wait=2) # 3M
     adRow = 1
     while True:
         adRow+=1
-        adRawDateTime = driver.getElementTextAndLocate(f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[1]/div[2]/div/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(adRow)}]/td[3]/span", By.XPATH) # Date
+        adRawDateTime = driver.getElementTextAndLocate('xpath', f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[1]/div[2]/div/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(adRow)}]/td[3]/span") # Date
         if adRawDateTime:
             adDateTime = datetime.strptime(adRawDateTime[:-4], '%m/%d/%Y %H:%M:%S') # remove timezone
             if adDateTime.date() >= dateRange['startDate'] and adDateTime.date() <= dateRange['endDate']:
-                amount = float(driver.getXPATHElementTextOnceAvailable(f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[1]/div[2]/div/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(adRow)}]/td[4]").replace('+','').replace(',','')) # Amount
-                description = driver.getXPATHElementTextOnceAvailable(f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[1]/div[2]/div/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(adRow)}]/td[2]") # Description
+                amount = float(driver.getElementText('xpath', f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[1]/div[2]/div/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(adRow)}]/td[4]").replace('+','').replace(',','')) # Amount
+                description = driver.getElementText('xpath', f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[1]/div[2]/div/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(adRow)}]/td[2]") # Description
                 csv.writer(open(WebullActivity, 'a', newline='', encoding="utf-8")).writerow([adDateTime, description, round(amount,2)])
             else:   break # no more transactions in date range
         else:       break # no more transactions or error finding date
 
     # check Positions > Order History for fees and description
-    driver.clickXPATHElementOnceAvailable("//*[@id='tabs_lv2_0']/span") # Positions
-    history = driver.clickXPATHElementOnceAvailable("/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[1]/div/div/div/div[3]") # Order History
+    driver.getElementAndClick('xpath', "//*[@id='tabs_lv2_0']/span") # Positions
+    history = driver.getElementAndClick('xpath', "/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[1]/div/div/div/div[3]") # Order History
     
     if history == False:
         showMessage('Error', 'Order History button not found')
@@ -204,7 +198,6 @@ def captureWebullTransactions(driver, dateRange): # CAN IMPROVE THIS BY PULLING 
     rows = list(csv.reader(open(WebullActivity), delimiter=','))
     for row in rows:
         print(f'getting details for row: {row}')
-        # details = getWebullOrderHistoryDetails(driver, row[0], row[1], row[2], 2) # hardcode at first row for now
         details = getWebullOrderHistoryDetails(driver, row[0], row[1], row[2], ohRow)
         print(f'details for row: {details}')
         row[0] = row[0][:-9] # remove timezone
@@ -215,81 +208,81 @@ def captureWebullTransactions(driver, dateRange): # CAN IMPROVE THIS BY PULLING 
     csv.writer(open(WebullActivity, 'w', newline='')).writerows(rows)
     return WebullActivity
 
-def captureWebullTransactionsModified(driver, dateRange): # CAN IMPROVE THIS BY PULLING DATE, DESCRIPTION, AMOUNT FROM ACCOUNT DETAILS, THEN FEE FROM POSITIONS>ORDER HISTORY
-    locateWebullWindow(driver)
-    WebullActivity = getWebullCSVFile("WebullOptions")
-    open(WebullActivity, 'w', newline='').truncate()
-    actionChains = ActionChains(driver.webDriver)
-    # check Account Details Page for true cash amount of transaction
-    accountDetails = driver.clickXPATHElementOnceAvailable("//*[@id='tabs_lv2_1']/span") # Account Details
-    if accountDetails == False:
-        showMessage('Error', 'Account Details button not found')
-        return
-    driver.clickXPATHElementOnceAvailable('/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[1]/div[1]/div[2]/span/div/span', wait=2) # Date Range
-    driver.clickXPATHElementOnceAvailable('/html/body/div[4]/div/div/div/div[1]/div[2]/div/div/div/button[3]/span', wait=2) # 3M
-    adRow = 1
-    transactions = {}
-    while True:
-        adRow+=1
-        adRawDateTime = driver.getElementTextAndLocate(f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[1]/div[2]/div/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(adRow)}]/td[3]/span", By.XPATH) # Date
-        if adRawDateTime:
-            adDateTime = datetime.strptime(adRawDateTime[:-4], '%m/%d/%Y %H:%M:%S') # remove timezone
-            if adDateTime.date() >= dateRange['startDate'] and adDateTime.date() <= dateRange['endDate']:
-                description = driver.getXPATHElementTextOnceAvailable(f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[1]/div[2]/div/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(adRow)}]/td[2]") # Description
-                if 'transfer' in description.lower(): 
-                    continue
-                amount = float(driver.getXPATHElementTextOnceAvailable(f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[1]/div[2]/div/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(adRow)}]/td[4]").replace('+','').replace(',','')) # Amount
-                if amount <0:
-                    options = premium = -(abs(amount)-fee)
-                else:
-                    options = -(amount)
-                    premium = -(amount-fee)
-                interest = amount if 'interest' in description.lower() else 0
-                if adDateTime.date() not in transactions:
-                    transactions[adDateTime.date()] = {'amount': amount, 'fee': 0, 'interest': interest}
-                else:
-                    transactions[adDateTime.date()]['amount'] += amount
-                    transactions[adDateTime.date()]['interest'] += interest
-                # csv.writer(open(WebullActivity, 'a', newline='', encoding="utf-8")).writerow([adDateTime, description, round(amount,2)])
-            else:   break # no more transactions in date range
-        else:       break # no more transactions or error finding date
+# def captureWebullTransactionsModified(driver, dateRange): # CAN IMPROVE THIS BY PULLING DATE, DESCRIPTION, AMOUNT FROM ACCOUNT DETAILS, THEN FEE FROM POSITIONS>ORDER HISTORY
+#     locateWebullWindow(driver)
+#     WebullActivity = getWebullCSVFile("WebullOptions")
+#     open(WebullActivity, 'w', newline='').truncate()
+#     actionChains = ActionChains(driver.webDriver)
+#     # check Account Details Page for true cash amount of transaction
+#     accountDetails = driver.getElementAndClick('xpath', "//*[@id='tabs_lv2_1']/span") # Account Details
+#     if accountDetails == False:
+#         showMessage('Error', 'Account Details button not found')
+#         return
+#     driver.getElementAndClick('xpath', '/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[1]/div[1]/div[2]/span/div/span', wait=2) # Date Range
+#     driver.getElementAndClick('xpath', '/html/body/div[4]/div/div/div/div[1]/div[2]/div/div/div/button[3]/span', wait=2) # 3M
+#     adRow = 1
+#     transactions = {}
+#     while True:
+#         adRow+=1
+#         adRawDateTime = driver.getElementTextAndLocate('xpath', f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[1]/div[2]/div/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(adRow)}]/td[3]/span") # Date
+#         if adRawDateTime:
+#             adDateTime = datetime.strptime(adRawDateTime[:-4], '%m/%d/%Y %H:%M:%S') # remove timezone
+#             if adDateTime.date() >= dateRange['startDate'] and adDateTime.date() <= dateRange['endDate']:
+#                 description = driver.getElementText('xpath', f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[1]/div[2]/div/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(adRow)}]/td[2]") # Description
+#                 if 'transfer' in description.lower(): 
+#                     continue
+#                 amount = float(driver.getElementText('xpath', f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[1]/div[2]/div/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(adRow)}]/td[4]").replace('+','').replace(',','')) # Amount
+#                 if amount <0:
+#                     options = premium = -(abs(amount)-fee)
+#                 else:
+#                     options = -(amount)
+#                     premium = -(amount-fee)
+#                 interest = amount if 'interest' in description.lower() else 0
+#                 if adDateTime.date() not in transactions:
+#                     transactions[adDateTime.date()] = {'amount': amount, 'fee': 0, 'interest': interest}
+#                 else:
+#                     transactions[adDateTime.date()]['amount'] += amount
+#                     transactions[adDateTime.date()]['interest'] += interest
+#                 # csv.writer(open(WebullActivity, 'a', newline='', encoding="utf-8")).writerow([adDateTime, description, round(amount,2)])
+#             else:   break # no more transactions in date range
+#         else:       break # no more transactions or error finding date
 
-    # check Positions > Order History for fees
-    driver.clickXPATHElementOnceAvailable("//*[@id='tabs_lv2_0']/span") # Positions
-    history = driver.clickXPATHElementOnceAvailable("/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[1]/div/div/div/div[3]") # Order History
-    if history == False:
-        showMessage('Error', 'Order History button not found')
-    ohRow = 1
-    while True:
-        ohRow+=1
-        ohRawDateTime = driver.getElementTextAndLocate(f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[9]", By.XPATH, wait=2) # filled time
-        if ohRawDateTime == False:  break # failed to find date
-        elif ohRawDateTime != '':   
-            ohDateTime = datetime.strptime(ohRawDateTime[:-4], '%m/%d/%Y %H:%M:%S') # remove timezone
-            if ohDateTime.date() in transactions:
-                actionChains.context_click(driver.webDriver.find_element(By.XPATH,f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[3]")).perform() # right-click on row
-                driver.clickXPATHElementOnceAvailable("/html/body/div[4]/div/div/div/div[1]/div[2]/div/div/div/button[1]") # Order Details
-                odRow = 1
-                while True:
-                    odRow+=1
-                    feeDescription = driver.getXPATHElementTextOnceAvailable(f"/html/body/div[5]/div[2]/div/div[{str(odRow)}]/div[1]", wait=1)
-                    if feeDescription:
-                        if feeDescription == 'Transaction Fee':
-                            feeText = driver.getXPATHElementTextOnceAvailable(f"/html/body/div[5]/div[2]/div/div[{str(odRow)}]/div[2]", wait=1).replace('$', '')
-                            if feeText != '--':
-                                transactions[ohDateTime.date()]['fee'] += float(feeText)
-                            break
-                        elif feeDescription == 'Order Status':
-                            odRow+=1 # skip extra row which is divider between order status and transaction fee
-                    else:   break
-                driver.getXPATHElementOnceAvailable('/html/body').send_keys(Keys.ESCAPE) # close pop-up window
-            else:
-                break # outside date range
-        else:                    
-            continue # skip canceled order
-    for date in transactions:
-        csv.writer(open(WebullActivity, 'a', newline='', encoding="utf-8")).writerow([date, 'Webull Options', round(transactions[date]['amount'],2), round(transactions[date]['fee'],2), round(transactions[date]['interest'],2)])
-    return WebullActivity
+#     # check Positions > Order History for fees
+#     driver.getElementAndClick('xpath', "//*[@id='tabs_lv2_0']/span") # Positions
+#     history = driver.getElementAndClick('xpath', "/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[1]/div/div/div/div[3]") # Order History
+#     if history == False:
+#         showMessage('Error', 'Order History button not found')
+#     ohRow = 1
+#     while True:
+#         ohRow+=1
+#         ohRawDateTime = driver.getElementTextAndLocate('xpath', f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[9]", wait=2) # filled time
+#         if ohRawDateTime == False:  break # failed to find date
+#         elif ohRawDateTime != '':   
+#             ohDateTime = datetime.strptime(ohRawDateTime[:-4], '%m/%d/%Y %H:%M:%S') # remove timezone
+#             if ohDateTime.date() in transactions:
+#                 actionChains.context_click(driver.getElement('xpath', f"/html/body/div[1]/main/section/div[2]/div[1]/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr[{str(ohRow)}]/td[3]")).perform() # right-click on row
+#                 driver.getElementAndClick('xpath', "/html/body/div[4]/div/div/div/div[1]/div[2]/div/div/div/button[1]") # Order Details
+#                 odRow = 1
+#                 while True:
+#                     odRow+=1
+#                     feeDescription = driver.getElementText('xpath', f"/html/body/div[5]/div[2]/div/div[{str(odRow)}]/div[1]", wait=1)
+#                     if feeDescription:
+#                         if feeDescription == 'Transaction Fee':
+#                             feeText = driver.getElementText('xpath', f"/html/body/div[5]/div[2]/div/div[{str(odRow)}]/div[2]", wait=1).replace('$', '')
+#                             if feeText != '--':
+#                                 transactions[ohDateTime.date()]['fee'] += float(feeText)
+#                             break
+#                         elif feeDescription == 'Order Status':
+#                             odRow+=1 # skip extra row which is divider between order status and transaction fee
+#                     else:   break
+#                 driver.getElementAndSendKeys('xpath', '/html/body', Keys.ESCAPE) # close pop-up window
+#             else:
+#                 break # outside date range
+#         else:                    
+#             continue # skip canceled order
+#     for date in transactions:
+#         csv.writer(open(WebullActivity, 'a', newline='', encoding="utf-8")).writerow([date, 'Webull Options', round(transactions[date]['amount'],2), round(transactions[date]['fee'],2), round(transactions[date]['interest'],2)])
+#     return WebullActivity
 
 def writeWebullOptionMarketChangeTransaction(accounts, book):
     splits, createdSplits=[], []
@@ -414,7 +407,7 @@ if __name__ == '__main__':
     gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
     accounts = getWebullAccounts(book)
     locateWebullWindow(driver)
-    # WebullActivity = captureWebullTransactionsModified(driver, dateRange)
-    WebullActivity = getWebullCSVFile("WebullOptions")
-    importWebullTransactionsModified(accounts, WebullActivity, book, gnuCashTransactions)
-    book.closeBook()
+    WebullActivity = captureWebullTransactions(driver, dateRange)
+    # WebullActivity = getWebullCSVFile("WebullOptions")
+    # importWebullTransactionsModified(accounts, WebullActivity, book, gnuCashTransactions)
+    # book.closeBook()

@@ -1,11 +1,11 @@
 from datetime import datetime
-if __name__ == '__main__' or __name__ == "Daily":
+if __name__ == '__main__' or __name__ == "DailyBank":
     from Ally import allyLogout, runAlly
     from Classes.Asset import USD, Security
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
     from Classes.Spreadsheet import Spreadsheet
-    from Functions.GeneralFunctions import getStartAndEndOfDateRange
+    from Functions.GeneralFunctions import getStartAndEndOfDateRange, getStockPrice
     from Paypal import checkUncategorizedPaypalTransactions
     from Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from Sofi import runSofi, sofiLogout, getSofiAccounts
@@ -17,7 +17,7 @@ else:
     from .Classes.WebDriver import Driver
     from .Classes.GnuCash import GnuCash
     from .Classes.Spreadsheet import Spreadsheet
-    from .Functions.GeneralFunctions import getStartAndEndOfDateRange
+    from .Functions.GeneralFunctions import getStartAndEndOfDateRange, getStockPrice
     from .Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from .Sofi import runSofi, sofiLogout, getSofiAccounts
     from. Paypal import runPaypal, checkUncategorizedPaypalTransactions
@@ -40,7 +40,7 @@ def runDailyBank(accounts, personalBook, jointBook, gnuCashTransactions, dateRan
     Home = Spreadsheet('Home', '2025 Balance', driver)
     runSofi(driver, accounts['Sofi'], personalBook, gnuCashTransactions, dateRange)
     runFidelityDaily(driver, accounts['Fidelity'], personalBook, gnuCashTransactions, dateRange)
-    runWebullDaily(driver, accounts['Webull'], personalBook, gnuCashTransactions, dateRange)
+    runWebullDaily(driver, accounts['Webull'], personalBook, gnuCashTransactions, dateRange) # FIX FEES NOT BEING ADDED
     # runAlly(driver, accounts['Ally'], jointBook, gnuCashTransactions, dateRange)
     presearchRewardsRedemptionAndBalanceUpdates(driver, accounts['Presearch'], personalBook, Finances)
     driver.findWindowByUrl(Finances.url)
@@ -50,6 +50,7 @@ def runDailyBank(accounts, personalBook, jointBook, gnuCashTransactions, dateRan
     personalBook.purgeOldGnucashFiles()
     jointBook.purgeOldGnucashFiles()
     driver.findWindowByUrl("/scripts/daily")
+    return True
     
 def tearDown(driver):
     sofiLogout(driver)
@@ -69,15 +70,11 @@ def tearDown(driver):
 
 if __name__ == '__main__':
     # driver = Driver("Chrome")
-    personalBook = GnuCash('Finance')
+    # personalBook = GnuCash('Finance')
     # jointBook = GnuCash('Home')
     # book = personalBook.getWriteBook()
     # from datetime import datetime
     # openSpreadsheet(driver, 'Home', '2024 Balance')
 
-
-    today=datetime.today().date().replace(day=1,month=1,year=2024)
-    dateRange = getStartAndEndOfDateRange(minDate=today,maxDate=today.replace(month=12, day=31))
-    personalBook.getTotalOfMRAccountsByDateRange(dateRange)
-
-
+    personalBook = GnuCash('Finance')
+    personalBook.purgeOldGnucashFiles()

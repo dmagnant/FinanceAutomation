@@ -1,5 +1,4 @@
 import time
-from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Eternl":
     from Classes.Asset import Security
@@ -21,15 +20,21 @@ def eternlLogin(driver):
 def getEternlBalance(driver):
     locateEternlWindow(driver)
     while True:
-        status = driver.getXPATHElementTextOnceAvailable("//*[@id='cc-main-container']/div/div[3]/div[2]/nav/div/div[2]/div/div/div[1]/div[2]/div/span").replace('\n', '')
-        print(status)
-        if 'initializing' in status or 'Syncing' in status:
-            time.sleep(2)
-            driver.webDriver.refresh()
-            time.sleep(2)
-        else:                           break
-    balance = float(driver.webDriver.find_element(By.XPATH,"//*[@id='cc-main-container']/div/div[3]/div[2]/nav/div/div[2]/div/div/div[1]/div[2]/div/div").text.replace('\n', '').replace('₳','').replace(',', ''))
-    return balance + float(2618.232158) # balance current in Kraken
+        rawStatus = driver.getElementText('xpath', "//*[@id='cc-main-container']/div/div[3]/div[2]/nav/div/div[2]/div/div/div[1]/div[2]/div/span", wait=2)
+        if rawStatus:
+            status = rawStatus.replace('\n', '')
+            print(status)
+            if 'initializing' in status or 'Syncing' in status:
+                time.sleep(2)
+                driver.webDriver.refresh()
+                time.sleep(2)
+            else:                          
+                break
+    rawBalance = driver.getElementText('xpath', "//*[@id='cc-main-container']/div/div[3]/div[2]/nav/div/div[2]/div/div/div[1]/div[2]/div/div", allowFail=False)
+    if rawBalance:
+        balance = float(rawBalance.replace('\n', '').replace('₳','').replace(',', ''))
+        return balance + float(2618.232158) # balance current in Kraken
+    return rawBalance
 
 def runEternl(driver, account, book, spreadsheet):
     account.setBalance(getEternlBalance(driver))

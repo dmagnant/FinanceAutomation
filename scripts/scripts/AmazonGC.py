@@ -46,22 +46,27 @@ def writeAmazonGCTransactionFromUI(book, account, requestInfo):
 
 def confirmAmazonGCBalance(driver, account):
     locateAmazonWindow(driver)
-    balance = driver.webDriver.find_element(By.ID, "gc-ui-balance-gc-balance-value").text.strip('$')
+    rawBalance = driver.getElementText('id', "gc-ui-balance-gc-balance-value")
+    if rawBalance:
+        balance = rawBalance.strip('$')
     if float(balance) == 0: balance = "0"
     account.setBalance(balance)
-    if str(account.gnuBalance) != account.balance:  showMessage("Amazon GC Mismatch", f'Amazon balance: {account.balance} \n' f'Gnu Cash balance: {account.gnuBalance} \n')
+    if str(account.gnuBalance) != account.balance:  
+        showMessage("Amazon GC Mismatch", f'Amazon balance: {account.balance} \n' f'Gnu Cash balance: {account.gnuBalance} \n')
 
-# if __name__ == '__main__':
-#     book = GnuCash('Finance')
-#     driver = Driver("Chrome")
-#     AmazonGC = USD("Amazon GC", book)    
-#     confirmAmazonGCBalance(driver, AmazonGC)
-#     AmazonGC.getData()
-#     book.closeBook()
+import sys
+def main(arg):
+    print(f"Received argument: {arg}")
 
 if __name__ == '__main__':
-    book = GnuCash('Finance')
-    AmazonGC = USD("Amazon GC", book)
-    AmazonGC.getData()    
+    # book = GnuCash('Finance')
+    # driver = Driver("Chrome")
+    # AmazonGC = USD("Amazon GC", book)    
+    # confirmAmazonGCBalance(driver, AmazonGC)
+    # AmazonGC.getData()
+    # book.closeBook()
 
-    print(AmazonGC.gnuCashAccount.fullname)
+    if len(sys.argv) > 1:
+        main(sys.argv[1])
+    else:
+        print("No argument provided.")

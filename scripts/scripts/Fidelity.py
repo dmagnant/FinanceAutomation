@@ -2,20 +2,15 @@ import time, csv, json
 from datetime import datetime
 from decimal import Decimal
 
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
-
 if __name__ == '__main__' or __name__ == "Fidelity":
     from Classes.Asset import USD, Security
-    from Classes.GnuCash import GnuCash, createNewTestBook
+    from Classes.GnuCash import GnuCash
     from Classes.WebDriver import Driver
-    from Classes.Spreadsheet import Spreadsheet
     from Functions.GeneralFunctions import (showMessage, getPassword, getStartAndEndOfDateRange, setDirectory, getNotes, getOTP, getStockPrice)    
 else:
     from .Classes.Asset import USD, Security
-    from .Classes.GnuCash import GnuCash, createNewTestBook
-    from .Classes.Spreadsheet import Spreadsheet
-    from .Functions.GeneralFunctions import (showMessage, getPassword, getStartAndEndOfDateRange, setDirectory, getNotes, getOTP, getStockPrice)    
+    from .Classes.GnuCash import GnuCash
+    from .Functions.GeneralFunctions import (showMessage, getPassword, getStartAndEndOfDateRange, setDirectory, getNotes, getOTP, getStockPrice) 
 
 def getFidelityAccounts(book):
     accounts = {}
@@ -39,36 +34,33 @@ def getFidelityCSVFile(account):
 def locateFidelityWindow(driver):
     found = driver.findWindowByUrl("digital.fidelity.com")
     if not found:   fidelityLogin(driver)
-    else:           driver.webDriver.switch_to.window(found); time.sleep(1)
+    else:           driver.webDriver.switch_to.window(found)
 
 def fidelityLogin(driver):
     driver.openNewWindow('https://digital.fidelity.com/prgw/digital/login/full-page')
     driver.webDriver.refresh()
     time.sleep(1)
-    # driver.webDriver.find_element(By.ID,'dom-pswd-input').send_keys(getPassword('Fidelity')) # pre-filled
-    time.sleep(2)
-    driver.webDriver.find_element(By.XPATH,"//*[@id='dom-login-button']/div").click() # login
-    otpElement = driver.getIDElementOnceAvailable("dom-totp-security-code-input")
-    if otpElement:
-        otpElement.send_keys(getOTP('Fidelity'))
-        driver.clickXPATHElementOnceAvailable("//*[@id='dom-totp-code-continue-button']/div") # continue
+    # driver.getElementAndSendKeys('id','dom-pswd-input',getPassword('Fidelity')) # password
+    driver.getElementAndClick('xpath', "//*[@id='dom-login-button']/div") # login
+    if driver.getElementAndSendKeys('id', 'dom-totp-security-code-input', getOTP('Fidelity')): # otp
+        driver.getElementAndClick('xpath', "//*[@id='dom-totp-code-continue-button']/div") # continue
 def selectFidelityAccount(driver, account='all'):
     accountNum = str(json.loads(getNotes('Fidelity'))[account]) if account != 'all' else 'allaccounts'
-    try:    driver.clickXPATHElementOnceAvailable(f"//*[@id='{accountNum}']/span/s-slot/s-assigned-wrapper/div/div/div[1]/span[2]") # Account
-    except ElementClickInterceptedException:    exception = "already on all accounts"
+    driver.getElementAndClick('xpath', f"//*[@id='{accountNum}']/span/s-slot/s-assigned-wrapper/div/div/div[1]/span[2]") # Account
     driver.webDriver.execute_script("window.scrollTo(0, 0)") #scroll to top of page
     
 def clickHistoryButton(driver): 
-    if driver.getXPATHElementOnceAvailable("//*[@id='ao-pending-table']/s-root/button/div/span/s-slot/s-assigned-wrapper/span") != False:
-        driver.clickXPATHElementOnceAvailable("//*[@id='accountDetails']/div/div/div[2]/new-tab-group/new-tab-group-ui/div[2]/activity-orders-shell/section/div/ap143528-portsum-dashboard-activity-orders-home-root/div/div/account-activity-container/div/div[1]/div[2]/apex-kit-field-group/s-root/div/div/s-slot/s-assigned-wrapper/div/core-filter-button[2]/pvd3-button/s-root/button/div/span/s-slot/s-assigned-wrapper") # History
+    if driver.getElement('xpath', "//*[@id='ao-pending-table']/s-root/button/div/span/s-slot/s-assigned-wrapper/span"):
+        driver.getElementAndClick('xpath', "//*[@id='accountDetails']/div/div/div[2]/new-tab-group/new-tab-group-ui/div[2]/activity-orders-shell/section/div/ap143528-portsum-dashboard-activity-orders-home-root/div/div/account-activity-container/div/div[1]/div[2]/apex-kit-field-group/s-root/div/div/s-slot/s-assigned-wrapper/div/core-filter-button[2]/pvd3-button/s-root/button/div/span/s-slot/s-assigned-wrapper") # History
 
 def prepFidelityTransactionSearch(driver, formatting=False):
     locateFidelityWindow(driver)
-    driver.webDriver.find_element(By.XPATH, "//*[@id='portsum-tab-activity']/a/span").click() # Activity & Orders
+    driver.getElementAndClick('xpath', "//*[@id='portsum-tab-activity']/a/span") # Activity & Orders
+    time.sleep(2)
     if formatting: # the following not necessary when capturing deposits to Fidelity
-        driver.clickXPATHElementOnceAvailable("//*[@id='timeperiod-select-button']/span") #Timeframe
-        driver.clickXPATHElementOnceAvailable("//*[@id='60']/s-root/div/label") # past 60 days
-        driver.clickXPATHElementOnceAvailable("//*[@id='timeperiod-select-container']/div/div/apex-kit-button/s-root/button/div/span/s-slot/s-assigned-wrapper") # Apply
+        driver.getElementAndClick('xpath', "//*[@id='timeperiod-select-button']/span") #Timeframe
+        driver.getElementAndClick('xpath', "//*[@id='60']/s-root/div/label") # past 60 days
+        driver.getElementAndClick('xpath', "//*[@id='timeperiod-select-container']/div/div/apex-kit-button/s-root/button/div/span/s-slot/s-assigned-wrapper") # Apply
         clickHistoryButton(driver)
     time.sleep(1)
 
@@ -79,18 +71,17 @@ def getFidelityTransferAccount(driver, sofiAmount, sofiDate):
     row = 0
     while True:
         row+=1
-        try:
-            description = driver.webDriver.find_element(By.XPATH,getFidelityTransactionElementPath(row, '/div[4]/div/div')).text
-        except NoSuchElementException:
+        description = driver.getElementText('xpath', getFidelityTransactionElementPath(row, '/div[4]/div/div'))
+        if not description:
             if row==1:  showMessage('Error finding Description Element', 'Element path for description element has changed, please update. \n' + getFidelityTransactionElementPath(row,"/div[4]/div/div"))
             break
         if "Electronic Funds Transfer Received" in description or "CASH CONTRIBUTION" in description:
-            dateElement = driver.webDriver.find_element(By.XPATH,getFidelityTransactionElementPath(row,"/div[2]")).text
+            dateElement = driver.getElementText('xpath', getFidelityTransactionElementPath(row, '/div[2]'))
             date = datetime.strptime(dateElement, '%b-%d-%Y').date()
             if date == sofiDate:
-                amount = driver.webDriver.find_element(By.XPATH,getFidelityTransactionElementPath(row,'/div[5]')).text.replace('$','').replace(',','').replace('-','').replace('+','')
+                amount = driver.getElementText('xpath', getFidelityTransactionElementPath(row, '/div[5]')).replace('$','').replace(',','').replace('-','').replace('+','')
                 if sofiAmount == amount:
-                    accountName = driver.webDriver.find_element(By.XPATH,getFidelityTransactionElementPath(row,'/div[3]/span/span')).text
+                    accountName = driver.getElementText('xpath', getFidelityTransactionElementPath(row, '/div[3]/span/span'))
                     if 'ROTH' in accountName:           return 'FidelityRothIRASPAXX'
                     elif 'Individual' in accountName:   return 'FidelityBrokerageSPAXX'
                     elif 'Traditional' in accountName:  return 'FidelityIRASPAXX'
@@ -103,8 +94,8 @@ def getFidelityElementPathRoot():   return "//*[@id='accountDetails']/div/div[2]
 
 def getFidelityBalance(driver, allAccounts, accountBalanceToGet='all'):
     locateFidelityWindow(driver)
-    accounts = driver.webDriver.find_elements(By.CSS_SELECTOR,'div.acct-selector__acct-title')
-    balances = driver.webDriver.find_elements(By.CSS_SELECTOR,'div.acct-selector__acct-balance')
+    accounts = driver.getElements('css_selector', 'div.acct-selector__acct-title')
+    balances = driver.getElements('css_selector', 'div.acct-selector__acct-balance')
     i = 0
     if len(accounts) == len(balances):
         while i < len(accounts):
@@ -117,11 +108,11 @@ def getFidelityBalance(driver, allAccounts, accountBalanceToGet='all'):
         showMessage('Fidelity Balance issue', f"account name({str(len(accounts))}) and balance({str(len(balances))}) arrays dont match")
     
 def getCurrentValue(driver, row): 
-    value = driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div[3]/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[7]/div/span").text.replace('$', '').replace(',','')
+    value = driver.getElementText('xpath', "//*[@id='posweb-grid']/div[3]/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[7]/div/span").replace('$', '').replace(',','')
     return Decimal(value)
 
 def getCost(driver, row):
-    cost = driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div[3]/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[11]/div/span").text.replace('$', '').replace(',','').replace('c','')
+    cost = driver.getElementText('xpath', "//*[@id='posweb-grid']/div[3]/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[11]/div/span").replace('$', '').replace(',','').replace('c','')
     if '--' in cost:    
         return Decimal(0.00)
     else:               return Decimal(cost)
@@ -129,73 +120,81 @@ def getCost(driver, row):
 def getFidelityPricesSharesAndCost(driver, allAccounts, book, accountToGet='all'):
     locateFidelityWindow(driver)
     accountNum = str(json.loads(getNotes('Fidelity'))[accountToGet]) if accountToGet != 'all' else 'allaccounts'
-    driver.clickXPATHElementOnceAvailable(f"//*[@id='{accountNum}']/span/s-slot/s-assigned-wrapper/div/div/span") # Account
-    driver.clickXPATHElementOnceAvailable("//*[@id='portsum-tab-positions']/a/span") # Positions
-    driver.webDriver.implicitly_wait(1)
+    driver.getElementAndClick('xpath', f"//*[@id='{accountNum}']/span/s-slot/s-assigned-wrapper/div/div/span") # Account
+    driver.getElementAndClick('xpath', "//*[@id='portsum-tab-positions']/a/span") # Positions
+    time.sleep(2)
     symbolsWithPricesUpdated = ['GME']
     row = 0
     while True:
         row += 1
         cost = 0
-        try:    
-            accountName = driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div[3]/div[2]/div[2]/div[3]/div[1]/div[1]/div["+ str(row) +"]/div/div/span/div/div[2]/h3").text         
-        except  NoSuchElementException:
-            try:
-                symbol = driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div[3]/div[2]/div[2]/div[3]/div[1]/div[1]/div["+ str(row) +"]/div/div/span/div/div[2]/button/div/span").text.replace('$','')
-                if symbol == 'VXUS':
-                    if 'ROTH' in accountName:           account = allAccounts['FidelityRothIRAVXUS']
-                elif symbol == 'VTI':
-                    if 'ROTH' in accountName:           account = allAccounts['FidelityRothIRAVTI']
-                    elif 'Individual' in accountName:   account = allAccounts['FidelityBrokerageVTI']
-                    elif 'Traditional' in accountName:  account = allAccounts['FidelityIRAVTI']
-                elif symbol == 'Cash':
-                    if 'ROTH' in accountName:           account = allAccounts['FidelityRothIRASPAXX']
-                    elif 'Individual' in accountName:   account = allAccounts['FidelityBrokerageSPAXX']
-                    elif 'Traditional' in accountName:  account = allAccounts['FidelityIRASPAXX'] 
-                elif symbol == 'GME':
-                    if 'ROTH' in accountName:           account = allAccounts['FidelityRothIRAGME']
-                    elif 'Individual' in accountName:   account = allAccounts['FidelityBrokerageGME']
-                    elif 'Traditional' in accountName:  account = allAccounts['FidelityIRAGME']
-                elif 'Call' in symbol or 'Put' in symbol:
-                    if 'ROTH' in accountName:           account = allAccounts['FidelityRothIRAOptions']
-                    elif "Individual" in accountName:   account = allAccounts['FidelityBrokerageOptions']
-                    elif 'Traditional' in accountName:  account = allAccounts['FidelityIRAOptions']
-                    balance = account.balance + getCurrentValue(driver, row) if account.balance else getCurrentValue(driver, row)
-                    account.setBalance(balance)
-                    cost = account.cost + getCost(driver, row) if account.cost else getCost(driver, row)
-                    account.setCost(cost)
+        accountName = driver.getElementText('xpath', "//*[@id='posweb-grid']/div[3]/div[2]/div[2]/div[3]/div[1]/div[1]/div["+ str(row) +"]/div/div/span/div/div[2]/h3", wait=1)
+        if accountName: 
+            currentAccount = accountName
+            continue
+        elif row == 1:  showMessage('ERROR', 'Error finding the Account name in GetFidelityPricesSharesAndCost')
+        symbol = driver.getElementTextAndLocate('xpath', "//*[@id='posweb-grid']/div[3]/div[2]/div[2]/div[3]/div[1]/div[1]/div["+ str(row) +"]/div/div/span/div/div[2]/button/div/span", wait=1)
+        if symbol:
+            symbol = symbol.replace('$','')
+            if symbol == 'VXUS':
+                if 'ROTH' in currentAccount:           account = allAccounts['FidelityRothIRAVXUS']
+            elif symbol == 'VTI':
+                if 'ROTH' in currentAccount:           account = allAccounts['FidelityRothIRAVTI']
+                elif 'Individual' in currentAccount:   account = allAccounts['FidelityBrokerageVTI']
+                elif 'Traditional' in currentAccount:  account = allAccounts['FidelityIRAVTI']
+            elif symbol == 'Cash':
+                if 'ROTH' in currentAccount:           account = allAccounts['FidelityRothIRASPAXX']
+                elif 'Individual' in currentAccount:   account = allAccounts['FidelityBrokerageSPAXX']
+                elif 'Traditional' in currentAccount:  account = allAccounts['FidelityIRASPAXX'] 
+            elif symbol == 'GME':
+                if 'ROTH' in currentAccount:           account = allAccounts['FidelityRothIRAGME']
+                elif 'Individual' in currentAccount:   account = allAccounts['FidelityBrokerageGME']
+                elif 'Traditional' in currentAccount:  account = allAccounts['FidelityIRAGME']
+            elif 'Call' in symbol or 'Put' in symbol:
+                if 'ROTH' in currentAccount:           account = allAccounts['FidelityRothIRAOptions']
+                elif "Individual" in currentAccount:   account = allAccounts['FidelityBrokerageOptions']
+                elif 'Traditional' in currentAccount:  account = allAccounts['FidelityIRAOptions']
+                balance = account.balance + getCurrentValue(driver, row) if account.balance else getCurrentValue(driver, row)
+                account.setBalance(balance)
+                cost = account.cost + getCost(driver, row) if account.cost else getCost(driver, row)
+                account.setCost(cost)
+                continue
+            else:   continue
+            if symbol == 'Cash': account.setBalance(getCurrentValue(driver, row))
+            else: # get equity positions
+                account.price = Decimal(driver.getElementText('xpath', "//*[@id='posweb-grid']/div[3]/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[1]/div/span").replace('$', ''))
+                if symbol not in symbolsWithPricesUpdated:
+                    book.updatePriceInGnucash(account.symbol, account.price)
+                    symbolsWithPricesUpdated.append(symbol)
+                balance = float(driver.getElementText('xpath', "//*[@id='posweb-grid']/div[3]/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[9]/div/span").replace('$', '').replace(',',''))
+                balance = balance if not account.balance else balance + account.balance
+                value = float(getCurrentValue(driver, row))
+                value = value if not account.value else value + account.value
+                cost = float(getCost(driver,row))
+                cost = cost if not account.cost else cost + account.cost
+                account.setBalance(balance)
+                account.setCost(cost)
+                account.setValue(value)
+        else:
+            if accountToGet != 'all':
+                if row==2:  showMessage('Failed to Find Individual Account Share/Price Info', 'Need to update element information for prices and shares in Fidelity')
+                break
+            else:
+                if row==2:
+                    print('skipping security lending message')
                     continue
-                else:   continue
-                if symbol == 'Cash': account.setBalance(getCurrentValue(driver, row))
-                else: # get equity positions
-                    account.price = Decimal(driver.webDriver.find_element(By.XPATH, "//*[@id='posweb-grid']/div[3]/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[1]/div/span").text.replace('$', ''))
-                    if symbol not in symbolsWithPricesUpdated:
-                        book.updatePriceInGnucash(account.symbol, account.price)
-                        symbolsWithPricesUpdated.append(symbol)
-                    balance = float(driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div[3]/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[" + str(row) + "]/div[9]/div/span").text.replace('$', '').replace(',',''))
-                    balance = balance if not account.balance else balance + account.balance
-                    value = float(getCurrentValue(driver, row))
-                    value = value if not account.value else value + account.value
-                    cost = float(getCost(driver,row))
-                    cost = cost if not account.cost else cost + account.cost
-                    account.setBalance(balance)
-                    account.setCost(cost)
-                    account.setValue(value)
-            except NoSuchElementException:
-                if accountToGet != 'all':
-                    if row==2:  showMessage('Failed to Find Individual Account Share/Price Info', 'Need to update element information for prices and shares in Fidelity')
-                    break
-                else:
-                    if row==2:
-                        print('skipping security lending message')
-                        continue
-                try:
-                    if 'Account Total' == driver.webDriver.find_element(By.XPATH,"//*[@id='posweb-grid']/div[3]/div[2]/div[2]/div[3]/div[1]/div[1]/div["+ str(row) +"]/div/div/span/div/div[2]/div/p").text:
-                        row+=1
-                except NoSuchElementException:
-                    if row==1:  
-                        showMessage('Failed to Find Share Info', 'Need to update element information for prices and shares in Fidelity')
-                    break
+            altText = driver.getElementText('xpath', "//*[@id='posweb-grid']/div[3]/div[2]/div[2]/div[3]/div[1]/div[1]/div["+ str(row) +"]/div/div/span/div/div[2]/div/p")
+            if altText == 'Pending Activity':
+                row+=2
+                continue
+            elif altText == 'Account Total':
+                row+=1
+                continue
+            elif altText == 'Grand Total':
+                break
+            elif row==1:
+                showMessage('Failed to Find Share Info', 'Need to update element information for prices and shares in Fidelity')
+                break
 
 def captureFidelityTransactions(driver, dateRange, account='all'):
     locateFidelityWindow(driver)
@@ -206,17 +205,16 @@ def captureFidelityTransactions(driver, dateRange, account='all'):
     while True:
         row+=1
         accountName = account
-        try:    dateElement = driver.getXPATHElementOnceAvailable(getFidelityTransactionElementPath(row,"/div[2]"))
-        except NoSuchElementException:
+        dateElement = driver.getElement('xpath', getFidelityTransactionElementPath(row,"/div[2]"))
+        if not dateElement:
             if row==1:  showMessage('Error finding Date Element', 'Element path for date element has changed, please update. \n' + getFidelityTransactionElementPath(row,"/div[2]"))
-            else: 
-                try: driver.clickXPATHElementOnceAvailable("//*[@id='ao-history-list']/div[3]/div/div/apex-kit-button/s-root/button/div/span/s-slot/s-assigned-wrapper") # load more results
-                except NoSuchElementException:  break
+            elif not driver.getElementAndClick('xpath', "//*[@id='ao-history-list']/div[3]/div/div/apex-kit-button/s-root/button/div/span/s-slot/s-assigned-wrapper"): # load more results
+                break
         date = datetime.strptime(dateElement.text, '%b-%d-%Y').date()
         if date >= dateRange['startDate']:
-            amount = driver.webDriver.find_element(By.XPATH,getFidelityTransactionElementPath(row,'/div[4]')).text.replace('$','').replace(',','').replace('-','').replace('+','')
+            amount = driver.getElementText('xpath', getFidelityTransactionElementPath(row,'/div[4]')).replace('$','').replace(',','').replace('-','').replace('+','')
             if not amount:  continue
-            descriptionElement = driver.webDriver.find_element(By.XPATH,getFidelityTransactionElementPath(row, '/div[3]/div/div'))
+            descriptionElement = driver.getElement('xpath', getFidelityTransactionElementPath(row, '/div[3]/div/div'))
             description = descriptionElement.text
             fees = 0
             if "CASH CONTRIBUTION" in description or "Electronic Funds Transfer" in description or "REINVESTMENT" in description or "JOURNAL" in description or "EXPIRED" in description or "ASSIGNED as of" in description or "TRANSFER OF ASSETS" in description: continue
@@ -224,19 +222,19 @@ def captureFidelityTransactions(driver, dateRange, account='all'):
                 descriptionElement.click()
                 feesNum = 15
                 while feesNum < 19:
-                    feeDescription = driver.webDriver.find_element(By.XPATH, getFidelityTransactionElementPath(row,'[2]/div/activity-order-detail-panel/div/div/div[')+f'{str(feesNum)}]').text
+                    feeDescription = driver.getElementText('xpath', getFidelityTransactionElementPath(row,'[2]/div/activity-order-detail-panel/div/div/div[')+f'{str(feesNum)}]')
                     if feeDescription == "Fees" or feeDescription == "Commission": # fees
                         feesNum+=1
-                        fees += Decimal(driver.webDriver.find_element(By.XPATH,getFidelityTransactionElementPath(row,'[2]/div/activity-order-detail-panel/div/div/div[')+f'{str(feesNum)}]').text.replace('$',''))
+                        fees += Decimal(driver.getElementText('xpath', getFidelityTransactionElementPath(row,'[2]/div/activity-order-detail-panel/div/div/div[')+f'{str(feesNum)}]').replace('$',''))
                         feesNum+=1
                     else: feesNum=19
                 if "TRANSACTION" not in description.upper(): # shares bought
-                    shares = driver.webDriver.find_element(By.XPATH,getFidelityTransactionElementPath(row,'[2]/div/activity-order-detail-panel/div/div/div[10]')).text.replace('+','')
+                    shares = driver.getElementText('xpath', getFidelityTransactionElementPath(row,'[2]/div/activity-order-detail-panel/div/div/div[10]')).replace('+','')
                 else: shares = amount # options bought
                 descriptionElement.click()
             else:   shares = amount
             if account == 'all':
-                accountName = driver.webDriver.find_element(By.XPATH,getFidelityTransactionElementPath(row,'/div[3]/span/span')).text
+                accountName = driver.getElementText('xpath', getFidelityTransactionElementPath(row,'/div[3]/span/span'))
                 if 'ROTH' in accountName:           accountName = 'FidelityRothIRA'
                 elif 'Individual' in accountName:   accountName = 'FidelityBrokerage'
                 elif 'Traditional' in accountName:  accountName = 'FidelityIRA'
@@ -391,13 +389,10 @@ def runFidelityDaily(driver, accounts, book, gnuCashTransactions, dateRange):
 
 
 if __name__ == '__main__':
-    driver = Driver("Chrome")
-    book = GnuCash('Finance')
-    accounts = getFidelityAccounts(book)
-    dateRange = getStartAndEndOfDateRange(timeSpan=20)
-    locateFidelityWindow(driver)
-    prepFidelityTransactionSearch(driver, True)
-    baseAccounts = getFidelityBaseAccounts(accounts)
-    for accountName in list(baseAccounts.keys()): # get transactions per account (x3)
-        account = baseAccounts.get(accountName)
-        fidelityActivity = captureFidelityTransactions(driver, dateRange, accountName)
+    # driver = Driver("Chrome")
+    # locateFidelityWindow(driver)
+    # accounts = driver.getElements('css_selector', 'div.acct-selector__acct-title')
+    # for i in accounts:
+    #     print(i.text)
+
+    print(getStockPrice('VSCIX'))

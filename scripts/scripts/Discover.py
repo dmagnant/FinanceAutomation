@@ -2,20 +2,15 @@ import time, csv
 from decimal import Decimal
 from datetime import datetime
 
-from selenium.common.exceptions import (ElementClickInterceptedException,
-                                        ElementNotInteractableException,
-                                        NoSuchElementException)
-from selenium.webdriver.common.by import By
-
 if __name__ == '__main__' or __name__ == "Discover":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash    
-    from Functions.GeneralFunctions import getPassword, getStartAndEndOfDateRange
+    from Functions.GeneralFunctions import getPassword, getStartAndEndOfDateRange, getUsername
 else:
     from .Classes.Asset import USD
     from .Classes.GnuCash import GnuCash
-    from .Functions.GeneralFunctions import getPassword, getStartAndEndOfDateRange
+    from .Functions.GeneralFunctions import getPassword, getStartAndEndOfDateRange, getUsername
 
 def locateDiscoverWindow(driver):
     found = driver.findWindowByUrl("discover.com")
@@ -26,45 +21,47 @@ def discoverLogin(driver):
     driver.openNewWindow('https://portal.discover.com/customersvcs/universalLogin/ac_main') 
     # login
     # username already entered
-    # driver.find_element(By.ID, 'userid-content').send_keys(getUsername('Discover'))
-    # driver.webDriver.find_element(By.ID, 'password-content').send_keys(getPassword('Discover'))
-    time.sleep(1)
-    driver.webDriver.find_element(By.XPATH, '/html/body/div[1]/main/div/div[1]/div/form/input[8]').click()
-
-    #handle pop-up
-    try:    driver.find_element(By.XPATH, "//*[@id='root']/div[4]/div/div/button/img").click()
-    except (NoSuchElementException, ElementNotInteractableException, AttributeError): exception = "caught"
+    # driver.getElementAndSendKeys('id', 'userid-content',getUsername('Discover'))
+    # driver.getElementAndSendKeys('id', 'password-content',getPassword('Discover'))
+    # time.sleep(1)
+    driver.getElementAndClick('xpath', '/html/body/div[1]/main/div/div[1]/div/form/input[8]')
+    driver.getElementAndClick('xpath', "//*[@id='root']/div[4]/div/div/button/img", wait=2) # handle pop-up
 
 def getDiscoverBalance(driver):
     locateDiscoverWindow(driver)
     driver.webDriver.get("https://card.discover.com/cardmembersvcs/statements/app/activity#/current")
     time.sleep(1)
-    return driver.webDriver.find_element(By.ID, "new-balance").text.strip('$')
+    rawBalance = driver.getElementText('id', 'new-balance', allowFail=False)
+    if rawBalance:
+        return rawBalance.strip('$')
+    return False
 
 def exportDiscoverTransactions(driver, today):
-    driver.find_element(By.XPATH, "//*[@id='current-statement']/div[1]/div/a[2]").click() # download
-    driver.find_element(By.ID, "radio4").click() # csv
-    driver.find_element(By.ID, "submitDownload").click() # download
-    driver.find_element(By.XPATH, "//*[@id='downloadForm']/div/div[4]/a[1]/i").click() # x to close
+    driver.getElementAndClick('xpath', "//*[@id='current-statement']/div[1]/div/a[2]") # download
+    driver.getElementAndClick('id', "radio4") # csv
+    driver.getElementAndClick('id', "submitDownload") # download
+    driver.getElementAndClick('xpath', "//*[@id='downloadForm']/div/div[4]/a[1]/i") # x to close
     stmtYear, stmtMonth = str(today.year), today.strftime('%m')
     return r"C:\Users\dmagn\Downloads\Discover-Statement-" + stmtYear + stmtMonth + "12.csv"
 
 def claimDiscoverRewards(driver, account):
     locateDiscoverWindow(driver)    
     driver.webDriver.get("https://card.discover.com/cardmembersvcs/rewards/app/redemption?ICMPGN=AC_NAV_L3_REDEEM#/cash")
-    balance = driver.webDriver.find_element(By.XPATH,"//*[@id='main-content-rwd']/div/div/div[1]/section[2]/div/div/span").text.replace(' Available', '').replace('$','')
-    if float(balance) > 0:
-        driver.webDriver.find_element(By.ID, "electronic-deposit").click() # Electronic Deposit to your bank account
-        time.sleep(1)
-        driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[1]/main/div/div/section/div[2]/div/form/div[2]/fieldset/div[3]/div[2]/span[2]/button").click() # Redeem All link
-        time.sleep(1)
-        driver.webDriver.find_element(By.XPATH, "//*[@id='cashbackForm']/div[4]/input").click() # Continue
-        time.sleep(1)
-        driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[1]/main/div/div/section/div[2]/div/div/div/div[1]/div/div/div[2]/div/button[1]").click() # Submit
-    account.setValue(float(balance))
+    rawBalance = driver.getElementText('xpath', "//*[@id='main-content-rwd']/div/div/div[1]/section[2]/div/div/span", allowFail=False)
+    if rawBalance:
+        balance = float(rawBalance.replace(' Available', '').replace('$',''))
+    if balance > 0:
+        driver.getElementAndClick('id', "electronic-deposit") # Electronic Deposit to your bank account
+        # time.sleep(1)
+        driver.getElementAndClick('xpath', "/html/body/div[1]/div[1]/main/div/div/section/div[2]/div/form/div[2]/fieldset/div[3]/div[2]/span[2]/button") # Redeem All link
+        # time.sleep(1)
+        driver.getElementAndClick('xpath', "//*[@id='cashbackForm']/div[4]/input") # Continue
+        # time.sleep(1)
+        driver.getElementAndClick('xpath', "/html/body/div[1]/div[1]/main/div/div/section/div[2]/div/div/div/div[1]/div/div/div[2]/div/button[1]") # Submit
+    account.setValue(balance)
     if account.value:   account.value = account.balance - account.value
-    print('balance: ' + account.balance)
-    print('value: ' + account.value)
+    print('balance: ' + str(account.balance))
+    print('value: ' + str(account.value))
 
 def importDiscoverTransactions(account, discoverActivity, book, gnuCashTransactions):
     existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
@@ -101,7 +98,7 @@ def runDiscover(driver, account, book):
     account.setBalance(getDiscoverBalance(driver))
     dateRange = getStartAndEndOfDateRange(timeSpan=60)
     gnuCashTransactions = book.getTransactionsByDateRange(dateRange)    
-    discoverActivity = exportDiscoverTransactions(driver.webDriver, today)
+    discoverActivity = exportDiscoverTransactions(driver, today)
     claimDiscoverRewards(driver, account)
     importDiscoverTransactions(account, discoverActivity, book, gnuCashTransactions)
     account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))

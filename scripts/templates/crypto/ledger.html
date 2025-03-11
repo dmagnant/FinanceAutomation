@@ -8,7 +8,10 @@
                 <form method="post">
                     {% csrf_token %}
                     <button type="submit" name="main">Main</button><br>
+                    <input type="text" placeholder="description" name="description">
+                    <button type="submit" name="test">TEST</button>
                 </form>
+                {{test}}
             </div>
             <div style="width: 5%; display:table-cell;text-align:right">
                 {% for coin in coinList %}
@@ -23,5 +26,6 @@
                 {% endfor %}
             </div>
         </div>
+
     </div>  
 {% endblock %}

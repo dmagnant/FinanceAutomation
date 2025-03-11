@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from django.shortcuts import render
 from scripts.scripts.Ally import *
@@ -37,8 +38,14 @@ from scripts.scripts.Webull import *
 from scripts.scripts.Worthy import *
 from scripts.scripts.Classes.WebDriver import Driver
 from scripts.scripts.Classes.Asset import USD, Security
+from scripts.scripts.Classes.WebDriverContext import WebDriverContext
 from scripts.scripts.Classes.GnuCash import GnuCash
-from scripts.scripts.Functions.GeneralFunctions import returnRender
+from scripts.scripts.Functions.GeneralFunctions import returnRender, getLogger
+from django.http import HttpResponseRedirect, HttpResponse
+from django.urls import reverse
+from urllib.parse import urlencode
+from django.template.loader import render_to_string
+from requests.exceptions import ReadTimeout as ReadTimeoutError
 
 def scripts(request):
     bank = ['Ally', 'Sofi', 'Fidelity', 'HealthEquity', 'Optum', 'Vanguard', 'Webull', 'Worthy']; bank.sort()
@@ -332,7 +339,8 @@ def ioPay(request):
     IoTex = Security("IoTex", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "main" in request.POST:              runIoPay(driver, IoTex, book)
+        Finances = Spreadsheet('Finances', 'Investments', driver)
+        if "main" in request.POST:              runIoPay(driver, IoTex, book, Finances)
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/iopay"))
     context = {'account': IoTex}
     book.closeBook();   return returnRender(request, "crypto/iopay.html", context)
@@ -352,8 +360,11 @@ def kraken(request):
 def ledger(request):
     book = GnuCash('Test')
     coinList = getLedgerAccounts(book)
+    context = {}
     if request.method == 'POST':
         if "main" in request.POST:              runLedger(coinList)
+        elif 'test' in request.POST:            
+            return HttpResponseRedirect(reverse('Test'))
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/ledger"))
     context = {'coinList': coinList}
     book.closeBook();   return returnRender(request, "crypto/ledger.html", context)
@@ -504,19 +515,37 @@ def swagbucks(request):
     context = {'account': Swagbucks}
     book.closeBook();   return returnRender(request, "mr/swagbucks.html", context)
 
-def tellwut(request):
+def tellwut(request, log=getLogger()):
     book = GnuCash('Finance')
-    Tellwut = Security("Tellwut", book)    
+    Tellwut = Security("Tellwut", book)
     if request.method == 'POST':
-        driver = Driver("Chrome")
-        if "main" in request.POST:              runTellwut(driver, Tellwut, book)
-        elif "login" in request.POST:           locateTellWutWindow(driver)
-        elif "surveys" in request.POST:         completeTellWutSurveys(driver)
-        elif "balance" in request.POST:         Tellwut.setBalance(getTellWutBalance(driver))
-        elif "rewards" in request.POST:         redeemTellWutRewards(driver)
-        elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/tellwut"))
-    context = {'Tellwut': Tellwut}
-    book.closeBook();   return returnRender(request, "mr/tellwut.html", context)
+        print('post method received')
+        with WebDriverContext("Chrome") as driver:
+            if "main" in request.POST:
+                print('running tellwut')
+                runTellwut(driver, Tellwut, book)
+            elif "login" in request.POST:
+                locateTellWutWindow(driver)
+            elif "surveys" in request.POST:
+                completeTellWutSurveys(driver)
+            elif "balance" in request.POST:
+                Tellwut.setBalance(getTellWutBalance(driver))
+            elif "rewards" in request.POST:
+                redeemTellWutRewards(driver)
+            elif "close windows" in request.POST:
+                driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/tellwut"))
+        book.closeBook()
+        # Include context data in the query parameters
+        query_params = urlencode({'Tellwut': Tellwut})
+        url = f"{reverse('Tellwut')}?{query_params}"
+        return HttpResponseRedirect(url)  # Redirect to the same view with query parameters
+        # return HttpResponseRedirect(reverse("Tellwut", args=(Tellwut,)))
+    else:
+        context = {'Tellwut': Tellwut}
+        return returnRender(request, "mr/tellwut.html", context)
+        # html = render_to_string("mr/tellwut.html", context)
+        # # Create and return an HttpResponse object
+        # return HttpResponse(html)
 
 def updateGoals(request):
     context = {}
@@ -568,3 +597,20 @@ def worthy(request):
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/worthy"))
     context = {'account': Worthy}
     book.closeBook();   return returnRender(request, "banking/worthy.html", context)
+
+def test(request):
+    context = {'test': 'test'}
+    if request.method == 'POST':
+        driver = Driver("Chrome")
+        # try:
+        #     driver = Driver("Chrome")
+        # except ReadTimeoutError as e:
+        #     print(f"ReadTimeoutError: {e}")
+        #     # Handle the timeout error, e.g., retry or log the error
+        # except WebDriverException as e:
+        #     print(f"WebDriverException: {e}")
+        #     # Handle other WebDriver exceptions    
+        print('driver steps done')
+        # return HttpResponseRedirect(reverse('Ledger'))
+        return returnRender(request, "crypto/ledger.html", context)
+    return returnRender(request, "test.html", context)

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}TEST{% endblock %}
+{% block content %}
+<h1>TEST</h1>
+    <div style="width: 100%; display: table;">
+        <div style="display: table-row;">
+            <div style="width: 20%; display:table-cell">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="text" placeholder="description" name="description">
+                    <button type="submit" name="test">TEST</button>
+                </form>
+                {{test}}
+            </div>
+        </div>
+    </div>
+{% endblock %}

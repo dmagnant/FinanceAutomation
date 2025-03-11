@@ -9,11 +9,6 @@ from selenium.common.exceptions import WebDriverException
 
 # Start Chrome with remote debugging
 subprocess.Popen('chrome.exe --remote-debugging-port=9223', cwd='C:\\Program Files\\Google\\Chrome\\Application', shell=True)
-# Start the Django development server
-subprocess.Popen('python manage.py runserver', cwd='G:\\My Drive\\Projects\\Coding\\Python\\FinanceAutomation', shell=True)
-
-print('page will load automatically after development server starts \n')
-time.sleep(6)
 
 # Initialize the WebDriver with the session ID if it exists
 driver = Driver("Chrome")

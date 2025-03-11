@@ -2,9 +2,6 @@ import time
 from decimal import Decimal
 from datetime import datetime
 
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.by import By
-
 if __name__ == '__main__' or __name__ == "Worthy":
     from Classes.Asset import USD
     from Classes.WebDriver import Driver
@@ -25,19 +22,18 @@ def locateWorthyWindow(driver):
 def worthyLogin(driver):
     driver.openNewWindow('https://worthy.capital/auth/login/')
     time.sleep(1)
-    try:
-        # driver.find_element(By.ID, "email").send_keys(getUsername('Worthy'))
-        # driver.find_element(By.ID, "password").send_keys(getPassword('Worthy'))
-        driver.clickIDElementOnceAvailable('password') # to activate page
-        driver.webDriver.find_element(By.XPATH, "//*[@id='__next']/div/div/main/div/form/div[3]/button").click() # sign in
-    except NoSuchElementException:  exception = "already logged in"
-    time.sleep(3)
+    # driver.getElementAndSendKeys('id', 'email', getUsername('Worthy'), wait=2)
+    # driver.getElementAndSendKeys('id', 'password', getPassword('Worthy'), wait=2)
+    driver.getElementAndClick('id', 'password') # to activate page
+    driver.getElementAndClick('xpath', "//*[@id='__next']/div/div/main/div/form/div[3]/button") # sign in
+    # time.sleep(3)
 
 def getWorthyBalance(driver, account):
     locateWorthyWindow(driver)
-    time.sleep(1)
-    worthy1Balance = driver.webDriver.find_element(By.XPATH, "//*[@id='__next']/div/div/main/div/div/div[1]/div/div/p/strong").text.strip('$').replace(',','').replace('*', '')
-    account.setBalance(float(Decimal(worthy1Balance)))
+    # time.sleep(1)
+    rawBalance = driver.getElementText('xpath', "//*[@id='__next']/div/div/main/div/div/div[1]/div/div/p/strong", allowFail=False)
+    if rawBalance:
+        account.setBalance(float(Decimal(rawBalance.strip('$').replace(',','').replace('*', ''))))
 
 def importWorthyTransactions(account, book, date, gnuCashTransactions):
     existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)

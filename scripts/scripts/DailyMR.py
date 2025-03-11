@@ -1,4 +1,4 @@
-if __name__ == '__main__' or __name__ == "Daily":
+if __name__ == '__main__' or __name__ == "DailyMR":
     from Classes.Asset import USD, Security
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
@@ -26,17 +26,18 @@ def getDailyMRAccounts(personalReadBook):
     Presearch = Security("Presearch", personalReadBook)
     return {'AmazonGC': AmazonGC, 'Pinecone': Pinecone, 'Swagbucks': Swagbucks, 'Tellwut': Tellwut, 'Paidviewpoint': Paidviewpoint, 'Presearch': Presearch}
 
-def runDailyMR(accounts, book):
+def runDailyMR(accounts, book, runAlu=True):
     driver = Driver("Chrome")
     runTellwut(driver, accounts['Tellwut'], book)
     confirmAmazonGCBalance(driver, accounts['AmazonGC'])
     updatePaidViewPointBalance(driver, accounts['Paidviewpoint'], book)
     runPinecone(driver, accounts['Pinecone'], book)
-    runSwagbucks(driver, True, accounts['Swagbucks'], book)
+    runSwagbucks(driver, runAlu, accounts['Swagbucks'], book)
     driver.findWindowByUrl("/scripts/daily")
+    return True
     
 if __name__ == '__main__':
     personalBook = GnuCash('Finance')
     accounts = getDailyMRAccounts(personalBook)
-    runDailyMR(accounts, personalBook)
+    runDailyMR(accounts, personalBook, False)
     personalBook.closeBook()

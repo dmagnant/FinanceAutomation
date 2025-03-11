@@ -1,99 +1,98 @@
 import time
 
-from selenium.common.exceptions import (ElementClickInterceptedException,
-                                        ElementNotInteractableException,
-                                        NoSuchElementException)
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Tellwut":
     from Classes.WebDriver import Driver
     from Classes.Asset import Security
     from Classes.GnuCash import GnuCash
-    from Functions.GeneralFunctions import showMessage
+    from Functions.GeneralFunctions import showMessage, getLogger
+    from Classes.WebDriverContext import WebDriverContext
 else:
-    from .Functions.GeneralFunctions import showMessage
+    from .Functions.GeneralFunctions import showMessage, getLogger
     from .Classes.Asset import Security
     from .Classes.GnuCash import GnuCash
-
+    from .Classes.WebDriver import Driver
+    from .Classes.WebDriverContext import WebDriverContext
+    
 def locateTellWutWindow(driver):
     found = driver.findWindowByUrl("tellwut.com")
     if not found:   tellwutLogin(driver)
     else:           driver.webDriver.switch_to.window(found); time.sleep(1)
+    return True
 
 def tellwutLogin(driver):
     driver.openNewWindow('https://www.tellwut.com/')
-    try:
-        driver.clickXPATHElementOnceAvailable('/html/body/main/header/div[4]/button') # LOGIN button           
-        time.sleep(1)
-        driver.clickXPATHElementOnceAvailable("/html/body/div[1]/div/div/div/div[2]/form/button") # LOGIN button (again)
-    except NoSuchElementException:  exception = 'already logged in'
+    driver.getElementAndClick('xpath', '/html/body/main/header/div[4]/button', wait=2) # LOGIN button           
+    time.sleep(1)
+    driver.getElementAndClick('xpath', "/html/body/div[1]/div/div/div/div[2]/form/button", wait=1) # LOGIN button (again)
         
 def getTellWutBalance(driver):
     locateTellWutWindow(driver)
-    return driver.webDriver.find_element(By.XPATH, "/html/body/main/header/div[4]/a/div/div[2]/span").text                            
+    return driver.getElementText('xpath', "/html/body/main/header/div[4]/a/div/div[2]/span", allowFail=False)
 
-def clickButtons(driver, type):
-    # findSubmitButton(driver)
-    # num = 0
-    xpath = "//input[@type='" + type + "']"
-    list = driver.webDriver.find_elements(By.XPATH, xpath)
-    for i in list: # click all checkboxes
-        try:    
-            # x, y = str(i.rect['x'] + 10), str(i.rect['y'] + 10)
-            # driver.webDriver.execute_script(f"window.scrollTo({x}, {y})")
-            i.send_keys(Keys.SPACE)
-        except(ElementNotInteractableException):    
-            # print(f'button number {str(num)} failed to be selected')
-            continue
+def clickButtons(driver, type): # click all checkboxes
+    if type == 'radio' or type == 'checkbox':
+        path = "//input[@type='" + type + "']"
+    else:
+        path =  "//input"
+    buttons = driver.getElements('xpath', path)
+    if buttons:
+        for i in buttons:
+            if driver.locateElementOnPage(i):
+                driver.sendKeysToElement(i, f'{type} button', Keys.SPACE)
+        return True
+    else:
+        return False
+
 def findSubmitButton(driver):   
-    return driver.webDriver.find_element(By.ID,'survey_form_submit')
-
+    return driver.getElement('id', 'survey_form_submit', wait=2)
+    
 def completeTellWutSurveys(driver):
     locateTellWutWindow(driver)
-    driver.webDriver.implicitly_wait(1)
     driver.webDriver.get('https://www.tellwut.com/most_recent_surveys') # load most recent surveys page
     time.sleep(2)
-    try:    driver.webDriver.find_element(By.XPATH,"//*[@id='surveyList']/div[1]/div[2]/div[1]/a").click() # survey link
-    except NoSuchElementException:  return False
+    if not driver.getElementAndClick('xpath', "//*[@id='surveyList']/div[1]/div[2]/div[1]/a"): # survey link
+        return False
     while True:
-        try:
-            driver.webDriver.find_element(By.XPATH,"//*[@id='main']/section/div/div[2]/div[4]/div[1]") # scroll past to comments section
-            clickButtons(driver, 'radio')
-            clickButtons(driver, 'checkbox')
-            try:
-                path = 'btn btn-primary pm-btn nextQuestion nextQuestionPagebreak'
-                driver.webDriver.find_element(By.XPATH,"//button[@class='" + path + "']").click()
-                continue
-            except (NoSuchElementException, ElementNotInteractableException): 
-                submitButton = findSubmitButton(driver)
-                submitButton.send_keys(Keys.ENTER)            
-                time.sleep(8)
-                driver.webDriver.find_element(By.XPATH,"//*[@id='next-survey-btn']/a").click() # NEXT POLL
-        except NoSuchElementException:
-            try:
-                submitButton = findSubmitButton(driver)
-                showMessage('survey not complete', 'click survey answers manually, then click OK')
-                try:    submitButton.click()
-                except NoSuchElementException:  exception = 'clicked submit manually'
-                driver.webDriver.find_element(By.XPATH,"//*[@id='next-survey-btn']/a").click() # NEXT POLL
-            except NoSuchElementException:  break
-
-
+        radio = clickButtons(driver, 'radio')
+        checkbox = clickButtons(driver, 'checkbox')
+        if not (radio or checkbox):
+            print('no questions found to answer on survey load, exiting')
+            break # no questions found to answer, exiting
+        while True:
+            if not driver.getElementAndSendKeys('id', 'survey_form_submit', Keys.ENTER, wait=2): # Click Submit
+                print('no submit button found')
+                if driver.getElementLocateAndClick('xpath', f"//button[@class='btn btn-primary pm-btn nextQuestion nextQuestionPagebreak']", wait=2): # Next
+                    print('clicked Next')
+                    if not (clickButtons(driver, 'all')):
+                        print('no questions found to answer after clicking next, exiting')
+                        break
+                else:
+                    break
+            else:
+                break
+        time.sleep(1)
+        driver.getElementLocateAndClick('partial_link_text', "NEXT POLL", wait=5) # NEXT POLL
+    return True
+        
 def redeemTellWutRewards(driver):
     locateTellWutWindow(driver)
     driver.webDriver.get("https://www.tellwut.com/product/143--10-Amazon-com-e-Gift-Card.html")
-    driver.webDriver.find_element(By.ID, "checkout_form_submit").click()
-    driver.webDriver.find_element(By.ID, "form_button").click()
-    driver.webDriver.find_element(By.ID, "accept-additional").click()
-    time.sleep(3)
+    checkout = driver.getElementAndClick('id', "checkout_form_submit")
+    formButton = driver.getElementAndClick('id', "form_button")
+    accept = driver.getElementAndClick('id', "accept-additional")
+    if not (checkout and formButton and accept):
+        print("FAILED TO REDEEM TELLWUT REWARDS")
+    # time.sleep(3)
 
-def runTellwut(driver, account, book):
+def runTellwut(driver, account, book, log=getLogger()):
     locateTellWutWindow(driver)
     completeTellWutSurveys(driver)
     account.setBalance(getTellWutBalance(driver))
     book.updateMRBalance(account)
     if int(account.balance) >= 4000:    redeemTellWutRewards(driver)
+    return True
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
@@ -101,4 +100,5 @@ if __name__ == '__main__':
     Tellwut = Security("Tellwut", book)
     runTellwut(driver, Tellwut, book)
     book.closeBook()
-    
+                                 
+                                 

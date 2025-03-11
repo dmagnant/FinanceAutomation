@@ -2,8 +2,6 @@ import time, csv
 from datetime import datetime
 from decimal import Decimal
 
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "HealthEquity":
@@ -25,33 +23,31 @@ def locateHealthEquityWindow(driver):
 
 def healthEquitylogin(driver):
     driver.openNewWindow('https://member.my.healthequity.com/hsa/21895515-010')
-    try:
-        driver.clickIDElementOnceAvailable("ctl00_modulePageContent_txtUserIdStandard")
-        driver.webDriver.find_element(By.ID,"ctl00_modulePageContent_txtPassword").click()
-        driver.webDriver.find_element(By.ID, "ctl00_modulePageContent_btnLogin").click() # login
-        try:  # Two-Step Authentication
-            driver.webDriver.find_element(By.XPATH, "//*[@id='sendEmailTextVoicePanel']/div[5]/span[1]/span/label/span/strong").click() # send code to phone
-            driver.webDriver.find_element(By.ID, "sendOtp").click() # Send confirmation code
+    if driver.getElementAndClick('id', 'ctl00_modulePageContent_txtUserIdStandard', wait=2):
+        driver.getElementAndClick('id', 'ctl00_modulePageContent_txtPassword')
+        driver.getElementAndClick('id', 'ctl00_modulePageContent_btnLogin') # login
+        if driver.getElementAndClick('xpath', "//*[@id='sendEmailTextVoicePanel']/div[5]/span[1]/span/label/span/strong", wait=2): # send code to phone
+            driver.getElementAndClick('id', 'sendOtp') # Send confirmation code
             showMessage("Confirmation Code", "Enter code then click OK") # enter text code
-            driver.webDriver.find_element(By.XPATH, "//*[@id='VerifyOtpPanel']/div[4]/div[1]/div/label/span").click() # Remember me
-            driver.webDriver.find_element(By.ID, "verifyOtp").click() # click Confirm
-        except NoSuchElementException:  exception = "already verified"
-        try:    driver.webDriver.find_element(By.XPATH,"//*[@id='topmenu']/div[2]/a/span").click() # Home button to bypass error
-        except NoSuchElementException:  exception = "no error to bypass"
-    except NoSuchElementException:      exception = "already logged in"
-    time.sleep(1)
+            driver.getElementAndClick('xpath', "//*[@id='VerifyOtpPanel']/div[4]/div[1]/div/label/span") # Remember me
+            driver.getElementAndClick('id', 'verifyOtp') # click Confirm
+        driver.getElementAndClick('xpath', "//*[@id='topmenu']/div[2]/a/span", wait=2) # Home button to bypass error
 
 def getHealthEquityBalances(driver, accounts):
     locateHealthEquityWindow(driver)
     time.sleep(2)
-    cashBalance = float(driver.webDriver.find_element(By.XPATH, "//*[@id='21895515-020']/div/hqy-hsa-tab/div/div[2]/div/span[1]").text.strip('$').replace(',',''))
-    accounts['HECash'].setBalance(cashBalance)
-    investValue = float(driver.webDriver.find_element(By.XPATH, "//*[@id='21895515-020']/div/hqy-hsa-tab/div/div[2]/span[2]/span[1]").text.strip('$').replace(',',''))
-    accounts['VIIIX'].value = investValue
-    driver.webDriver.find_element(By.LINK_TEXT, "Manage investments").click()
+    cashBalance = driver.getElementText('xpath', "//*[@id='21895515-020']/div/hqy-hsa-tab/div/div[2]/div/span[1]", allowFail=False)
+    investValue = driver.getElementText('xpath', "//*[@id='21895515-020']/div/hqy-hsa-tab/div/div[2]/span[2]/span[1]", allowFail=False)
+    if not cashBalance and investValue:
+        return False
+    accounts['HECash'].setBalance(float(cashBalance.strip('$').replace(',','')))
+    accounts['VIIIX'].value = float(investValue.strip('$').replace(',',''))
+    driver.getElementAndClick('link_text', 'Manage investments')
     time.sleep(5)
-    accounts['VIIIX'].setBalance(driver.webDriver.find_element(By.ID,'desktopSharesHeld0').text)
-    driver.webDriver.find_element(By.XPATH,"//*[@id='topmenu']/div[2]/a/span").click() # Home Button
+    viiixBalance = driver.getElementText('id', 'desktopSharesHeld0', allowFail=False)
+    if not viiixBalance:    return False
+    accounts['VIIIX'].setBalance(viiixBalance)
+    driver.getElementAndClick('xpath', "//*[@id='topmenu']/div[2]/a/span") # Home Button
 
 def getHealthEquityCSVFile(account):
     accountName = account.name.replace(' ','').lower()
@@ -70,51 +66,49 @@ def captureHealthEquityInvestmentTransactionsBalanceAndCost(driver, account, boo
     investmentActivity = getHealthEquityCSVFile(account)
     open(investmentActivity, 'w', newline='').truncate()
     time.sleep(5)
-    driver.webDriver.find_element(By.LINK_TEXT, "Manage investments").click()
-    time.sleep(3)
-    driver.webDriver.find_element(By.ID, "EditPortfolioTab").click() # Portfolio performance
-    time.sleep(4)
-    driver.webDriver.find_element(By.ID, "fundSelection").click() # Click Investment Fund Option
+    driver.getElementAndClick('link_text', 'Manage investments')
+    # time.sleep(3)
+    driver.getElementAndClick('id', 'EditPortfolioTab') # Portfolio performance
+    # time.sleep(4)
+    driver.getElementAndClick('id', 'fundSelection') # Click Investment Fund Option
     num = 0
-    startDateElement = driver.webDriver.find_element(By.ID, "startDate")
-    endDateElement = driver.webDriver.find_element(By.ID, "endDate")
-    clearHEDate([startDateElement, endDateElement])  
+    startDateElement = driver.getElement('id', 'startDate')
+    endDateElement = driver.getElement('id', 'endDate')
+    clearHEDate([startDateElement, endDateElement])
     startDateElement.send_keys(datetime.strftime(datetime(2021,1,1,0,0).date(), '%m/%d/%Y'))
     endDateElement.send_keys(datetime.strftime(lastMonth['endDate'], '%m/%d/%Y'))
-    driver.webDriver.find_element(By.ID, "fundPerformanceRefresh").click() # Refresh
-    costHeader = driver.webDriver.find_element(By.XPATH, "//*[@id='EditPortfolioTab-panel']/member-portfolio-edit-display/member-overall-portfolio-performance-display/div[1]/div/div[2]").text
+    driver.getElementAndClick('id', 'fundPerformanceRefresh') # Refresh
+    costHeader = driver.getElementText('xpath', "//*[@id='EditPortfolioTab-panel']/member-portfolio-edit-display/member-overall-portfolio-performance-display/div[1]/div/div[2]", allowFail=False)
     if 'Trades' in costHeader:
-        cost = driver.webDriver.find_element(By.XPATH, "//*[@id='EditPortfolioTab-panel']/member-portfolio-edit-display/member-overall-portfolio-performance-display/div[1]/div/div[2]/div/span").text.replace('$', '').replace(',','')
-        print(cost)
-        account.setCost(cost)
+        cost = driver.getElementText('xpath', "//*[@id='EditPortfolioTab-panel']/member-portfolio-edit-display/member-overall-portfolio-performance-display/div[1]/div/div[2]/div/span", allowFail=False)
+        account.setCost(cost.replace('$', '').replace(',',''))
     num = 1        
     while True:
-        element = driver.webDriver.find_element(By.XPATH, "//*[@id='fundSelection']/option[" + str(num) + "]")
+        element = driver.getElement('xpath', "//*[@id='fundSelection']/option[" + str(num) + "]")
         if element.text == account.symbol: element.click(); break
         else:   num+=1
     clearHEDate([startDateElement])  
     startDateElement.send_keys(datetime.strftime(lastMonth['startDate'], '%m/%d/%Y'))
     # endDateElement.send_keys(datetime.strftime(lastMonth['endDate'], '%m/%d/%Y'))
-    driver.webDriver.find_element(By.ID, "fundPerformanceRefresh").click() # Refresh
-    time.sleep(1)
+    driver.getElementAndClick('id', 'fundPerformanceRefresh') # Refresh
+    # time.sleep(1)
     row = 1 # Skip 0 which should be "Starting Balance"
     while True:
-        description = driver.webDriver.find_element(By.ID, "desktopDescription" + str(row)).text
+        description = driver.getElementText('id', "desktopDescription" + str(row), allowFail=False)
         if 'Buy' in description or 'Dividend' in description:
-            date = datetime.strptime(driver.webDriver.find_element(By.ID, "desktopDate" + str(row)).text, '%m/%d/%Y').date()
-            amount = driver.webDriver.find_element(By.ID, "desktopAmount" + str(row)).text.strip('$')
-            shares = driver.webDriver.find_element(By.ID, "desktopSharesPurchased" + str(row)).text
+            date = datetime.strptime(driver.getElementText('id', "desktopDate" + str(row), allowFail=False), '%m/%d/%Y').date()
+            amount = driver.getElementText('id', "desktopAmount" + str(row), allowFail=False).strip('$')
+            shares = driver.getElementText('id', "desktopSharesPurchased" + str(row), allowFail=False)
             transaction = date, description, amount, shares
             csv.writer(open(investmentActivity, 'a', newline='', encoding="utf-8")).writerow(transaction)
             row+=1
         elif 'Ending Balance' in description:
-            account.price = Decimal(driver.webDriver.find_element(By.ID, "desktopPrice" + str(row)).text.replace('$', ''))
+            account.price = Decimal(driver.getElementText('id', "desktopPrice" + str(row), allowFail=False).replace('$', ''))
             book.updatePriceInGnucash(account.symbol, account.price)
-            account.setBalance(driver.webDriver.find_element(By.XPATH, "//*[@id='desktopTotalShares" + str(row) + "']/span").text)
-            account.value = driver.webDriver.find_element(By.XPATH, "//*[@id='desktopTotalValue" + str(row) + "']/span").text.replace('$', '').replace(',','')
+            account.setBalance(driver.getElementText('xpath', "//*[@id='desktopTotalShares" + str(row) + "']/span", allowFail=False))
+            account.value = driver.getElementText('xpath', "//*[@id='desktopTotalValue" + str(row) + "']/span", allowFail=False).replace('$', '').replace(',','')
             break
         else:   showMessage('Unknown Transaction: ' + description, "check Investment transaction list for undefined transaction")
-
     return investmentActivity
 
 def captureHealthEquityCashTransactionsAndBalance(driver, account, lastMonth):
@@ -122,27 +116,27 @@ def captureHealthEquityCashTransactionsAndBalance(driver, account, lastMonth):
     driver.webDriver.get('https://my.healthequity.com/Member/MemberTransactions.aspx?Subaccount=HSA')
     cashActivity = getHealthEquityCSVFile(account)
     open(cashActivity, 'w', newline='').truncate()
-    driver.webDriver.find_element(By.XPATH, "/html/body/form/div[3]/div/div/div[1]/div/div[2]/span/div[2]/section/section[2]/div/div[2]/select").click() # Date range drop-down
-    driver.webDriver.find_element(By.XPATH, "/html/body/form/div[3]/div/div/div[1]/div/div[2]/span/div[2]/section/section[2]/div/div[2]/select/option[1]").click() # All dates
+    driver.getElementAndClick('xpath', "/html/body/form/div[3]/div/div/div[1]/div/div[2]/span/div[2]/section/section[2]/div/div[2]/select") # Date range drop-down
+    driver.getElementAndClick('xpath', "/html/body/form/div[3]/div/div/div[1]/div/div[2]/span/div[2]/section/section[2]/div/div[2]/select/option[1]") # All dates
     time.sleep(1)
     row = 1
     while True:
         column=1
         row+=1
-        dateString = driver.webDriver.find_element(By.XPATH, "//*[@id='ctl00_modulePageContent_MemberTransactionsStyled_gvTransferLines']/tbody/tr[" + str(row) + "]/td[" + str(column) + "]").text
+        dateString = driver.getElementText('xpath', "//*[@id='ctl00_modulePageContent_MemberTransactionsStyled_gvTransferLines']/tbody/tr[" + str(row) + "]/td[" + str(column) + "]")
         postDate = datetime.strptime(dateString, '%m/%d/%Y').date()
         if postDate.month == lastMonth['endDate'].month:
             column+=1
-            description = driver.webDriver.find_element(By.XPATH, "//*[@id='ctl00_modulePageContent_MemberTransactionsStyled_gvTransferLines']/tbody/tr[" + str(row) + "]/td[" + str(column) + "]").text
+            description = driver.getElementText('xpath', "//*[@id='ctl00_modulePageContent_MemberTransactionsStyled_gvTransferLines']/tbody/tr[" + str(row) + "]/td[" + str(column) + "]")
             if 'Investment Admin Fee' in description or 'Interest' in description or 'Employer Contribution' in description:
                 column+=1
-                amount = driver.webDriver.find_element(By.XPATH, "//*[@id='ctl00_modulePageContent_MemberTransactionsStyled_gvTransferLines']/tbody/tr[" + str(row) + "]/td[" + str(column) + "]").text.replace('(','').replace('$','').replace(')','')
+                amount = driver.getElementText('xpath', "//*[@id='ctl00_modulePageContent_MemberTransactionsStyled_gvTransferLines']/tbody/tr[" + str(row) + "]/td[" + str(column) + "]").replace('(','').replace('$','').replace(')','')
                 amount = -Decimal(amount) if 'Fee' in description else amount
                 transaction = postDate, description, amount
                 csv.writer(open(cashActivity, 'a', newline='', encoding="utf-8")).writerow(transaction)
                 if "Interest" in description:
                     column+=1
-                    account.setBalance(driver.webDriver.find_element(By.XPATH,"//*[@id='ctl00_modulePageContent_MemberTransactionsStyled_gvTransferLines']/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/span").text.replace('$','').replace(',',''))
+                    account.setBalance(driver.getElementText('xpath', "//*[@id='ctl00_modulePageContent_MemberTransactionsStyled_gvTransferLines']/tbody/tr[" + str(row) + "]/td[" + str(column) + "]/span").replace('$','').replace(',',''))
             elif 'Employee Contribution' in description or 'Investment: ' in description:   continue
             else:   showMessage('Unknown Transaction: ' + description, "check Cash transaction list for undefined transaction"); break
         elif postDate.month < lastMonth['endDate'].month or postDate.year < lastMonth['endDate'].year: break

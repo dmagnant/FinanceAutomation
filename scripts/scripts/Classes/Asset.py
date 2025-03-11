@@ -18,6 +18,7 @@ def getSymbolByName(self):
         case 'vfiax':                                               return "VFIAX"
         case 'vbirx':                                               return "VBIRX"
         case 'viiix':                                               return 'VIIIX'
+        case 'vscix':                                               return 'VSCIX'
         case "iotex":                                               return 'IOTX'
         case "presearch":                                           return 'PRE'
         case "bing":                                                return 'BNG'
@@ -25,6 +26,7 @@ def getSymbolByName(self):
         case "tellwut":                                             return 'TWT'
         case "swagbucks":                                           return 'SB'
         case 'employee benefit index':                              return 'M038'
+        case 'extended market index':                               return 'M036'
         case 'total stock market':                                  return '8585'
         case 'fidelityiragme' | 'fidelityrothiragme' | 'fidelitybrokeragegme':          return 'GME'
         case 'fidelityiravti' | 'fidelityrothiravti' | 'fidelitybrokeragevti':          return 'VTI'

@@ -1,8 +1,6 @@
 import csv, time, json, os
 from datetime import datetime
 from decimal import Decimal
-from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 
@@ -31,38 +29,32 @@ def allyLogin(driver):
     loggedIn = False
     while not loggedIn:
         driver.openNewWindow('https://ally.com/')
-        time.sleep(2)
-        driver.webDriver.find_element(By.XPATH,"/html/body/header/section[1]/div/nav/ul/li[5]/button").click() # login
-        time.sleep(2)
-        try:    driver.webDriver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[4]/button").click() # login
-        except ElementNotInteractableException:
+        # time.sleep(2)
+        driver.getElementAndClick('xpath', "html/body/header/section[1]/div/nav/ul/li[5]/button") # login
+        # time.sleep(2)
+        if not driver.getElementAndClick('xpath', "//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[4]/button", wait=2): # login
             driver.webDriver.refresh(); time.sleep(1)
-            driver.webDriver.find_element(By.XPATH,"/html/body/header/section[1]/div/nav/ul/li[5]/button").click() # login
-            time.sleep(2)
-            driver.webDriver.find_element(By.XPATH,"//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button").click() # login
+            driver.getElementAndClick('xpath', "html/body/header/section[1]/div/nav/ul/li[5]/button") # login
+            # time.sleep(2)
+            driver.getElementAndClick('xpath', "//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button") # login
         time.sleep(5)
-        try: driver.webDriver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div/div[2]/form/div[3]/button/span").click() # check if login button is still seen
-        except NoSuchElementException:  
-            try: # check if 2fa is prompted
-                driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/div/main/div/div/div/div/form/div[2]/button/span").click() # Send Security Code
+        if not driver.getElementAndClick('xpath', 'html/bmody/div[1]/main/div/div/div/div/div[2]/form/div[3]/button/span', wait=2): # login 
+            if driver.getElementAndClick('xpath', "/html/body/div[1]/div/main/div/div/div/div/form/div[2]/button/span", wait=2): # Send Security Code
                 showMessage('Enter Security Code', 'Enter security code, then click OK on this message')
-                driver.webDriver.find_element(By.XPATH,"/html/body/div[1]/div/main/div/div/div/div/form/button[1]/span").click() # Continue
-                try:    driver.find_element(By.XPATH,"/html/body/div[1]/div/main/div/div/div/div/form/div[2]/button/span").click() # Continue
-                except  NoSuchElementException: exception = 'device already registered'
-            except NoSuchElementException:  exception = 'no 2fa prompted'
+                driver.getElementAndClick('xpath', "/html/body/div[1]/div/main/div/div/div/div/form/button[1]/span") # Continue
+                driver.getElementAndClick('xpath', "/html/body/div[1]/div/main/div/div/div/div/form/div[2]/button/span") # Continue
         loggedIn = True
-    driver.webDriver.find_element(By.PARTIAL_LINK_TEXT, "Joint Checking").click();  time.sleep(5)
-    # driver.webDriver.find_element(By.XPATH,'/html/body/div/div[1]/main/div/div/div/div[1]/div/div/span/div[1]/button[1]/span').click()
-    # time.sleep(1)
+    driver.getElementAndClick('partial_link_text', 'Joint Checking');  time.sleep(5)
     
 def allyLogout(driver):
     locateAllyWindow(driver)
-    driver.webDriver.find_element(By.XPATH, "//*[@id='app']/div[1]/header/div[1]/div/nav/div/div[3]/div/button/p").click() # Profile and Settings
-    driver.webDriver.find_element(By.XPATH, "//*[@id='profile-menu-logout']/span").click() # Log out
+    driver.getElementAndClick('xpath', "//*[@id='app']/div[1]/header/div[1]/div/nav/div/div[3]/div/button/p") # Profile and Settings
+    driver.getElementAndClick('xpath', "//*[@id='profile-menu-logout']/span") # Log out
 
 def getAllyBalance(driver):
     locateAllyWindow(driver)
-    return driver.webDriver.find_element(By.XPATH, "/html/body/div/div[1]/main/div/div/div/div[1]/div/section[1]/div/div[1]/div/div[2]/div[1]/span[2]/span/div").text.replace('$', '').replace(',', '')
+    balance = driver.getElementText('xpath', "/html/body/div/div[1]/main/div/div/div/div[1]/div/section[1]/div/div[1]/div/div[2]/div[1]/span[2]/span/div")
+    return balance.replace('$', '').replace(',', '') if balance else False
 
 def captureAllyTransactions(driver, dateRange):
     def setAllyTransactionElementRoot(row, column):
@@ -75,52 +67,61 @@ def captureAllyTransactions(driver, dateRange):
     time.sleep(6)
     insideDateRange = True
     while insideDateRange:
-        try:
-            date = datetime.strptime(driver.webDriver.find_element(By.XPATH, element + "span").text, '%b %d, %Y').date()
-            if date < dateRange['startDate'] or date > dateRange['endDate']:    insideDateRange = False
-            else:
-                column += 1
-                element = setAllyTransactionElementRoot(row, column)
-                description = driver.webDriver.find_element(By.XPATH, element + "div/button/span").text
-                column += 1
-                element = setAllyTransactionElementRoot(row, column)
-                amount = driver.webDriver.find_element(By.XPATH, element + "span").text.replace('$', '').replace(',', '')
-                if not amount[0].isnumeric():   amount = -Decimal(amount.replace(amount[0], ''))
-                transaction = str(date), description, amount
-                csv.writer(open(allyActivity, 'a', newline='', encoding="utf-8")).writerow(transaction)
-                row += 1
-                column = 1
-                element = setAllyTransactionElementRoot(row, column)
-        except (NoSuchElementException):    insideDateRange = False
+        rawDate = driver.getElementText('xpath', element + "span")
+        if not rawDate: 
+            break
+        date = datetime.strptime(rawDate, '%b %d, %Y').date()
+        if date < dateRange['startDate'] or date > dateRange['endDate']:    insideDateRange = False
+        else:
+            column += 1
+            element = setAllyTransactionElementRoot(row, column)
+            description = driver.getElementText('xpath', element + "div/button/span")
+            column += 1
+            element = setAllyTransactionElementRoot(row, column)
+            amount = driver.getElementText('xpath', element + "span").replace('$', '').replace(',', '')
+            if not amount[0].isnumeric():   amount = -Decimal(amount.replace(amount[0], ''))
+            transaction = str(date), description, amount
+            csv.writer(open(allyActivity, 'a', newline='', encoding="utf-8")).writerow(transaction)
+            row += 1
+            column = 1
+            element = setAllyTransactionElementRoot(row, column)
     return allyActivity
 
 def payWaterBill(driver, book):
+    def getWaterFeeElement(tr, td):
+        return f"//*[@id='tblAccountInfo']/tbody/tr[{str(tr)}]/td[{str(td)}]"
+    
+    driver.findWindowByUrl('bill2pay.com')
+    today = datetime.today()
     Home = Spreadsheet('Home', str(today.year) + ' Balance', driver)
     paymentAccountDetails = json.loads(getNotes('Ally Bank'))
     today = datetime.today()
     driver.openNewWindow('https://paywater.milwaukee.gov/webclient/user/login.seam')
-    try:
-        driver.webDriver.find_element(By.ID, 'account').send_keys(getUsername('Water'))
-        driver.webDriver.find_element(By.XPATH, "//*[@id='anonymous-form']/div[2]/button").click() # login
-    except NoSuchElementException:  exception = "already logged in"
-    billAmount = driver.getIDElementTextOnceAvailable("dashboardMyAccountsShowBalances").replace('$','')
+    if driver.getElementAndSendKeys('id', 'account', getUsername('Water'), wait=2):
+        driver.getElementAndClick('xpath', "//*[@id='anonymous-form']/div[2]/button") # login
+    billAmount = driver.getElementText('id', "dashboardMyAccountsShowBalances").replace('$','')
+    driver.getElementAndClick('id', 'payBill_btn')
+    time.sleep(1)
     driver.webDriver.get(f'https://paywater.milwaukee.gov/app/PaymentGateway?ccpa={billAmount}')
-    driver.webDriver.find_element(By.ID,'txtUserField1').send_keys(os.environ.get('firstName') + " " + os.environ.get('lastName'))
-    driver.webDriver.find_element(By.ID, 'txtPhone').send_keys(os.environ.get('Phone'))
-    driver.webDriver.find_element(By.ID, 'btnSubmit').click() # Continue
-    driver.webDriver.find_element(By.ID, 'txtNameonBankAccount').send_keys(os.environ.get('firstName') + " " + os.environ.get('lastName'))
-    driver.webDriver.find_element(By.ID, 'ddlBankAccountType').send_keys(Keys.DOWN)
-    driver.webDriver.find_element(By.ID, 'txtBankRoutingNumber').send_keys(paymentAccountDetails['routing'])
-    driver.webDriver.find_element(By.ID, 'txtBankAccountNumber').send_keys(paymentAccountDetails['account'])
-    driver.webDriver.find_element(By.ID, 'txtBankAccountNumber2').send_keys(paymentAccountDetails['account'])
-    driver.webDriver.find_element(By.ID, 'btnSubmitAch').click() # Continue
-    billTotal = driver.getXPATHElementTextOnceAvailable("//*[@id='tblAccountInfo']/tbody/tr[7]/td[2]").replace('$','')
-    driver.webDriver.find_element(By.ID, 'txtEmailAddress').send_keys(os.environ.get('Email'))
-    driver.webDriver.find_element(By.ID, 'chkTermsAgree').click() # agree to T&C
-    driver.webDriver.find_element(By.ID, 'btnSubmit').click() # Make a Payment
-    splits = [book.createSplit(round(Decimal(billTotal), 2), "Expenses:Utilities:Water"), book.createSplit(-round(Decimal(billTotal), 2), 'Ally')]
+    driver.getElementAndSendKeys('id', 'txtUserField1', os.environ.get('firstName') + " " + os.environ.get('lastName'))
+    driver.getElementAndSendKeys('id', 'txtPhone', os.environ.get('Phone'))
+    driver.getElementAndClick('id', 'btnSubmit') # Continue
+    driver.getElementAndSendKeys('id', 'txtNameonBankAccount', os.environ.get('firstName') + " " + os.environ.get('lastName'))
+    driver.getElementAndSendKeys('id', 'ddlBankAccountType', Keys.DOWN)
+    driver.getElementAndSendKeys('id', 'txtBankRoutingNumber', paymentAccountDetails['routing'])
+    driver.getElementAndSendKeys('id', 'txtBankAccountNumber', paymentAccountDetails['account'])
+    driver.getElementAndSendKeys('id', 'txtBankAccountNumber2', paymentAccountDetails['account'])
+    driver.getElementAndClick('id', 'btnSubmitAch') # Continue
+    billTotal = driver.getElementText('xpath', "//*[@id='tblAccountInfo']/tbody/tr[7]/td[2]").replace('$','')
+    driver.getElementAndSendKeys('id', 'txtEmailAddress', os.environ.get('Email'))
+    time.sleep(2)
+    driver.getElementAndClick('id', 'chkTermsAgree') # agree to T&C
+    time.sleep(2)
+    driver.getElementAndClick('id', 'btnSubmit') # Make a Payment
+    totalIncludingFee = driver.getElementText('xpath', "//*[@id='tblAccountInfo']/tbody/tr[10]/td[2]").replace('$','')
+    splits = [book.createSplit(round(Decimal(totalIncludingFee)), 2), book.getGnuAccountFullName('Water'), book.createSplit(-round(Decimal(totalIncludingFee), 2), book.getGnuAccountFullName('Ally'))]
     book.writeTransaction(today.date(), 'Water Bill', splits)
-    Home.updateSpreadsheet('Water Bill', today.month, -float(billTotal))
+    Home.updateSpreadsheet('Water Bill', today.month, -float(totalIncludingFee))
     driver.findWindowByUrl("/scripts/ally")
 
 def importAllyTransactions(driver, account, allyActivity, book, gnuCashTransactions):
@@ -165,26 +166,25 @@ def getEnergyBillAmounts(driver, amount, energyBillNum):
     if energyBillNum == 1:
         driver.openNewWindow('https://www.we-energies.com/secure/auth/l/acct/summary_accounts.aspx')
         time.sleep(2)
-        try:
-            # driver.webDriver.find_element(By.XPATH, "//*[@id='signInName']").send_keys(getUsername('WE-Energies (Home)'))
-            # driver.webDriver.find_element(By.XPATH, "//*[@id='password']").send_keys(getPassword('WE-Energies (Home)'))
-            driver.webDriver.find_element(By.XPATH, "//*[@id='next']").click() # login
+        if driver.getElementAndSendKeys('id', 'signInName', getUsername('WE-Energies (Home)'), wait=2):
+            driver.getElementAndSendKeys('id', 'password', getPassword('WE-Energies (Home)'))
+            driver.getElementAndClick('xpath', "//*[@id='next']") # login
             time.sleep(4)
-            driver.webDriver.find_element(By.XPATH, "//*[@id='notInterested']/a").click # close out of app notice
-        except NoSuchElementException:  exception = "caught"
-        driver.webDriver.find_element(By.XPATH, "//*[@id='mainContentCopyInner']/ul/li[2]/a").click();  time.sleep(4) # view bill history
+            driver.getElementAndClick('xpath', "//*[@id='notInterested']/a") # close out of app notice
+        driver.getElementAndClick('xpath', "//*[@id='mainContentCopyInner']/ul/li[2]/a") # view bill history
+        time.sleep(4)
     billRow, billColumn, billFound = 2, 7, False
     while not billFound: # find bill based on comparing amount from Arcadia (weBill)
         weBillPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span/span"
-        weBillAmount = driver.webDriver.find_element(By.XPATH, weBillPath).text.replace('$', '')
+        weBillAmount = driver.getElementText('xpath', weBillPath).replace('$', '')
         if str(abs(amount)) == weBillAmount:    billFound = True
         else:                                   billRow += 1
     billColumn -= 2
     weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
-    gas = Decimal(driver.webDriver.find_element(By.XPATH, weAmountPath).text.strip('$'))
+    gas = Decimal(driver.getElementText('xpath', weAmountPath).strip('$'))
     billColumn -= 2
     weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
-    electricity = Decimal(driver.webDriver.find_element(By.XPATH, weAmountPath).text.strip('$'))
+    electricity = Decimal(driver.getElementText('xpath', weAmountPath).strip('$'))
     return {'electricity': electricity, 'gas': gas, 'total': amount}
 
 def updateEnergyBillAmounts(driver, book, amount):
@@ -192,26 +192,22 @@ def updateEnergyBillAmounts(driver, book, amount):
     Home = Spreadsheet('Home', str(today.year) + ' Balance', driver)
     driver.openNewWindow('https://www.we-energies.com/secure/auth/l/acct/summary_accounts.aspx')    
     time.sleep(2)
-    try:
-        # driver.webDriver.find_element(By.XPATH, "//*[@id='signInName']").send_keys(getUsername('WE-Energies (Home)'))
-        # driver.webDriver.find_element(By.XPATH, "//*[@id='password']").send_keys(getPassword('WE-Energies (Home)'))
-        driver.webDriver.find_element(By.ID, "next").click() # login
-        time.sleep(4)
-        driver.webDriver.find_element(By.XPATH, "//*[@id='notInterested']/a").click # close out of app notice
-    except NoSuchElementException:  exception = "caught"
-    driver.webDriver.find_element(By.XPATH, "//*[@id='mainContentCopyInner']/ul/li[2]/a").click() # view bill history
+    if driver.getElementAndClick('id', 'signInName', wait=2):
+        driver.getElementAndClick('xpath', "//*[@id='next']", wait=3) # login
+        driver.getElementAndClick('xpath', "//*[@id='notInterested']/a", wait=2) # close out of app notice
+    driver.getElementAndClick('xpath', "//*[@id='mainContentCopyInner']/ul/li[2]/a", allowFail=False) # view bill history
     time.sleep(4)
     billRow, billColumn, billNotFound = 2, 7, True
     while billNotFound:
-        weBillAmount = driver.webDriver.find_element(By.XPATH, "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span/span").text.replace('$', '')
+        weBillAmount = driver.getElementText('xpath', "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span/span").replace('$', '')
         if amount == weBillAmount:  billNotFound = False
         else:   billRow += 1
     billColumn -= 2
     weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
-    gas = Decimal(driver.webDriver.find_element(By.XPATH, weAmountPath).text.strip('$'))
+    gas = Decimal(driver.getElementText('xpath', weAmountPath).strip('$'))
     billColumn -= 2
     weAmountPath = "/html/body/div[1]/div[1]/form/div[5]/div/div/div/div/div[6]/div[2]/div[2]/div/table/tbody/tr[" + str(billRow) + "]/td[" + str(billColumn) + "]/span"
-    electricity = Decimal(driver.webDriver.find_element(By.XPATH, weAmountPath).text.strip('$'))
+    electricity = Decimal(driver.getElementText('xpath', weAmountPath).strip('$'))
     splits = []
     splits.append(book.createSplit(electricity, "Expenses:Utilities:Electricity"))
     splits.append(book.createSplit(gas, "Expenses:Utilities:Gas"))
@@ -265,7 +261,7 @@ def runAlly(driver, account, book, gnuCashTransactions, dateRange):
 #     driver = Driver("Chrome")
 #     book = GnuCash('Home')
 #     driver.findWindowByUrl("paywater.milwaukee.gov")
-#     # billAmount = driver.getIDElementTextOnceAvailable("paymentAmountValue")
+#     # billAmount = driver.getElementText('id', "paymentAmountValue")
 #     # print(billAmount)
 #     import os, shutil, time, zipfile, sys
 #     from selenium import webdriver
@@ -284,6 +280,26 @@ def runAlly(driver, account, book, gnuCashTransactions, dateRange):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    Mortgage = Spreadsheet('Mortgage', 'Mortgage', driver)
-    row = Mortgage.firstRowOfThisYear
-    print(row)
+    # Mortgage = Spreadsheet('Mortgage', 'Mortgage', driver)
+    # row = Mortgage.firstRowOfThisYear
+    # print(row)
+    def getWaterFeeElement(tr, td):
+        return f"//*[@id='tblAccountInfo']/tbody/tr[{str(tr)}]/td[{str(td)}]"
+    driver.findWindowByUrl('bill2pay.com')
+    tr = 3
+    td = 1
+    while True:
+        text = driver.getElementText('xpath', getWaterFeeElement(tr, td))
+        print(text)
+        if text == 'CONVENIENCE FEE':
+            td += 1
+            fee = driver.getElementText('xpath', getWaterFeeElement(tr, td))
+            print(fee)
+            break
+        tr+=1
+
+
+
+    
+
+

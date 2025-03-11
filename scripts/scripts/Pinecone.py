@@ -1,7 +1,4 @@
 import time
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import ElementClickInterceptedException
-
 
 if __name__ == '__main__' or __name__ == "Pinecone":
     from Classes.Asset import Security
@@ -19,30 +16,29 @@ def locatePineconeWindow(driver):
     
 def pineConeLogin(driver):
     driver.openNewWindow('https://members.pineconeresearch.com/#/Login')
-    time.sleep(4)
-    driver.webDriver.find_element(By.XPATH, "//*[@id='mainContainer']/div/div/div[1]/div/form/button").click() # login
-    time.sleep(4)
+    # time.sleep(4)
+    driver.getElementAndClick('xpath', "//*[@id='mainContainer']/div/div/div[1]/div/form/button") # login
+    # time.sleep(4)
 
 def getPineConeBalance(driver):
     locatePineconeWindow(driver)    
     balance = ''
-    while balance == '':    balance = driver.webDriver.find_element(By.XPATH, "//*[@id='basic-navbar-nav']/div/form/button/div").text
-    return balance                
+    while balance == '':
+        balance = driver.getElementText('xpath', "//*[@id='basic-navbar-nav']/div/form/button/div")
+    return balance
     
 def claimPineConeRewards(driver):
     locatePineconeWindow(driver)    
-    driver, loading = driver.webDriver, True
-    while loading:
-        # click Redeem
-        try:                                        driver.find_element(By.ID, "3").click(); loading = False
-        except ElementClickInterceptedException:    exception = "still Loading"
+    while True:
+        if driver.getElementAndClick('id', "3"): # click Redeem
+            break
     time.sleep(3)
-    driver.get("https://rewards.pineconeresearch.com/shop/wishlist/")
-    driver.find_element(By.XPATH, "/html/body/div[2]/div/div/div[3]/div[1]/div/div[2]/div/div/div/div[2]/div[1]/span[1]/a").click()  # link for product
-    driver.find_element(By.XPATH, "/html/body/div[2]/div/div/div[2]/div/div[2]/div[1]/div[2]/form/div/div[2]/input").click()  # add to cart
-    driver.find_element(By.XPATH, "/html/body/div[2]/div/div/div[4]/div[1]/div/div[2]/div/div/table/tbody/tr[5]/td/a").click() # checkout
-    driver.find_element(By.XPATH, "/html/body/div[2]/div/div/div[3]/div/div/div[2]/div/form/div[2]/div/button").click() # Review Order
-    driver.find_element(By.XPATH, "/html/body/div[2]/div/div/div[3]/div/div[3]/div/table/tbody/tr[5]/td/form/button").click() # Place Order
+    driver.webDriver.get("https://rewards.pineconeresearch.com/shop/wishlist/")
+    driver.getElementAndClick('xpath', "/html/body/div[2]/div/div/div[3]/div[1]/div/div[2]/div/div/div/div[2]/div[1]/span[1]/a")  # link for product
+    driver.getElementAndClick('xpath', "/html/body/div[2]/div/div/div[2]/div/div[2]/div[1]/div[2]/form/div/div[2]/input")  # add to cart
+    driver.getElementAndClick('xpath', "/html/body/div[2]/div/div/div[4]/div[1]/div/div[2]/div/div/table/tbody/tr[5]/td/a") # checkout
+    driver.getElementAndClick('xpath', "/html/body/div[2]/div/div/div[3]/div/div/div[2]/div/form/div[2]/div/button") # Review Order
+    driver.getElementAndClick('xpath', "/html/body/div[2]/div/div/div[3]/div/div[3]/div/table/tbody/tr[5]/td/form/button") # Place Order
 
 def runPinecone(driver, account, book):
     locatePineconeWindow(driver)
@@ -59,4 +55,3 @@ if __name__ == '__main__':
     book.closeBook()
     print(type(Pinecone.gnuBalance))
     print(type(Pinecone.price))
-

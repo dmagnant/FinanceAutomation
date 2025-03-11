@@ -1,7 +1,6 @@
 import time, pyautogui
 from datetime import datetime
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.by import By
+from decimal import Decimal
 
 if __name__ == '__main__' or __name__ == "Paypal":
     from Classes.WebDriver import Driver
@@ -20,36 +19,32 @@ def locatePayPalWindow(driver):
 
 def payPalLogin(driver):
     driver.openNewWindow('https://www.paypal.com/us/signin')
-    driver = driver.webDriver
     time.sleep(3)
-    num = 1
-    while num <3:
-        try:
-            # enter password
-            # driver.find_element(By.ID, "password").send_keys(getPassword('Paypal'))
-            # click log in
-            driver.find_element(By.ID,"btnLogin").click()
-            time.sleep(2)
-            # handle captcha
-            try:
-                driver.find_element(By.XPATH,"//*[@id='content']/h1")
-                pyautogui.moveTo(825,400)
-                pyautogui.leftClick(825,400)
-                time.sleep(5)
-            except (NoSuchElementException):    exception = "no captcha presented"
-        except NoSuchElementException:          exception = "already logged in"
-        try:                            driver.find_element(By.ID, "password")
-        except NoSuchElementException:  break
-        num+=1
+    driver.getElementAndClick('id', 'btnLogin', wait=2) # click login as pass/user is pre-filled (for now)
+    # num = 1
+    # while num <3:
+    #     # driver.getElementAndSendKeys('id', 'password', getPassword('Paypal'))
+    #     if driver.getElementAndClick('id', 'btnLogin', wait=2):
+    #         time.sleep(2)
+    #         if driver.find_element('xpath', "//*[@id='content']/h1", wait=2):
+    #             pyautogui.moveTo(825,400)
+    #             pyautogui.leftClick(825,400)
+    #             time.sleep(5)
+    #     if not driver.getElement('id', 'password'):
+    #         break
+    #     num+=1
 
 def transferMoney(driver):
-    if float(driver.find_element(By.XPATH,"//*[@id='reactContainer__balance']/div/div/div[1]").text.replace('$','')) > 0:
-        driver.find_element(By.XPATH,"//*[@id='reactContainer__balance']/div/div/a").click() # transfer money
-        time.sleep(2)
-        driver.find_element(By.XPATH,"//*[@id='mainModal']/div/div/div/div/div/div[1]/ul/li[1]/a/span/p[2]").click() # transfer to bank
-        time.sleep(1)
-        bank = driver.find_element(By.XPATH,"//*[@id='mainModal']/div/div/div/form/div/div/div/div[1]/span/span[2]/span[1]").text
-        if "savings" in bank.lower():   driver.find_element(By.XPATH,"//*[@id='mainModal']/div/div/div/form/div/div/div/button").click()
+    rawBalance = driver.getElementText('xpath', "//*[@id='reactContainer__balance']/div/div/div[1]")
+
+    if Decimal(rawBalance.replace('$','').replace(' USD', '')) > 0:
+        driver.getElementAndClick('xpath', "//*[@id='reactContainer__balance']/div/div/a") # transfer money
+        # time.sleep(2)
+        driver.getElementAndClick('xpath', "//*[@id='mainModal']/div/div/div/div/div/div[1]/ul/li[1]/a/span/p[2]") # transfer to bank
+        # time.sleep(1)
+        bank = driver.getElementText('xpath', "//*[@id='mainModal']/div/div/div/div/form/div/div/div/div[1]/span/span[2]/span[1]")
+        if "savings" in bank.lower():   
+            driver.getElementAndClick('xpath', "//*[@id='mainModal']/div/div/div/div/form/div/div/div/button")
 
 def checkUncategorizedPaypalTransactions(driver, book, Paypal, dateRange):
     transactions = [tr for tr in book.readBook.transactions
@@ -63,15 +58,15 @@ def checkUncategorizedPaypalTransactions(driver, book, Paypal, dateRange):
     
 def runPaypal(driver):
     locatePayPalWindow(driver)
-    transferMoney(driver.webDriver)
+    transferMoney(driver)
     
 if __name__ == '__main__':
-    # driver = Driver("Chrome")
-    # runPaypal(driver)
+    driver = Driver("Chrome")
+    runPaypal(driver)
     
     
-    book = GnuCash('Finance')
-    today = datetime.today().date()
-    dateRange = getStartAndEndOfDateRange(today, 7)
-    Paypal = USD("Paypal", book)
-    checkUncategorizedPaypalTransactions(book, Paypal, dateRange)
+    # book = GnuCash('Finance')
+    # today = datetime.today().date()
+    # dateRange = getStartAndEndOfDateRange(today, 7)
+    # Paypal = USD("Paypal", book)
+    # checkUncategorizedPaypalTransactions(book, Paypal, dateRange)

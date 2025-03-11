@@ -38,5 +38,6 @@ urlpatterns = [
     path('updateGoals', views.updateGoals , name="UpdateGoals"),
     path('vanguard', views.vanguard , name="Vanguard"),
     path('worthy', views.worthy , name="Worthy"),
-    path('webull', views.webull, name='Webull')
+    path('webull', views.webull, name='Webull'),
+    path('test', views.test, name='Test')
 ]
