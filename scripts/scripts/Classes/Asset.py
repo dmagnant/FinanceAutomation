@@ -18,13 +18,13 @@ def getSymbolByName(self):
         case 'vfiax':                                               return "VFIAX"
         case 'vbirx':                                               return "VBIRX"
         case 'viiix':                                               return 'VIIIX'
-        case 'vscix':                                               return 'VSCIX'
         case "iotex":                                               return 'IOTX'
         case "presearch":                                           return 'PRE'
         case "bing":                                                return 'BNG'
         case "pinecone":                                            return 'PNCN'
         case "tellwut":                                             return 'TWT'
         case "swagbucks":                                           return 'SB'
+        case 'small cap index':                                     return 'VSCIX'
         case 'employee benefit index':                              return 'M038'
         case 'extended market index':                               return 'M036'
         case 'total stock market':                                  return '8585'
@@ -69,20 +69,26 @@ class Security(Asset):    # this is a class for tracking security information
     def getPriceFromCoinGecko(self):        return getCryptocurrencyPrice(self.name)[self.name.lower()]['usd']
     def setPrice(self, price):              self.price = Decimal(price)
     def getSymbol(self):                    return self.symbol      
-    def updateGnuBalance(self, balance):    
+    def updateGnuBalance(self, balance):
+        hasattr(self, 'symbol')
+        if hasattr(self, 'symbol'):
+            self.gnuValue = self.getGnuValue()
         print(f'updating gnuBalance for {self.name} from {self.gnuBalance} to {balance}')
         self.gnuBalance = Decimal(balance)
     
     def getGnuValue(self):  price = Decimal(self.price);    return round(self.gnuBalance * price, 2) if float(self.gnuBalance * price)>0 else 0
     
-    def updateGnuBalanceAndValue(self, balance):    self.gnuBalance = Decimal(balance); self.gnuValue = self.getGnuValue()
+    def updateGnuBalanceAndValue(self, balance):    
+        self.gnuBalance = Decimal(balance); self.gnuValue = self.getGnuValue()
     
     def getData(self):
         print(  f'name: {self.name} \n'
                 f'symbol: {self.symbol} \n'
                 f'balance: {self.balance} \n'
                 f'gnuBalance: {self.gnuBalance} \n'
+                f'cost: {self.cost} \n'
                 f'price: {self.price}')
+        
     
     def updateSpreadsheetAndGnuCash(self, spreadsheet, book):
         spreadsheet.updateSpreadsheet(self.symbol, 1, self.balance, self.symbol)

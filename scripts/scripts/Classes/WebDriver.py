@@ -101,9 +101,17 @@ class Driver:
         index = 0
         for window in self.webDriver.window_handles:
             found = False
+            pageUrl = ''
             self.webDriver.switch_to.window(self.webDriver.window_handles[index])
-            for url in urls:
-                if url in self.webDriver.current_url:   found = True
+            
+            try:
+                pageUrl = self.webDriver.current_url
+            except (ReadTimeoutError, MaxRetryError):    pass
+            if pageUrl:
+                for url in urls:
+                    if url in pageUrl:      
+                        found = True
+                        break
             if found:   index += 1
             else:   self.webDriver.close()
         if displayWindowHandle: self.webDriver.switch_to.window(displayWindowHandle)
@@ -130,7 +138,7 @@ class Driver:
         try:
             element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((ElementTypes[type].value,path)))
             return element
-        except TimeoutException:
+        except (TimeoutException, StaleElementReferenceException):
             if not allowFail:
                 print(f'Element not found: {path}')
             return False

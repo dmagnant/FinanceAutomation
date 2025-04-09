@@ -49,7 +49,7 @@ def exportAmexTransactions(driver):
         clickViewAmexTransactions(driver)
     driver.getElementAndClick('xpath', "//*[@id='root']/div[1]/div/div[2]/div/div/div[4]/div/div[3]/div/div/div/div/div/div/div[2]/div/div/div[5]/div/div[2]/div/div[2]/a/span", wait=2) # view activity
     # time.sleep(6)
-    driver.getElemenetAndClick('xpath', getAmexBasePath() + "/div[1]/div[1]/div/div/div[1]/div[2]/div[1]/div/button/div/p", wait=7, allowFail=False) # download arrow
+    driver.getElementAndClick('xpath', getAmexBasePath() + "/div[1]/div[1]/div/div/div[1]/div[2]/div[1]/div/button/div/p", wait=7, allowFail=False) # download arrow
     num = 1
     while True:
         fileTypeElement = driver.getElement('xpath', getAmexBasePath() + "[1]/div/div/div/div/div/div[2]/div/div/div[1]/div/fieldset/div[" + str(num) + "]/label")
@@ -67,7 +67,7 @@ def claimAmexRewards(driver, account):
     driver.webDriver.get("https://global.americanexpress.com/rewards")
     rawBalance = driver.getElementText('id', 'globalmrnavpointbalance')
     if rawBalance:
-        rewardsBalance = rewardsBalance.replace('$', '')
+        rewardsBalance = rawBalance.replace('$', '')
         if float(rewardsBalance) > 0:
             driver.getElementAndClick('xpath', "//*[@id='recommendations-CTA']/a", wait=2) # redeem now link
             rewardsInputElement = driver.getElement('id', 'rewardsInput')

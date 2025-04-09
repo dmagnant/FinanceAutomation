@@ -25,7 +25,7 @@ def worthyLogin(driver):
     # driver.getElementAndSendKeys('id', 'email', getUsername('Worthy'), wait=2)
     # driver.getElementAndSendKeys('id', 'password', getPassword('Worthy'), wait=2)
     driver.getElementAndClick('id', 'password') # to activate page
-    driver.getElementAndClick('xpath', "//*[@id='__next']/div/div/main/div/form/div[3]/button") # sign in
+    driver.getElementAndClick('xpath', "//*[@id='__next']/div/div/main/div/div/form/div[3]/button") # sign in
     # time.sleep(3)
 
 def getWorthyBalance(driver, account):

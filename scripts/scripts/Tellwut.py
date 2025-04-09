@@ -76,22 +76,24 @@ def completeTellWutSurveys(driver):
         driver.getElementLocateAndClick('partial_link_text', "NEXT POLL", wait=5) # NEXT POLL
     return True
         
-def redeemTellWutRewards(driver):
+def redeemTellWutRewards(driver, account):
+    if int(account.balance) < 11000:    
+        print("Insufficient funds to redeem TellWut rewards")
+        return False
     locateTellWutWindow(driver)
-    driver.webDriver.get("https://www.tellwut.com/product/143--10-Amazon-com-e-Gift-Card.html")
+    driver.webDriver.get("https://www.tellwut.com/product/144--25-PayPal.html")
     checkout = driver.getElementAndClick('id', "checkout_form_submit")
     formButton = driver.getElementAndClick('id', "form_button")
     accept = driver.getElementAndClick('id', "accept-additional")
     if not (checkout and formButton and accept):
         print("FAILED TO REDEEM TELLWUT REWARDS")
-    # time.sleep(3)
 
 def runTellwut(driver, account, book, log=getLogger()):
     locateTellWutWindow(driver)
     completeTellWutSurveys(driver)
     account.setBalance(getTellWutBalance(driver))
     book.updateMRBalance(account)
-    if int(account.balance) >= 4000:    redeemTellWutRewards(driver)
+    redeemTellWutRewards(driver, account)
     return True
 
 if __name__ == '__main__':

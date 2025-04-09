@@ -72,7 +72,7 @@ def runAlusRevenge(driver, log=getLogger()):
     driver.getElementAndClick('id', 'gamesItemBtn', wait=20) # Play for Free
     time.sleep(3)
     pageBody = driver.getElement('xpath', "/html/body")
-    pageBody.send_keys(Keys.DOWN);   pageBody.send_keys(Keys.DOWN);   pageBody.send_keys(Keys.DOWN)
+    # pageBody.send_keys(Keys.DOWN);   pageBody.send_keys(Keys.DOWN);   pageBody.send_keys(Keys.DOWN)
     redeemed = 0
     totalGames = 0
     while redeemed < 3 and totalGames < 8:
@@ -190,9 +190,12 @@ def getSwagBucksBalance(driver):
     if rawBalance:
         return rawBalance.replace('SB', '').replace(',', '')
 
-def claimSwagBucksRewards(driver):
+def claimSwagBucksRewards(driver, account):
+    if int(account.balance) < 10030:
+        print('Not enough Swagbucks to redeem')
+        return False
     locateSwagBucksWindow(driver)
-    driver.webDriver.get("https://www.swagbucks.com/p/prize/28353/PayPal-10")
+    driver.webDriver.get("https://www.swagbucks.com/p/prize/34668/PayPal-100")
     # time.sleep(4)
     driver.getElementAndClick('id', "redeemBtnHolder") # Claim Reward
     driver.getElementAndClick('id', "redeemBtn") # Claim a Gift Card
@@ -206,18 +209,20 @@ def runSwagbucks(driver, runAlu, account, book, runSearch=False, log=getLogger()
     dailyPoll(driver)
     swagbucksInbox(driver)
     toDoList(driver)
-    swagBuckscontentDiscovery(driver)
+    # swagBuckscontentDiscovery(driver)
     account.setBalance(getSwagBucksBalance(driver))
     book.updateMRBalance(account)
     if runSearch:   swagbucksSearch(driver)
-    if int(account.balance) > 1000: claimSwagBucksRewards(driver)
+    claimSwagBucksRewards(driver, account)
     return True
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
     Swagbucks = Security("Swagbucks", book)
-    runSwagbucks(driver, False, Swagbucks, book)
+    # locateSwagBucksWindow(driver)
+    swagBuckscontentDiscovery(driver)
+    driver.closeWindowsExcept([':8000/'])
     book.closeBook()
-
+            
     

@@ -6,10 +6,12 @@ if __name__ == '__main__' or __name__ == "IoPay":
     from Functions.GeneralFunctions import showMessage
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
+    from Classes.Spreadsheet import Spreadsheet
 else:
     from .Classes.Asset import Security
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import showMessage
+    from .Classes.Spreadsheet import Spreadsheet
 
 def locateIoPayWindow(driver):
     found = driver.findWindowByUrl("stake.iotex.io")
@@ -34,6 +36,8 @@ def runIoPay(driver, account, book, spreadsheet):
     rawWalletbalance = driver.getElementText('xpath', walletBalancePath, wait=15, allowFail=False).replace(" IOTX", "").replace(",", "")
     rawStakedBalance = driver.getElementText('xpath', stakedBalancePath, wait=2, allowFail=False).replace(" IOTX", "").replace(",", "")
     if rawWalletbalance and rawStakedBalance:  
+        print('rawWalletbalance:', rawWalletbalance)
+        print('rawStakedBalance:', rawStakedBalance)
         totalbalance = Decimal(rawWalletbalance) + Decimal(rawStakedBalance)
     else:           return False
     # if walletBalance > 5: # staking not allowed without stake lock
@@ -52,6 +56,7 @@ if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')    
     IoTex = Security("IoTex", book)
-    runIoPay(driver, IoTex, book)
+    Finances = Spreadsheet('Finances', 'Investments', driver)
+    runIoPay(driver, IoTex, book, Finances)
     IoTex.getData()
     book.closeBook()

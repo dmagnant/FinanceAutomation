@@ -509,7 +509,7 @@ def swagbucks(request):
         elif 'balance' in request.POST:             Swagbucks.setBalance(getSwagBucksBalance(driver))           
         elif "content" in request.POST:             swagBuckscontentDiscovery(driver)
         elif "search" in request.POST:              swagbucksSearch(driver)
-        elif "rewards" in request.POST:             claimSwagBucksRewards(driver)
+        elif "rewards" in request.POST:             claimSwagBucksRewards(driver, Swagbucks)
         elif "inbox" in request.POST:               swagbucksInbox(driver)
         elif "close windows" in request.POST:       driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/swagbucks"))
     context = {'account': Swagbucks}
@@ -531,7 +531,8 @@ def tellwut(request, log=getLogger()):
             elif "balance" in request.POST:
                 Tellwut.setBalance(getTellWutBalance(driver))
             elif "rewards" in request.POST:
-                redeemTellWutRewards(driver)
+                Tellwut.setBalance(getTellWutBalance(driver))
+                redeemTellWutRewards(driver, Tellwut)
             elif "close windows" in request.POST:
                 driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/tellwut"))
         book.closeBook()

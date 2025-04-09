@@ -103,7 +103,7 @@ def importChaseTransactions(account, chaseActivity, book, gnuCashTransactions):
         toAccount = book.getGnuAccountFullName('Other')
         if "AUTOMATIC PAYMENT" in rawDescription.upper():                           
             continue
-        elif "REDEMPTION CREDIT" in rawDescription.upper() and float(amount) > 0:   
+        elif "STATEMENT CREDIT" in rawDescription.upper() and float(amount) > 0:   
             description = "Chase CC Rewards"
             toAccount = book.getGnuAccountFullName('CC Rewards')  
         elif "BP#" in rawDescription.upper():                         

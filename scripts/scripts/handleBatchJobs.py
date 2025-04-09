@@ -22,7 +22,7 @@ def runScripts(scripts, log=getLogger()):
         try:
             if script == 'DailyMR':
                 accounts = getDailyMRAccounts(book)
-                if runDailyMR(accounts, book, runAlu=False):
+                if runDailyMR(accounts, book, runAlu=True):
                     scriptResult = True
             elif script == 'Tellwut':
                 if runTellwut(driver, Security("Tellwut", book), book):

@@ -91,9 +91,8 @@ def getAssetAccountBalances(date, accountList, book, accountsType, timeframe, sp
         #     value += float(book.getGnuAccountBalance(book.getGnuAccountFullName('GME'), date) * book.getPriceInGnucash('GME'))
         updateSpreadsheet(spreadsheet, account, date, round(value,2), accountsType, timeframe)
 
-def getCellForMonthly(account, month, accounts='Personal'):
-    rowStart = 82 if accounts == 'Personal' else 25
-    row = str(rowStart + (month - 1))
+def getCellForMonthly(account, month, spreadsheet, accounts='Personal'):
+    row = str(spreadsheet.rowStart + (month - 1))
     match account:
         case 'Amazon':                  return 'C' + row if accounts == 'Personal' else 'B' + row
         case 'Bars & Restaurants':      return 'D' + row if accounts == 'Personal' else 'C' + row
@@ -119,8 +118,8 @@ def getCellForMonthly(account, month, accounts='Personal'):
         case "Tessa's Contributions":   return 'R' + row  
         case _:                         print('Month cell not found for: ' + account)
         
-def getCellForYTD(account, accountsType):
-    column = 'H' if accountsType == 'Personal' else 'G' # current YTD column
+def getCellForYTD(account, spreadsheet, accountsType):
+    column = spreadsheet.currentYearColumn
     match account:
         # Update Year % column:
         case 'PercentColumn':                   return chr(ord(column) + 1) + str(1)
@@ -182,7 +181,7 @@ def getCellForYTD(account, accountsType):
         case _:                                 print('YTD cell not found for: ' + account)
 
 def updateSpreadsheet(spreadsheet, account, date, value, accountsType, timeframe):
-    cell = getCellForMonthly(account, date.month, accountsType) if timeframe == 'Month' else getCellForYTD(account, accountsType)
+    cell = getCellForMonthly(account, date.month, spreadsheet, accountsType) if timeframe == 'Month' else getCellForYTD(account, spreadsheet, accountsType)
     spreadsheet.writeCell(cell, value)
 
 def runUpdateGoals(accountsType, book):

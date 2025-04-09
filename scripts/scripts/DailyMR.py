@@ -37,7 +37,10 @@ def runDailyMR(accounts, book, runAlu=True):
     return True
     
 if __name__ == '__main__':
+    driver = Driver("Chrome")
     personalBook = GnuCash('Finance')
     accounts = getDailyMRAccounts(personalBook)
     runDailyMR(accounts, personalBook, False)
     personalBook.closeBook()
+
+    

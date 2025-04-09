@@ -9,10 +9,12 @@ if __name__ == '__main__' or __name__ == "Presearch":
     from Classes.Asset import Security, USD
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
+    from Classes.Spreadsheet import Spreadsheet
     from Functions.GeneralFunctions import showMessage
 else:
     from .Classes.Asset import Security, USD
     from .Classes.GnuCash import GnuCash
+    from .Classes.Spreadsheet import Spreadsheet
     from .Functions.GeneralFunctions import showMessage
 
 class Node(object):
@@ -107,20 +109,17 @@ def presearchRewardsRedemptionAndBalanceUpdates(driver, account, book, spreadshe
     if preAvailableToStake: 
         stakePresearchRewards(driver, preAvailableToStake)
         account.setBalance(getPresearchBalance(driver))
-        account.setPrice(account.getPriceFromCoinGecko())
+        price = account.getPriceFromCoinGecko()
+        price = price if price else 0.01
+        account.setPrice(price)
         account.updateSpreadsheetAndGnuCash(spreadsheet, book)
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
     book = GnuCash('Finance')
-    # locatePresearchWindow(driver)
+    Finances = Spreadsheet('Finances', 'Investments', driver)
+    locatePresearchWindow(driver)
     Presearch = Security("Presearch", book)
-    # presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book)
-    # Presearch.getData()
-    # book.closeBook()
-    
-    Bitcoin = Security("Bitcoin", book)
-    Presearch.setPrice(Presearch.getPriceFromCoinGecko())
-    print(Presearch.price)
-    
-    
+    presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book, Finances)
+    Presearch.getData()
+    book.closeBook()

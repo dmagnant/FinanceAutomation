@@ -40,7 +40,7 @@ def runDailyBank(accounts, personalBook, jointBook, gnuCashTransactions, dateRan
     Home = Spreadsheet('Home', '2025 Balance', driver)
     runSofi(driver, accounts['Sofi'], personalBook, gnuCashTransactions, dateRange)
     runFidelityDaily(driver, accounts['Fidelity'], personalBook, gnuCashTransactions, dateRange)
-    runWebullDaily(driver, accounts['Webull'], personalBook, gnuCashTransactions, dateRange) # FIX FEES NOT BEING ADDED
+    # runWebullDaily(driver, accounts['Webull'], personalBook, gnuCashTransactions, dateRange)
     # runAlly(driver, accounts['Ally'], jointBook, gnuCashTransactions, dateRange)
     presearchRewardsRedemptionAndBalanceUpdates(driver, accounts['Presearch'], personalBook, Finances)
     driver.findWindowByUrl(Finances.url)

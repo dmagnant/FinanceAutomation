@@ -131,3 +131,4 @@ if __name__ == '__main__':
     # runUSD(driver, today, usdAccounts, personalBook)
     
     loginToUSDAccounts(driver)
+    Finances = Spreadsheet('Finances', 'Investments', driver)

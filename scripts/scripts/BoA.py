@@ -27,11 +27,12 @@ def boALogin(driver, account):
     driver.openNewWindow('https://www.bankofamerica.com/')
     username = getUserNameElement()
     username.click()
+    # username.send_keys(getUsername('BoA CC'))
     time.sleep(3)
     password = getPassWordElement()
     password.send_keys(getPassword('BoA CC'))
     clickLoginButton()
-    if driver.getElement('id', "signin-message"):
+    if driver.getElement('id', "signin-message", wait=2):
         driver.getElementAndSendKeys('id', 'onlineId1', getUsername('BoA CC'))
         driver.getElementAndSendKeys('id', 'passcode1', getPassword('BoA CC'))
         clickLoginButton()
@@ -101,12 +102,12 @@ def claimBoARewards(driver, account):
     else:
         driver.getElementAndClick('xpath', "/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[3]/a") # View/Redeem
         time.sleep(5)
-        driver.executeScript("window.scrollTo(0, 300)")
+        driver.webDriver.execute_script("window.scrollTo(0, 300)")
         time.sleep(3)
-        driver.getElementAndClick('id', 'rewardsRedeembtn') # redeem cash rewards
-        driver.switchToLastWindow()
+        driver.getElementAndClick('id', 'choose-redeem-primary-button') # redeem cash rewards
         driver.getElementAndClick('xpath', "/html/body/div[1]/div/div/div[2]/div/div/button", wait=2) # close pop-up
-        driver.getElementAndClick('xpath', "//*[@id='skip-to-maincontent']/div/div/div[1]/div/div/ul/li[1]/div/div[1]/div[2]/div/a") # get cash back
+        driver.findWindowByUrl("managerewardsonline.bankofamerica.com")
+        driver.getElementAndClick('xpath', "//*[@id='skip-to-maincontent']/div/div/div/div/div/ul/li[1]/div/div[1]/div[2]/div/a") # get cash back
         driver.getElementAndClick('id', "redemption_option") # redemption option
         if driver.getElementAndSendKeys('id', "redemption_option", "v"): # for visa statement credit
             driver.getElementAndSendKeys('id', "redemption_option", Keys.ENTER)
@@ -187,17 +188,18 @@ def runBoA(driver, account, book):
 #     book.closeBook()
     
 if __name__ == '__main__':
+    SET_ACCOUNT_VARIABLE = "BoA" # BoA or BoA-joint
     driver = Driver("Chrome")
     book = GnuCash('Finance')
-    account = USD('BoA', book)
-
+    account = USD(SET_ACCOUNT_VARIABLE, book)
     locateBoAWindowAndOpenAccount(driver, account.name)
     dateRange = getStartAndEndOfDateRange(timeSpan=60)
     gnuCashTransactions = book.getTransactionsByDateRange(dateRange)    
     account.setBalance(getBoABalance(driver, account.name))
     boAActivity = exportBoATransactions(driver, account.name, datetime.today())
-    # claimBoARewards(driver, account.name)
+    claimBoARewards(driver, account.name)
     importBoATransactions(account, boAActivity, book, gnuCashTransactions)
     account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:  book.openGnuCashUI()
+    account.getData()
