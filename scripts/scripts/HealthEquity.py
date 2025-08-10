@@ -21,6 +21,9 @@ def locateHealthEquityWindow(driver):
     if not found:   healthEquitylogin(driver)
     else:           driver.webDriver.switch_to.window(found); time.sleep(1)
 
+def closePopUps(driver):
+    driver.getElementAndClick('xpath', "/html/body/div[2]/div[2]/div/mat-dialog-container/div/div/hqy-mobile-download-modal/div/button/mat-icon", wait=0.1) # X
+    
 def healthEquitylogin(driver):
     driver.openNewWindow('https://member.my.healthequity.com/hsa/21895515-010')
     if driver.getElementAndClick('id', 'ctl00_modulePageContent_txtUserIdStandard', wait=2):
@@ -32,6 +35,7 @@ def healthEquitylogin(driver):
             driver.getElementAndClick('xpath', "//*[@id='VerifyOtpPanel']/div[4]/div[1]/div/label/span") # Remember me
             driver.getElementAndClick('id', 'verifyOtp') # click Confirm
         driver.getElementAndClick('xpath', "//*[@id='topmenu']/div[2]/a/span", wait=2) # Home button to bypass error
+    closePopUps(driver)
 
 def getHealthEquityBalances(driver, accounts):
     locateHealthEquityWindow(driver)

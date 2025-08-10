@@ -70,24 +70,37 @@ def claimPresearchRewards(driver):
 def stakePresearchRewards(driver, availToStake):
     print(f'avail to stake {str(availToStake)}')
     locatePresearchWindow(driver)
-    num, stillNodes, nodes, reliabilityScores = 1, True, [], []
+    # stake single staked node
+    num, stillNodes, nodes = 1, True, []
     while stillNodes:
         name = driver.getElementText('xpath', getPresearchBasePath() + '5]/div/table/tbody/tr[' + str(num) + ']/td[1]')
-        if not name:
-            break # no more nodes
-        reliabilityScore = driver.getElementText('xpath', getPresearchBasePath() + '5]/div/table/tbody/tr[' + str(num) + ']/td[10]')
-        nodes.append(Node(num=num, name=name, reliabilityScore=reliabilityScore))
-        reliabilityScores.append(reliabilityScore)
+        if not name:    break # no more nodes
+        stake = driver.getElementText('xpath', getPresearchBasePath() + '5]/div/table/tbody/tr[' + str(num) + ']/td[6]').replace(',', '')
+        if float(stake) > 0:
+            node = Node(num=num, name=name, reliabilityScore=float(stake))
+            node.stakePRE(driver, availToStake)
+            break
         num += 1
-    reliabilityScores.sort()
-    rsMode = mode(reliabilityScores)
-    rsMax = max(reliabilityScores)
-    if rsMode == rsMax: # duplicate high scores
-        count = dict((i, reliabilityScores.count(i)) for i in reliabilityScores)
-        stakeAmount = availToStake / count[rsMax]
-    else: stakeAmount = availToStake # single high score
-    for n in nodes:
-        if n.reliabilityScore == rsMax: n.stakePRE(driver, stakeAmount)
+
+    # stake highest reliability scores
+    # num, stillNodes, nodes, reliabilityScores = 1, True, [], []
+    # while stillNodes:
+    #     name = driver.getElementText('xpath', getPresearchBasePath() + '5]/div/table/tbody/tr[' + str(num) + ']/td[1]')
+    #     if not name:
+    #         break # no more nodes
+    #     reliabilityScore = driver.getElementText('xpath', getPresearchBasePath() + '5]/div/table/tbody/tr[' + str(num) + ']/td[10]')
+    #     nodes.append(Node(num=num, name=name, reliabilityScore=reliabilityScore))
+    #     reliabilityScores.append(reliabilityScore)
+    #     num += 1
+    # reliabilityScores.sort()
+    # rsMode = mode(reliabilityScores)
+    # rsMax = max(reliabilityScores)
+    # if rsMode == rsMax: # duplicate high scores
+    #     count = dict((i, reliabilityScores.count(i)) for i in reliabilityScores)
+    #     stakeAmount = availToStake / count[rsMax]
+    # else: stakeAmount = availToStake # single high score
+    # for n in nodes:
+    #     if n.reliabilityScore == rsMax: n.stakePRE(driver, stakeAmount)
 
 def getPresearchBalance(driver):
     found = driver.findWindowByUrl("presearch.com/dashboard")

@@ -1,39 +1,31 @@
-import time
+import time, json
 
 if __name__ == '__main__' or __name__ == "Eternl":
     from Classes.Asset import Security
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
+    from Functions.GeneralFunctions import getNotes
 else:
     from .Classes.Asset import Security
     from .Classes.GnuCash import GnuCash
+    from .Functions.GeneralFunctions import getNotes
 
 def locateEternlWindow(driver):
-    found = driver.findWindowByUrl("eternl.io/app/mainnet")
+    found = driver.findWindowByUrl("eternl.io/mainnet/wallet/home")
     if not found:   eternlLogin(driver)
     else:           driver.webDriver.switch_to.window(found); time.sleep(1)
 
 def eternlLogin(driver):
-    driver.openNewWindow('https://eternl.io/app/mainnet/wallet/xpub1wxalshqc32m-ml/summary')
+    driver.openNewWindow('https://eternl.io/landing/login')
+    driver.getElementAndSendKeys('xpath', "//*[@id='inputPinConfirm1']", str(json.loads(getNotes('Eternl'))['LoginCode'])) # PIN code
     time.sleep(1)
-    
+
 def getEternlBalance(driver):
     locateEternlWindow(driver)
-    while True:
-        rawStatus = driver.getElementText('xpath', "//*[@id='cc-main-container']/div/div[3]/div[2]/nav/div/div[2]/div/div/div[1]/div[2]/div/span", wait=2)
-        if rawStatus:
-            status = rawStatus.replace('\n', '')
-            print(status)
-            if 'initializing' in status or 'Syncing' in status:
-                time.sleep(2)
-                driver.webDriver.refresh()
-                time.sleep(2)
-            else:                          
-                break
-    rawBalance = driver.getElementText('xpath', "//*[@id='cc-main-container']/div/div[3]/div[2]/nav/div/div[2]/div/div/div[1]/div[2]/div/div", allowFail=False)
+    rawBalance = driver.getElementText('xpath', "//*[@id='eternl-app']/div[2]/div[1]/div/div[1]/div[1]/div/div/div/div[1]/button/div[2]/div/div[2]/div[1]/div")
     if rawBalance:
         balance = float(rawBalance.replace('\n', '').replace('₳','').replace(',', ''))
-        return balance + float(2618.232158) # balance current in Kraken
+        return balance
     return rawBalance
 
 def runEternl(driver, account, book, spreadsheet):
@@ -41,16 +33,16 @@ def runEternl(driver, account, book, spreadsheet):
     account.setPrice(account.getPriceFromCoinGecko())
     account.updateSpreadsheetAndGnuCash(spreadsheet, book)
     
-if __name__ == '__main__':
-    driver = Driver("Chrome")
-    book = GnuCash('Finance')
-    Cardano = Security("Cardano", book)    
-    runEternl(driver, Cardano, book)
-    Cardano.getData()
-    book.closeBook()
+# if __name__ == '__main__':
+#     driver = Driver("Chrome")
+#     book = GnuCash('Finance')
+#     Cardano = Security("Cardano", book)    
+#     runEternl(driver, Cardano, book)
+#     Cardano.getData()
+#     book.closeBook()
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
     locateEternlWindow(driver)
-                                         
-    driver.webDriver.refresh()
+    balance = getEternlBalance(driver)
+    print(balance)

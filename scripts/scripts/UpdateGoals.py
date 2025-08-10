@@ -29,6 +29,7 @@ def getTotalForIncomeExpenseAccounts(accountList, mybook, transactions, timefram
                         total += float(amount)
         if (timeframe=='YTD'):                
             accounts[i.replace(' ','').replace('&','').replace('/','').replace("'",'')+'_'+accountsType] = round(total, 2)
+        print(f"Total for {i} is: {total} and accountsType is: {accountsType}")
         updateSpreadsheet(spreadsheet, i, date, total, accountsType, timeframe)
     return accounts
 
@@ -96,26 +97,26 @@ def getCellForMonthly(account, month, spreadsheet, accounts='Personal'):
     match account:
         case 'Amazon':                  return 'C' + row if accounts == 'Personal' else 'B' + row
         case 'Bars & Restaurants':      return 'D' + row if accounts == 'Personal' else 'C' + row
-        case 'Entertainment':           return 'E' + row if accounts == 'Personal' else 'D' + row
-        case 'Other':                   return 'G' + row if accounts == 'Personal' else 'J' + row    
+        case 'Entertainment':           return 'E' + row if accounts == 'Personal' else 'E' + row
+        case 'Other':                   return 'F' + row if accounts == 'Personal' else 'K' + row    
         # Personal
-        case 'Joint Expenses':          return 'F' + row
-        case 'Dividends':               return 'L' + row
-        case 'Interest':                return 'M' + row
-        case 'Market Change':           return 'N' + row
-        case 'Market Research':         return 'O' + row
-        case 'Premiums':                return 'P' + row
+        case 'Dividends':               return 'K' + row
+        case 'Interest':                return 'L' + row
+        case 'Market Change':           return 'M' + row
+        case 'Market Research':         return 'N' + row
+        case 'Premiums':                return 'O' + row    
         # Joint
-        case 'Groceries':               return 'E' + row
-        case 'Home Depot':              return 'F' + row
-        case 'Home Expenses':           return 'G' + row
-        case 'Home Furnishings':        return 'H' + row
-        case 'Mortgage Principle':      return 'I' + row
-        case 'Pet':                     return 'K' + row
-        case 'Travel':                  return 'L' + row
-        case 'Utilities':               return 'M' + row
-        case "Dan's Contributions":     return 'Q' + row
-        case "Tessa's Contributions":   return 'R' + row  
+        case 'Cars':                    return 'D' + row
+        case 'Groceries':               return 'F' + row
+        case 'Home Depot':              return 'G' + row
+        case 'Home Expenses':           return 'H' + row
+        case 'Home Furnishings':        return 'I' + row
+        case 'Mortgage Principle':      return 'J' + row
+        case 'Pet':                     return 'L' + row
+        case 'Travel':                  return 'M' + row
+        case 'Utilities':               return 'N' + row
+        case "Dan's Contributions":     return 'R' + row
+        case "Tessa's Contributions":   return 'S' + row
         case _:                         print('Month cell not found for: ' + account)
         
 def getCellForYTD(account, spreadsheet, accountsType):
@@ -126,9 +127,9 @@ def getCellForYTD(account, spreadsheet, accountsType):
         # Joint and Personal
         case 'Amazon':                          return column + str(25) if accountsType == 'Personal' else column + str(7)
         case 'Bars & Restaurants':              return column + str(27) if accountsType == 'Personal' else column + str(8)
-        case 'Entertainment':                   return column + str(29) if accountsType == 'Personal' else column + str(9)
-        case 'Groceries':                       return column + str(30) if accountsType == 'Personal' else column + str(10)
-        case 'Other':                           return column + str(34) if accountsType == 'Personal' else column + str(15)
+        case 'Entertainment':                   return column + str(29) if accountsType == 'Personal' else column + str(10)
+        case 'Groceries':                       return column + str(30) if accountsType == 'Personal' else column + str(11)
+        case 'Other':                           return column + str(34) if accountsType == 'Personal' else column + str(16)
         # Personal
         # Employer Contributions
         case '401k Contributions':              return column + str(2)
@@ -155,29 +156,27 @@ def getCellForYTD(account, spreadsheet, accountsType):
         case 'Income Taxes':                    return column + str(31)
         case 'Joint Expenses':                  return column + str(32)
         case 'Medical':                         return column + str(33)
-        case 'Loan Interest':                   return column + str(35) 
-        case 'Loan Principle':                  return column + str(36)         
-        case 'Transportation':                  return column + str(37)
         # Asset Accounts
-        case 'Vanguard401k':                    return column + str(67)
-        case 'Brokerage':                       return column + str(68)
-        case 'CryptoCurrency':                  return column + str(69)
-        case 'HSA':                             return column + str(70)
-        case 'I Bonds':                         return column + str(71)
-        case 'IRA':                             return column + str(72)
-        case 'Liquid Assets':                   return column + str(73)
-        case 'Pension':                         return column + str(74)
-        case 'Roth IRA':                        return column + str(75)
+        case 'Vanguard401k':                    return column + str(63)
+        case 'Brokerage':                       return column + str(64)
+        case 'CryptoCurrency':                  return column + str(65)
+        case 'HSA':                             return column + str(66)
+        case 'I Bonds':                         return column + str(67)
+        case 'IRA':                             return column + str(68)
+        case 'Liquid Assets':                   return column + str(69)
+        case 'Pension':                         return column + str(70)
+        case 'Roth IRA':                        return column + str(71)
         # Joint
         case "Dan's Contributions":             return column + str(2)                 
-        case "Tessa's Contributions":           return column + str(3)         
-        case 'Home Depot':                      return column + str(11)
-        case 'Home Expenses':                   return column + str(12)
-        case 'Home Furnishings':                return column + str(13)
-        case 'Mortgage Principle':              return column + str(14)
-        case 'Pet':                             return column + str(16)
-        case 'Travel':                          return column + str(17)
-        case 'Utilities':                       return column + str(18)
+        case "Tessa's Contributions":           return column + str(3)
+        case 'Cars':                            return column + str(9)         
+        case 'Home Depot':                      return column + str(12)
+        case 'Home Expenses':                   return column + str(13)
+        case 'Home Furnishings':                return column + str(14)
+        case 'Mortgage Principle':              return column + str(15)
+        case 'Pet':                             return column + str(17)
+        case 'Travel':                          return column + str(18)
+        case 'Utilities':                       return column + str(19)
         case _:                                 print('YTD cell not found for: ' + account)
 
 def updateSpreadsheet(spreadsheet, account, date, value, accountsType, timeframe):
@@ -204,14 +203,14 @@ def runUpdateGoals(accountsType, book):
     monthlyAccounts.extend(commonExpenseAccounts)
     if accountsType == 'Personal':
         specificIncomeAccounts = ['401k Contributions', 'Dividends', 'HSA Contributions', 'Interest', 'Market Change', 'Market Research','Pension Contributions', 'Premiums', 'Salary']
-        specificExpenseAccounts = ['Bank Fees', 'Clothing/Apparel', 'Income Taxes', 'Joint Expenses', 'Medical', 'Loan Interest', 'Loan Principle', 'Transportation']
+        specificExpenseAccounts = ['Bank Fees', 'Clothing/Apparel', 'Income Taxes', 'Joint Expenses', 'Medical']
         retirementContributionAccounts = ['Vanguard401k', 'Optum Cash', 'HE Cash', 'FidelityIRASPAXX', 'FidelityRothIRASPAXX', 'FidelityBrokerageSPAXX', 'GME', 'WebullBrokerageCash']
         assetAccounts = ['Vanguard401k', 'Brokerage', 'CryptoCurrency', 'HSA', 'IRA', 'Liquid Assets', 'Pension', 'Roth IRA']
         monthlyAccounts.remove('Groceries')
-        monthlyAccounts.extend(['Dividends', 'Interest', 'Joint Expenses', 'Market Change', 'Market Research', 'Premiums'])
+        monthlyAccounts.extend(['Dividends', 'Interest', 'Market Change', 'Market Research', 'Premiums'])
     elif accountsType == 'Joint':
         specificIncomeAccounts = ["Dan's Contributions", "Tessa's Contributions"]
-        specificExpenseAccounts = ['Home Depot','Home Expenses','Home Furnishings','Pet','Travel','Utilities', 'Mortgage Principle']
+        specificExpenseAccounts = ['Cars', 'Home Depot','Home Expenses','Home Furnishings','Pet','Travel','Utilities', 'Mortgage Principle']
         monthlyAccounts.extend(specificIncomeAccounts)
         monthlyAccounts.extend(specificExpenseAccounts)
     ytdAccounts.extend(specificIncomeAccounts); ytdAccounts.extend(specificExpenseAccounts);

@@ -7,6 +7,7 @@ if __name__ == '__main__' or __name__ == "DailyMR":
     from Pinecone import runPinecone
     from Swagbucks import runSwagbucks
     from Tellwut import runTellwut
+    from InboxDollars import runInboxDollars
 else:
     from .Classes.Asset import USD, Security
     from .Classes.WebDriver import Driver
@@ -16,6 +17,8 @@ else:
     from .Pinecone import runPinecone
     from .Swagbucks import runSwagbucks
     from .Tellwut import runTellwut
+    from .InboxDollars import runInboxDollars
+
 
 def getDailyMRAccounts(personalReadBook):
     AmazonGC = USD("Amazon GC", personalReadBook)
@@ -24,7 +27,8 @@ def getDailyMRAccounts(personalReadBook):
     Tellwut = Security("Tellwut", personalReadBook)
     Paidviewpoint = USD("Paidviewpoint", personalReadBook)
     Presearch = Security("Presearch", personalReadBook)
-    return {'AmazonGC': AmazonGC, 'Pinecone': Pinecone, 'Swagbucks': Swagbucks, 'Tellwut': Tellwut, 'Paidviewpoint': Paidviewpoint, 'Presearch': Presearch}
+    InboxDollars = USD("InboxDollars", personalReadBook)
+    return {'AmazonGC': AmazonGC, 'Pinecone': Pinecone, 'Swagbucks': Swagbucks, 'Tellwut': Tellwut, 'Paidviewpoint': Paidviewpoint, 'Presearch': Presearch, 'InboxDollars': InboxDollars}
 
 def runDailyMR(accounts, book, runAlu=True):
     driver = Driver("Chrome")
@@ -33,6 +37,7 @@ def runDailyMR(accounts, book, runAlu=True):
     updatePaidViewPointBalance(driver, accounts['Paidviewpoint'], book)
     runPinecone(driver, accounts['Pinecone'], book)
     runSwagbucks(driver, runAlu, accounts['Swagbucks'], book)
+    runInboxDollars(driver, accounts['InboxDollars'], book)
     driver.findWindowByUrl("/scripts/daily")
     return True
     

@@ -33,7 +33,10 @@ def writeAmazonGCTransactionFromUI(book, account, requestInfo):
     splits.append(book.createSplit(-amount, source))
     book.writeTransaction(datetime.today().date(), description, splits)
     account.reviewTransactions = [source + ': ' + str(amount)]
-    account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
+    balance = book.getGnuAccountBalance(account.gnuAccount)
+    print(f'balance in gnuCash: {balance} for {account.name}')
+    account.updateGnuBalance(balance)
+    print(f'set account gnubalance: {account.gnuBalance}')
     if 'Joint' in requestInfo['source']:
         jointBook = GnuCash('Home')
         splits = []
@@ -41,7 +44,6 @@ def writeAmazonGCTransactionFromUI(book, account, requestInfo):
         splits.append(jointBook.createSplit(-amount, jointBook.getGnuAccountFullName('Amazon')))
         jointBook.writeTransaction(datetime.today().date(), description, splits)
         jointBook.closeBook()
-    book.getGnuCashAccountBalance(account.gnuCashAccount) 
     confirmAmazonGCBalance(Driver("Chrome"), account)
 
 def confirmAmazonGCBalance(driver, account):
@@ -51,7 +53,7 @@ def confirmAmazonGCBalance(driver, account):
         balance = rawBalance.strip('$')
     if float(balance) == 0: balance = "0"
     account.setBalance(balance)
-    if str(account.gnuBalance) != account.balance:  
+    if str(account.gnuBalance) != account.balance:
         showMessage("Amazon GC Mismatch", f'Amazon balance: {account.balance} \n' f'Gnu Cash balance: {account.gnuBalance} \n')
 
 import sys
@@ -66,7 +68,11 @@ if __name__ == '__main__':
     # AmazonGC.getData()
     # book.closeBook()
 
-    if len(sys.argv) > 1:
-        main(sys.argv[1])
-    else:
-        print("No argument provided.")
+    # if len(sys.argv) > 1:
+    #     main(sys.argv[1])
+    # else:
+    #     print("No argument provided.")
+
+    driver = Driver("Chrome", asUser=False)
+    driver.get("www.amazon.com/gc/balance")
+

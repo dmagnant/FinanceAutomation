@@ -10,6 +10,8 @@
                     <button type="submit" name="main">Main</button><br>
                     <button type="submit" name="login">Login</button><br>
                     <button type="submit" name="balances">Get Balances</button><br>
+                    <button type="submit" name="ally">Calculate Ally Transfer</button>{{transferAmount}}<br>
+                    <button type="submit" name="transfer">Ally Transfer</button><br>
                     <button type="submit" name="logout">Logout</button><br>
                 </form>
             </div>
@@ -25,7 +27,7 @@
                         </div>
                     </div>
                     {% endfor %}
-                </div><br><br>
+                </div><br>
                 &ensp;Savings Balance: <b>${{Sofi.Savings.balance}}</b><br>
                 &thinsp;gnuCash Balance: <b>${{Sofi.Savings.gnuBalance}}</b><br>
                 Review Transactions: <br><br>
@@ -38,6 +40,8 @@
                     </div>
                     {% endfor %}
                 </div>
+                &ensp;SGOV Balance: <b>{{Sofi.SGOV.balance}}</b><br>
+                &thinsp;gnuCash Balance: <b>{{Sofi.SGOV.gnuBalance}}</b> {{Sofi.SGOV.symbol}}<br>
             </div>
         </div>
     </div>

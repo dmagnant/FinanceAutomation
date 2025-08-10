@@ -44,7 +44,7 @@ def updatePensionBalanceAndCost(driver, book, newBalance):
     newBalance = round(Decimal(newBalance),2)
     # gather amounts
     monthGain = newBalance - Pension.gnuBalance
-    employerContributionPerMonth = round(Decimal(813.40),2)
+    employerContributionPerMonth = round(Decimal(896.88),2)
     # write transaction
     splits = [
         book.createSplit(-(monthGain - employerContributionPerMonth), book.getGnuAccountFullName('Interest')), 

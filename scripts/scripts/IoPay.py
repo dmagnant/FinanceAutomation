@@ -25,8 +25,8 @@ def IoPayLogin(driver):
 def runIoPay(driver, account, book, spreadsheet):
     locateIoPayWindow(driver)
     showMessage('Open Ledger Wallet - IoPay App', 'Once Open, click OK')
-    walletBalancePath = '/html/body/div[1]/section/div[1]/main/div/div[5]/div[2]/div[2]/div[3]/div[2]/div[2]/div[2]/p[2]'
-    stakedBalancePath = '/html/body/div[1]/section/div[1]/main/div/div[5]/div[2]/div[2]/div[3]/div[2]/div[2]/div[3]/p[2]'
+    walletBalancePath = '/html/body/div[1]/section/div[3]/main/div/div[5]/div[2]/div[2]/div[3]/div[2]/div[2]/div[2]/p[2]'
+    stakedBalancePath = '/html/body/div[1]/section/div[3]/main/div/div[5]/div[2]/div[2]/div[3]/div[2]/div[2]/div[3]/p[2]'
     walletConnectElement = driver.getElementAndClick('xpath', "//*[@id='__next']/section/nav/div/div[2]/div/div/button[1]") # connect wallet
     if walletConnectElement: # else -> already connected
         driver.getElementAndClick('xpath', "//*[@id='chakra-modal--body-1']/div/div[2]") # ledger
@@ -34,6 +34,7 @@ def runIoPay(driver, account, book, spreadsheet):
 
     driver.getElementAndClick('xpath', "//*[@id='__next']/section/nav/div/div[2]/nav/div[4]/div/div/p") # click my Stake
     rawWalletbalance = driver.getElementText('xpath', walletBalancePath, wait=15, allowFail=False).replace(" IOTX", "").replace(",", "")
+    time.sleep(3)
     rawStakedBalance = driver.getElementText('xpath', stakedBalancePath, wait=2, allowFail=False).replace(" IOTX", "").replace(",", "")
     if rawWalletbalance and rawStakedBalance:  
         print('rawWalletbalance:', rawWalletbalance)

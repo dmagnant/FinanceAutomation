@@ -37,11 +37,13 @@ def configureDriverOptions(browser, asUser=True):
     else:        
         options = webdriver.ChromeOptions()
         options.debugger_address="localhost:9223"
+        options.add_argument("--disable-gpu")
+        options.add_argument("--log-level=3")
     if browser == "Chrome":
         options.set_capability("pageLoadStrategy", "eager")
         options.set_capability("timeouts", {"implicit":1000})
         if asUser:  
-            options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\Google\Chrome\User Data")
+            options.add_argument(r"user-data-dir=C:\Users\dmagn\User Data")
     elif browser == "Brave":
         options.binary_location = "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe"
         if asUser:  options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\BraveSoftware\Brave-Browser\User Data")
@@ -87,15 +89,19 @@ class Driver:
         # self.webDriver.set_script_timeout(30)  # Increase script timeout
 
     def findWindowByUrl(self, url):
-        currentWindow = self.webDriver.current_window_handle
-        if url in self.webDriver.current_url:   return currentWindow
-        if len(self.webDriver.window_handles) > 1:
-            for i in self.webDriver.window_handles:
-                self.webDriver.switch_to.window(i)
-                if url in self.webDriver.current_url:   
-                    return self.webDriver.current_window_handle
-        self.webDriver.switch_to.window(currentWindow)
-        return False
+        try:
+            currentWindow = self.webDriver.current_window_handle
+            if url in self.webDriver.current_url:
+                return currentWindow
+            if len(self.webDriver.window_handles) > 1:
+                for i in self.webDriver.window_handles:
+                    self.webDriver.switch_to.window(i)
+                    if url in self.webDriver.current_url:   
+                        return self.webDriver.current_window_handle
+            self.webDriver.switch_to.window(currentWindow)
+            return False
+        except NoSuchWindowException:
+            return False
 
     def closeWindowsExcept(self, urls, displayWindowHandle=''):
         index = 0
@@ -126,6 +132,9 @@ class Driver:
     def switchToLastWindow(self):
         self.webDriver.switch_to.window(self.webDriver.window_handles[len(self.webDriver.window_handles)-1])
 
+    def getWindowCount(self):
+        return len(self.webDriver.window_handles)
+
     def locateElementOnPage(self, element):
         try:
             ActionChains(self.webDriver).move_to_element(element).perform()
@@ -137,10 +146,12 @@ class Driver:
     def getElement(self, type, path, wait=5, allowFail=True, elementState='visible'):
         try:
             element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((ElementTypes[type].value,path)))
+            if element:
+                self.locateElementOnPage(element)
             return element
         except (TimeoutException, StaleElementReferenceException):
             if not allowFail:
-                print(f'Element not found: {path}')
+                print(f'Element needed but found: {path}')
             return False
     
     def clickElement(self, element, path):
@@ -175,12 +186,12 @@ class Driver:
         if element: return element.text
         else:       return False
 
-    def getElementTextAndLocate(self, type, path, wait=5, allowFail=True):
+    def getElementText(self, type, path, wait=5, allowFail=True):
         element = self.getElement(type, path, wait, allowFail)
         if element: 
-            self.locateElementOnPage(element)
             return element.text
-        else:       return False
+        else:       
+            return False
 
     def getElementLocateAndClick(self, type, path, wait=5, allowFail=True):
         element = self.getElement(type, path, wait, allowFail)

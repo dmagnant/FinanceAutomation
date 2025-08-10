@@ -20,7 +20,7 @@ else:
 
 def getSwagbucksBasePath(): return '/html/body/div[2]/div[' 
     
-def closePopUps(driver):
+def closeSwagbucksPopUps(driver):
     driver.getElementAndClick('xpath', getSwagbucksBasePath() + "3]/section/section/aside/button[2]", wait=1)  # Yay for me
     driver.getElementAndClick('id', 'lightboxExit', wait=1) # to exit pop-up
 
@@ -31,35 +31,38 @@ def locateSwagBucksWindow(driver):
 
 def swagBucksLogin(driver):
     driver.openNewWindow('https://www.swagbucks.com/')
-    closePopUps(driver)
+    closeSwagbucksPopUps(driver)
         
 def swagBuckscontentDiscovery(driver):
-    driver.openNewWindow("https://www.swagbucks.com/discover/alloffers?sort=2")
-    cardNum = 1
-    closePopUps(driver)
-    while True:
-        contentPath = getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div[2]/div[1]/section[" + str(cardNum) + "]"
-        earnings = driver.getElementText('xpath', contentPath + "/p/span/span[3]", wait=2)
-        if not earnings:
-            cardNum += 1; 
-            continue
-        description = driver.getElementText('xpath', contentPath + "/button", wait=2, allowFail=False)
-        if not description:
-            if cardNum == 1:    showMessage('failed to find content discovery', 'check script for correct element')
-            else:       break
-        if "1 sb" in earnings.lower() or "check out the latest deals" == description.lower():
-            clickAmt = 1
-            while clickAmt < 5:
-                driver.getElementAndClick('xpath', contentPath)
-                driver.getElementAndClick('xpath', "/html/body/aside[2]/div/div[1]/div[2]/div[2]/div/div[2]/a") # get SB
-                # time.sleep(1)
-                driver.getElementAndClick('xpath', "/html/body/aside[2]/div/button") # X to close
-                clickAmt += 1
-                if "discover daily interests" != description.lower():
-                    break
-        elif "sb per" in earnings.lower() or int(earnings.lower().replace(" sb", '')) > 4:  break
-        cardNum += 1
+    driver.openNewWindow("https://www.swagbucks.com/discover-new/explore")
+    contentDiscoverWindow = driver.webDriver.current_window_handle
+    closeSwagbucksPopUps(driver)
+    windowCount = driver.getWindowCount()
+    cycleThroughSwagbucksOffers(driver, f"{getSwagbucksBasePath()}2]/div[2]/div[2]/main/div[3]/div[2]/div[2]/div/div/ul/li[cardNum]/section/div", contentDiscoverWindow, windowCount) # featured offers
+    cycleThroughSwagbucksOffers(driver, f"{getSwagbucksBasePath()}2]/div[2]/div[2]/main/div[3]/section[2]/ul/li[cardNum]", contentDiscoverWindow, windowCount) # explore web content and earn
     driver.closeWindowsExcept([':8000/'])
+
+def cycleThroughSwagbucksOffers(driver, offerPath, contentDiscoverWindow, windowCount):
+    cardNum = 1
+    while True:
+        modifiedOfferPath = offerPath.replace('cardNum', str(cardNum))
+        offer = driver.getElement('xpath', modifiedOfferPath, wait=0.5) # click to open
+        if not offer: 
+            print("failed to find offer element")
+            return False
+        reviewSwagbucksOffer(driver, offer, contentDiscoverWindow, windowCount)
+        cardNum += 1
+
+def reviewSwagbucksOffer(driver, offer, contentDiscoverWindow, windowCount):
+    print(offer.text)
+    if "1 sb" in offer.text.lower():
+        offer.click()
+        driver.getElementAndClick('xpath', "/html/body/div[3]/reset-styles/div[1]/div/aside/div/div[2]/a/span", wait=0.5) # Earn SB
+        time.sleep(1)
+        newWindowCount = driver.getWindowCount()
+        if newWindowCount > windowCount:
+            driver.webDriver.switch_to.window(contentDiscoverWindow)
+        driver.getElementAndClick('xpath', "/html/body/div[3]/reset-styles/div[1]/div/aside/div/button", wait=0.5) # X to close
 
 def runAlusRevenge(driver, log=getLogger()):
     locateSwagBucksWindow(driver)
@@ -102,12 +105,12 @@ def runAlusRevenge(driver, log=getLogger()):
 
 def dailyPoll(driver):
     driver.openNewWindow('https://www.swagbucks.com/polls');    time.sleep(1)
-    if driver.getElementAndClick('css_selector', "td.pollCheckbox", wait=2): # try first answer
+    if driver.getElementAndClick('xpath', "//*[@id='answer1']/table/tbody/tr/td[2]/table/tbody/tr/td", wait=2): # try first answer
         driver.getElementAndClick('id', "btnVote", wait=2) # vote & earn
 
-def toDoList(driver):
+def swagBucksToDoList(driver):
     list_item_num, button_num, button_not_clicked, main = 1, 2, True, driver.webDriver.window_handles[len(driver.webDriver.window_handles)-1]
-    closePopUps(driver)
+    closeSwagbucksPopUps(driver)
     while list_item_num <= 8:
         if not driver.getElement('xpath', getSwagbucksBasePath() + "1]/header/nav/div[3]/div/div/div/div[1]/h4", wait=2): # look for Daily Bonus header
             driver.getElementAndClick('xpath', getSwagbucksBasePath() + "1]/header/nav/div[3]/button/span", wait=2) # click to show To Do List
@@ -149,15 +152,17 @@ def swagbucksInbox(driver):
     
     driver.openNewWindow('https://www.swagbucks.com/g/inbox')
     while True:
-        closePopUps(driver)
+        closeSwagbucksPopUps(driver)
         if not driver.getElementAndClick('xpath', getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div/div[2]/div/div[3]/div[1]/a/div[2]", wait=2): # Inbox Item
             break
         description = driver.getElementText('xpath', getSwagbucksBasePath() + "3]/div[1]/div[1]/main/h1", wait=2)
-        if "Earn Every" in description: 
-            openAndCloseInboxItem(driver)
-        elif "Discover Daily Interests" in description:
-            num = 0
-            while num < 4:  openAndCloseInboxItem(driver); num += 1
+        if description:
+            if "Earn Every" in description: 
+                openAndCloseInboxItem(driver)
+            elif "Discover Daily Interests" in description:
+                num = 0
+                while num < 4:  
+                    openAndCloseInboxItem(driver); num += 1
         if not driver.getElementAndClick('xpath', getSwagbucksBasePath() + "3]/div[1]/div[1]/main/div[3]/div[2]/div[2]", wait=2): # delete
             driver.getElementAndClick('xpath', getSwagbucksBasePath() + '3]/div[1]/div[1]/main/div/div[2]/div/div[3]/div[1]/div/span') # checkbox
             driver.getElementAndClick('id', 'deleteMessageCta') # delete
@@ -175,7 +180,7 @@ def swagbucksSearch(driver, log=getLogger()):
             break
         else:
             time.sleep(1)
-            closePopUps(driver)
+            closeSwagbucksPopUps(driver)
             driver.getElementAndClick('id', 'sbLogoLink')
             time.sleep(1)
             while search_term1 is None: search_term1 = RandomWords().get_random_word()
@@ -191,6 +196,7 @@ def getSwagBucksBalance(driver):
         return rawBalance.replace('SB', '').replace(',', '')
 
 def claimSwagBucksRewards(driver, account):
+    account.setBalance(getSwagBucksBalance(driver))
     if int(account.balance) < 10030:
         print('Not enough Swagbucks to redeem')
         return False
@@ -207,9 +213,9 @@ def runSwagbucks(driver, runAlu, account, book, runSearch=False, log=getLogger()
     locateSwagBucksWindow(driver)
     if runAlu:  runAlusRevenge(driver)
     dailyPoll(driver)
-    swagbucksInbox(driver)
-    toDoList(driver)
-    # swagBuckscontentDiscovery(driver)
+    # swagbucksInbox(driver)
+    swagBucksToDoList(driver)
+    swagBuckscontentDiscovery(driver)
     account.setBalance(getSwagBucksBalance(driver))
     book.updateMRBalance(account)
     if runSearch:   swagbucksSearch(driver)
@@ -218,11 +224,8 @@ def runSwagbucks(driver, runAlu, account, book, runSearch=False, log=getLogger()
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = GnuCash('Finance')
-    Swagbucks = Security("Swagbucks", book)
-    # locateSwagBucksWindow(driver)
-    swagBuckscontentDiscovery(driver)
-    driver.closeWindowsExcept([':8000/'])
-    book.closeBook()
-            
-    
+    # book = GnuCash('Finance')
+    # Swagbucks = Security("Swagbucks", book)
+    locateSwagBucksWindow(driver)
+    dailyPoll(driver)
+    # book.closeBook()

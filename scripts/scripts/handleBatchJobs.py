@@ -7,6 +7,7 @@ if __name__ == '__main__' or __name__ == "handleBatchJobs":
     from DailyBank import getDailyBankAccounts, runDailyBank
     from Tellwut import runTellwut
     from Swagbucks import runSwagbucks
+    from InboxDollars import runInboxDollars
     from Functions.GeneralFunctions import setDirectory, getStartAndEndOfDateRange, getLogger
     from Classes.GnuCash import GnuCash
     from Classes.WebDriver import Driver
@@ -36,6 +37,9 @@ def runScripts(scripts, log=getLogger()):
                 dateRange = getStartAndEndOfDateRange(timeSpan=7)
                 gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
                 if runDailyBank(accounts, book, jointBook, gnuCashTransactions, dateRange):
+                    scriptResult = True
+            elif script == 'InboxDollars':
+                if runInboxDollars(driver, USD("InboxDollars", book), book):
                     scriptResult = True
             elif script == 'Test':
                 driver.openNewWindow("http://127.0.0.1:8000/scripts/tellwut")

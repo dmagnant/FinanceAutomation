@@ -19,18 +19,20 @@ def locateBoAWindowAndOpenAccount(driver, account):
     else:           driver.webDriver.switch_to.window(found); time.sleep(1)
         
 def boALogin(driver, account):
-    def getUserNameElement():       return driver.getElement('id', "onlineId1")
+    print(f'Account: {account}')
+    def getUserNameElement():       return driver.getElement('xpath', "/html/body/div[1]/div/div/section[2]/div/div/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/form/div[1]/div/div[1]/div[2]/div/select", wait=2)
     def getPassWordElement():       return driver.getElement('id', "passcode1")
     def clickLoginButton():         return driver.getElementAndClick('id', 'signIn')
     
     print(f'getting account: {account}')
     driver.openNewWindow('https://www.bankofamerica.com/')
+    time.sleep(2)
     username = getUserNameElement()
     username.click()
     # username.send_keys(getUsername('BoA CC'))
     time.sleep(3)
     password = getPassWordElement()
-    password.send_keys(getPassword('BoA CC'))
+    # password.send_keys(getPassword('BoA CC'))
     clickLoginButton()
     if driver.getElement('id', "signin-message", wait=2):
         driver.getElementAndSendKeys('id', 'onlineId1', getUsername('BoA CC'))
@@ -46,7 +48,7 @@ def boALogin(driver, account):
         driver.getElementAndClick('xpath', "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/fieldset/div[2]/div/div[1]/input")
         driver.getElementAndClick('xpath', "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/a[1]/span")
     driver.getElementAndClick('xpath', "//*[@id='sasi-overlay-module-modalClose']/span[1]", wait=2) # close pop-up
-    partialLink = 'Travel Rewards Visa Signature - 8955' if 'Joint' in account else 'Customized Cash Rewards Visa Signature - 5700'
+    partialLink = 'Travel Rewards Visa Signature - 8955' if 'joint' in account.lower() else 'Customized Cash Rewards Visa Signature - 5700'
     driver.getElementAndClick('partial_link_text', partialLink)
     # time.sleep(3)
 
@@ -72,33 +74,32 @@ def claimBoARewards(driver, account):
         driver.getElementAndClick('xpath', "/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[2]/a") # View/Redeem
         driver.getElementAndClick('id', 'redeemButton') # redeem points
         driver.switchToLastWindow()
-        # time.sleep(1)
-        driver.getElementAndClick('xpath', "/html/body/main/div/div[2]/div[1]/div[1]/div/div[2]/div/div[1]/div[3]/a") # redeem
+        time.sleep(1)
+        driver.getElementAndClick('xpath', "/html/body/main/div/div[2]/div[1]/div[1]/div/div[2]/div/div[1]/div[3]/a", wait=2) # redeem
+        driver.webDriver.refresh()
         rawAvailablePoints = driver.getElementText('id', 'zsummary_availablepoints', allowFail=False)
         if not rawAvailablePoints:
             return False
-        availablePoints = rawAvailablePoints.replace(',','')
-        if int(availablePoints) >= 2500:
+        availablePoints = int(rawAvailablePoints.replace(',',''))
+        if availablePoints >= 2500:
             remainingPoints = availablePoints
             num = 1
-            if int(availablePoints) > 0:
-                while remainingPoints:
-                    driver.getElementAndClick('xpath', "/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[6]/label/input") # select to redeem
-                    rawRemainingPoints = driver.getElementText('id', 'remainingpoints', allowFail=False)
-                    if not rawRemainingPoints:
-                        return False
-                    remainingPoints = rawRemainingPoints.replace(',','')
-                    num += 2
-                    availablePoints = remainingPoints
-                driver.getElementAndClick('xpath', "/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[7]/div/input[2]") # "enter points to redeem"
-                backspaces = 8
-                while backspaces > 0:
-                    driver.getElementAndSendKeys('xpath', "/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[7]/div/input[2]", Keys.BACKSPACE)
-                    backspaces -= 1
-                driver.getElementAndSendKeys('xpath', "/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[7]/div/input[2]", availablePoints)
-                driver.getElementAndClick('xpath', "/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[7]/div/input[3]") # update
-                driver.getElementAndClick('xpath', "/html/body/main/div/div[2]/div/div[1]/div/div[2]/table/tbody/tr[7]/td/div/input") # request travel credit
-                driver.getElementAndClick('xpath', "/html/body/div[2]/div[2]/div[1]/div[1]/div[4]/input[1]") # complete redemption
+            while remainingPoints:
+                redemptionPointsNeeded = driver.getElementText('xpath', f"/html/body/main/div/div[2]/div/div[2]/div/form/div[2]/table/tbody/tr[{str(num)}]/td[5]/span", allowFail=False).replace(',','')
+                driver.getElementAndClick('xpath', "/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[6]/label/input") # select to redeem
+                if int(redemptionPointsNeeded) > remainingPoints:
+                    driver.getElementAndClick('xpath', "/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[7]/div/input[2]") # "enter points to redeem"
+                    backspaces = 8
+                    while backspaces > 0:
+                        driver.getElementAndSendKeys('xpath', "/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[7]/div/input[2]", Keys.BACKSPACE)
+                        backspaces -= 1
+                    driver.getElementAndSendKeys('xpath', "/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[7]/div/input[2]", str(remainingPoints))
+                    driver.getElementAndClick('xpath', "/html/body/main/div/div[2]/div/div[2]/div/form/div/table/tbody/tr[" + str(num) + "]/td[7]/div/input[3]") # update
+                    driver.getElementAndClick('xpath', "/html/body/main/div/div[2]/div/div[1]/div/div[2]/table/tbody/tr[7]/td/div/input") # request travel credit
+                    driver.getElementAndClick('xpath', "/html/body/div[2]/div[2]/div[1]/div[1]/div[4]/input[1]") # complete redemption
+                    break
+                remainingPoints = remainingPoints - int(redemptionPointsNeeded)
+                num += 2
     else:
         driver.getElementAndClick('xpath', "/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[3]/a") # View/Redeem
         time.sleep(5)
@@ -130,16 +131,17 @@ def importBoATransactions(account, boAActivity, book, gnuCashTransactions):
             continue
         elif 'AMAZON' in rawDescription.upper() or 'AMZN' in rawDescription.upper():
             toAccount = book.getGnuAccountFullName('Amazon')
+        elif 'PROGRESSIVE' in rawDescription.upper():
+            toAccount = book.getGnuAccountFullName('Car Insurance')
         if toAccount == 'Expenses:Other':
             for i in ['PICK N SAVE', 'KETTLE RANGE', 'WHOLE FOODS', 'WHOLEFDS', 'TARGET', 'MINI MARKET MILWAUKEE', 'KAINTH']:
                 if i in rawDescription.upper():                        
                     toAccount = book.getGnuAccountFullName('Groceries')
                     break
-            for i in ['MCDONALD', 'JIMMY JOHN', 'COLECTIVO', "KOPP'S CUSTARD", 'MAHARAJA', 'STARBUCKS', 'TACO BELL']:
+            for i in ['MCDONALD', 'JIMMY JOHN', 'COLECTIVO', "WWW.KOPPS", 'MAHARAJA', 'STARBUCKS', 'TACO BELL']:
                 if i in rawDescription.upper():                        
                     toAccount = book.getGnuAccountFullName("Bars & Restaurants")
                     break
-        if toAccount == 'Expenses:Other':
             if account.name == 'BoA':
                 if "CASH REWARDS STATEMENT CREDIT" in rawDescription.upper():
                     description = "BoA CC Rewards"
@@ -161,6 +163,10 @@ def importBoATransactions(account, boAActivity, book, gnuCashTransactions):
                     toAccount = book.getGnuAccountFullName('Travel') + ':Ride Services'
                 elif 'CHEWY' in description.upper():
                     toAccount = book.getGnuAccountFullName('Pet')
+                elif 'HOMEOWNERS INSURANCE' in description.upper():
+                    toAccount = book.getGnuAccountFullName('Home Insurance')
+                elif "TECH WAY AUTO SERV" in rawDescription.upper():   
+                    toAccount = book.getGnuAccountFullName('Car Maintenance')
         if toAccount == 'Expenses:Other':   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)
@@ -188,18 +194,19 @@ def runBoA(driver, account, book):
 #     book.closeBook()
     
 if __name__ == '__main__':
-    SET_ACCOUNT_VARIABLE = "BoA" # BoA or BoA-joint
+    SET_ACCOUNT_VARIABLE = "BoA-joint" # BoA or BoA-joint
     driver = Driver("Chrome")
-    book = GnuCash('Finance')
+    book = GnuCash('Home')
     account = USD(SET_ACCOUNT_VARIABLE, book)
     locateBoAWindowAndOpenAccount(driver, account.name)
-    dateRange = getStartAndEndOfDateRange(timeSpan=60)
-    gnuCashTransactions = book.getTransactionsByDateRange(dateRange)    
-    account.setBalance(getBoABalance(driver, account.name))
-    boAActivity = exportBoATransactions(driver, account.name, datetime.today())
+    # dateRange = getStartAndEndOfDateRange(timeSpan=60)
+    # gnuCashTransactions = book.getTransactionsByDateRange(dateRange)    
+    # account.setBalance(getBoABalance(driver, account.name))
+    # boAActivity = exportBoATransactions(driver, account.name, datetime.today())
     claimBoARewards(driver, account.name)
-    importBoATransactions(account, boAActivity, book, gnuCashTransactions)
-    account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
-    account.locateAndUpdateSpreadsheet(driver)
-    if account.reviewTransactions:  book.openGnuCashUI()
-    account.getData()
+    # importBoATransactions(account, boAActivity, book, gnuCashTransactions)
+    # account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
+    # account.locateAndUpdateSpreadsheet(driver)
+    # if account.reviewTransactions:  book.openGnuCashUI()
+    # account.getData()
+    book.closeBook()

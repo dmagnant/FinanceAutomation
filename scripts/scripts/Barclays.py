@@ -132,16 +132,10 @@ def runBarclays(driver, account, book):
     if account.reviewTransactions:  book.openGnuCashUI()
 
 if __name__ == '__main__':
-    # driver = Driver("Chrome")
-    # book = GnuCash('Finance')
-    # Barclays = USD("Barclays", book)    
-    # runBarclays(driver, Barclays, book)
-    # Barclays.getData()
-    # book.closeBook()
-    
-    
     driver = Driver("Chrome")
     book = GnuCash('Finance')
-    Barclays = USD("Barclays", book)   
-    Barclays.setBalance(float(116.22))
+    Barclays = USD("Barclays", book)    
+    # runBarclays(driver, Barclays, book)
+    # Barclays.getData()
     Barclays.locateAndUpdateSpreadsheet(driver)
+    # book.closeBook()

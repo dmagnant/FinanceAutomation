@@ -28,6 +28,7 @@ def getSymbolByName(self):
         case 'employee benefit index':                              return 'M038'
         case 'extended market index':                               return 'M036'
         case 'total stock market':                                  return '8585'
+        case 'sofi sgov':                                           return 'SGOV'
         case 'fidelityiragme' | 'fidelityrothiragme' | 'fidelitybrokeragegme':          return 'GME'
         case 'fidelityiravti' | 'fidelityrothiravti' | 'fidelitybrokeragevti':          return 'VTI'
         case 'fidelityiravxus' | 'fidelityrothiravxus':                                 return 'VXUS'        
@@ -128,7 +129,10 @@ class USD(Asset):
         if self.reviewTransactions: print(f'Review Transactions: \n 'f'{self.reviewTransactions}')
         
     def locateAndUpdateSpreadsheet(self, driver):
-        balance = 0.00 if float(self.balance) < 0 else float(self.balance) * -1
+        if not self.balance or float(self.balance) < 0:
+            balance = 0.00
+        else:
+            balance = float(self.balance) * -1                              
         if self.value: balance = self.value
         today = datetime.today()
         month, year = today.month, today.year
@@ -138,17 +142,17 @@ class USD(Asset):
             Home = Spreadsheet('Home', str(year) + ' Balance', driver)
             Home.updateSpreadsheet(self.name, month, balance, modifiedCC=True)
         else:
-            CheckingBalance = Spreadsheet('Finances', str(year))
+            CheckingBalance = Spreadsheet('Finances', str(year), driver)
             column = CheckingBalance.projectedColumns[month-1]
             row = CheckingBalance.projectedRows[month-1]
             while True:
                 description = CheckingBalance.readCell(column+str(row))
                 if description and self.name in description:
+                    CheckingBalance.writeCell(chr(ord(column) + 1) + str(row), balance)
+                    CheckingBalance.writeCell(chr(ord(column) + 4) + str(row), balance)
                     break
                 else:   row+=1
-            CheckingBalance.writeCell(chr(ord(column) + 1) + str(row), balance)
-            CheckingBalance.writeCell(chr(ord(column) + 4) + str(row), balance)
-    
+
     def getInterestTotalForDateRange(self, book):
         interestAccount = book.getGnuAccountFullName('Interest')
         dateRange = getStartAndEndOfDateRange(timeSpan='all', minDate=datetime(2022,1,1,0,0,0).date())

@@ -5,7 +5,7 @@ if __name__ == '__main__' or __name__ == "DailyBank":
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
     from Classes.Spreadsheet import Spreadsheet
-    from Functions.GeneralFunctions import getStartAndEndOfDateRange, getStockPrice
+    from Functions.GeneralFunctions import getStartAndEndOfDateRange
     from Paypal import checkUncategorizedPaypalTransactions
     from Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from Sofi import runSofi, sofiLogout, getSofiAccounts
@@ -17,7 +17,7 @@ else:
     from .Classes.WebDriver import Driver
     from .Classes.GnuCash import GnuCash
     from .Classes.Spreadsheet import Spreadsheet
-    from .Functions.GeneralFunctions import getStartAndEndOfDateRange, getStockPrice
+    from .Functions.GeneralFunctions import getStartAndEndOfDateRange
     from .Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from .Sofi import runSofi, sofiLogout, getSofiAccounts
     from. Paypal import runPaypal, checkUncategorizedPaypalTransactions
@@ -40,7 +40,7 @@ def runDailyBank(accounts, personalBook, jointBook, gnuCashTransactions, dateRan
     Home = Spreadsheet('Home', '2025 Balance', driver)
     runSofi(driver, accounts['Sofi'], personalBook, gnuCashTransactions, dateRange)
     runFidelityDaily(driver, accounts['Fidelity'], personalBook, gnuCashTransactions, dateRange)
-    # runWebullDaily(driver, accounts['Webull'], personalBook, gnuCashTransactions, dateRange)
+    runWebullDaily(driver, accounts['Webull'], personalBook, gnuCashTransactions, dateRange)
     # runAlly(driver, accounts['Ally'], jointBook, gnuCashTransactions, dateRange)
     presearchRewardsRedemptionAndBalanceUpdates(driver, accounts['Presearch'], personalBook, Finances)
     driver.findWindowByUrl(Finances.url)

@@ -18,6 +18,18 @@
                 gnuBalance: <b>${{mrAccounts.AmazonGC.gnuBalance}}</b><br>
             </div>
             <div style="width: 14%; display:table-cell">
+                <b><a href="{% url 'InboxDollars' %}" target="_blank">InboxDollars</a></b><br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="inboxDollarsMain">Main</button>
+                    <button type="submit" name="inboxDollarsLogin">Login</button>
+                    <button type="submit" name="inboxDollarsBalance">Balance</button>
+                    <button type="submit" name="inboxDollarsRewards">Rewards</button><br><br>
+                </form>
+                &emsp;&thinsp;Balance: <b>{{mrAccounts.InboxDollars.gnuBalance}}</b><br>
+                Redeem at: $100<br>
+            </div>
+            <div style="width: 14%; display:table-cell">
                 <b><a href="{% url 'Paidviewpoint' %}" target="_blank">Paidviewpoint</a></b><br><br>
                 <form method="post">
                     {% csrf_token %}
@@ -40,7 +52,7 @@
                     <button type="submit" name="pineconeRewards">Rewards</button><br><br>
                 </form>
                 &emsp;&thinsp;Balance: <b>{{mrAccounts.Pinecone.gnuBalance}}</b><br>
-                Redeem at: 300<br>
+                Redeem at: 1000<br>
             </div>
             <div style="width: 14%; display:table-cell">
                 <b><a href="{% url 'Presearch' %}" target="_blank">Presearch</a></b><br><br>
@@ -68,7 +80,7 @@
                     <button type="submit" name="swagbucksRewards">Rewards</button><br><br>
                 </form>
                 &emsp;&thinsp;Balance: <b>{{mrAccounts.Swagbucks.gnuBalance}}</b><br>
-                Redeem at: 1000<br><br>
+                Redeem at: 10000<br><br>
                 <form method="post">
                     {% csrf_token %}
                     <button type="submit" name="swagbucksInbox">Inbox</button>
@@ -87,7 +99,7 @@
                     <button type="submit" name="tellwutRewards">Rewards</button><br><br>
                 </form>
                 &emsp;&thinsp;Balance: <b>{{mrAccounts.Tellwut.gnuBalance}}</b><br>
-                Redeem at: 4000<br>
+                Redeem at: 11000<br>
             </div>
         </div>
     </div>

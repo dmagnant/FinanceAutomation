@@ -21,6 +21,7 @@ urlpatterns = [
     path('fidelity', views.fidelity, name="Fidelity"),
     path('gamestopCC', views.gamestopCC, name="GamestopCC"),
     path('healthEquity', views.healthEquity , name="HealthEquity"),
+    path('inboxDollars', views.inboxDollars, name="InboxDollars"),
     path('ioPay', views.ioPay, name="IoPay"),
     path('kraken', views.kraken, name="Kraken"),
     path('ledger', views.ledger, name="Ledger"),

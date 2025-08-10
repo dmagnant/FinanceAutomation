@@ -14,7 +14,11 @@ else:
     from .Functions.GeneralFunctions import (getPassword, getUsername, getStartAndEndOfDateRange)
 
 def getAmexBasePath():  return '/html/body/div[1]/div[2]/main/section/div[3]/div/div/div/div/div/div/div[2]/div/div[2]/div/div/div'
-            
+
+def closeAmexPopUps(driver):
+    elementPath = 'NEED TO ENTER'
+    driver.getElementAndClick('xpath', elementPath, allowFail=True, wait=0.3) # close pop-up
+
 def locateAmexWindow(driver):
     found = driver.findWindowByUrl("americanexpress.com")
     if not found:   amexLogin(driver)
@@ -22,8 +26,8 @@ def locateAmexWindow(driver):
         
 def amexLogin(driver):
     driver.openNewWindow('https://www.americanexpress.com/en-us/account/login?inav=iNavLnkLog')
-    driver.getElementAndSendKeys('id', "eliloUserID", getUsername('Amex'))
-    driver.getElementAndSendKeys('id', "eliloPassword", getPassword('Amex'))
+    # driver.getElementAndSendKeys('id', "eliloUserID", getUsername('Amex'))
+    # driver.getElementAndSendKeys('id', "eliloPassword", getPassword('Amex'))
     driver.getElementAndClick('id', "loginSubmit")
     # time.sleep(1)
     driver.getElementAndClick('xpath', "/html/body/div[1]/div[5]/div/div/div/div/div/div[2]/div/div/div/div/div[1]/div/a/span/span", wait=2) # close pop-up
@@ -116,18 +120,11 @@ def runAmex(driver, account, book):
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:  book.openGnuCashUI()
 
-# if __name__ == '__main__':
-#     driver = Driver("Chrome")
-#     book = GnuCash('Finance')
-#     Amex = USD("Amex", book)
-#     runAmex(driver, Amex, book)
-#     Amex.getData()
-#     book.closeBook()
-
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    # book = GnuCash('Finance')
-    # Amex = USD("Amex", book)
-    # Amex.setBalance(getAmexBalance(driver))
-    # claimAmexRewards(driver, Amex)
-
+    book = GnuCash('Finance')
+    Amex = USD("Amex", book)
+    # runAmex(driver, Amex, book)
+    # Amex.getData()
+    # book.closeBook()
+    Amex.locateAndUpdateSpreadsheet(driver)

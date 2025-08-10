@@ -7,13 +7,11 @@ if __name__ == '__main__' or __name__ == "Tellwut":
     from Classes.Asset import Security
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import showMessage, getLogger
-    from Classes.WebDriverContext import WebDriverContext
 else:
     from .Functions.GeneralFunctions import showMessage, getLogger
     from .Classes.Asset import Security
     from .Classes.GnuCash import GnuCash
     from .Classes.WebDriver import Driver
-    from .Classes.WebDriverContext import WebDriverContext
     
 def locateTellWutWindow(driver):
     found = driver.findWindowByUrl("tellwut.com")
@@ -23,9 +21,9 @@ def locateTellWutWindow(driver):
 
 def tellwutLogin(driver):
     driver.openNewWindow('https://www.tellwut.com/')
-    driver.getElementAndClick('xpath', '/html/body/main/header/div[4]/button', wait=2) # LOGIN button           
+    driver.getElementAndClick('xpath', '/html/body/main/header/div[3]/div[2]/button', wait=2, allowFail=False) # LOGIN button
     time.sleep(1)
-    driver.getElementAndClick('xpath', "/html/body/div[1]/div/div/div/div[2]/form/button", wait=1) # LOGIN button (again)
+    driver.getElementAndClick('xpath', "/html/body/div[1]/div/div/div/div[2]/form/button", wait=1, allowFail=False) # LOGIN button (again)
         
 def getTellWutBalance(driver):
     locateTellWutWindow(driver)
@@ -58,8 +56,11 @@ def completeTellWutSurveys(driver):
         radio = clickButtons(driver, 'radio')
         checkbox = clickButtons(driver, 'checkbox')
         if not (radio or checkbox):
-            print('no questions found to answer on survey load, exiting')
-            break # no questions found to answer, exiting
+            if not driver.getElementLocateAndClick('partial_link_text', "NEXT POLL", wait=1): # NEXT POLL
+                print('no questions found to answer on survey load, exiting')
+                break # no questions found to answer, exiting
+            else: 
+                continue # skip survey with no questions
         while True:
             if not driver.getElementAndSendKeys('id', 'survey_form_submit', Keys.ENTER, wait=2): # Click Submit
                 print('no submit button found')

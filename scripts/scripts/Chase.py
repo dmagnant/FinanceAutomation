@@ -1,6 +1,7 @@
 import time, pyautogui, csv
 from datetime import datetime
 from decimal import Decimal
+from pygetwindow import PyGetWindowException
 
 if __name__ == '__main__' or __name__ == "Chase":
     from Classes.Asset import USD
@@ -21,8 +22,12 @@ def locateChaseWindow(driver):
 
 def activateChaseWindow(title):
     for w in pyautogui.getWindowsWithTitle("Google Chrome"):
-        if title in w.title.lower(): w.activate()
-
+        if title in w.title.lower(): 
+            try: 
+                w.activate()
+            except PyGetWindowException:
+                pass
+                
 def chaseLogin(driver):
     driver.openNewWindow('https://secure.chase.com/web/auth/#/logon/logon/chaseOnline?treatment=chase&lang=en')
     time.sleep(5)
@@ -104,7 +109,7 @@ def importChaseTransactions(account, chaseActivity, book, gnuCashTransactions):
         if "AUTOMATIC PAYMENT" in rawDescription.upper():                           
             continue
         elif "STATEMENT CREDIT" in rawDescription.upper() and float(amount) > 0:   
-            description = "Chase CC Rewards"
+            description = "Chase CC Rewards"    
             toAccount = book.getGnuAccountFullName('CC Rewards')  
         elif "BP#" in rawDescription.upper():                         
             toAccount = book.getGnuAccountFullName('Transportation') + ':Gas'            
@@ -130,18 +135,14 @@ def runChase(driver, account, book):
     
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = GnuCash('Finance')
-    Chase = USD("Chase", book)    
-    runChase(driver, Chase, book)
-    Chase.getData()
-    book.closeBook()
-    
-# if __name__ == '__main__':
-#     driver = Driver("Chrome")
-#     book = GnuCash('Finance')
-#     Chase = USD("Chase", book)
-#     chaseLogin(driver)
+    # book = GnuCash('Finance')
+    # Chase = USD("Chase", book)
+    # exportChaseTransactions(driver, datetime.today())  # This line is just to ensure the function is defined
+    # runChase(driver, Chase, book)
+    # book.closeBook()
 
 
-
-
+    from Classes.Spreadsheet import Spreadsheet
+    from datetime import datetime
+    year = datetime.today().year
+    CheckingBalance = Spreadsheet('Finances', str(year), driver)
