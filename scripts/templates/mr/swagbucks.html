@@ -7,15 +7,16 @@
             <div style="width: 20%; display:table-cell">
                 <form method="post">
                     {% csrf_token %}
-                    <input type="checkbox" name="Run Alu" checked="yes">Run Alu?</input>
+                    <input type="checkbox" name="DailyGame" checked="yes">Run Daily Game?</input>
                     <button type="submit" name="main">Main</button>
                 </form>
                 <form method="post">
                     {% csrf_token %}
                     <button type="submit" name="login">Login</button><br>
-                    <button type="submit" name="alu">Alus Revenge</button><br>
+                    <button type="submit" name="dailyGame">Daily Game</button><br>
                     <button type="submit" name="balance">Balance</button><br>
                     <button type="submit" name="content">Content Discovery</button><br>
+                    <button type="submit" name="mobile">Mobile</button><input type="text" placeholder="Integer value" name="amount" size=8><br>
                     <button type="submit" name="search">Search</button><br>
                     <button type="submit" name="rewards">Rewards</button><br>
                     <button type="submit" name="inbox">Inbox</button>

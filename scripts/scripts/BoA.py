@@ -1,6 +1,7 @@
 import os, time, csv
 from decimal import Decimal
-from datetime import datetime
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "BoA":
@@ -19,12 +20,10 @@ def locateBoAWindowAndOpenAccount(driver, account):
     else:           driver.webDriver.switch_to.window(found); time.sleep(1)
         
 def boALogin(driver, account):
-    print(f'Account: {account}')
-    def getUserNameElement():       return driver.getElement('xpath', "/html/body/div[1]/div/div/section[2]/div/div/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/form/div[1]/div/div[1]/div[2]/div/select", wait=2)
+    def getUserNameElement():       return driver.getElement('xpath', "/html/body/div[1]/div/div/section[2]/div/div/div[2]/div[2]/div[2]/div[1]/div[1]/div[1]/form/div[1]/div/div[1]/div[2]/div", wait=2)
     def getPassWordElement():       return driver.getElement('id', "passcode1")
     def clickLoginButton():         return driver.getElementAndClick('id', 'signIn')
     
-    print(f'getting account: {account}')
     driver.openNewWindow('https://www.bankofamerica.com/')
     time.sleep(2)
     username = getUserNameElement()
@@ -72,11 +71,14 @@ def claimBoARewards(driver, account):
     locateBoAWindowAndOpenAccount(driver, account)
     if 'joint' in account:
         driver.getElementAndClick('xpath', "/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[2]/a") # View/Redeem
+        driver.waitForWebPageLoad(5)
+        time.sleep(2)
         driver.getElementAndClick('id', 'redeemButton') # redeem points
-        driver.switchToLastWindow()
-        time.sleep(1)
+        time.sleep(12)
+        driver.findWindowByUrl("managerewardsonline.bankofamerica.com")
         driver.getElementAndClick('xpath', "/html/body/main/div/div[2]/div[1]/div[1]/div/div[2]/div/div[1]/div[3]/a", wait=2) # redeem
-        driver.webDriver.refresh()
+        driver.waitForWebPageLoad(5)
+        time.sleep(2)
         rawAvailablePoints = driver.getElementText('id', 'zsummary_availablepoints', allowFail=False)
         if not rawAvailablePoints:
             return False
@@ -133,6 +135,8 @@ def importBoATransactions(account, boAActivity, book, gnuCashTransactions):
             toAccount = book.getGnuAccountFullName('Amazon')
         elif 'PROGRESSIVE' in rawDescription.upper():
             toAccount = book.getGnuAccountFullName('Car Insurance')
+        elif 'BP#' in rawDescription.upper():
+            toAccount = book.getGnuAccountFullName('Cars') + ':Gas'
         if toAccount == 'Expenses:Other':
             for i in ['PICK N SAVE', 'KETTLE RANGE', 'WHOLE FOODS', 'WHOLEFDS', 'TARGET', 'MINI MARKET MILWAUKEE', 'KAINTH']:
                 if i in rawDescription.upper():                        
@@ -170,6 +174,10 @@ def importBoATransactions(account, boAActivity, book, gnuCashTransactions):
         if toAccount == 'Expenses:Other':   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)
+    if 'joint' in account.name: # add future transaction for boa joint bill
+        splits = [{'amount': -Decimal(account.balance), 'account':book.getGnuAccountFullName('Ally')}, {'amount': Decimal(account.balance), 'account':fromAccount}]
+        postDate = datetime.today().date().replace(day=13) + relativedelta(months=1)
+        book.writeUniqueTransaction(account, existingTransactions, postDate, 'BoA CC', splits)
 
 def runBoA(driver, account, book):
     locateBoAWindowAndOpenAccount(driver, account.name)
@@ -183,30 +191,15 @@ def runBoA(driver, account, book):
     account.locateAndUpdateSpreadsheet(driver)
     if account.reviewTransactions:  book.openGnuCashUI()
 
-# if __name__ == '__main__':
-#     SET_ACCOUNT_VARIABLE = "BoA-joint" # BoA or BoA-joint
-#     bookName = 'Finance' if SET_ACCOUNT_VARIABLE == 'Personal' else 'Home'
-#     book = GnuCash(bookName)
-#     driver = Driver("Chrome")
-#     BoA = USD(SET_ACCOUNT_VARIABLE, book)
+if __name__ == '__main__':
+    SET_ACCOUNT_VARIABLE = "BoA-joint" # BoA or BoA-joint
+    bookName = 'Finance' if SET_ACCOUNT_VARIABLE == 'Personal' else 'Home'
+    book = GnuCash(bookName)
+    driver = Driver("Chrome")
+    BoA = USD(SET_ACCOUNT_VARIABLE, book)
 #     runBoA(driver, BoA, book)
 #     BoA.getData()
 #     book.closeBook()
-    
-if __name__ == '__main__':
-    SET_ACCOUNT_VARIABLE = "BoA-joint" # BoA or BoA-joint
-    driver = Driver("Chrome")
-    book = GnuCash('Home')
-    account = USD(SET_ACCOUNT_VARIABLE, book)
-    locateBoAWindowAndOpenAccount(driver, account.name)
-    # dateRange = getStartAndEndOfDateRange(timeSpan=60)
-    # gnuCashTransactions = book.getTransactionsByDateRange(dateRange)    
-    # account.setBalance(getBoABalance(driver, account.name))
-    # boAActivity = exportBoATransactions(driver, account.name, datetime.today())
-    claimBoARewards(driver, account.name)
-    # importBoATransactions(account, boAActivity, book, gnuCashTransactions)
-    # account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
-    # account.locateAndUpdateSpreadsheet(driver)
-    # if account.reviewTransactions:  book.openGnuCashUI()
-    # account.getData()
+    claimBoARewards(driver, BoA.name)
     book.closeBook()
+

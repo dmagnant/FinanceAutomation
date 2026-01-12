@@ -34,8 +34,9 @@ def getMonthlyAccounts(type, personalBook, jointBook):
         CryptoPortfolio = USD("CryptoCurrency", personalBook)
         Cardano = Security("Cardano", personalBook)
         ledgerAccounts = getLedgerAccounts(personalBook)
-        IoTex = Security("IoTex", personalBook)   
-        accounts = {'CryptoPortfolio': CryptoPortfolio, 'Cardano': Cardano,'IoTex': IoTex, 'ledgerAccounts': ledgerAccounts}
+        IoTex = Security("IoTex", personalBook)
+        Presearch = Security("Presearch", personalBook)
+        accounts = {'CryptoPortfolio': CryptoPortfolio, 'Cardano': Cardano,'IoTex': IoTex, 'ledgerAccounts': ledgerAccounts, 'Presearch': Presearch}
     return accounts
 
 def updatePensionBalanceAndCost(driver, book, newBalance):
@@ -68,7 +69,7 @@ def loginToUSDAccounts(driver):
     locateOptumWindow(driver)
  
 def loginToCryptoAccounts(driver):
-    locateEternlWindow(driver)
+    # locateEternlWindow(driver)
     locateIoPayWindow(driver)
     
 def runUSD(driver, accounts, personalBook, gnuCashTransactions, lastMonth):
@@ -84,8 +85,9 @@ def runUSD(driver, accounts, personalBook, gnuCashTransactions, lastMonth):
 def runCrypto(driver, accounts, personalBook):
     loginToCryptoAccounts(driver)
     Finances = Spreadsheet('Finances', 'Investments', driver)
-    runEternl(driver, accounts['Cardano'], personalBook, Finances)
+    # runEternl(driver, accounts['Cardano'], personalBook, Finances)
     runIoPay(driver, accounts['IoTex'], personalBook, Finances)
+    Finances.updateCryptoInvestmentsMonthly(personalBook, accounts)
     accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getGnuAccountBalance(accounts['CryptoPortfolio'].gnuAccount))
     driver.findWindowByUrl("/scripts/monthly")
 
@@ -131,4 +133,3 @@ if __name__ == '__main__':
     # runUSD(driver, today, usdAccounts, personalBook)
     
     loginToUSDAccounts(driver)
-    Finances = Spreadsheet('Finances', 'Investments', driver)

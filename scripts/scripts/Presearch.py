@@ -50,6 +50,7 @@ def claimPresearchRewards(driver):
     locatePresearchWindow(driver)
     driver.webDriver.get("https://nodes.presearch.org/dashboard")
     unclaimedRaw = driver.getElementText('xpath', getPresearchBasePath() + '2]/div[3]/div[2]/div/div/div[1]/h2')
+    if not unclaimedRaw:   return False
     if unclaimedRaw:
         unclaimed = float(unclaimedRaw.strip(' PRE'))
     else:
@@ -65,6 +66,7 @@ def claimPresearchRewards(driver):
     if availToStakeRaw:
         return float(availToStakeRaw.strip(' PRE'))
     else:
+        print('failed to find available to stake')
         return False
 
 def stakePresearchRewards(driver, availToStake):
@@ -134,5 +136,7 @@ if __name__ == '__main__':
     locatePresearchWindow(driver)
     Presearch = Security("Presearch", book)
     presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book, Finances)
-    Presearch.getData()
     book.closeBook()
+
+
+

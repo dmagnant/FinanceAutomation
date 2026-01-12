@@ -34,11 +34,15 @@ def configureDriverOptions(browser, asUser=True):
         options.add_experimental_option("debuggerAddress", "localhost:9222")
         options.add_argument("--no-sandbox")
         if asUser:  options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\Microsoft\Edge\User Data")
-    else:        
+    else:
         options = webdriver.ChromeOptions()
         options.debugger_address="localhost:9223"
-        options.add_argument("--disable-gpu")
         options.add_argument("--log-level=3")
+        options.add_argument("--remote-allow-origins=*")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--no-first-run")
+        options.add_argument("--no-default-browser-check")
+        # options.add_experimental_option("detach", True) # keep browser open after script ends (doesn't work with remote debugging)
     if browser == "Chrome":
         options.set_capability("pageLoadStrategy", "eager")
         options.set_capability("timeouts", {"implicit":1000})
@@ -82,11 +86,9 @@ def openWebDriver(browser, asUser=True):
 
 class Driver:
     "this is a class for creating webdriver with implicit wait"
-    def __init__(self, browser, asUser=True, session_id=None):
+    def __init__(self, browser, asUser=True):
         self.webDriver = openWebDriver(browser, asUser)
         self.webDriver.implicitly_wait(10)  # Increase implicit wait
-        # self.webDriver.set_page_load_timeout(30)  # Increase page load timeout
-        # self.webDriver.set_script_timeout(30)  # Increase script timeout
 
     def findWindowByUrl(self, url):
         try:
@@ -99,8 +101,10 @@ class Driver:
                     if url in self.webDriver.current_url:   
                         return self.webDriver.current_window_handle
             self.webDriver.switch_to.window(currentWindow)
+            print(f'No window found for URL: {url}')
             return False
         except NoSuchWindowException:
+            print(f'No window found for URL: {url}')
             return False
 
     def closeWindowsExcept(self, urls, displayWindowHandle=''):
@@ -119,16 +123,32 @@ class Driver:
                         found = True
                         break
             if found:   index += 1
-            else:   self.webDriver.close()
+            else:   
+                try:
+                    self.webDriver.close()
+                except WebDriverException:
+                    pass
         if displayWindowHandle: self.webDriver.switch_to.window(displayWindowHandle)
         else:   self.switchToLastWindow()
                 
-    def openNewWindow(self, url):
-        self.findWindowByUrl(self.webDriver.current_url)
-        self.webDriver.execute_script(f"window.open('')")
-        self.findWindowByUrl('about:blank')
+    def openNewWindow(self, url, wait=5):
+        try:
+            self.findWindowByUrl(self.webDriver.current_url)                
+            self.webDriver.execute_script(f"window.open('')")
+            self.findWindowByUrl('about:blank')
+            self.webDriver.get(url)
+            self.waitForWebPageLoad(wait)
+        except Exception as e:
+            print(f"Failed to open new window for URL {url}: {e}")
+            raise
+
+    def getURL(self, url, wait=3):
         self.webDriver.get(url)
-                
+        if not self.waitForURLToLoad(url, wait):
+            showMessage(f'Error: {url} did not load in {wait} seconds')
+            return False
+        return True
+
     def switchToLastWindow(self):
         self.webDriver.switch_to.window(self.webDriver.window_handles[len(self.webDriver.window_handles)-1])
 
@@ -140,18 +160,16 @@ class Driver:
             ActionChains(self.webDriver).move_to_element(element).perform()
             return element
         except (JavascriptException, ElementNotInteractableException):
-            print('unable to locate element')
+            print(f'unable to locate element: {element}')
         return False
 
-    def getElement(self, type, path, wait=5, allowFail=True, elementState='visible'):
+    def getElement(self, type, path, wait=3, allowFail=True, elementState='visible'):
         try:
             element = WebDriverWait(self.webDriver, wait).until(EC.element_to_be_clickable((ElementTypes[type].value,path)))
-            if element:
-                self.locateElementOnPage(element)
+            if element: self.locateElementOnPage(element)
             return element
         except (TimeoutException, StaleElementReferenceException):
-            if not allowFail:
-                print(f'Element needed but found: {path}')
+            if not allowFail:   print(f'Element needed but found: {path}')
             return False
     
     def clickElement(self, element, path):
@@ -174,48 +192,66 @@ class Driver:
             print(f'ElementNotInteractableException: {path}')
         return False
 
-    def getElementAndClick(self, type, path, wait=5, allowFail=True):
+    def getElementAndClick(self, type, path, wait=3, allowFail=True):
         element = self.getElement(type, path, wait, allowFail)
         if element:
             return self.clickElement(element, path)
         else:
             return False
         
-    def getElementText(self, type, path, wait=5, allowFail=True):
+    def getElementText(self, type, path, wait=3, allowFail=True):
         element = self.getElement(type, path, wait, allowFail)
         if element: return element.text
         else:       return False
 
-    def getElementText(self, type, path, wait=5, allowFail=True):
+    def getElementText(self, type, path, wait=3, allowFail=True):
         element = self.getElement(type, path, wait, allowFail)
         if element: 
             return element.text
         else:       
             return False
 
-    def getElementLocateAndClick(self, type, path, wait=5, allowFail=True):
+    def getElementLocateAndClick(self, type, path, wait=3, allowFail=True):
         element = self.getElement(type, path, wait, allowFail)
         if element: 
             self.locateElementOnPage(element)
             return self.clickElement(element, path)
         else:       return False
 
-    def getElementLocateAndSendKeys(self, type, path, keys, wait=5, allowFail=True):
+    def getElementLocateAndSendKeys(self, type, path, keys, wait=3, allowFail=True):
         element = self.getElement(type, path, wait, allowFail)
         if element: 
             self.locateElementOnPage(element)
             return self.sendKeysToElement(element, path, keys)
         else:       return False
 
-    def getElementAndSendKeys(self, type, path, keys, wait=5, allowFail=True):
+    def getElementAndSendKeys(self, type, path, keys, wait=3, allowFail=True):
         element = self.getElement(type, path, wait, allowFail)
         if element:
            return self.sendKeysToElement(element, path, keys)
         else:
             return False
 
-    def getElements(self, type, path, wait=5, allowFail=True):
+    def getElements(self, type, path, wait=3, allowFail=True):
         if self.getElement(type, path, wait, allowFail):
             return self.webDriver.find_elements(ElementTypes[type].value, path)
         else:
+            return False
+        
+    def waitForURLToLoad(self, URL, wait=5):
+        try:
+            WebDriverWait(self.webDriver, wait).until(EC.url_to_be(URL))
+            return True
+        except TimeoutException:
+            print(f'Timeout waiting for URL to load: {URL}')
+            return False
+        
+    def waitForWebPageLoad(self, wait=5):
+        try:
+            WebDriverWait(self.webDriver, wait).until(
+                lambda d: d.execute_script('return document.readyState') == 'complete'
+            )
+            return True
+        except TimeoutException:
+            print("Timeout: Web page did not finish loading.")
             return False

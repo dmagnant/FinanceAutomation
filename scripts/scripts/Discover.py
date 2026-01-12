@@ -24,7 +24,7 @@ def discoverLogin(driver):
     # driver.getElementAndSendKeys('id', 'userid-content',getUsername('Discover'))
     # driver.getElementAndSendKeys('id', 'password-content',getPassword('Discover'))
     # time.sleep(1)
-    driver.getElementAndClick('xpath', '/html/body/div[1]/main/div/div[1]/div/form/input[8]')
+    driver.getElementAndClick('xpath', '/html/body/div[1]/div/div/main/div/div/div/div/login-card-wc/div/form/div/div[4]/button') # Log In
     driver.getElementAndClick('xpath', "//*[@id='root']/div[4]/div/div/button/img", wait=2) # handle pop-up
 
 def getDiscoverBalance(driver):

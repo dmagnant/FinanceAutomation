@@ -9,12 +9,12 @@ if __name__ == '__main__' or __name__ == "HealthEquity":
     from Classes.WebDriver import Driver
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange,
-                                            showMessage, setDirectory)
+                                            showMessage, setDirectory, getUsername, getPassword)
 else:
     from .Classes.Asset import USD, Security
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import (getStartAndEndOfDateRange,
-                                             showMessage, setDirectory)    
+                                             showMessage, setDirectory, getUsername, getPassword)
 
 def locateHealthEquityWindow(driver):
     found = driver.findWindowByUrl("member.my.healthequity.com")
@@ -26,15 +26,23 @@ def closePopUps(driver):
     
 def healthEquitylogin(driver):
     driver.openNewWindow('https://member.my.healthequity.com/hsa/21895515-010')
-    if driver.getElementAndClick('id', 'ctl00_modulePageContent_txtUserIdStandard', wait=2):
-        driver.getElementAndClick('id', 'ctl00_modulePageContent_txtPassword')
+    driver.waitForWebPageLoad()
+    userNameElement = driver.getElement('id', 'ctl00_modulePageContent_txtUserIdStandard', wait=2)
+    if userNameElement:
+        userNameElement.clear()
+        driver.getElementAndSendKeys('id', 'ctl00_modulePageContent_txtUserIdStandard', getUsername('HealthEquity HSA'))
+        driver.getElementAndClick('id', 'ctl00_modulePageContent_btnSubmitUsername') # Continue
+        passwordElement = driver.getElement('id', 'ctl00_modulePageContent_txtPassword', wait=2)
+        passwordElement.click()
+        passwordElement.clear()
+        driver.getElementAndSendKeys('id', 'ctl00_modulePageContent_txtPassword', getPassword('HealthEquity HSA'))
         driver.getElementAndClick('id', 'ctl00_modulePageContent_btnLogin') # login
-        if driver.getElementAndClick('xpath', "//*[@id='sendEmailTextVoicePanel']/div[5]/span[1]/span/label/span/strong", wait=2): # send code to phone
+        if driver.getElementAndClick('xpath', "//*[@id='sendEmailTextVoicePanel']/div[5]/span[1]/span/label/span/strong", wait=1): # send code to phone
             driver.getElementAndClick('id', 'sendOtp') # Send confirmation code
             showMessage("Confirmation Code", "Enter code then click OK") # enter text code
             driver.getElementAndClick('xpath', "//*[@id='VerifyOtpPanel']/div[4]/div[1]/div/label/span") # Remember me
             driver.getElementAndClick('id', 'verifyOtp') # click Confirm
-        driver.getElementAndClick('xpath', "//*[@id='topmenu']/div[2]/a/span", wait=2) # Home button to bypass error
+        driver.getElementAndClick('xpath', "//*[@id='topmenu']/div[2]/a/span", wait=1) # Home button to bypass error
     closePopUps(driver)
 
 def getHealthEquityBalances(driver, accounts):
@@ -55,7 +63,7 @@ def getHealthEquityBalances(driver, accounts):
 
 def getHealthEquityCSVFile(account):
     accountName = account.name.replace(' ','').lower()
-    return setDirectory() + f"\Projects\Coding\Python\FinanceAutomation\Resources\{accountName}.csv"
+    return setDirectory() + f"/Projects/Coding/Python/FinanceAutomation/Resources/{accountName}.csv"
 
 def clearHEDate(dates):
     for d in dates:
@@ -207,6 +215,5 @@ def runHealthEquity(driver, accounts, book, gnuCashTransactions, lastMonth):
 #     book.closeBook()
 
 if __name__ == '__main__':
-    driver, book = Driver("Chrome"), GnuCash('Finance')
-    HEaccounts = getHealthEquityAccounts(book)
-    HEaccounts['VIIIX'].getData()
+    driver = Driver("Chrome")
+    locateHealthEquityWindow(driver)

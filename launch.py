@@ -6,20 +6,20 @@ from scripts.scripts.Classes.WebDriver import Driver
 from scripts.scripts.Functions.GeneralFunctions import setDirectory
 from selenium.common.exceptions import WebDriverException
 
-# Start Chrome with remote debugging
+# # Start Chrome with remote debugging
 subprocess.Popen(
-    r'"C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9223 --user-data-dir="C:\\Users\\dmagn\\User Data" --disable-gpu --log-level=3',
+    r'"C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9223 --user-data-dir="C:\\Users\\dmagn\\User Data" --log-level=3',
     cwd='C:\\Program Files\\Google\\Chrome\\Application',
     shell=True
 )
+time.sleep(1)
 
 # Start the Django development server
 subprocess.Popen('python manage.py runserver', cwd='G:\\My Drive\\Projects\\Coding\\Python\\FinanceAutomation', shell=True)
 
 print('page will load automatically after development server starts \n')
-time.sleep(6)
+time.sleep(1)
 
-# Initialize the WebDriver with the session ID if it exists
 driver = Driver("Chrome")
 time.sleep(6)
 

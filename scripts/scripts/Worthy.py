@@ -27,6 +27,7 @@ def worthyLogin(driver):
     driver.getElementAndClick('id', 'password') # to activate page
     driver.getElementAndClick('xpath', "//*[@id='__next']/div/div/main/div/div/form/div[3]/button") # sign in
     # time.sleep(3)
+    driver.waitForURLToLoad("https://worthy.capital/dashboard/", wait=5)
 
 def getWorthyBalance(driver, account):
     locateWorthyWindow(driver)

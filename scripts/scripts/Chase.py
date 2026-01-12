@@ -69,7 +69,7 @@ def exportChaseTransactions(driver, today):
     currentDate = str(today.year) + today.strftime('%m') + today.strftime('%d')
     return r'C:\Users\dmagn\Downloads\Chase2715_Activity' + fromDate + toDate + currentDate + '.csv'
 
-def claimChaseRewards(driver):
+def claimChaseRewards(driver, account):
     locateChaseWindow(driver)
     time.sleep(1)
     driver.webDriver.get("https://ultimaterewardspoints.chase.com/cash-back?lang=en")
@@ -92,6 +92,8 @@ def claimChaseRewards(driver):
             pyautogui.press('tab'); time.sleep(1);  n+=1
         time.sleep(1)
         pyautogui.press('space') # submit
+        account.value = (float(account.balance) - float(balance))*-1
+
 
 def importChaseTransactions(account, chaseActivity, book, gnuCashTransactions):
     existingTransactions = book.getTransactionsByGnuAccount(account.gnuAccount, transactionsToFilter=gnuCashTransactions)
@@ -110,7 +112,7 @@ def importChaseTransactions(account, chaseActivity, book, gnuCashTransactions):
             continue
         elif "STATEMENT CREDIT" in rawDescription.upper() and float(amount) > 0:   
             description = "Chase CC Rewards"    
-            toAccount = book.getGnuAccountFullName('CC Rewards')  
+            toAccount = book.getGnuAccountFullName('Credit Card Rewards')  
         elif "BP#" in rawDescription.upper():                         
             toAccount = book.getGnuAccountFullName('Transportation') + ':Gas'            
         elif transactionType == "Food & Drink":   
@@ -127,7 +129,7 @@ def runChase(driver, account, book):
     gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
     account.setBalance(getChaseBalance(driver))
     chaseActivity = exportChaseTransactions(driver, datetime.today())
-    claimChaseRewards(driver)
+    claimChaseRewards(driver, account)
     importChaseTransactions(account, chaseActivity, book, gnuCashTransactions)
     account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
     account.locateAndUpdateSpreadsheet(driver)

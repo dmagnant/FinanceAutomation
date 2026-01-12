@@ -58,7 +58,7 @@ def getBarclaysBalance(driver):
 def getBarclaysRewardBalance(driver):
     locateBarclaysWindow(driver)
     balance = driver.getElementText('xpath', "//*[@id='rewardsTile']/div[2]/div/div[2]/div[1]/div", allowFail=False)
-    return float(balance.strip('-').strip('$').replace(',', '')) if balance else False
+    return float(balance.strip('-').replace('$', '').replace(',', '')) if balance else False
 
 def exportBarclaysTransactions(driver, today):
     driver.getElementAndClick('xpath', "/html/body/section[2]/div[1]/nav/div/ul/li[3]/a") # Activity & Statements
@@ -77,15 +77,15 @@ def exportBarclaysTransactions(driver, today):
 
 def claimBarclaysRewards(driver):
     locateBarclaysWindow(driver)
-    driver.webDriver.get("https://www.barclaycardus.com/servicing/cashBack?__fsk=332216775#!/redeem")
-    # time.sleep(1)
+    driver.webDriver.get('https://www.barclaycardus.com/servicing/rewardsHub?shopRewards') # rewards center
+    driver.waitForWebPageLoad()
+    driver.getElementAndClick('xpath', '//*[@id="SSO-CASHBACK-URL_LINK"]/a') # direct deposit / statement credit
+    driver.waitForWebPageLoad()
     driver.getElementAndClick('id', 'redeem-continue') # continue
     driver.getElementAndClick('id', 'mor_dropDown0') # reward method
     driver.getElementAndSendKeys('id', 'mor_dropDown0', Keys.DOWN)
     driver.getElementAndSendKeys('id', 'mor_dropDown0', Keys.ENTER)
-    # time.sleep(1)
     driver.getElementAndClick('id', 'achModal-continue') # continue
-    # time.sleep(1)
     driver.getElementAndClick('id', 'redeem-continue') # redeem now
 
 def importBarclaysTransactions(account, barclaysActivity, book, gnuCashTransactions):
@@ -137,5 +137,8 @@ if __name__ == '__main__':
     Barclays = USD("Barclays", book)    
     # runBarclays(driver, Barclays, book)
     # Barclays.getData()
-    Barclays.locateAndUpdateSpreadsheet(driver)
     # book.closeBook()
+    today = datetime.today()
+    rewardsBalance = getBarclaysRewardBalance(driver)
+    print(f'Rewards Balance: ${rewardsBalance}')
+    if rewardsBalance >= float(50): claimBarclaysRewards(driver)

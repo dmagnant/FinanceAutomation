@@ -21,14 +21,14 @@ def locatePineconeWindow(driver):
 def pineConeLogin(driver):
     driver.openNewWindow('https://www.pineconeresearch.com/#/login')
     driver.getElementAndClick('xpath', "//*[@id='desktop-header-signin']/span[1]/span") # Sign In
-    driver.getElementAndSendKeys('id', "password-1", getPassword('PineCone Research')) # enter password
+    # driver.getElementAndSendKeys('id', "password-1", getPassword('PineCone Research')) # enter password
     time.sleep(2)
     driver.getElementAndClick('id', "sign-in-modal-submit-btn") # Sign In
 
 def getPineConeBalance(driver):
     locatePineconeWindow(driver)    
     rawBalance = driver.getElementText('xpath', "/html/body/app-root/div/lib-main-template/lib-header/header/lib-banner/div/div/lib-banner-rewards/a/span")
-    balance = float(rawBalance.replace('Rewards Balance: ', '').replace(' points', ''))
+    balance = float(rawBalance.replace('Rewards Balance: ', '').replace(' Points', ''))
     return balance
     
 def claimPineConeRewards(driver):
@@ -44,7 +44,7 @@ def runPinecone(driver, account, book):
     locatePineconeWindow(driver)
     account.setBalance(getPineConeBalance(driver))
     book.updateMRBalance(account)
-    if float(account.balance) >= 1000:   claimPineConeRewards(driver)
+    # if float(account.balance) >= 1000:   claimPineConeRewards(driver)
 
 if __name__ == '__main__':
     driver = Driver("Chrome")

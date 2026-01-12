@@ -68,7 +68,8 @@ def ally(request):
         elif "login" in request.POST:   locateAllyWindow(driver)
         elif "logout" in request.POST:  allyLogout(driver)
         elif "balance" in request.POST: Ally.setBalance(getAllyBalance(driver))
-        elif "water" in request.POST:   payWaterBill(driver, book)
+        elif "logWater" in request.POST: logWaterBill(driver, book)
+        elif "payWater" in request.POST:   payWaterBill(driver)
         elif "mortgage" in request.POST: mortgageBill(driver, book)
     context = {'account': Ally}
     book.closeBook();   return returnRender(request, "banking/ally.html", context)
@@ -149,7 +150,7 @@ def chase(request):
         if "main" in request.POST:              runChase(driver, Chase, book)
         elif "login" in request.POST:           locateChaseWindow(driver)
         elif "balance" in request.POST:         Chase.setBalance(getChaseBalance(driver))
-        elif "rewards" in request.POST:         claimChaseRewards(driver)   
+        elif "rewards" in request.POST:         claimChaseRewards(driver, Chase)   
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/chase"))
     context = {'account': Chase}
     book.closeBook();   return returnRender(request, "banking/creditcard.html", context)
@@ -189,7 +190,7 @@ def creditCards(request):
         elif "chaseMain" in request.POST:           runChase(driver, Chase, personalBook)
         elif "chaseLogin" in request.POST:          locateChaseWindow(driver)
         elif "chaseBalances" in request.POST:       Chase.setBalance(getChaseBalance(driver))
-        elif "chaseRewards" in request.POST:        claimChaseRewards(driver)
+        elif "chaseRewards" in request.POST:        claimChaseRewards(driver, Chase)
         elif "discoverMain" in request.POST:        runDiscover(driver, Discover, personalBook)
         elif "discoverLogin" in request.POST:       locateDiscoverWindow(driver)
         elif "discoverBalances" in request.POST:    Discover.setBalance(getDiscoverBalance(driver))
@@ -205,7 +206,7 @@ def dailyBank(request):
     gnuCashTransactions = personalBook.getTransactionsByDateRange(dateRange)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "bank" in request.POST:              runDailyBank(bankAccounts, personalBook, jointBook, gnuCashTransactions, dateRange)
+        if "bank" in request.POST:              runDailyBank(driver, bankAccounts, personalBook, jointBook, gnuCashTransactions, dateRange)
         elif "allyMain" in request.POST:        runAlly(driver, bankAccounts['Ally'], jointBook, gnuCashTransactions, dateRange)
         elif "allyLogin" in request.POST:       locateAllyWindow(driver)
         elif "allyLogout" in request.POST:      allyLogout(driver)        
@@ -228,12 +229,16 @@ def dailyMR(request):
     mrAccounts = getDailyMRAccounts(personalBook)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "MR" in request.POST:                        runDailyMR(mrAccounts, personalBook)
+        if "MR" in request.POST:                        runDailyMR(driver, mrAccounts, personalBook)
         elif "amazonMain" in request.POST:              confirmAmazonGCBalance(driver, mrAccounts['AmazonGC'])
         elif "inboxDollarsMain" in request.POST: runInboxDollars(driver, mrAccounts['InboxDollars'], personalBook)
         elif "inboxDollarsLogin" in request.POST:       locateInboxDollarsWindow(driver)
         elif "inboxDollarsBalance" in request.POST:     mrAccounts['InboxDollars'].setBalance(getInboxDollarsBalance(driver))
         elif "inboxDollarsContent" in request.POST:     inboxDollarsContentDiscovery(driver)
+        elif "inboxDollarsMobile" in request.POST:      
+            requestInfo = request.POST.copy()
+            redeemInboxDollarsMobileOffers(driver, offersToRedeem=requestInfo.get("amount", "auto"))
+        elif "inboxDollarsRewards" in request.POST:     claimInboxDollarsRewards(driver)
         elif "pineconeMain" in request.POST:            runPinecone(driver, mrAccounts['Pinecone'], personalBook)
         elif "pineconeLogin" in request.POST:           locatePineconeWindow(driver)
         elif "pineconeBalance" in request.POST:         mrAccounts['Pinecone'].setBalance(getPineConeBalance(driver))
@@ -242,14 +247,17 @@ def dailyMR(request):
         elif "presearchLogin" in request.POST:          locatePresearchWindow(driver)          
         elif "presearchBalance" in request.POST:        mrAccounts['Presearch'].setBalance(getPresearchBalance(driver))
         elif "presearchRewards" in request.POST:        presearchRewardsRedemptionAndBalanceUpdates(driver, mrAccounts['Presearch'], personalBook)
-        elif "swagbucksMain" in request.POST:           runSwagbucks(driver, True, mrAccounts['Swagbucks'], personalBook) if "Run Alu" in request.POST else runSwagbucks(driver, False, mrAccounts['Swagbucks'], personalBook)
+        elif "swagbucksMain" in request.POST:           runSwagbucks(driver, True, mrAccounts['Swagbucks'], personalBook) if "DailyGame" in request.POST else runSwagbucks(driver, False, mrAccounts['Swagbucks'], personalBook)
         elif "swagbucksLogin" in request.POST:          locateSwagBucksWindow(driver)
-        elif "swagbucksAlu" in request.POST:            runAlusRevenge(driver)
+        elif "swagbucksDailyGame" in request.POST:      runHamsterRun(driver)
         elif 'swagbucksBalance' in request.POST:        mrAccounts['Swagbucks'].setBalance(getSwagBucksBalance(driver))
         elif "swagbucksContent" in request.POST:        swagBuckscontentDiscovery(driver)
         elif "swabucksSearch" in request.POST:          swagbucksSearch(driver)
         elif "swagbucksRewards" in request.POST:        claimSwagBucksRewards(driver)
         elif "swagbucksInbox" in request.POST:          swagbucksInbox(driver)
+        elif 'swagbucksMobile' in request.POST:         
+            requestInfo = request.POST.copy()
+            redeemSwagbucksMobileOffers(driver, offersToRedeem=requestInfo.get("amount", "auto"))
         elif "tellwutMain" in request.POST:             runTellwut(driver, mrAccounts['Tellwut'], personalBook)
         elif "tellwutLogin" in request.POST:            locateTellWutWindow(driver)
         elif "tellwutSurveys" in request.POST:          completeTellWutSurveys(driver)            
@@ -347,6 +355,9 @@ def inboxDollars(request):
         if "main" in request.POST:              runInboxDollars(driver, InboxDollars, book)
         elif "login" in request.POST:           locateInboxDollarsWindow(driver)
         elif "balance" in request.POST:         InboxDollars.setBalance(getInboxDollarsBalance(driver))
+        elif 'mobile' in request.POST:          
+            requestInfo = request.POST.copy()
+            redeemInboxDollarsMobileOffers(driver, offersToRedeem=requestInfo.get("amount"))
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/inboxDollars"))
     context = {'account': InboxDollars}
     book.closeBook();   return returnRender(request, "mr/inboxDollars.html", context)
@@ -514,7 +525,7 @@ def sofi(request):
         elif "balances" in request.POST:                getSofiBalanceAndOrientPage(driver, accounts['Checking']);  getSofiBalanceAndOrientPage(driver, accounts['Savings'])
         elif 'ally' in request.POST:                    
             jointBook = GnuCash('Home')
-            transferAmount = calculateAllyTransfer(driver, book, jointBook)
+            transferAmount = calculateAllyTransfer(driver, jointBook)
         elif 'transfer' in request.POST:                 transferAmount = sofiTransfer(driver, accounts['Checking'], jointBook, transferAmount)
         elif "close windows" in request.POST:           driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/sofi"))
     context = {'Sofi':accounts, 'transferAmount': transferAmount}
@@ -525,16 +536,17 @@ def swagbucks(request):
     Swagbucks = Security("Swagbucks", book)
     if request.method == 'POST':
         driver = Driver("Chrome")
-        if "main" in request.POST:                  runSwagbucks(driver, True, Swagbucks, book) if "Run Alu" in request.POST else runSwagbucks(driver, False, Swagbucks, book)
+        if "main" in request.POST:                  runSwagbucks(driver, True, Swagbucks, book) if "DailyGame" in request.POST else runSwagbucks(driver, False, Swagbucks, book)
         elif "login" in request.POST:               locateSwagBucksWindow(driver)
-        elif "alu" in request.POST:                 runAlusRevenge(driver)
+        elif "dailyGame" in request.POST:           runHamsterRun(driver)
         elif 'balance' in request.POST:             Swagbucks.setBalance(getSwagBucksBalance(driver))           
         elif "content" in request.POST:             swagBuckscontentDiscovery(driver)
         elif "search" in request.POST:              swagbucksSearch(driver)
-        elif "rewards" in request.POST:             
-            
-            claimSwagBucksRewards(driver, Swagbucks)
+        elif "rewards" in request.POST:             claimSwagBucksRewards(driver, Swagbucks)
         elif "inbox" in request.POST:               swagbucksInbox(driver)
+        elif 'mobile' in request.POST:              
+            requestInfo = request.POST.copy()
+            redeemSwagbucksMobileOffers(driver, offersToRedeem=requestInfo.get("amount", "auto"))
         elif "close windows" in request.POST:       driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/swagbucks"))
     context = {'account': Swagbucks}
     book.closeBook();   return returnRender(request, "mr/swagbucks.html", context)

@@ -173,16 +173,16 @@
                 </form><br><br>
                 <div style="display: table-row;">
                     <div style="display:table-cell;text-align:right">
-                        {% for coin in cryptoAccounts.ledgerAccounts %}
-                            {{coin.symbol}} balance: &thinsp;<br>
-                            gnuBalance: &thinsp;<br><br>
-                        {% endfor %}
+                        {{cryptoAccounts.ledgerAccounts.Bitcoin.symbol}} balance: &thinsp;<br>
+                        gnuBalance: &thinsp;<br><br>
+                        {{cryptoAccounts.ledgerAccounts.Ethereum.symbol}} balance: &thinsp;<br>
+                        gnuBalance: &thinsp;<br><br>
                     </div>
                     <div style="display:table-cell;text-align:left">
-                        {% for coin in cryptoAccounts.ledgerAccounts %}
-                            <b>{{coin.balance}}<br>
-                            {{coin.gnuBalance}}</b><br><br>
-                        {% endfor %}
+                        <b>{{cryptoAccounts.ledgerAccounts.Bitcoin.balance}}<br>
+                        {{cryptoAccounts.ledgerAccounts.Bitcoin.gnuBalance}}</b><br><br>
+                        <b>{{cryptoAccounts.ledgerAccounts.Ethereum.balance}}<br>
+                        {{cryptoAccounts.ledgerAccounts.Ethereum.gnuBalance}}</b><br><br>
                     </div>
                 </div>
             </div>

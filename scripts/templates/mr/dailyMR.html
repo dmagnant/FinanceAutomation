@@ -27,7 +27,11 @@
                     <button type="submit" name="inboxDollarsRewards">Rewards</button><br><br>
                 </form>
                 &emsp;&thinsp;Balance: <b>{{mrAccounts.InboxDollars.gnuBalance}}</b><br>
-                Redeem at: $100<br>
+                Redeem at: $100<br><br>
+                                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="inboxDollarsMobile">Mobile</button><input type="text" placeholder="Integer value" name="amount" size=8><br>
+                </form>
             </div>
             <div style="width: 14%; display:table-cell">
                 <b><a href="{% url 'Paidviewpoint' %}" target="_blank">Paidviewpoint</a></b><br><br>
@@ -70,7 +74,7 @@
                 <b><a href="{% url 'Swagbucks' %}" target="_blank">Swagbucks</a></b><br><br>
                 <form method="post">
                     {% csrf_token %}
-                    <input type="checkbox" name="Run Alu" checked="yes">Alu?</input>
+                    <input type="checkbox" name="DailyGame" checked="yes">DailyGame?</input>
                     <button type="submit" name="swagbucksMain">Main</button>
                 </form>
                 <form method="post">
@@ -86,6 +90,7 @@
                     <button type="submit" name="swagbucksInbox">Inbox</button>
                     <button type="submit" name="swagbucksContent">Content</button>
                     <button type="submit" name="swabucksSearch">Search</button><br>
+                    <button type="submit" name="swagbucksMobile">Mobile</button><input type="text" placeholder="Integer value" name="amount" size=8><br>
                 </form>
             </div>
             <div style="width: 14%; display:table-cell">

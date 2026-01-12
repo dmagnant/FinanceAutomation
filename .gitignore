@@ -5,9 +5,13 @@ scripts/scripts/Classes/GnuCash.py
 scripts/scripts/Functions/GeneralFunctions.py
 scripts/scripts/Functions/SpreadsheetFunctions.py
 scripts/scripts/Classes/Spreadsheet.py
+scripts/scripts/Classes/MobileDriver.py
 scripts/scripts/Sofi.py
 scripts/scripts/Vanguard.py
 scripts/scripts/Paidviewpoint.py
+scripts/scripts/Swagbucks.py
+scripts/scripts/InboxDollars.py
+scritps/scripts/Tellwut.py
 scripts/__pycache__/views.cpython-310.pyc
 scripts/scripts/Functions/__pycache__/GnuCashFunctions.cpython-310.pyc
 scripts/scripts/Functions/__pycache__/GeneralFunctions.cpython-310.pyc

@@ -1,6 +1,7 @@
 import csv, time, json, os
 from datetime import datetime
 from decimal import Decimal
+from dateutil.relativedelta import relativedelta
 from selenium.webdriver.common.keys import Keys
 
 
@@ -26,25 +27,12 @@ def locateAllyWindow(driver):
     return True
 
 def allyLogin(driver):
-    loggedIn = False
-    while not loggedIn:
-        driver.openNewWindow('https://ally.com/')
-        # time.sleep(2)
-        driver.getElementAndClick('xpath', "html/body/header/section[1]/div/nav/ul/li[5]/button") # login
-        # time.sleep(2)
-        if not driver.getElementAndClick('xpath', "//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[4]/button", wait=2): # login
-            driver.webDriver.refresh(); time.sleep(1)
-            driver.getElementAndClick('xpath', "html/body/header/section[1]/div/nav/ul/li[5]/button") # login
-            # time.sleep(2)
-            driver.getElementAndClick('xpath', "//*[@id='367761b575af35f6ccb5b53e96b2fa2d']/form/div[5]/button") # login
-        time.sleep(5)
-        if not driver.getElementAndClick('xpath', 'html/bmody/div[1]/main/div/div/div/div/div[2]/form/div[3]/button/span', wait=2): # login 
-            if driver.getElementAndClick('xpath', "/html/body/div[1]/div/main/div/div/div/div/form/div[2]/button/span", wait=2): # Send Security Code
-                showMessage('Enter Security Code', 'Enter security code, then click OK on this message')
-                driver.getElementAndClick('xpath', "/html/body/div[1]/div/main/div/div/div/div/form/button[1]/span") # Continue
-                driver.getElementAndClick('xpath', "/html/body/div[1]/div/main/div/div/div/div/form/div[2]/button/span") # Continue
-        loggedIn = True
-    driver.getElementAndClick('partial_link_text', 'Joint Checking');  time.sleep(5)
+    driver.openNewWindow('https://ally.com/')
+    driver.getElementAndClick('xpath', "/html/body/header/section[1]/nav/ul/li[5]/button") # login
+    time.sleep(2)
+    driver.getElementAndClick('xpath', "/html/body/div[2]/div[1]/div[2]/div/div[1]/div/form/div[3]/button", wait=2) # login
+    time.sleep(2)
+    driver.getElementAndClick('partial_link_text', 'Joint Checking', wait=5);  time.sleep(5)
     
 def allyLogout(driver):
     locateAllyWindow(driver)
@@ -87,15 +75,24 @@ def captureAllyTransactions(driver, dateRange):
             element = setAllyTransactionElementRoot(row, column)
     return allyActivity
 
-def payWaterBill(driver, book):
-    def getWaterFeeElement(tr, td):
-        return f"//*[@id='tblAccountInfo']/tbody/tr[{str(tr)}]/td[{str(td)}]"
-    
+def logWaterBill(driver, book):
+    driver.findWindowByUrl('bill2pay.com')
+    today = datetime.today()
+    Home = Spreadsheet('Home', str(today.year) + ' Balance', driver)
+    driver.openNewWindow('https://paywater.milwaukee.gov/webclient/user/login.seam')
+    if driver.getElementAndSendKeys('id', 'account', getUsername('Water'), wait=2):
+        driver.getElementAndClick('xpath', "//*[@id='anonymous-form']/div[2]/button") # login
+    billAmount = driver.getElementText('id', "dashboardMyAccountsShowBalances").replace('$','')
+    billPlusEstimatedFee = float(billAmount) + 0.40
+    splits = [book.createSplit(round(Decimal(billPlusEstimatedFee), 2), book.getGnuAccountFullName('Water')), book.createSplit(-round(Decimal(billPlusEstimatedFee), 2), book.getGnuAccountFullName('Ally'))]
+    book.writeTransaction(today.date().replace(day=25), 'Water Bill', splits)
+    Home.updateSpreadsheet('Log Water Bill', today.month, -float(billPlusEstimatedFee))
+
+def payWaterBill(driver):    
     driver.findWindowByUrl('bill2pay.com')
     today = datetime.today()
     Home = Spreadsheet('Home', str(today.year) + ' Balance', driver)
     paymentAccountDetails = json.loads(getNotes('Ally Bank'))
-    today = datetime.today()
     driver.openNewWindow('https://paywater.milwaukee.gov/webclient/user/login.seam')
     if driver.getElementAndSendKeys('id', 'account', getUsername('Water'), wait=2):
         driver.getElementAndClick('xpath', "//*[@id='anonymous-form']/div[2]/button") # login
@@ -112,15 +109,12 @@ def payWaterBill(driver, book):
     driver.getElementAndSendKeys('id', 'txtBankAccountNumber', paymentAccountDetails['account'])
     driver.getElementAndSendKeys('id', 'txtBankAccountNumber2', paymentAccountDetails['account'])
     driver.getElementAndClick('id', 'btnSubmitAch') # Continue
-    billTotal = driver.getElementText('xpath', "//*[@id='tblAccountInfo']/tbody/tr[7]/td[2]").replace('$','')
     driver.getElementAndSendKeys('id', 'txtEmailAddress', os.environ.get('Email'))
     time.sleep(2)
     driver.getElementAndClick('id', 'chkTermsAgree') # agree to T&C
     time.sleep(2)
     driver.getElementAndClick('id', 'btnSubmit') # Make a Payment
     totalIncludingFee = driver.getElementText('xpath', "//*[@id='tblAccountInfo']/tbody/tr[10]/td[2]").replace('$','')
-    splits = [book.createSplit(round(Decimal(totalIncludingFee)), 2), book.getGnuAccountFullName('Water'), book.createSplit(-round(Decimal(totalIncludingFee), 2), book.getGnuAccountFullName('Ally'))]
-    book.writeTransaction(today.date(), 'Water Bill', splits)
     Home.updateSpreadsheet('Water Bill', today.month, -float(totalIncludingFee))
     driver.findWindowByUrl("/scripts/ally")
 
@@ -219,13 +213,16 @@ def updateEnergyBillAmounts(driver, book, amount):
 
 def mortgageBill(driver, book):
     today = datetime.today()
+    nextMonth = today + relativedelta(months=1)
+    spreadsheetYear = nextMonth.year
     total = round(Decimal(2000.00),2)
-    Home = Spreadsheet('Home', str(today.year) + ' Balance', driver)
+    Home = Spreadsheet('Home', str(spreadsheetYear) + ' Balance', driver)
     Mortgage = Spreadsheet('Mortgage', 'Mortgage', driver)
-    row = Mortgage.firstRowOfThisYear
+    # row = Mortgage.firstRowOfThisYear
+    row = Mortgage.startRow + ((spreadsheetYear-2022)*12)+(nextMonth.month-1)
     while True:
         paymentDate = datetime.strptime(Mortgage.readCell(Mortgage.dateColumn+str(row)), '%m/%d/%Y').date()
-        if paymentDate.month == today.month and paymentDate.year == today.year:
+        if paymentDate.month == nextMonth.month and paymentDate.year == nextMonth.year:
             interest = round(Decimal(Mortgage.readCell(Mortgage.interestColumn+str(row))),2)
             break
         else:   row+=1
@@ -234,7 +231,7 @@ def mortgageBill(driver, book):
     splits.append(book.createSplit(interest, "Expenses:Home Expenses:Mortgage Interest"))
     splits.append(book.createSplit(total - interest, "Liabilities:Mortgage Loan"))
     splits.append(book.createSplit(-total, book.getGnuAccountFullName('Ally')))
-    book.writeTransaction(today.date(), 'Mortgage Payment', splits)
+    book.writeTransaction(nextMonth.date().replace(day=13), 'Mortgage Payment', splits)
     # update Home spreadsheet # 
     Home.updateSpreadsheet('Mortgage', today.month, -float(total))
     driver.findWindowByUrl("/scripts/ally")
@@ -246,58 +243,17 @@ def runAlly(driver, account, book, gnuCashTransactions, dateRange):
     importAllyTransactions(driver, account, allyActivity, book, gnuCashTransactions)
     account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
 
-# if __name__ == '__main__':
-#     driver = Driver("Chrome")
-#     book = GnuCash('Home')
-#     Ally = USD("Ally", book)
-#     dateRange = getStartAndEndOfDateRange(timeSpan=7)
-#     gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
-#     runAlly(driver, Ally, book, gnuCashTransactions, dateRange)
-#     Ally.getData()
-#     # allyLogout(driver)
-#     book.closeBook()
-    
-# if __name__ == '__main__':
-#     driver = Driver("Chrome")
-#     book = GnuCash('Home')
-#     driver.findWindowByUrl("paywater.milwaukee.gov")
-#     # billAmount = driver.getElementText('id', "paymentAmountValue")
-#     # print(billAmount)
-#     import os, shutil, time, zipfile, sys
-#     from selenium import webdriver
-#     from selenium.webdriver.common.keys import Keys
-#     from selenium.common.exceptions import (InvalidArgumentException,
-#                                             WebDriverException, TimeoutException)
-#     from selenium.webdriver.chrome.service import Service
-#     from selenium.webdriver.common.by import By
-#     from selenium.webdriver.support.wait import WebDriverWait
-#     from selenium.webdriver.support import expected_conditions as EC
-    # try:
-    #     element = WebDriverWait(driver.webDriver, 5).until(EC.element_to_be_clickable((By.XPATH,"//*[@id='billTable']/tbody/tr[1]/td[3]/div")))
-    #     print(element.text)
-    # except TimeoutException:
-    #     print('FALSE')
-
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    # Mortgage = Spreadsheet('Mortgage', 'Mortgage', driver)
-    # row = Mortgage.firstRowOfThisYear
-    # print(row)
-    def getWaterFeeElement(tr, td):
-        return f"//*[@id='tblAccountInfo']/tbody/tr[{str(tr)}]/td[{str(td)}]"
-    driver.findWindowByUrl('bill2pay.com')
-    tr = 3
-    td = 1
-    while True:
-        text = driver.getElementText('xpath', getWaterFeeElement(tr, td))
-        print(text)
-        if text == 'CONVENIENCE FEE':
-            td += 1
-            fee = driver.getElementText('xpath', getWaterFeeElement(tr, td))
-            print(fee)
-            break
-        tr+=1
-
+    # book = GnuCash('Home')
+    # Ally = USD("Ally", book)
+    # dateRange = getStartAndEndOfDateRange(timeSpan=7)
+    # gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
+    locateAllyWindow(driver)
+    # runAlly(driver, Ally, book, gnuCashTransactions, dateRange)
+    # allyLogout(driver)
+    # book.closeBook()
+    
 
 
     

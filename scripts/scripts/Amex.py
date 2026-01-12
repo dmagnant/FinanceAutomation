@@ -13,16 +13,15 @@ else:
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import (getPassword, getUsername, getStartAndEndOfDateRange)
 
-def getAmexBasePath():  return '/html/body/div[1]/div[2]/main/section/div[3]/div/div/div/div/div/div/div[2]/div/div[2]/div/div/div'
-
 def closeAmexPopUps(driver):
-    elementPath = 'NEED TO ENTER'
+    elementPath = '/html/body/div[1]/div/main/section/div[3]/div/div/div[1]/div/div/div/div/div/div/div/header/button/div/span[2]/svg'
     driver.getElementAndClick('xpath', elementPath, allowFail=True, wait=0.3) # close pop-up
 
 def locateAmexWindow(driver):
     found = driver.findWindowByUrl("americanexpress.com")
     if not found:   amexLogin(driver)
     else:           driver.webDriver.switch_to.window(found); time.sleep(1) 
+    closeAmexPopUps(driver)
         
 def amexLogin(driver):
     driver.openNewWindow('https://www.americanexpress.com/en-us/account/login?inav=iNavLnkLog')
@@ -34,17 +33,17 @@ def amexLogin(driver):
     # time.sleep(1)
 
 def clickViewAmexTransactions(driver):
-    driver.getElementAndClick('xpath', "//*[@id='axp-balance-payment']/div[3]/div[2]/div/div[1]/div[1]/div/a", allowFail=False) # view transactions
+    driver.getElementAndClick('link_text', "View Transactions", allowFail=False) # view transactions
 
 def clickAmexHome(driver):
-    driver.getElementAndClick('xpath', "/html/body/div[1]/div[2]/main/section/div[1]/div/div/div[2]/div/div/div[1]/div/div/div/div/div/div[1]/div/div[1]/div/ul/li[1]/a/span", allowFail=False) # Home
+    driver.getElementAndClick('link_text', "Home", allowFail=False)
 
 def getAmexBalance(driver):
     locateAmexWindow(driver)
     if 'activity' not in driver.webDriver.current_url:
         clickAmexHome(driver)
         clickViewAmexTransactions(driver)
-    balance = driver.getElementText('xpath', "//*[@id='root']/div[2]/main/section/div[3]/div/div/div/div/div/div/div[2]/div/div[1]/div/div/section/div[2]/div[5]/div[3]/span[1]", allowFail=False)
+    balance = driver.getElementText('xpath', "/html/body/div[1]/div/main/section/div[3]/div/div/div/div/div/div/div[2]/div/div[1]/div/div/section/div[2]/div[5]/div[3]/span[1]", allowFail=False)
     return balance.replace('$', '') if balance else False
 
 def exportAmexTransactions(driver):
@@ -53,17 +52,17 @@ def exportAmexTransactions(driver):
         clickViewAmexTransactions(driver)
     driver.getElementAndClick('xpath', "//*[@id='root']/div[1]/div/div[2]/div/div/div[4]/div/div[3]/div/div/div/div/div/div/div[2]/div/div/div[5]/div/div[2]/div/div[2]/a/span", wait=2) # view activity
     # time.sleep(6)
-    driver.getElementAndClick('xpath', getAmexBasePath() + "/div[1]/div[1]/div/div/div[1]/div[2]/div[1]/div/button/div/p", wait=7, allowFail=False) # download arrow
+    driver.getElementAndClick('xpath', "/html/body/div[1]/div/main/section/div[3]/div/div/div/div/div/div/div[2]/div/div[2]/div/div/div/div[1]/div[1]/div/div/div[1]/div[2]/div[1]/div/button/div/i", wait=7, allowFail=False) # download arrow
     num = 1
     while True:
-        fileTypeElement = driver.getElement('xpath', getAmexBasePath() + "[1]/div/div/div/div/div/div[2]/div/div/div[1]/div/fieldset/div[" + str(num) + "]/label")
+        fileTypeElement = driver.getElement('xpath', f"//*[@id='root']/div/main/section/div[3]/div/div/div/div/div/div/div[2]/div/div[2]/div/div/div[1]/div/div/div/div/div/div[2]/div/div/div[1]/div/fieldset/div[{str(num)}]/label")
         if fileTypeElement.text == 'CSV':
             fileTypeElement.click()
             break
         else: num +=1
     try: os.remove(r"C:\Users\dmagn\Downloads\activity.csv")
     except FileNotFoundError:   exception = "caught"
-    driver.getElementAndClick('xpath', getAmexBasePath() + "[1]/div/div/div/div/div/div[3]/div/a/span") # Download
+    driver.getElementAndClick('xpath', "/html/body/div[1]/div/main/section/div[3]/div/div/div/div/div/div/div[2]/div/div[2]/div/div/div[1]/div/div/div/div/div/div[3]/div/a/span") # Download
     time.sleep(3)
 
 def claimAmexRewards(driver, account):
@@ -80,7 +79,8 @@ def claimAmexRewards(driver, account):
                 rewardsInputElement.send_keys(Keys.TAB)
                 driver.getElementAndClick('xpath', "//*[@id='continue-btn']/span")
                 if driver.getElementAndClick('xpath', "//*[@id='use-dollars-btn']/span"):
-                    account.value = (float(account.balance) - float(rewardsBalance))*-1
+                    # account.value = (float(account.balance) - float(rewardsBalance))*-1
+                    return True
     return False
 
 def importAmexTransactions(account, book, gnuCashTransactions):
@@ -122,9 +122,12 @@ def runAmex(driver, account, book):
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = GnuCash('Finance')
-    Amex = USD("Amex", book)
+    # book = GnuCash('Finance')
+    # Amex = USD("Amex", book)
+    locateAmexWindow(driver)
     # runAmex(driver, Amex, book)
     # Amex.getData()
     # book.closeBook()
-    Amex.locateAndUpdateSpreadsheet(driver)
+
+
+    print(getAmexBalance(driver))

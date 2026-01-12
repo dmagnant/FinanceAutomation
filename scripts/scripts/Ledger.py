@@ -12,7 +12,7 @@ else:
 def getLedgerAccounts(readBook):
     Bitcoin = Security("Bitcoin", readBook)
     Ethereum = Security("Ethereum", readBook)
-    return [Bitcoin, Ethereum]
+    return {'Bitcoin': Bitcoin, 'Ethereum': Ethereum}
 
 def updateCoin(coin, book):
     balance = float(input(f"Paste {coin.symbol} balance here: "))

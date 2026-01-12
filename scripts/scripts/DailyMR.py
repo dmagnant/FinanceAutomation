@@ -30,14 +30,13 @@ def getDailyMRAccounts(personalReadBook):
     InboxDollars = USD("InboxDollars", personalReadBook)
     return {'AmazonGC': AmazonGC, 'Pinecone': Pinecone, 'Swagbucks': Swagbucks, 'Tellwut': Tellwut, 'Paidviewpoint': Paidviewpoint, 'Presearch': Presearch, 'InboxDollars': InboxDollars}
 
-def runDailyMR(accounts, book, runAlu=True):
-    driver = Driver("Chrome")
-    runTellwut(driver, accounts['Tellwut'], book)
+def runDailyMR(driver, accounts, book, dailyGame=True):
+    # runTellwut(driver, accounts['Tellwut'], book)
     confirmAmazonGCBalance(driver, accounts['AmazonGC'])
     updatePaidViewPointBalance(driver, accounts['Paidviewpoint'], book)
     runPinecone(driver, accounts['Pinecone'], book)
-    runSwagbucks(driver, runAlu, accounts['Swagbucks'], book)
     runInboxDollars(driver, accounts['InboxDollars'], book)
+    runSwagbucks(driver, dailyGame, accounts['Swagbucks'], book)
     driver.findWindowByUrl("/scripts/daily")
     return True
     
@@ -45,7 +44,7 @@ if __name__ == '__main__':
     driver = Driver("Chrome")
     personalBook = GnuCash('Finance')
     accounts = getDailyMRAccounts(personalBook)
-    runDailyMR(accounts, personalBook, False)
+    runDailyMR(driver, accounts, personalBook, False)
     personalBook.closeBook()
 
     

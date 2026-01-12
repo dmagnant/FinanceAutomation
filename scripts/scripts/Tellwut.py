@@ -15,16 +15,19 @@ else:
     
 def locateTellWutWindow(driver):
     found = driver.findWindowByUrl("tellwut.com")
-    if not found:   tellwutLogin(driver)
+    if not found:   
+        return tellwutLogin(driver)
     else:           driver.webDriver.switch_to.window(found); time.sleep(1)
     return True
 
 def tellwutLogin(driver):
     driver.openNewWindow('https://www.tellwut.com/')
-    driver.getElementAndClick('xpath', '/html/body/main/header/div[3]/div[2]/button', wait=2, allowFail=False) # LOGIN button
+    time.sleep(2)
+    driver.getElementAndClick('xpath', '/html/body/main/header/div[3]/div[2]/button', wait=0.2, allowFail=False) # LOGIN button
     time.sleep(1)
-    driver.getElementAndClick('xpath', "/html/body/div[1]/div/div/div/div[2]/form/button", wait=1, allowFail=False) # LOGIN button (again)
-        
+    driver.getElementAndClick('xpath',"//*[@id='loginForm']/div[6]/div/a[2]", wait=2)
+    return True
+
 def getTellWutBalance(driver):
     locateTellWutWindow(driver)
     return driver.getElementText('xpath', "/html/body/main/header/div[4]/a/div/div[2]/span", allowFail=False)
@@ -77,31 +80,40 @@ def completeTellWutSurveys(driver):
         driver.getElementLocateAndClick('partial_link_text', "NEXT POLL", wait=5) # NEXT POLL
     return True
         
-def redeemTellWutRewards(driver, account):
-    if int(account.balance) < 11000:    
+def redeemTellWutRewards(driver, account, book):
+    if int(account.balance) < 4000:    
         print("Insufficient funds to redeem TellWut rewards")
         return False
     locateTellWutWindow(driver)
-    driver.webDriver.get("https://www.tellwut.com/product/144--25-PayPal.html")
+    amazonGC = book.getGnuAccountBalance(book.getGnuAccountByName("Amazon GC").fullname)
+    homeDepotGC = book.getGnuAccountBalance(book.getGnuAccountByName("Home Depot GC").fullname)
+    if homeDepotGC <= amazonGC:
+        driver.webDriver.get("https://www.tellwut.com/product/119-10-home-depot-e-gift-card.html")
+    else:
+        driver.webDriver.get("https://www.tellwut.com/product/143-10-amazon-com-e-gift-card.html")
     checkout = driver.getElementAndClick('id', "checkout_form_submit")
     formButton = driver.getElementAndClick('id', "form_button")
     accept = driver.getElementAndClick('id', "accept-additional")
     if not (checkout and formButton and accept):
         print("FAILED TO REDEEM TELLWUT REWARDS")
+    account.balance = str(int(account.balance) - 4000)
+    account.updateGnuBalance(account.balance)
+    return True
 
 def runTellwut(driver, account, book, log=getLogger()):
     locateTellWutWindow(driver)
     completeTellWutSurveys(driver)
     account.setBalance(getTellWutBalance(driver))
+    redeemTellWutRewards(driver, account, book)
     book.updateMRBalance(account)
-    redeemTellWutRewards(driver, account)
     return True
 
 if __name__ == '__main__':
     driver = Driver("Chrome")
-    book = GnuCash('Finance')
-    Tellwut = Security("Tellwut", book)
-    runTellwut(driver, Tellwut, book)
-    book.closeBook()
-                                 
-                                 
+    # book = GnuCash('Finance')
+    # Tellwut = Security("Tellwut", book)
+    # runTellwut(driver, Tellwut, book)
+    # book.closeBook()
+
+
+    locateTellWutWindow(driver)

@@ -12,16 +12,3 @@ subprocess.Popen(
     cwd='C:\\Program Files\\Google\\Chrome\\Application',
     shell=True
 )
-
-# # Initialize the WebDriver with the session ID if it exists
-# driver = Driver("Chrome")
-# time.sleep(6)
-
-# # Attempt to load the page until successful
-# while True:
-#     try:
-#         driver.webDriver.get("http://127.0.0.1:8000/")
-#         break
-#     except WebDriverException:
-#         print("...")
-#         time.sleep(2)

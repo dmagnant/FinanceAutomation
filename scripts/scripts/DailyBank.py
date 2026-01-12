@@ -11,6 +11,7 @@ if __name__ == '__main__' or __name__ == "DailyBank":
     from Sofi import runSofi, sofiLogout, getSofiAccounts
     from Fidelity import runFidelityDaily, getFidelityAccounts, getFidelityAccounts
     from Webull import getWebullAccounts, runWebullDaily
+    from Vanguard import vanguardStalePriceCheck
 else:
     from .Ally import allyLogout, runAlly
     from .Classes.Asset import USD, Security
@@ -23,6 +24,8 @@ else:
     from. Paypal import runPaypal, checkUncategorizedPaypalTransactions
     from .Fidelity import runFidelityDaily, getFidelityAccounts, getFidelityAccounts
     from .Webull import getWebullAccounts, runWebullDaily
+    from .Vanguard import vanguardStalePriceCheck
+
 
 def getDailyBankAccounts(personalBook, jointBook=''):
     CryptoPortfolio = USD("CryptoCurrency", personalBook)
@@ -34,17 +37,17 @@ def getDailyBankAccounts(personalBook, jointBook=''):
     Webull = getWebullAccounts(personalBook)
     return {'CryptoPortfolio': CryptoPortfolio, 'Sofi':Sofi, 'Ally': Ally, 'Presearch': Presearch, 'Paypal': Paypal, 'Fidelity': Fidelity, 'Webull': Webull}
 
-def runDailyBank(accounts, personalBook, jointBook, gnuCashTransactions, dateRange):
-    driver = Driver("Chrome")
+def runDailyBank(driver, accounts, personalBook, jointBook, gnuCashTransactions, dateRange):
     Finances = Spreadsheet('Finances', 'Investments', driver)
-    Home = Spreadsheet('Home', '2025 Balance', driver)
+    Home = Spreadsheet('Home', '2026 Balance', driver)
     runSofi(driver, accounts['Sofi'], personalBook, gnuCashTransactions, dateRange)
     runFidelityDaily(driver, accounts['Fidelity'], personalBook, gnuCashTransactions, dateRange)
     runWebullDaily(driver, accounts['Webull'], personalBook, gnuCashTransactions, dateRange)
     # runAlly(driver, accounts['Ally'], jointBook, gnuCashTransactions, dateRange)
     presearchRewardsRedemptionAndBalanceUpdates(driver, accounts['Presearch'], personalBook, Finances)
     driver.findWindowByUrl(Finances.url)
-    Finances.updateInvestmentsDaily(personalBook, accounts)
+    vanguard = vanguardStalePriceCheck(driver, personalBook)
+    Finances.updateInvestmentsDaily(personalBook, accounts, vanguard)
     accounts['CryptoPortfolio'].updateGnuBalance(personalBook.getGnuAccountBalance(accounts['CryptoPortfolio'].gnuAccount))
     checkUncategorizedPaypalTransactions(driver, personalBook, accounts['Paypal'], getStartAndEndOfDateRange(timeSpan=7))
     personalBook.purgeOldGnucashFiles()
@@ -58,23 +61,24 @@ def tearDown(driver):
     driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/daily"))
 
 # if __name__ == '__main__':
+    # driver = Driver("Chrome")
 #     personalBook = GnuCash('Finance')
 #     jointBook = GnuCash('Home')
 #     accounts = getDailyBankAccounts(personalBook, jointBook)
 #     dateRange = getStartAndEndOfDateRange(timeSpan=7)
 #     gnuCashTransactions = personalBook.getTransactionsByDateRange(dateRange)
-#     GME = runDailyBank(accounts, personalBook, jointBook)
+#     GME = runDailyBank(driver, accounts, personalBook, jointBook)
 #     personalBook.closeBook()
 #     jointBook.closeBook()
 
 
 if __name__ == '__main__':
-    # driver = Driver("Chrome")
-    # personalBook = GnuCash('Finance')
+    driver = Driver("Chrome")
+    personalBook = GnuCash('Finance')
     # jointBook = GnuCash('Home')
-    # book = personalBook.getWriteBook()
+    book = personalBook.getWriteBook()
     # from datetime import datetime
     # openSpreadsheet(driver, 'Home', '2024 Balance')
-
-    personalBook = GnuCash('Finance')
-    personalBook.purgeOldGnucashFiles()
+    # accounts = getDailyBankAccounts(personalBook, jointBook)
+    Finances = Spreadsheet('Finances', 'Investments', driver)
+    book.closeBook()

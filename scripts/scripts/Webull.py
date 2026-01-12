@@ -1,4 +1,4 @@
-import time, csv, json
+import time, csv, json, pyautogui
 from datetime import datetime, timedelta
 
 from decimal import Decimal
@@ -46,12 +46,15 @@ def locateWebullWindow(driver):
     webullClosePopUps(driver)
 
 def webullLogin(driver):
-    driver.openNewWindow('https://www.webull.com')
-    login = driver.getElementAndClick('xpath', '/html/body/div/section/header/div/div[2]/div/button[2]', wait=2) # login
-    if login:
-        time.sleep(1)
-        # driver.getElementAndSendKeys('xpath', '/html/body/div[1]/div/div[2]/div/div/div[5]/div[1]/div[2]/div/div/span/input', os.environ.get('Phone')) # enter phone as user
-        driver.getElementAndSendKeys('xpath', '/html/body/div[1]/div/div[2]/div/div/div[5]/div[3]/div/span/input',getPassword('Webull')) # enter password
+    driver.openNewWindow('https://app.webull.com/account')
+    driver.waitForWebPageLoad(5)
+    # login = driver.getElementAndClick('xpath', '/html/body/div[1]/section/header/div/div[2]/div/div/button[2]/span', wait=2, allowFail=False) # Log In
+    phoneElement = driver.getElement('xpath', '/html/body/div[1]/div/div[2]/div/div/div[5]/div[1]/div[2]/div/div/span/input', wait=2, allowFail=False) # phone input
+    if phoneElement:
+        phoneElement.click()
+        passwordElement = driver.getElement('xpath', '/html/body/div[1]/div/div[2]/div/div/div[5]/div[3]/div/span/input', wait=2, allowFail=False) # password input
+        # phoneElement.send_keys(os.environ.get('Phone')) # enter phone as user
+        # passwordElement.send_keys(getPassword('Webull')) # enter password
         driver.getElementAndClick('xpath', '/html/body/div[1]/div/div[2]/div/div/div[5]/div[4]/button/span') # Log In
         if driver.getElement('xpath', '/html/body/div[1]/div/div[2]/div/div/div/div/div[1]/div/div/input'): # 2FA Code
             showMessage('Enter 2FA Code', 'Enter Code Manually, then click OK here')
@@ -68,10 +71,10 @@ def getWebullBalanceByPath(driver, path):
 def getWebullBalance(driver, accounts):
     locateWebullWindow(driver)
     unlockTrading(driver)
-    accounts['WebullBrokerage'].balance = getWebullBalanceByPath(driver, "/html/body/div[1]/section/section/section/main/div/div/div[1]/div/div[2]/div[1]/div[2]/span")                                                                    
+    accounts['WebullBrokerage'].balance = getWebullBalanceByPath(driver, "/html/body/div[1]/section/section/section/section/main/div/div/div[1]/div/div[2]/div[1]/div[2]/span")                                                                                           
     if not accounts['WebullBrokerage'].balance:
         showMessage('Failed to find balance', 'No balance found for ' + accounts['WebullBrokerage'].name)
-    accounts['WebullBrokerageCash'].balance = getWebullBalanceByPath(driver, "/html/body/div[1]/section/section/section/main/div/div/div[1]/div/div[3]/div[3]/div/div/div[1]/div[2]/div/div/div/div/div/div[3]/div/div[2]/span")                                
+    accounts['WebullBrokerageCash'].balance = getWebullBalanceByPath(driver, "/html/body/div[1]/section/section/section/section/main/div/div/div[1]/div/div[3]/div[3]/div/div/div[1]/div[2]/div/div/div/div/div/div[3]/div/div[2]/span") 
     if not accounts['WebullBrokerageCash'].balance:
         showMessage('Failed to find balance', 'No balance found for ' + accounts['WebullBrokerageCash'].name)    
     accounts['WebullBrokerageOptions'].balance = round(accounts['WebullBrokerage'].balance - accounts['WebullBrokerageCash'].balance,2)
@@ -122,14 +125,14 @@ def getFromAccountDetailsPage(driver, dateRange):
         dateRange = getStartAndEndOfDateRange(minDate=today - timedelta(days=currentWeekday), maxDate=today - timedelta(days=1))
     accountDetailsCSV = getWebullCSVFile('AD')
     open(accountDetailsCSV, 'w', newline='').truncate()
-    accountDetailsLink = driver.getElementAndClick('xpath', "/html/body/div[1]/section/section/section/main/div/div/div[2]/div/div[1]/div/div/ul/li[2]/span") # Account Details
+    accountDetailsLink = driver.getElementAndClick('xpath', "/html/body/div[1]/section/section/section/section/main/div/div/div[2]/div/div[1]/div/div/ul/li[2]/span") # Account Details
     if accountDetailsLink == False:
         showMessage('Error', 'Account Details button not found')
         return
-    driver.getElementAndClick('xpath', '/html/body/div[1]/section/section/section/main/div/div/div[2]/div/div[2]/div[1]/div[1]/div[2]/span/div/span', wait=2) # Date Range
+    driver.getElementAndClick('xpath', '/html/body/div[1]/section/section/section/section/main/div/div/div[2]/div/div[2]/div[1]/div[1]/div[2]/span/div/span', wait=2) # Date Range
     driver.getElementAndClick('xpath', '/html/body/div[3]/div/div/div/div[1]/div[2]/div/div/div/button[2]/span', wait=2) # 1M timeframe
     webullClosePopUps(driver)
-    accountDetailsTablePathPrefix = "/html/body/div[1]/section/section/section/main/div/div/div[2]/div/div[2]/div[1]/div[2]/div/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr["
+    accountDetailsTablePathPrefix = "/html/body/div[1]/section/section/section/section/main/div/div/div[2]/div/div[2]/div/div[1]/div[2]/div/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr["
     adRow = 1
     while True:
         adRow+=1
@@ -214,10 +217,12 @@ def getFromOrderHistoryPage(driver, dateRange):
     open(orderHistory, 'w', newline='').truncate()
     actionChains = ActionChains(driver.webDriver)
     # check Positions > Order History for fees and description
-    driver.getElementAndClick('xpath', "/html/body/div[1]/section/section/section/main/div/div/div[2]/div/div[1]/div/div/ul/li[1]/span") # Positions
-    if not driver.getElementAndClick('xpath', "/html/body/div[1]/section/section/section/main/div/div/div[2]/div/div[2]/div[2]/div[1]/div/div/ul/li[3]/span"): # Order History
+    driver.getElementAndClick('xpath', "/html/body/div[1]/section/section/section/section/main/div/div/div[2]/div/div[1]/div/div/ul/li[1]/span") # Positions
+    time.sleep(1)
+    if not driver.getElementAndClick('xpath', "/html/body/div[1]/section/section/section/section/main/div/div/div[2]/div/div[2]/div/div/div[1]/div/div/ul/li[3]/span"): # Order History
         showMessage('Error', 'Order History button not found')
-    driver.getElementAndClick('xpath', "/html/body/div[1]/section/section/section/main/div/div/div[2]/div/div[2]/div[2]/div[2]/div[1]/div[1]/span/div/span") # timeframe
+    driver.getElementAndClick('xpath', "/html/body/div[1]/section/section/section/section/main/div/div/div[2]/div/div[2]/div/div/div[2]/div[1]/div/span/button/span") # timeframe
+    time.sleep(0.5)
     orderFilledTab = driver.getElement('xpath', "/html/body/div[3]/div/div/div/div[1]/div[2]/div/div/div/button[2]/span") # Order Filled
     action_chains = ActionChains(driver.webDriver)
     action_chains.move_to_element(orderFilledTab).send_keys(Keys.RIGHT).perform()
@@ -227,7 +232,7 @@ def getFromOrderHistoryPage(driver, dateRange):
     time.sleep(0.5)
     action_chains.send_keys(Keys.SPACE).perform()
     webullClosePopUps(driver)
-    orderhistoryTablePathPrefix = "/html/body/div[1]/section/section/section/main/div/div/div[2]/div/div[2]/div[2]/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr["
+    orderhistoryTablePathPrefix = "/html/body/div[1]/section/section/section/section/main/div/div/div[2]/div/div[2]/div/div/div[3]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr["
     loadFullOHPage(driver, orderhistoryTablePathPrefix)
     row = 1
     while True:
@@ -241,10 +246,10 @@ def getFromOrderHistoryPage(driver, dateRange):
             ohDateTime = datetime.strptime(ohRawDateTime[:-4], '%m/%d/%Y %H:%M:%S') # remove timezone
             print(f'Row: {row} - date found: {ohRawDateTime}')
             ohDate = ohDateTime.strftime('%Y-%m-%d')
+            averagePrice = driver.getElementText('xpath', f"{orderhistoryTablePathPrefix}{str(row)}]/td[10]", wait=2) # Average Price
         else:
             print(f'Row: {row} - has blank date: {ohRawDateTime}')
             averagePrice = driver.getElementText('xpath', f"{orderhistoryTablePathPrefix}{str(row)}]/td[10]", wait=2) # Average Price
-            print(f'averagePrice: {averagePrice}')
             try:
                 Decimal(averagePrice.replace('$', '').replace(',', ''))
                 print(f'Row: {row} - date is blank but average price is not, trying again')
@@ -261,6 +266,7 @@ def getFromOrderHistoryPage(driver, dateRange):
             rawDescription = driver.getElementText('xpath', f"{orderhistoryTablePathPrefix}{str(row)}]/td[2]", wait=2) # Symbol
             side = driver.getElementText('xpath', f"{orderhistoryTablePathPrefix}{str(row)}]/td[3]", wait=2) # Side (buy/sell)
             quantity = driver.getElementText('xpath', f"{orderhistoryTablePathPrefix}{str(row)}]/td[8]", wait=2) # Filled Quantity
+            print(f'quantity: {quantity}')
             description = parseWebullOHDescription(rawDescription)
             if averagePrice and averagePrice != '--':
                 averagePrice = driver.getElementText('xpath', f"{orderhistoryTablePathPrefix}{str(row)}]/td[10]", wait=2) # Average Price
@@ -335,8 +341,6 @@ def captureWebullTransactions(driver, dateRange):
     locateWebullWindow(driver)
     WebullActivity = getWebullCSVFile()
     open(WebullActivity, 'w', newline='').truncate()
-    # accountDetailsTransactionsFile = getWebullCSVFile('AD')
-    # orderHistoryTransactionsFile = getWebullCSVFile('OH')
     accountDetailsTransactionsFile = getFromAccountDetailsPage(driver, dateRange)
     orderHistoryTransactionsFile = getFromOrderHistoryPage(driver, dateRange) 
     accountDetails = list(csv.reader(open(accountDetailsTransactionsFile), delimiter=','))
@@ -436,7 +440,22 @@ def getWebullDuplicateTransactions(account, book, dateRange):
                 if f"{tr.post_date} {tr.description}" == key and tr != highest_fee_transaction:
                     print(f"Deleting duplicate transaction: {tr}")
                     book.writeBook.delete(tr)  # Assuming `deleteTransaction` is a method in `book`    
-                    book.writeBook.flush()                
+                    book.writeBook.flush()    
+
+def getWebullCashInvested(accounts, book):
+    account = accounts['WebullBrokerageCash']
+    investedTotal = Decimal(0.00)
+    gnuAccount = book.getGnuAccountFullName(account.name)
+    for tr in book.getTransactionsByGnuAccountIncludingChildren(gnuAccount):
+        for spl in tr.splits:
+            if spl.account.fullname == gnuAccount:
+                if 'Webull Deposit' in tr.description:
+                    investedTotal += spl.value
+                    print(f'description: {tr.description} - amount: {spl.value} - date: {tr.post_date}')
+                elif 'Webull Withdrawal' in tr.description:
+                    investedTotal -= spl.value
+                    print(f'description: {tr.description} - amount: {spl.value} - date: {tr.post_date}')
+    return investedTotal
 
 def runWebullDaily(driver, accounts, book, gnuCashTransactions, dateRange):
     locateWebullWindow(driver)
@@ -453,18 +472,23 @@ def runWebullDaily(driver, accounts, book, gnuCashTransactions, dateRange):
     getWebullDuplicateTransactions(accounts['WebullBrokerageCash'].gnuAccount, book, dateRange)
 
 if __name__ == '__main__':
-    driver = Driver("Chrome")
-    # book = GnuCash('Finance')
-    dateRange = getStartAndEndOfDateRange(timeSpan=7)
+    # driver = Driver("Chrome")
+    book = GnuCash('Finance')
+    # dateRange = getStartAndEndOfDateRange(timeSpan=7)
     # gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
-    # accounts = getWebullAccounts(book)
-    locateWebullWindow(driver)
-    WebullActivity = getWebullCSVFile()
+    accounts = getWebullAccounts(book)
+    # locateWebullWindow(driver)
+    # WebullActivity = getWebullCSVFile()
     # WebullActivity = captureWebullTransactions(driver, dateRange)
     # accountDetailsTransactions = getFromAccountDetailsPage(driver, dateRange)
-    orderHistoryTransactions = getFromOrderHistoryPage(driver, dateRange) 
+    # orderHistoryTransactions = getFromOrderHistoryPage(driver, dateRange) 
     # importWebullTransactions(accounts, WebullActivity, book, gnuCashTransactions)
     # getWebullOptionsCost(driver, accounts)
     # writeWebullOptionMarketChangeTransaction(accounts, book)
     # getWebullDuplicateTransactions(accounts['WebullBrokerageCash'].gnuAccount, book, dateRange)
-    # book.closeBook() 
+
+    # runWebullDaily(driver, accounts, book, gnuCashTransactions, dateRange)
+    total = getWebullCashInvested(accounts, book)
+    print(f'Total Cash Invested in Webull: {total}')
+    book.closeBook() 
+

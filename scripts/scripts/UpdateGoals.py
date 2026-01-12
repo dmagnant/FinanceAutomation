@@ -1,5 +1,5 @@
 import gspread
-from datetime import datetime
+from datetime import date, datetime
 
 if __name__ == '__main__' or __name__ == "UpdateGoals":
     from Classes.WebDriver import Driver
@@ -70,18 +70,8 @@ def getContributionsForRetirementAccounts(accountList, mybook, transactions, acc
     updateSpreadsheet(spreadsheet, 'Roth IRA Contributions', date, accountsContext['RothIRAContributions'], 'Personal', 'YTD')
     updateSpreadsheet(spreadsheet, 'Brokerage Contributions', date, accountsContext['BrokerageContributions'], 'Personal', 'YTD')
     
-def getContributionsForCryptoCurrency(mybook, transactions, accountsContext, date, spreadsheet):
-    readBook = mybook.readBook
-    baseAccount = readBook.accounts(fullname='Assets:Non-Liquid Assets:CryptoCurrency')
-    cryptoAccounts = [baseAccount]
-    total = 0
-    for acc in baseAccount.children:    cryptoAccounts.append(acc)
-    for acc in cryptoAccounts:
-        for tr in transactions:
-            for spl in tr.splits:
-                if spl.account.fullname == acc.fullname:
-                    if tr.description == 'Crypto Purchase' or 'DIGITALOCEAN' in tr.description:
-                        total += float(format(spl.value, ".2f"))
+def getContributionsForCryptoCurrency(book, transactions, accountsContext, date, spreadsheet):
+    total = book.getCryptoCurrencyDepositsFromExistingTransactions(book, transactions)
     accountsContext['CryptoContributions'] = round(total, 2)
     updateSpreadsheet(spreadsheet, 'Crypto Contributions', date, accountsContext['CryptoContributions'], 'Personal', 'YTD')
 
@@ -233,11 +223,11 @@ def runUpdateGoals(accountsType, book):
 
 if __name__ == '__main__':
     # from Classes.Asset import USD
-
-    # book = GnuCash('Finance')
+    driver = Driver("Chrome")
+    book = GnuCash('Finance')
     # account =  USD("Vanguard401k", book)
-    # dateRange = getStartAndEndOfDateRange(datetime.today().date(), timeSpan='year')
-    # transactions = book.getTransactionsByDateRange(dateRange)
+    dateRange = getStartAndEndOfDateRange(datetime.today().date(), minDate=date(2017,1,1), timeSpan='all')
+    transactions = book.getTransactionsByDateRange(dateRange)
     # rothAmount = 0
     # preTaxAmount = 0
     # for tr in transactions:
@@ -255,5 +245,7 @@ if __name__ == '__main__':
     #                     preTaxAmount += spl.value
     # print("rothAmount: " + str(rothAmount))
     # print("preTaxAmount: " + str(preTaxAmount))
-    column = 'G'
-    print(chr(ord(column) + 1))
+    Finances = Spreadsheet('Finances', 'Investments', driver)
+    from Monthly import getMonthlyAccounts
+    accounts = getMonthlyAccounts('Crypto', book, None)
+    Finances.updateCryptoInvestmentsMonthly(book, accounts)
