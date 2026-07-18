@@ -188,7 +188,9 @@ if __name__ == "__main__":
     # driver = createDriver("com.prodege.swagiq", "com.tapjoy.TJAdUnitActivity")
     driver = createDriver("com.mentormate.android.inboxdollars", "com.tapjoy.TJAdUnitActivity")
     # runBothApps()
-
-    el = getElementIfTextEquals(driver, "Tapjoy")
-    print(el)
-    driver.quit()
+    # print(driver.page_source)
+    textviews = driver.find_elements(AppiumBy.ANDROID_UIAUTOMATOR,'new UiSelector().className("android.view.View").descriptionContains("Image")')
+    print(f"Found {len(textviews)} TextView elements.")
+    for e in textviews:
+        print("class=", e.get_attribute("className"),"text=", e.text,"id=", e.get_attribute("resourceId"),"desc=", e.get_attribute("contentDescription"))
+    textviews[0].click()

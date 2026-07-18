@@ -11,13 +11,14 @@ if __name__ == '__main__' or __name__ == "handleBatchJobs":
     from Paidviewpoint import runPaidviewpoint
     from Functions.GeneralFunctions import setDirectory, getStartAndEndOfDateRange, getLogger, minimizeAllWindowsExcept
     from Classes.GnuCash import GnuCash
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Classes.Asset import USD, Security
 
 def runScripts(scripts, log=getLogger()):
     book = GnuCash('Finance')
-    driver = Driver("Chrome")
+    driver = WebDriver("Chrome")
     setupWindow(driver)
+    print('window setup complete, starting scripts')
     results = {}
     for script in scripts:
         log.info(f'Running script: {script}')
@@ -78,7 +79,7 @@ def setupWindow(driver):
             for i in driver.webDriver.window_handles:
                 driver.webDriver.switch_to.window(i)
                 print(f'url is {driver.webDriver.current_url}')
-                if i != currentWindow and driver.webDriver.current_url != 'chrome://tab-search.top-chrome/':
+                if i != currentWindow and 'omnibox-popup.top-chrome' not in driver.webDriver.current_url:
                     driver.webDriver.close()
         driver.webDriver.switch_to.window(currentWindow)
     except NoSuchWindowException:

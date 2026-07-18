@@ -4,7 +4,7 @@ from datetime import datetime
 
 if __name__ == '__main__' or __name__ == "Discover":
     from Classes.Asset import USD
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Classes.GnuCash import GnuCash    
     from Functions.GeneralFunctions import getPassword, getStartAndEndOfDateRange, getUsername
 else:
@@ -88,7 +88,7 @@ def importDiscoverTransactions(account, discoverActivity, book, gnuCashTransacti
                     toAccount = book.getGnuAccountFullName('Groceries')
                     break
         # toAccount = book.getGnuAccountFullName(fromAccount, description=description)
-        if toAccount == 'Expenses:Other': reviewTransaction = True
+        if 'Other' in toAccount:   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)
 
@@ -106,7 +106,7 @@ def runDiscover(driver, account, book):
     if account.reviewTransactions: book.openGnuCashUI()
 
 if __name__ == '__main__':
-    driver = Driver("Chrome")
+    driver = WebDriver("Chrome")
     book = GnuCash('Finance')
     Discover = USD("Discover", book)
     runDiscover(driver, Discover, book)

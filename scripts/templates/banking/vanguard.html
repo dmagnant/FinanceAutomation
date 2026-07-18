@@ -12,17 +12,117 @@
                     <button type="submit" name="balance">Balances</button>
                 </form>
             </div>
-            <div style="width: 80%; display:table-cell">
-                &emsp;&ensp;401k Balance: <b>${{accounts.V401k.balance}}</b><br>
-                &emsp;&emsp;&thinsp;gnuBalance: <b>${{accounts.V401k.gnuBalance}}</b><br><br>
-                &emsp;&emsp;&emsp;&thinsp;TSM shares: <b>{{accounts.TSM401k.balance}} ({{accounts.TSM401k.symbol}})</b><br>
-                gnuBalance shares: <b>{{accounts.TSM401k.gnuBalance}} ({{accounts.TSM401k.symbol}})</b><br>
-                &emsp;&emsp;&emsp;&ensp;&thinsp;TSM value: <b>${{accounts.TSM401k.value}}</b><br>
-                &emsp;${{accounts.TSM401k.price}} x shares: <b>${{accounts.TSM401k.gnuValue}}</b><br><br>
-                &emsp;&emsp;&emsp;&thinsp;EBI shares: <b>{{accounts.EBI.balance}} ({{accounts.EBI.symbol}})</b><br>
-                gnuBalance shares: <b>{{accounts.EBI.gnuBalance}} ({{accounts.EBI.symbol}})</b><br>
-                &emsp;&emsp;&emsp;&ensp;&thinsp;EBI value: <b>${{accounts.EBI.value}}</b><br>
-                &emsp;${{accounts.EBI.price}} x shares: <b>${{accounts.EBI.gnuValue}}</b><br><br>              
+            <div style="display:table-cell;text-align:right">
+                {{accounts.Vanguard401k.name}} balance: &thinsp; <br><br>
+
+                {{accounts.Vanguard401k1464.symbol}} shares: &thinsp; <br>
+                gnuBalance shares: &thinsp; <br>
+                {{accounts.Vanguard401k1464.symbol}} value: &thinsp; <br>
+                ${{accounts.Vanguard401k1464.price}} x shares: &thinsp; <br><br>
+
+                {{accounts.Vanguard401k1676.symbol}} shares: &thinsp; <br>
+                gnuBalance shares: &thinsp; <br>
+                {{accounts.Vanguard401k1676.symbol}} value: &thinsp; <br>
+                ${{accounts.Vanguard401k1676.price}} x shares: &thinsp; <br><br>
+
+                {{accounts.Vanguard401k4769.symbol}} shares: &thinsp; <br>
+                gnuBalance shares: &thinsp; <br>
+                {{accounts.Vanguard401k4769.symbol}} value: &thinsp; <br>
+                ${{accounts.Vanguard401k4769.price}} x shares: &thinsp; <br><br>
+
+                {{accounts.Vanguard401kM038.symbol}} shares: &thinsp; <br>
+                gnuBalance shares: &thinsp; <br>
+                {{accounts.Vanguard401kM038.symbol}} value: &thinsp; <br>
+                ${{accounts.Vanguard401kM038.price}} x shares: &thinsp; <br><br>
+
+                {{accounts.Vanguard401kM078.symbol}} shares: &thinsp; <br>
+                gnuBalance shares: &thinsp; <br>
+                {{accounts.Vanguard401kM078.symbol}} value: &thinsp; <br>
+                ${{accounts.Vanguard401kM078.price}} x shares: &thinsp; <br><br>
+            </div>
+            <div style="display:table-cell;text-align:left">
+                <b>${{accounts.Vanguard401k.gnuBalance}}<br><br>
+
+                {{accounts.Vanguard401k1464.balance}} {{accounts.Vanguard401k1464.symbol}}<br>
+                {{accounts.Vanguard401k1464.gnuBalance}} {{accounts.Vanguard401k1464.symbol}}<br>
+                ${{accounts.Vanguard401k1464.value}}<br>
+                ${{accounts.Vanguard401k1464.gnuValue}}<br><br>
+
+                {{accounts.Vanguard401k1676.balance}} {{accounts.Vanguard401k1676.symbol}}<br>
+                {{accounts.Vanguard401k1676.gnuBalance}} {{accounts.Vanguard401k1676.symbol}}<br>
+                ${{accounts.Vanguard401k1676.value}}<br>
+                ${{accounts.Vanguard401k1676.gnuValue}}<br><br>
+
+                {{accounts.Vanguard401k4769.balance}} {{accounts.Vanguard401k4769.symbol}}<br>
+                {{accounts.Vanguard401k4769.gnuBalance}} {{accounts.Vanguard401k4769.symbol}}<br>
+                ${{accounts.Vanguard401k4769.value}}<br>
+                ${{accounts.Vanguard401k4769.gnuValue}}<br><br>
+
+                {{accounts.Vanguard401kM038.balance}} {{accounts.Vanguard401kM038.symbol}}<br>
+                {{accounts.Vanguard401kM038.gnuBalance}} {{accounts.Vanguard401kM038.symbol}}<br>
+                ${{accounts.Vanguard401kM038.value}}<br>
+                ${{accounts.Vanguard401kM038.gnuValue}}<br><br>
+            
+                {{accounts.Vanguard401kM078.balance}} {{accounts.Vanguard401kM078.symbol}}<br>
+                {{accounts.Vanguard401kM078.gnuBalance}} {{accounts.Vanguard401kM078.symbol}}<br>
+                ${{accounts.Vanguard401kM078.value}}<br>
+                ${{accounts.Vanguard401kM078.gnuValue}}<br><br></b>                   
+            </div>
+            <div style="display:table-cell;text-align:right">
+                {{accounts.VanguardRoth401k.name}} balance: &thinsp; <br><br>
+
+                {{accounts.VanguardRoth401k1464.symbol}} shares: &thinsp; <br>
+                gnuBalance shares: &thinsp; <br>
+                {{accounts.VanguardRoth401k1464.symbol}} value: &thinsp; <br>
+                ${{accounts.VanguardRoth401k1464.price}} x shares: &thinsp; <br><br>
+
+                {{accounts.VanguardRoth401k1676.symbol}} shares: &thinsp; <br>
+                gnuBalance shares: &thinsp; <br>
+                {{accounts.VanguardRoth401k1676.symbol}} value: &thinsp; <br>
+                ${{accounts.VanguardRoth401k1676.price}} x shares: &thinsp; <br><br>
+
+                {{accounts.VanguardRoth401k4769.symbol}} shares: &thinsp; <br>
+                gnuBalance shares: &thinsp; <br>
+                {{accounts.VanguardRoth401k4769.symbol}} value: &thinsp; <br>
+                ${{accounts.VanguardRoth401k4769.price}} x shares: &thinsp; <br><br>
+
+                {{accounts.VanguardRoth401kM038.symbol}} shares: &thinsp; <br>
+                gnuBalance shares: &thinsp; <br>
+                {{accounts.VanguardRoth401kM038.symbol}} value: &thinsp; <br>
+                ${{accounts.VanguardRoth401kM038.price}} x shares: &thinsp; <br><br>
+
+                {{accounts.VanguardRoth401kM078.symbol}} shares: &thinsp; <br>
+                gnuBalance shares: &thinsp; <br>
+                {{accounts.VanguardRoth401kM078.symbol}} value: &thinsp; <br>
+                ${{accounts.VanguardRoth401kM078.price}} x shares: &thinsp; <br><br>
+            </div>
+            <div style="display:table-cell;text-align:left">
+                <b>${{accounts.VanguardRoth401k.gnuBalance}}<br><br>
+
+                {{accounts.VanguardRoth401k1464.balance}} {{accounts.VanguardRoth401k1464.symbol}}<br>
+                {{accounts.VanguardRoth401k1464.gnuBalance}} {{accounts.VanguardRoth401k1464.symbol}}<br>
+                ${{accounts.VanguardRoth401k1464.value}}<br>
+                ${{accounts.VanguardRoth401k1464.gnuValue}}<br><br>
+
+                {{accounts.VanguardRoth401k1676.balance}} {{accounts.VanguardRoth401k1676.symbol}}<br>
+                {{accounts.VanguardRoth401k1676.gnuBalance}} {{accounts.VanguardRoth401k1676.symbol}}<br>
+                ${{accounts.VanguardRoth401k1676.value}}<br>
+                ${{accounts.VanguardRoth401k1676.gnuValue}}<br><br>
+
+                {{accounts.VanguardRoth401k4769.balance}} {{accounts.VanguardRoth401k4769.symbol}}<br>
+                {{accounts.VanguardRoth401k4769.gnuBalance}} {{accounts.VanguardRoth401k4769.symbol}}<br>
+                ${{accounts.VanguardRoth401k4769.value}}<br>
+                ${{accounts.VanguardRoth401k4769.gnuValue}}<br><br>
+
+                {{accounts.VanguardRoth401kM038.balance}} {{accounts.VanguardRoth401kM038.symbol}}<br>
+                {{accounts.VanguardRoth401kM038.gnuBalance}} {{accounts.VanguardRoth401kM038.symbol}}<br>
+                ${{accounts.VanguardRoth401kM038.value}}<br>
+                ${{accounts.VanguardRoth401kM038.gnuValue}}<br><br>
+            
+                {{accounts.VanguardRoth401kM078.balance}} {{accounts.VanguardRoth401kM078.symbol}}<br>
+                {{accounts.VanguardRoth401kM078.gnuBalance}} {{accounts.VanguardRoth401kM078.symbol}}<br>
+                ${{accounts.VanguardRoth401kM078.value}}<br>
+                ${{accounts.VanguardRoth401kM078.gnuValue}}<br><br></b>                   
             </div>
         </div>
     </div>

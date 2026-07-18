@@ -6,12 +6,17 @@ scripts/scripts/Functions/GeneralFunctions.py
 scripts/scripts/Functions/SpreadsheetFunctions.py
 scripts/scripts/Classes/Spreadsheet.py
 scripts/scripts/Classes/MobileDriver.py
+scripts/scripts/Classes/Selenium.py
+scripts/scripts/Classes/WebDriver.py
 scripts/scripts/Sofi.py
 scripts/scripts/Vanguard.py
 scripts/scripts/Paidviewpoint.py
 scripts/scripts/Swagbucks.py
 scripts/scripts/InboxDollars.py
+scripts/scripts/MyPoints.py
 scripts/scripts/Tellwut.py
+scripts/scripts/Freecash.py
+scripts/scripts/FireFaucet.py
 scripts/__pycache__/views.cpython-310.pyc
 scripts/scripts/Functions/__pycache__/GnuCashFunctions.cpython-310.pyc
 scripts/scripts/Functions/__pycache__/GeneralFunctions.cpython-310.pyc
@@ -40,7 +45,6 @@ scripts/scripts/__pycache__/Sofi.cpython-310.pyc
 scripts/scripts/__pycache__/Swagbucks.cpython-310.pyc
 scripts/scripts/__pycache__/Tellwut.cpython-310.pyc
 scripts/scripts/__pycache__/Vanguard.cpython-310.pyc
-scripts/scripts/__pycache__/Worthy.cpython-310.pyc
 scripts/scripts/Classes/__pycache__/Asset.cpython-310.pyc
 scripts/scripts/Functions/__pycache__/GnuCashFunctions.cpython-310.pyc
 scripts/scripts/Functions/__pycache__/GnuCashFunctions.cpython-310.pyc

@@ -1,13 +1,16 @@
 import time, json
 
+
 if __name__ == '__main__' or __name__ == "Eternl":
     from Classes.Asset import Security
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Classes.GnuCash import GnuCash
+    from Classes.Spreadsheet import Spreadsheet
     from Functions.GeneralFunctions import getNotes
 else:
     from .Classes.Asset import Security
     from .Classes.GnuCash import GnuCash
+    from .Classes.Spreadsheet import Spreadsheet
     from .Functions.GeneralFunctions import getNotes
 
 def locateEternlWindow(driver):
@@ -33,16 +36,11 @@ def runEternl(driver, account, book, spreadsheet):
     account.setPrice(account.getPriceFromCoinGecko())
     account.updateSpreadsheetAndGnuCash(spreadsheet, book)
     
-# if __name__ == '__main__':
-#     driver = Driver("Chrome")
-#     book = GnuCash('Finance')
-#     Cardano = Security("Cardano", book)    
-#     runEternl(driver, Cardano, book)
-#     Cardano.getData()
-#     book.closeBook()
-
 if __name__ == '__main__':
-    driver = Driver("Chrome")
-    locateEternlWindow(driver)
-    balance = getEternlBalance(driver)
-    print(balance)
+    driver = WebDriver("Chrome")
+    book = GnuCash('Finance')
+    Finances = Spreadsheet('Finances', 'Investments', driver)
+    Cardano = Security("Cardano", book)    
+    runEternl(driver, Cardano, book, Finances)
+    Cardano.getData()
+    book.closeBook()

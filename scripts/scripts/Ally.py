@@ -7,7 +7,7 @@ from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Ally":
     from Classes.Asset import USD
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Classes.GnuCash import GnuCash
     from Classes.Spreadsheet import Spreadsheet
     from Functions.GeneralFunctions import (getPassword,
@@ -244,12 +244,12 @@ def runAlly(driver, account, book, gnuCashTransactions, dateRange):
     account.updateGnuBalance(book.getGnuAccountBalance(account.gnuAccount))
 
 if __name__ == '__main__':
-    driver = Driver("Chrome")
-    # book = GnuCash('Home')
+    # driver = WebDriver("Chrome")
+    book = GnuCash('Home')
     # Ally = USD("Ally", book)
     # dateRange = getStartAndEndOfDateRange(timeSpan=7)
     # gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
-    locateAllyWindow(driver)
+    # locateAllyWindow(driver)
     # runAlly(driver, Ally, book, gnuCashTransactions, dateRange)
     # allyLogout(driver)
     # book.closeBook()

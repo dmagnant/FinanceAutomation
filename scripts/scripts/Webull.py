@@ -10,7 +10,7 @@ from selenium.webdriver import Keys
 if __name__ == '__main__' or __name__ == "Webull":
     from Classes.Asset import USD
     from Classes.GnuCash import GnuCash
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Functions.GeneralFunctions import (showMessage, getPassword, getStartAndEndOfDateRange, setDirectory, getNotes, getOTP)    
 else:
     from .Classes.Asset import USD
@@ -41,26 +41,32 @@ def webullClosePopUps(driver):
     
 def locateWebullWindow(driver):
     found = driver.findWindowByUrl("app.webull.com/account")
-    if not found:   webullLogin(driver)
+    if not found:   
+        return webullLogin(driver)
     else:           driver.webDriver.switch_to.window(found); time.sleep(0.5)
     webullClosePopUps(driver)
+    return True
 
 def webullLogin(driver):
     driver.openNewWindow('https://app.webull.com/account')
     driver.waitForWebPageLoad(5)
     # login = driver.getElementAndClick('xpath', '/html/body/div[1]/section/header/div/div[2]/div/div/button[2]/span', wait=2, allowFail=False) # Log In
-    phoneElement = driver.getElement('xpath', '/html/body/div[1]/div/div[2]/div/div/div[5]/div[1]/div[2]/div/div/span/input', wait=2, allowFail=False) # phone input
+    phoneElement = driver.getElement('css_selector', "input[placeholder='Phone Number']", wait=2, allowFail=False) # phone input
     if phoneElement:
         phoneElement.click()
-        passwordElement = driver.getElement('xpath', '/html/body/div[1]/div/div[2]/div/div/div[5]/div[3]/div/span/input', wait=2, allowFail=False) # password input
+        # passwordElement = driver.getElement('xpath', '/html/body/div[1]/div/div[2]/div/div/div[5]/div[3]/div/span/input', wait=2, allowFail=False) # password input
         # phoneElement.send_keys(os.environ.get('Phone')) # enter phone as user
         # passwordElement.send_keys(getPassword('Webull')) # enter password
-        driver.getElementAndClick('xpath', '/html/body/div[1]/div/div[2]/div/div/div[5]/div[4]/button/span') # Log In
-        if driver.getElement('xpath', '/html/body/div[1]/div/div[2]/div/div/div/div/div[1]/div/div/input'): # 2FA Code
+        driver.getElementAndClick('xpath', "//button//span[text()='Log In']/..", wait=2, allowFail=False) # Log In
+        if driver.getElement('xpath', '/html/body/div[1]/div/div[2]/div/div/div/div/div[1]/div/div/input', wait=2): # 2FA Code
             showMessage('Enter 2FA Code', 'Enter Code Manually, then click OK here')
             driver.getElementAndClick('xpath', '/html/body/div[1]/div/div[2]/div/div/div/div/div[2]/button') # Next
-    driver.webDriver.get('https://app.webull.com/account')
-    unlockTrading(driver)
+    if not driver.getWebURL('https://app.webull.com/account', wait=5):
+        print('FAILED TO LOGIN TO WEBULL')
+        return False
+    else:
+        unlockTrading(driver)
+    return True
 
 def getWebullBalanceByPath(driver, path):
     balance = driver.getElementText('xpath', path)
@@ -132,7 +138,7 @@ def getFromAccountDetailsPage(driver, dateRange):
     driver.getElementAndClick('xpath', '/html/body/div[1]/section/section/section/section/main/div/div/div[2]/div/div[2]/div[1]/div[1]/div[2]/span/div/span', wait=2) # Date Range
     driver.getElementAndClick('xpath', '/html/body/div[3]/div/div/div/div[1]/div[2]/div/div/div/button[2]/span', wait=2) # 1M timeframe
     webullClosePopUps(driver)
-    accountDetailsTablePathPrefix = "/html/body/div[1]/section/section/section/section/main/div/div/div[2]/div/div[2]/div/div[1]/div[2]/div/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr["
+    accountDetailsTablePathPrefix = "/html/body/div[1]/section/section/section/section/main/div/div/div[2]/div/div[2]/div/div[1]/div/div[2]/div/div/div/div[1]/div[2]/div/div/div/div/table/tbody/tr["
     adRow = 1
     while True:
         adRow+=1
@@ -149,7 +155,12 @@ def getFromAccountDetailsPage(driver, dateRange):
                 description = parseWebullADDescription(rawDescription)
                 if description:
                     csv.writer(open(accountDetailsCSV, 'a', newline='', encoding="utf-8")).writerow([ahDate, description, round(amount,2)])
-            else:   break # no more transactions in date range
+            elif adDateTime.date() > dateRange['endDate']:
+                # Date is after max date, keep looping to find dates in range
+                continue
+            else:
+                # Date is before min date, stop processing
+                break
         else:       break # no more transactions or error finding date
     rows = list(csv.reader(open(accountDetailsCSV), delimiter=','))
     consolidatedRows = []
@@ -222,7 +233,7 @@ def getFromOrderHistoryPage(driver, dateRange):
     if not driver.getElementAndClick('xpath', "/html/body/div[1]/section/section/section/section/main/div/div/div[2]/div/div[2]/div/div/div[1]/div/div/ul/li[3]/span"): # Order History
         showMessage('Error', 'Order History button not found')
     driver.getElementAndClick('xpath', "/html/body/div[1]/section/section/section/section/main/div/div/div[2]/div/div[2]/div/div/div[2]/div[1]/div/span/button/span") # timeframe
-    time.sleep(0.5)
+    time.sleep(2)
     orderFilledTab = driver.getElement('xpath', "/html/body/div[3]/div/div/div/div[1]/div[2]/div/div/div/button[2]/span") # Order Filled
     action_chains = ActionChains(driver.webDriver)
     action_chains.move_to_element(orderFilledTab).send_keys(Keys.RIGHT).perform()
@@ -449,16 +460,14 @@ def getWebullCashInvested(accounts, book):
     for tr in book.getTransactionsByGnuAccountIncludingChildren(gnuAccount):
         for spl in tr.splits:
             if spl.account.fullname == gnuAccount:
-                if 'Webull Deposit' in tr.description:
+                if 'Webull' in tr.description and 'Transfer' in tr.description:
                     investedTotal += spl.value
-                    print(f'description: {tr.description} - amount: {spl.value} - date: {tr.post_date}')
-                elif 'Webull Withdrawal' in tr.description:
-                    investedTotal -= spl.value
                     print(f'description: {tr.description} - amount: {spl.value} - date: {tr.post_date}')
     return investedTotal
 
 def runWebullDaily(driver, accounts, book, gnuCashTransactions, dateRange):
-    locateWebullWindow(driver)
+    if not locateWebullWindow(driver):  
+        return False
     getWebullBalance(driver, accounts)
     WebullActivity = captureWebullTransactions(driver, dateRange)
     importWebullTransactions(accounts, WebullActivity, book, gnuCashTransactions)
@@ -472,12 +481,12 @@ def runWebullDaily(driver, accounts, book, gnuCashTransactions, dateRange):
     getWebullDuplicateTransactions(accounts['WebullBrokerageCash'].gnuAccount, book, dateRange)
 
 if __name__ == '__main__':
-    # driver = Driver("Chrome")
-    book = GnuCash('Finance')
+    driver = WebDriver("Chrome")
+    # book = GnuCash('Finance')
     # dateRange = getStartAndEndOfDateRange(timeSpan=7)
     # gnuCashTransactions = book.getTransactionsByDateRange(dateRange)
-    accounts = getWebullAccounts(book)
-    # locateWebullWindow(driver)
+    # accounts = getWebullAccounts(book)
+    locateWebullWindow(driver)
     # WebullActivity = getWebullCSVFile()
     # WebullActivity = captureWebullTransactions(driver, dateRange)
     # accountDetailsTransactions = getFromAccountDetailsPage(driver, dateRange)
@@ -488,7 +497,6 @@ if __name__ == '__main__':
     # getWebullDuplicateTransactions(accounts['WebullBrokerageCash'].gnuAccount, book, dateRange)
 
     # runWebullDaily(driver, accounts, book, gnuCashTransactions, dateRange)
-    total = getWebullCashInvested(accounts, book)
-    print(f'Total Cash Invested in Webull: {total}')
-    book.closeBook() 
-
+    # total = getWebullCashInvested(accounts, book)
+    # print(f'Total Cash Invested in Webull: {total}')
+    # book.closeBook() 

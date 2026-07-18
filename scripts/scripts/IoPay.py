@@ -4,7 +4,7 @@ from decimal import Decimal
 if __name__ == '__main__' or __name__ == "IoPay":
     from Classes.Asset import Security
     from Functions.GeneralFunctions import showMessage
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Classes.GnuCash import GnuCash
     from Classes.Spreadsheet import Spreadsheet
 else:
@@ -59,7 +59,7 @@ def runIoPay(driver, account, book, spreadsheet):
     account.updateSpreadsheetAndGnuCash(spreadsheet, book)
 
 if __name__ == '__main__':                                                                  
-    driver = Driver("Chrome")
+    driver = WebDriver("Chrome")
     book = GnuCash('Finance')    
     IoTex = Security("IoTex", book)
     Finances = Spreadsheet('Finances', 'Investments', driver)

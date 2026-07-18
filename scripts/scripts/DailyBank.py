@@ -2,12 +2,11 @@ from datetime import datetime
 if __name__ == '__main__' or __name__ == "DailyBank":
     from Ally import allyLogout, runAlly
     from Classes.Asset import USD, Security
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Classes.GnuCash import GnuCash
     from Classes.Spreadsheet import Spreadsheet
     from Functions.GeneralFunctions import getStartAndEndOfDateRange
     from Paypal import checkUncategorizedPaypalTransactions
-    from Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from Sofi import runSofi, sofiLogout, getSofiAccounts
     from Fidelity import runFidelityDaily, getFidelityAccounts, getFidelityAccounts
     from Webull import getWebullAccounts, runWebullDaily
@@ -15,11 +14,10 @@ if __name__ == '__main__' or __name__ == "DailyBank":
 else:
     from .Ally import allyLogout, runAlly
     from .Classes.Asset import USD, Security
-    from .Classes.WebDriver import Driver
+    from .Classes.Selenium import WebDriver
     from .Classes.GnuCash import GnuCash
     from .Classes.Spreadsheet import Spreadsheet
     from .Functions.GeneralFunctions import getStartAndEndOfDateRange
-    from .Presearch import presearchRewardsRedemptionAndBalanceUpdates
     from .Sofi import runSofi, sofiLogout, getSofiAccounts
     from. Paypal import runPaypal, checkUncategorizedPaypalTransactions
     from .Fidelity import runFidelityDaily, getFidelityAccounts, getFidelityAccounts
@@ -31,11 +29,10 @@ def getDailyBankAccounts(personalBook, jointBook=''):
     CryptoPortfolio = USD("CryptoCurrency", personalBook)
     Sofi = getSofiAccounts(personalBook)
     Ally = USD("Ally", jointBook)
-    Presearch = Security("Presearch", personalBook)
     Paypal = USD("Paypal", personalBook)
     Fidelity = getFidelityAccounts(personalBook)
     Webull = getWebullAccounts(personalBook)
-    return {'CryptoPortfolio': CryptoPortfolio, 'Sofi':Sofi, 'Ally': Ally, 'Presearch': Presearch, 'Paypal': Paypal, 'Fidelity': Fidelity, 'Webull': Webull}
+    return {'CryptoPortfolio': CryptoPortfolio, 'Sofi':Sofi, 'Ally': Ally, 'Paypal': Paypal, 'Fidelity': Fidelity, 'Webull': Webull}
 
 def runDailyBank(driver, accounts, personalBook, jointBook, gnuCashTransactions, dateRange):
     Finances = Spreadsheet('Finances', 'Investments', driver)
@@ -44,7 +41,6 @@ def runDailyBank(driver, accounts, personalBook, jointBook, gnuCashTransactions,
     runFidelityDaily(driver, accounts['Fidelity'], personalBook, gnuCashTransactions, dateRange)
     runWebullDaily(driver, accounts['Webull'], personalBook, gnuCashTransactions, dateRange)
     # runAlly(driver, accounts['Ally'], jointBook, gnuCashTransactions, dateRange)
-    presearchRewardsRedemptionAndBalanceUpdates(driver, accounts['Presearch'], personalBook, Finances)
     driver.findWindowByUrl(Finances.url)
     vanguard = vanguardStalePriceCheck(driver, personalBook)
     Finances.updateInvestmentsDaily(personalBook, accounts, vanguard)
@@ -73,7 +69,7 @@ def tearDown(driver):
 
 
 if __name__ == '__main__':
-    driver = Driver("Chrome")
+    driver = WebDriver("Chrome")
     personalBook = GnuCash('Finance')
     # jointBook = GnuCash('Home')
     book = personalBook.getWriteBook()

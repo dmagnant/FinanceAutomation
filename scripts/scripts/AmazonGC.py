@@ -5,12 +5,11 @@ from decimal import Decimal
 
 if __name__ == '__main__' or __name__ == "AmazonGC":
     from Classes.Asset import USD
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Classes.GnuCash import GnuCash    
     from Functions.GeneralFunctions import showMessage
 else:
     from .Classes.Asset import USD
-    from .Classes.WebDriver import Driver    
     from .Classes.GnuCash import GnuCash    
     from .Functions.GeneralFunctions import showMessage
 
@@ -44,17 +43,19 @@ def writeAmazonGCTransactionFromUI(book, account, requestInfo):
         splits.append(jointBook.createSplit(-amount, jointBook.getGnuAccountFullName('Amazon')))
         jointBook.writeTransaction(datetime.today().date(), description, splits)
         jointBook.closeBook()
-    confirmAmazonGCBalance(Driver("Chrome"), account)
+    confirmAmazonGCBalance(WebDriver("Chrome"), account)
 
 def confirmAmazonGCBalance(driver, account):
     locateAmazonWindow(driver)
     rawBalance = driver.getElementText('id', "gc-ui-balance-gc-balance-value")
     if rawBalance:
         balance = rawBalance.strip('$')
-    if float(balance) == 0: balance = "0"
-    account.setBalance(balance)
-    if str(account.gnuBalance) != account.balance:
-        showMessage("Amazon GC Mismatch", f'Amazon balance: {account.balance} \n' f'Gnu Cash balance: {account.gnuBalance} \n')
+        if float(balance) == 0: balance = "0"
+        account.setBalance(balance)
+        if str(account.gnuBalance) != account.balance:
+            showMessage("Amazon GC Mismatch", f'Amazon balance: {account.balance} \n' f'Gnu Cash balance: {account.gnuBalance} \n')
+    else:
+        print("Could not find Amazon GC balance on page, could be login error or not finding balance element.")
 
 import sys
 def main(arg):
@@ -62,7 +63,7 @@ def main(arg):
 
 if __name__ == '__main__':
     # book = GnuCash('Finance')
-    # driver = Driver("Chrome")
+    # driver = WebDriver("Chrome")
     # AmazonGC = USD("Amazon GC", book)    
     # confirmAmazonGCBalance(driver, AmazonGC)
     # AmazonGC.getData()
@@ -73,6 +74,6 @@ if __name__ == '__main__':
     # else:
     #     print("No argument provided.")
 
-    driver = Driver("Chrome", asUser=False)
+    driver = WebDriver("Chrome", asUser=False)
     driver.get("www.amazon.com/gc/balance")
 

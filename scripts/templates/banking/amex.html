@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Amex{% endblock %}
+{% block content %}
+    <h1>Amex</h1>
+    <div style="width: 100%; display: table;">
+        <div style="display: table-row;">
+            <div style="width: 20%; display:table-cell">
+                <form method="post">
+                    <label for="account">Account</label><br>
+                    <form method="post" id="account">
+                        <input type="radio" id="Personal CC" name="account" value="Personal" required>
+                        <label for="Personal CC">Personal CC</label><br>
+                        <input type="radio" id="Business CC" name="account" value="Business">
+                        <label for="Business CC">Business CC</label><br>
+                        <input type="radio" id="Business Checking" name="account" value="Checking">
+                        <label for="Business Checking">Business Checking</label><br>
+                    {% csrf_token %}
+                    <button type="submit" name="main">Main</button><br>
+                    <button type="submit" name="login">Login</button><br>
+                    <button type="submit" name="balance">Balance</button><br>
+                    <button type="submit" name="rewards">Rewards</button><br><br>
+                </form>
+            </div>
+            <div style="width: 80%; display:table-cell">
+                Personal CC Balance: <b>${{Personal.balance}}</b><br>
+                gnuCash Balance: <b>${{Personal.gnuBalance}}</b><br>
+                Review Transactions:<br><br>
+                <div style="width: 50%; display: table;">
+                    {%for tr in Personal.reviewTransactions %}
+                    <div style="display: table-row;">
+                        <div style="width: 20%; display:table-cell">
+                            {{tr}}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div><br>
+                Business CC Balance: <b>${{Business.balance}}</b><br>
+                gnuCash Balance: <b>${{Business.gnuBalance}}</b><br>
+                Review Transactions: <br><br>
+                <div style="width: 50%; display: table;">
+                    {%for tr in Business.reviewTransactions %}
+                    <div style="display: table-row;">
+                        <div style="width: 20%; display:table-cell">
+                            {{tr}}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div><br>
+                Business Checking Balance: <b>${{Checking.balance}}</b><br>
+                gnuCash Balance: <b>${{Checking.gnuBalance}}</b><br>
+                Review Transactions: <br><br>
+                <div style="width: 50%; display: table;">
+                    {%for tr in Checking.reviewTransactions %}
+                    <div style="display: table-row;">
+                        <div style="width: 20%; display:table-cell">
+                            {{tr}}
+                        </div>
+                    </div>
+                    {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

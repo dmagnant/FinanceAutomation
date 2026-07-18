@@ -7,13 +7,14 @@
         <button type="submit" name="bank">Daily Banking</button>
         <button type="submit" name="crypto">Crypto Portfolio Total</button>
         <button type="submit" name="tearDown">teardown</button>
+        <button type="submit" name="paypalAdjust">Paypal Recategorize</button>
         <br><br>
         &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<b>${{bankAccounts.CryptoPortfolio.gnuBalance}}</b>
         <br><br>
     </form>
     <div style="width: 100%; display: table;">
         <div style="display: table-row;">
-            <div style="width: 20%; display:table-cell">
+            <div style="width: 17%; display:table-cell">
                 <b><a href="{% url 'Sofi' %}" target="_blank">Sofi</a></b><br><br>
                     <form method="post">
                         {% csrf_token %}
@@ -64,107 +65,114 @@
                 &emsp;&thinsp;SGOV Balance: <b>{{bankAccounts.Sofi.SGOV.balance}}</b><br>
                 &thinsp;gnuCash Balance: <b>{{bankAccounts.Sofi.SGOV.gnuBalance}}</b> {{bankAccounts.Sofi.SGOV.symbol}}<br>
             </div>
-            <div style="width: 50%; display:table-cell">
-                <div style="display: table-row;">
-                    <div style="width: 13%; display:table-cell">
-                        <b><a href="{% url 'Fidelity' %}" target="_blank">Fidelity</a></b><br><br>
-                        <form method="post">
-                            {% csrf_token %}
-                            <button type="submit" name="fidelityMain">Main</button>
-                            <button type="submit" name="fidelityLogin">Login</button>
-                            <button type="submit" name="fidelityBalance">Balance</button>
-                        </form><br>
-                        <div style="display:table-cell;text-align:right">
-                            {{bankAccounts.Fidelity.FidelityBrokerage.name}} balance: &thinsp; <br>
-                            gnuBalance: &thinsp; <br><br>
-                            {{bankAccounts.Fidelity.FidelityBrokerageGME.symbol}} shares: &thinsp; <br>
-                            gnuBalance shares: &thinsp; <br>
-                            {{bankAccounts.Fidelity.FidelityBrokerageGME.symbol}} value: &thinsp; <br>
-                            ${{bankAccounts.Fidelity.FidelityBrokerageGME.price}} x shares: &thinsp; <br><br>
-                            {{bankAccounts.Fidelity.FidelityBrokerageOptions.name}}: &thinsp; <br>
-                            gnuBalance: &thinsp; <br><br>
-                            {{bankAccounts.Fidelity.FidelityBrokerageSPAXX.name}} balance: &thinsp; <br>
-                            gnuBalance: &thinsp; <br><br>
-                        </div>
-                        <div style="display:table-cell;text-align:left">
-                            <b>${{bankAccounts.Fidelity.FidelityBrokerage.balance}}<br>
-                            ${{bankAccounts.Fidelity.FidelityBrokerage.gnuBalance}}<br><br>
-                            {{bankAccounts.Fidelity.FidelityBrokerageGME.balance}} {{bankAccounts.Fidelity.FidelityBrokerageGME.symbol}}<br>
-                            {{bankAccounts.Fidelity.FidelityBrokerageGME.gnuBalance}} {{bankAccounts.Fidelity.FidelityBrokerageGME.symbol}}<br>
-                            ${{bankAccounts.Fidelity.FidelityBrokerageGME.value}}<br>
-                            ${{bankAccounts.Fidelity.FidelityBrokerageGME.gnuValue}}<br><br>
-                            ${{bankAccounts.Fidelity.FidelityBrokerageOptions.balance}}<br>
-                            ${{bankAccounts.Fidelity.FidelityBrokerageOptions.gnuBalance}}<br><br>
-                            ${{bankAccounts.Fidelity.FidelityBrokerageSPAXX.balance}}<br>
-                            ${{bankAccounts.Fidelity.FidelityBrokerageSPAXX.gnuBalance}}<br><br></b>                       
-                        </div>
-                    </div>
-                    <div style="width: 18%; display:table-cell">
-                        <br><br><br><br>
-                        <div style="display:table-cell;text-align:right">
-                            {{bankAccounts.Fidelity.FidelityIRA.name}} balance: &thinsp; <br>
-                            gnuBalance: &thinsp; <br><br>
-                            {{bankAccounts.Fidelity.FidelityIRAGME.symbol}} shares: &thinsp; <br>
-                            gnuBalance shares: &thinsp; <br>
-                            {{bankAccounts.Fidelity.FidelityIRAGME.symbol}} value: &thinsp; <br>
-                            ${{bankAccounts.Fidelity.FidelityIRAGME.price}} x shares: &thinsp; <br><br>
-                            {{bankAccounts.Fidelity.FidelityIRAOptions.name}}: &thinsp; <br>
-                            gnuBalance: &thinsp; <br><br>
-                            {{bankAccounts.Fidelity.FidelityIRASPAXX.name}} balance: &thinsp; <br>
-                            gnuBalance: &thinsp; <br><br>                            
-                        </div>
-                        <div style="display:table-cell;text-align:left">
-                            <b>${{bankAccounts.Fidelity.FidelityIRA.balance}}<br>
-                            ${{bankAccounts.Fidelity.FidelityIRA.gnuBalance}}<br><br>
-                            {{bankAccounts.Fidelity.FidelityIRAGME.balance}} {{bankAccounts.Fidelity.FidelityIRAGME.symbol}}<br>
-                            {{bankAccounts.Fidelity.FidelityIRAGME.gnuBalance}} {{bankAccounts.Fidelity.FidelityIRAGME.symbol}}<br>
-                            ${{bankAccounts.Fidelity.FidelityIRAGME.value}}<br>
-                            ${{bankAccounts.Fidelity.FidelityIRAGME.gnuValue}}<br><br>
-                            ${{bankAccounts.Fidelity.FidelityIRAOptions.balance}}<br>
-                            ${{bankAccounts.Fidelity.FidelityIRAOptions.gnuBalance}}<br><br>
-                            ${{bankAccounts.Fidelity.FidelityIRASPAXX.balance}}<br>
-                            ${{bankAccounts.Fidelity.FidelityIRASPAXX.gnuBalance}}<br><br></b>
-                        </div>
-                    </div>
-                    <div style="width: 18%; display:table-cell">
-                        <br><br><br><br>
-                        <div style="display:table-cell;text-align:right">
-                            {{bankAccounts.Fidelity.FidelityRothIRA.name}} balance: &thinsp; <br>
-                            gnuBalance: &thinsp; <br><br>
-                            {{bankAccounts.Fidelity.FidelityRothIRAGME.symbol}} shares: &thinsp; <br>
-                            gnuBalance shares: &thinsp; <br>
-                            {{bankAccounts.Fidelity.FidelityRothIRAGME.symbol}} value: &thinsp; <br>
-                            ${{bankAccounts.Fidelity.FidelityRothIRAGME.price}} x shares: &thinsp; <br><br>
-                            {{bankAccounts.Fidelity.FidelityRothIRAOptions.name}}: &thinsp; <br>
-                            gnuBalance: &thinsp; <br><br>
-                            {{bankAccounts.Fidelity.FidelityRothIRASPAXX.name}} balance: &thinsp; <br>
-                            gnuBalance: &thinsp; <br><br>
-                            {{bankAccounts.Fidelity.FidelityRothIRAVXUS.symbol}} shares: &thinsp; <br>
-                            gnuBalance shares: &thinsp; <br>
-                            {{bankAccounts.Fidelity.FidelityRothIRAVXUS.symbol}} value: &thinsp; <br>
-                            ${{bankAccounts.Fidelity.FidelityRothIRAVXUS.price}} x shares: &thinsp; <br><br>                            
-                        </div>
-                        <div style="display:table-cell;text-align:left">
-                            <b>${{bankAccounts.Fidelity.FidelityRothIRA.balance}}<br>
-                            ${{bankAccounts.Fidelity.FidelityRothIRA.gnuBalance}}<br><br>
-                            {{bankAccounts.Fidelity.FidelityRothIRAGME.balance}} {{bankAccounts.Fidelity.FidelityRothIRAGME.symbol}}<br>
-                            {{bankAccounts.Fidelity.FidelityRothIRAGME.gnuBalance}} {{bankAccounts.Fidelity.FidelityRothIRAGME.symbol}}<br>
-                            ${{bankAccounts.Fidelity.FidelityRothIRAGME.value}}<br>
-                            ${{bankAccounts.Fidelity.FidelityRothIRAGME.gnuValue}}<br><br>
-                            ${{bankAccounts.Fidelity.FidelityRothIRAOptions.balance}}<br>
-                            ${{bankAccounts.Fidelity.FidelityRothIRAOptions.gnuBalance}}<br><br>
-                            ${{bankAccounts.Fidelity.FidelityRothIRASPAXX.balance}}<br>
-                            ${{bankAccounts.Fidelity.FidelityRothIRASPAXX.gnuBalance}}<br><br>
-                            {{bankAccounts.Fidelity.FidelityRothIRAVXUS.balance}} {{bankAccounts.Fidelity.FidelityRothIRAVXUS.symbol}}<br>
-                            {{bankAccounts.Fidelity.FidelityRothIRAVXUS.gnuBalance}} {{bankAccounts.Fidelity.FidelityRothIRAVXUS.symbol}}<br>
-                            ${{bankAccounts.Fidelity.FidelityRothIRAVXUS.value}}<br>
-                            ${{bankAccounts.Fidelity.FidelityRothIRAVXUS.gnuValue}}<br><br></b>
-                        </div>
-                    </div>
+            <div style="width: 11%; display:table-cell">
+                <b><a href="{% url 'Fidelity' %}" target="_blank">Fidelity</a></b><br><br>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="fidelityMain">Main</button>
+                    <button type="submit" name="fidelityLogin">Login</button>
+                    <button type="submit" name="fidelityBalance">Balance</button>
+                </form><br>
+                <div style="display:table-cell;text-align:right">
+                    Individual balance: &thinsp; <br>
+                    gnuBalance: &thinsp; <br><br>
+                    {{bankAccounts.Fidelity.FidelityIndividualGME.symbol}} shares: &thinsp; <br>
+                    gnuBalance shares: &thinsp; <br>
+                    {{bankAccounts.Fidelity.FidelityIndividualGME.symbol}} value: &thinsp; <br>
+                    ${{bankAccounts.Fidelity.FidelityIndividualGME.price}} x shares: &thinsp; <br><br>
+                    Options Balance: &thinsp; <br>
+                    gnuBalance: &thinsp; <br><br>
+                    Individual Cash balance: &thinsp; <br>
+                    gnuBalance: &thinsp; <br><br>
                 </div>
-            </div> 
-            <div style="width: 20%; display:table-cell">
-                <b><a href="{% url 'Webull' %}" target="_blank">Webull</a></b><br><br>
+                <div style="display:table-cell;text-align:left">
+                    <b>${{bankAccounts.Fidelity.FidelityIndividual.balance}}<br>
+                    ${{bankAccounts.Fidelity.FidelityIndividual.gnuBalance}}<br><br>
+                    {{bankAccounts.Fidelity.FidelityIndividualGME.balance}} {{bankAccounts.Fidelity.FidelityIndividualGME.symbol}}<br>
+                    {{bankAccounts.Fidelity.FidelityIndividualGME.gnuBalance}} {{bankAccounts.Fidelity.FidelityIndividualGME.symbol}}<br>
+                    ${{bankAccounts.Fidelity.FidelityIndividualGME.value}}<br>
+                    ${{bankAccounts.Fidelity.FidelityIndividualGME.gnuValue}}<br><br>
+                    ${{bankAccounts.Fidelity.FidelityIndividualOptions.balance}}<br>
+                    ${{bankAccounts.Fidelity.FidelityIndividualOptions.gnuBalance}}<br><br>
+                    ${{bankAccounts.Fidelity.FidelityIndividualCash.balance}}<br>
+                    ${{bankAccounts.Fidelity.FidelityIndividualCash.gnuBalance}}<br><br></b>
+                </div>
+            </div>
+            <div style="width: 11%; display:table-cell">
+                <br><br><br><br>
+                <div style="display:table-cell;text-align:right">
+                    Business balance: &thinsp; <br>
+                    gnuBalance: &thinsp; <br><br>
+                    Cash balance: &thinsp; <br>
+                    gnuBalance: &thinsp; <br><br>
+                    Options Balance: &thinsp; <br>
+                    gnuBalance: &thinsp; <br><br>
+                </div>
+                <div style="display:table-cell;text-align:left">
+                    <b>${{bankAccounts.Fidelity.FidelityBusiness.balance}}<br>
+                    ${{bankAccounts.Fidelity.FidelityBusiness.gnuBalance}}<br><br>
+                    ${{bankAccounts.Fidelity.FidelityBusinessCash.balance}}<br>
+                    ${{bankAccounts.Fidelity.FidelityBusinessCash.gnuBalance}}<br><br>
+                    ${{bankAccounts.Fidelity.FidelityBusinessOptions.balance}}<br>
+                    ${{bankAccounts.Fidelity.FidelityBusinessOptions.gnuBalance}}<br><br></b>
+                </div>
+            </div>
+            <div style="width: 11%; display:table-cell">
+                <br><br><br><br>
+                <div style="display:table-cell;text-align:right">
+                    IRA balance: &thinsp; <br>
+                    gnuBalance: &thinsp; <br><br>
+                    {{bankAccounts.Fidelity.FidelityIRAGME.symbol}} shares: &thinsp; <br>
+                    gnuBalance shares: &thinsp; <br>
+                    {{bankAccounts.Fidelity.FidelityIRAGME.symbol}} value: &thinsp; <br>
+                    ${{bankAccounts.Fidelity.FidelityIRAGME.price}} x shares: &thinsp; <br><br>
+                    Options Balance: &thinsp; <br>
+                    gnuBalance: &thinsp; <br><br>
+                    IRA Cash balance: &thinsp; <br>
+                    gnuBalance: &thinsp; <br><br>
+                </div>
+                <div style="display:table-cell;text-align:left">
+                    <b>${{bankAccounts.Fidelity.FidelityIRA.balance}}<br>
+                    ${{bankAccounts.Fidelity.FidelityIRA.gnuBalance}}<br><br>
+                    {{bankAccounts.Fidelity.FidelityIRAGME.balance}} {{bankAccounts.Fidelity.FidelityIRAGME.symbol}}<br>
+                    {{bankAccounts.Fidelity.FidelityIRAGME.gnuBalance}} {{bankAccounts.Fidelity.FidelityIRAGME.symbol}}<br>
+                    ${{bankAccounts.Fidelity.FidelityIRAGME.value}}<br>
+                    ${{bankAccounts.Fidelity.FidelityIRAGME.gnuValue}}<br><br>
+                    ${{bankAccounts.Fidelity.FidelityIRAOptions.balance}}<br>
+                    ${{bankAccounts.Fidelity.FidelityIRAOptions.gnuBalance}}<br><br>
+                    ${{bankAccounts.Fidelity.FidelityIRACash.balance}}<br>
+                    ${{bankAccounts.Fidelity.FidelityIRACash.gnuBalance}}<br><br></b>
+                </div>
+            </div>
+            <div style="width: 11%; display:table-cell">
+                <br><br><br><br>
+                <div style="display:table-cell;text-align:right">
+                    Roth IRA balance: &thinsp; <br>
+                    gnuBalance: &thinsp; <br><br>
+                    {{bankAccounts.Fidelity.FidelityRothIRAGME.symbol}} shares: &thinsp; <br>
+                    gnuBalance shares: &thinsp; <br>
+                    {{bankAccounts.Fidelity.FidelityRothIRAGME.symbol}} value: &thinsp; <br>
+                    ${{bankAccounts.Fidelity.FidelityRothIRAGME.price}} x shares: &thinsp; <br><br>
+                    Options Balance: &thinsp; <br>
+                    gnuBalance: &thinsp; <br><br>
+                    Roth IRA Cash balance: &thinsp; <br>
+                    gnuBalance: &thinsp; <br><br>
+                </div>
+                <div style="display:table-cell;text-align:left">
+                    <b>${{bankAccounts.Fidelity.FidelityRothIRA.balance}}<br>
+                    ${{bankAccounts.Fidelity.FidelityRothIRA.gnuBalance}}<br><br>
+                    {{bankAccounts.Fidelity.FidelityRothIRAGME.balance}} {{bankAccounts.Fidelity.FidelityRothIRAGME.symbol}}<br>
+                    {{bankAccounts.Fidelity.FidelityRothIRAGME.gnuBalance}} {{bankAccounts.Fidelity.FidelityRothIRAGME.symbol}}<br>
+                    ${{bankAccounts.Fidelity.FidelityRothIRAGME.value}}<br>
+                    ${{bankAccounts.Fidelity.FidelityRothIRAGME.gnuValue}}<br><br>
+                    ${{bankAccounts.Fidelity.FidelityRothIRAOptions.balance}}<br>
+                    ${{bankAccounts.Fidelity.FidelityRothIRAOptions.gnuBalance}}<br><br>
+                    ${{bankAccounts.Fidelity.FidelityRothIRACash.balance}}<br>
+                    ${{bankAccounts.Fidelity.FidelityRothIRACash.gnuBalance}}<br><br></b>
+                </div>
+            </div>            <div style="width: 2%; display:table-cell">
+            </div>            <div style="width: 17%; display:table-cell">
+                <b><a href="{% url 'Webull' %}"target="_blank">Webull</a></b><br><br>
                     <form method="post">
                         {% csrf_token %}
                         <button type="submit" name="webullMain">Main</button>
@@ -189,20 +197,16 @@
                         ${{bankAccounts.Webull.WebullBrokerageOptions.gnuBalance}}</b><br><br>
                     </div>
                 </div>
-            </div>        
-        </div>
-        <div style="width: 10%; display:table-cell">
-            <br><br><form method="post">
-                {% csrf_token %}
-                <button type="submit" name="paypalAdjust">Paypal Recategorize</button><br><br>
-                {%for tr in bankAccounts.Paypal.reviewTransactions %}
+            </div>
+            <div style="width: 9%; display:table-cell">
+                <br><br>{%for tr in bankAccounts.Paypal.reviewTransactions %}
                 <div style="display: table-row;">
                     <div style="width: 20%; display:table-cell">
                         {{tr}}
                     </div>
                 </div>
                 {% endfor %}
-            </form>
-        </div>   
+            </div>        
+        </div>
     </div>
 {% endblock %}

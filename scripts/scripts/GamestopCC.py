@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "GamestopCC":
     from Classes.Asset import USD
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getPassword, getUsername, getStartAndEndOfDateRange)
 else:
@@ -78,7 +78,7 @@ def runGamestopCC(driver, account, book):
 #     book.closeBook()
 
 # if __name__ == '__main__':
-#     driver = Driver("Chrome")
+#     driver = WebDriver("Chrome")
 #     book = GnuCash('Finance')
 #     GamestopCC = USD("Gamestop CC", book)
 #     GamestopCC.setBalance(getGamestopCCBalance(driver))

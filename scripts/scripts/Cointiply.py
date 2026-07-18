@@ -9,7 +9,7 @@ from selenium.common.exceptions import (ElementClickInterceptedException,
 from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Cointiply":
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Functions.GeneralFunctions import (getPassword, getUsername,
                                             setDirectory, showMessage)
 else:
@@ -216,7 +216,7 @@ def runCointiply(driver, faucetRun=True):
     return nextRun(driver)
 
 # if __name__ == '__main__':
-#     driver = Driver("Chrome")
+#     driver = WebDriver("Chrome")
 #     runCointiply(driver, True)
 
 if __name__ == '__main__': # MR

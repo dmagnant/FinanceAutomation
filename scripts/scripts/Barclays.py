@@ -5,7 +5,7 @@ from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Barclays":
     from Classes.Asset import USD
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getPassword, getUsername, showMessage, getStartAndEndOfDateRange)
 else:
@@ -63,17 +63,26 @@ def getBarclaysRewardBalance(driver):
 def exportBarclaysTransactions(driver, today):
     driver.getElementAndClick('xpath', "/html/body/section[2]/div[1]/nav/div/ul/li[3]/a") # Activity & Statements
     driver.getElementAndClick('xpath', "/html/body/section[2]/div[1]/nav/div/ul/li[3]/ul/li/div/div[2]/ul/li[1]/a") # Transactions
-    driver.getElementAndClick('xpath', "/html/body/section[2]/div[4]/div/div/div[3]/div[1]/div/div[2]/span/div/button/span[1]") # download
+    driver.getElementAndClick('id', "Download-transactions-btn") # download
     year, month = today.year, today.month
-    monthTo, yrTO, yearTo = str(month), str(year - 2000), str(year)
-    if month == 1:  monthFrom, yrFROM, yearFrom = "12", str(year - 2001), str(year - 1)
-    else:           monthFrom, yrFROM, yearFrom = str(month - 1), yrTO, yearTo
+    monthTo = str(month).zfill(2)
+    yearTo = str(year)
+    if month == 1:  
+        monthFrom = "12"
+        yearFrom = str(year - 1)
+    else:           
+        monthFrom = str(month - 1).zfill(2)
+        yearFrom = str(year)
     # enter date_range
-    driver.getElementAndSendKeys('id', 'downloadFromDate_input', monthFrom + "/05/" + yrFROM)
-    driver.getElementAndSendKeys('id', 'downloadToDate_input', monthTo + "/04/" + yrTO)
-    driver.getElementAndClick('xpath', "/html/body/div[3]/div[2]/div/div/div[2]/div/form/div[3]/div/button") # Download
-    time.sleep(2)
-    return r"C:\Users\dmagn\Downloads\CreditCard_" + yearFrom + monthFrom + "05_" + yearTo + monthTo + "04.csv"
+    driver.getElementAndSendKeys('id', 'Download-DateStart', monthFrom + "/05/" + yearFrom)
+    driver.getElementAndSendKeys('id', 'Download-DateEnd', monthTo + "/04/" + yearTo)
+    driver.getElementAndClick('id', "download-submit-btn", allowFail=False) # Download
+    driver.randomSleep(2, 4)
+    filename = f"CreditCard_{yearFrom}{monthFrom}05_{yearTo}{monthTo}04.csv"
+    filepath = os.path.join(os.path.expanduser("~"), "Downloads", filename)
+    print('File path for downloaded file:')
+    print(filepath)
+    return filepath
 
 def claimBarclaysRewards(driver):
     locateBarclaysWindow(driver)
@@ -100,18 +109,19 @@ def importBarclaysTransactions(account, barclaysActivity, book, gnuCashTransacti
         amount = Decimal(row[3])
         fromAccount = account.gnuAccount
         toAccount = book.getGnuAccountFullName('Other')
-        if "PAYMENT RECEIVED" in rawDescription.upper():   
+        transporationAccount = toAccount + ':Transportation'
+        if "PAYMENT RECEIVED" in rawDescription.upper():
             continue
         elif "TECH WAY AUTO SERV" in rawDescription.upper():   
-            toAccount = book.getGnuAccountFullName('Transportation') + ':Car Maintenance'
+            toAccount = transporationAccount + ':Car Maintenance'
         elif "BP#" in rawDescription.upper():                         
-            toAccount = book.getGnuAccountFullName('Transportation') + ':Gas'
+            toAccount = transporationAccount + ':Gas'
         elif 'PROGRESSIVE' in rawDescription.upper():
-            toAccount = book.getGnuAccountFullName('Transportation') + ':Car Insurance'
+            toAccount = transporationAccount + ':Car Insurance'
         elif "SPOTHERO" in rawDescription.upper() or 'PARKMOBILE' in rawDescription.upper():                      
-            toAccount = book.getGnuAccountFullName('Transportation') + ':Parking'
+            toAccount = transporationAccount + ':Parking'
         elif 'UBER' in rawDescription.upper() or 'LYFT' in rawDescription.upper():                     
-            toAccount = book.getGnuAccountFullName('Transportation') + ':Ride Services'
+            toAccount = transporationAccount + ':Ride Services'
         if toAccount == 'Expenses:Other':   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)
@@ -132,13 +142,15 @@ def runBarclays(driver, account, book):
     if account.reviewTransactions:  book.openGnuCashUI()
 
 if __name__ == '__main__':
-    driver = Driver("Chrome")
-    book = GnuCash('Finance')
-    Barclays = USD("Barclays", book)    
+    driver = WebDriver("Chrome")
+    # book = GnuCash('Finance')
+    # Barclays = USD("Barclays", book)    
     # runBarclays(driver, Barclays, book)
     # Barclays.getData()
     # book.closeBook()
     today = datetime.today()
-    rewardsBalance = getBarclaysRewardBalance(driver)
-    print(f'Rewards Balance: ${rewardsBalance}')
-    if rewardsBalance >= float(50): claimBarclaysRewards(driver)
+    # rewardsBalance = getBarclaysRewardBalance(driver)
+    # print(f'Rewards Balance: ${rewardsBalance}')
+    # if rewardsBalance >= float(50): claimBarclaysRewards(driver)
+    locateBarclaysWindow(driver)
+    exportBarclaysTransactions(driver, today)

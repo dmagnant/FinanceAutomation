@@ -3,7 +3,7 @@ import time
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 if __name__ == '__main__' or __name__ == "PSCoupons":
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Functions.GeneralFunctions import (getPassword, showMessage)
 else:
     from .Functions.GeneralFunctions import (getPassword, showMessage)
@@ -52,7 +52,7 @@ def runPSCoupon(driver):
     # clipCoupons(driver)
 
 if __name__ == '__main__':
-    driver = Driver("Chrome")
+    driver = WebDriver("Chrome")
     setPSCouponFilters(driver)
     
     # locatePSCouponWindow(driver)

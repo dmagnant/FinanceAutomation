@@ -6,12 +6,13 @@ from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "BoA":
     from Classes.Asset import USD
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getPassword, getUsername, showMessage, getAnswerForSecurityQuestion, getStartAndEndOfDateRange)
 else:
     from .Classes.Asset import USD
     from .Classes.GnuCash import GnuCash
+    from .Classes.Selenium import WebDriver
     from .Functions.GeneralFunctions import (getPassword, getUsername, showMessage, getAnswerForSecurityQuestion, getStartAndEndOfDateRange)
 
 def locateBoAWindowAndOpenAccount(driver, account):
@@ -20,9 +21,9 @@ def locateBoAWindowAndOpenAccount(driver, account):
     else:           driver.webDriver.switch_to.window(found); time.sleep(1)
         
 def boALogin(driver, account):
-    def getUserNameElement():       return driver.getElement('xpath', "/html/body/div[1]/div/div/section[2]/div/div/div[2]/div[2]/div[2]/div[1]/div[1]/div[1]/form/div[1]/div/div[1]/div[2]/div", wait=2)
-    def getPassWordElement():       return driver.getElement('id', "passcode1")
-    def clickLoginButton():         return driver.getElementAndClick('id', 'signIn')
+    def getUserNameElement():       return driver.getElement('id', "oid", wait=2)
+    def getPassWordElement():       return driver.getElement('id', "pass")
+    def clickLoginButton():         return driver.getElementAndClick('id', 'secure-signin-submit')
     
     driver.openNewWindow('https://www.bankofamerica.com/')
     time.sleep(2)
@@ -33,36 +34,42 @@ def boALogin(driver, account):
     password = getPassWordElement()
     # password.send_keys(getPassword('BoA CC'))
     clickLoginButton()
-    if driver.getElement('id', "signin-message", wait=2):
-        driver.getElementAndSendKeys('id', 'onlineId1', getUsername('BoA CC'))
-        driver.getElementAndSendKeys('id', 'passcode1', getPassword('BoA CC'))
-        clickLoginButton()
-    if driver.getElementAndClick('xpath', "//*[@id='btnARContinue']/span[1]", wait=2): # ID verification
-        showMessage("Get Verification Code", "Enter code, then click OK")
-        driver.getElementAndClick('xpath', "//*[@id='yes-recognize']")
-        driver.getElementAndClick('xpath', "//*[@id='continue-auth-number']/span")
-    question = driver.getElementText('xpath', "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/div[2]/label", wait=2)
-    if question:
-        driver.getElementAndSendKeys('name', 'challengeQuestionAnswer', getAnswerForSecurityQuestion(question))
-        driver.getElementAndClick('xpath', "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/fieldset/div[2]/div/div[1]/input")
-        driver.getElementAndClick('xpath', "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/a[1]/span")
+    # if driver.getElement('id', "signin-message", wait=2):
+    #     driver.getElementAndSendKeys('id', 'onlineId1', getUsername('BoA CC'))
+    #     driver.getElementAndSendKeys('id', 'passcode1', getPassword('BoA CC'))
+    #     clickLoginButton()
+    # if driver.getElementAndClick('xpath', "//*[@id='btnARContinue']/span[1]", wait=2): # ID verification
+    #     showMessage("Get Verification Code", "Enter code, then click OK")
+    #     driver.getElementAndClick('xpath', "//*[@id='yes-recognize']")
+    #     driver.getElementAndClick('xpath', "//*[@id='continue-auth-number']/span")
+    # question = driver.getElementText('xpath', "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/div[2]/label", wait=2)
+    # if question:
+    #     driver.getElementAndSendKeys('name', 'challengeQuestionAnswer', getAnswerForSecurityQuestion(question))
+    #     driver.getElementAndClick('xpath', "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/fieldset/div[2]/div/div[1]/input")
+    #     driver.getElementAndClick('xpath', "/html/body/div[1]/div/div/div[2]/div[1]/div/div/form/a[1]/span")
     driver.getElementAndClick('xpath', "//*[@id='sasi-overlay-module-modalClose']/span[1]", wait=2) # close pop-up
     partialLink = 'Travel Rewards Visa Signature - 8955' if 'joint' in account.lower() else 'Customized Cash Rewards Visa Signature - 5700'
-    driver.getElementAndClick('partial_link_text', partialLink)
+    driver.getElementAndClick('partial_link_text', partialLink, allowFail=False) # open account activity
     # time.sleep(3)
 
 def getBoABalance(driver, account):
     locateBoAWindowAndOpenAccount(driver, account)
-    balance = driver.getElementText('xpath', "/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[3]/div[5]/div[3]/div/div[2]/div[2]/div[2]")
+    balance = driver.getElementText('xpath', "/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[3]/div[1]/div/div[2]/div/div[1]/div/div[2]/div[2]", allowFail=False)
     return balance.replace('$','').replace(',','') if balance else False
 
 def exportBoATransactions(driver, account, today):
     driver.getElementAndClick('partial_link_text', "Previous transactions")
-    driver.getElementAndClick('xpath', "/html/body/div[1]/div/div[4]/div[1]/div/div[5]/div[2]/div[2]/div/div[1]/a") # download
-    # time.sleep(1)
-    driver.getElementAndSendKeys('xpath', "/html/body/div[1]/div/div[4]/div[1]/div/div[5]/div[2]/div[2]/div/div[3]/div/div[3]/div[1]/select", 'm') # for microsoft excel
+    time.sleep(2)
+    driver.getElementAndClick('partial_link_text', "Download")
+    fileTypeElement = driver.getElement('id', "select_filetype", wait=2)
+    if not fileTypeElement:
+        print("Could not find file type element to export BoA transactions")
+        return False
+    driver.getElementAndSendKeys('id', "select_filetype", 'm') # for microsoft excel
+    driver.randomSleep(1,3)
     driver.webDriver.execute_script("window.scrollTo(0, 300)")
-    driver.getElementLocateAndClick('xpath', "/html/body/div[1]/div/div[4]/div[1]/div/div[5]/div[2]/div[2]/div/div[3]/div/div[4]/div[2]/a/span") # download transactions
+    driver.randomSleep(1,3)
+    driver.getElementAndClick('CSS_SELECTOR', 'a.submit-download', allowFail=False) # download transactions
     stmtMonth, stmtYear = today.strftime("%B"), str(today.year)
     accountNum = "_8955.csv" if 'joint' in account else "_5700.csv"
     return os.path.join(r"C:\Users\dmagn\Downloads", stmtMonth + stmtYear + accountNum)
@@ -72,15 +79,16 @@ def claimBoARewards(driver, account):
     if 'joint' in account:
         driver.getElementAndClick('xpath', "/html/body/div[1]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[4]/div[2]/a") # View/Redeem
         driver.waitForWebPageLoad(5)
-        time.sleep(2)
+        driver.randomSleep(2, 5)
         driver.getElementAndClick('id', 'redeemButton') # redeem points
-        time.sleep(12)
+        driver.randomSleep(10, 15)
         driver.findWindowByUrl("managerewardsonline.bankofamerica.com")
         driver.getElementAndClick('xpath', "/html/body/main/div/div[2]/div[1]/div[1]/div/div[2]/div/div[1]/div[3]/a", wait=2) # redeem
         driver.waitForWebPageLoad(5)
-        time.sleep(2)
+        driver.randomSleep(2, 5)
         rawAvailablePoints = driver.getElementText('id', 'zsummary_availablepoints', allowFail=False)
         if not rawAvailablePoints:
+            print('no available points, skipping BoA rewards redemption')
             return False
         availablePoints = int(rawAvailablePoints.replace(',',''))
         if availablePoints >= 2500:
@@ -129,7 +137,7 @@ def importBoATransactions(account, boAActivity, book, gnuCashTransactions):
         amount = Decimal(row[4])
         fromAccount = account.gnuAccount
         toAccount = book.getGnuAccountFullName('Other')
-        if "BA ELECTRONIC PAYMENT" in rawDescription.upper():                           
+        if "BA ELECTRONIC PAYMENT" in rawDescription.upper() or 'ONLINE/MOBILE PAYMENT' in rawDescription.upper() or 'ONLINE/MOBILE RECURRING' in rawDescription.upper():                           
             continue
         elif 'AMAZON' in rawDescription.upper() or 'AMZN' in rawDescription.upper():
             toAccount = book.getGnuAccountFullName('Amazon')
@@ -137,7 +145,9 @@ def importBoATransactions(account, boAActivity, book, gnuCashTransactions):
             toAccount = book.getGnuAccountFullName('Car Insurance')
         elif 'BP#' in rawDescription.upper():
             toAccount = book.getGnuAccountFullName('Cars') + ':Gas'
-        if toAccount == 'Expenses:Other':
+        elif 'POWERPACKS' in rawDescription.upper():
+            toAccount = book.getGnuAccountFullName('Entertainment')
+        if 'Other' in toAccount:
             for i in ['PICK N SAVE', 'KETTLE RANGE', 'WHOLE FOODS', 'WHOLEFDS', 'TARGET', 'MINI MARKET MILWAUKEE', 'KAINTH']:
                 if i in rawDescription.upper():                        
                     toAccount = book.getGnuAccountFullName('Groceries')
@@ -171,7 +181,7 @@ def importBoATransactions(account, boAActivity, book, gnuCashTransactions):
                     toAccount = book.getGnuAccountFullName('Home Insurance')
                 elif "TECH WAY AUTO SERV" in rawDescription.upper():   
                     toAccount = book.getGnuAccountFullName('Car Maintenance')
-        if toAccount == 'Expenses:Other':   reviewTransaction = True
+        if 'Other' in toAccount:   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)
     if 'joint' in account.name: # add future transaction for boa joint bill
@@ -192,14 +202,19 @@ def runBoA(driver, account, book):
     if account.reviewTransactions:  book.openGnuCashUI()
 
 if __name__ == '__main__':
-    SET_ACCOUNT_VARIABLE = "BoA-joint" # BoA or BoA-joint
-    bookName = 'Finance' if SET_ACCOUNT_VARIABLE == 'Personal' else 'Home'
+    SET_ACCOUNT_VARIABLE = "BoA" # BoA or BoA-joint
+    bookName = 'Finance' if SET_ACCOUNT_VARIABLE == 'BoA' else 'Home'
     book = GnuCash(bookName)
-    driver = Driver("Chrome")
+    driver = WebDriver("Chrome")
     BoA = USD(SET_ACCOUNT_VARIABLE, book)
 #     runBoA(driver, BoA, book)
 #     BoA.getData()
 #     book.closeBook()
-    claimBoARewards(driver, BoA.name)
-    book.closeBook()
+    # claimBoARewards(driver, BoA.name)
+    # book.closeBook()
+
+
+    driver.findWindowByUrl('secure.bankofamerica.com')
+    boAActivity = exportBoATransactions(driver, BoA.name, datetime.today())
+
 

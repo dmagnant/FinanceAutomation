@@ -2,13 +2,12 @@ import time
 
 if __name__ == '__main__' or __name__ == "Pinecone":
     from Classes.Asset import Security
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import getPassword
 
 else:
     from .Classes.Asset import Security
-    from .Classes.WebDriver import Driver
     from .Classes.GnuCash import GnuCash
     from .Functions.GeneralFunctions import getPassword
 
@@ -28,8 +27,12 @@ def pineConeLogin(driver):
 def getPineConeBalance(driver):
     locatePineconeWindow(driver)    
     rawBalance = driver.getElementText('xpath', "/html/body/app-root/div/lib-main-template/lib-header/header/lib-banner/div/div/lib-banner-rewards/a/span")
-    balance = float(rawBalance.replace('Rewards Balance: ', '').replace(' Points', ''))
-    return balance
+    if rawBalance:
+        balance = float(rawBalance.replace('Rewards Balance: ', '').replace(' Points', ''))
+        return balance
+    else:
+        print("Could not find PineCone balance on page, could be login error or not finding balance element.")
+        return False
     
 def claimPineConeRewards(driver):
     locatePineconeWindow(driver)    
@@ -43,11 +46,11 @@ def claimPineConeRewards(driver):
 def runPinecone(driver, account, book):
     locatePineconeWindow(driver)
     account.setBalance(getPineConeBalance(driver))
-    book.updateMRBalance(account)
+    book.updateMRBalance(account, 'Surveys')
     # if float(account.balance) >= 1000:   claimPineConeRewards(driver)
 
 if __name__ == '__main__':
-    driver = Driver("Chrome")
+    driver = WebDriver("Chrome")
     book = GnuCash('Finance')
     Pinecone = Security("Pinecone", book)
     runPinecone(driver, Pinecone, book)

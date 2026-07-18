@@ -5,14 +5,14 @@ from pygetwindow import PyGetWindowException
 
 if __name__ == '__main__' or __name__ == "Chase":
     from Classes.Asset import USD
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Classes.GnuCash import GnuCash
-    from Functions.GeneralFunctions import showMessage, getPassword, getStartAndEndOfDateRange
+    from Functions.GeneralFunctions import showMessage, getUsername, getPassword, getStartAndEndOfDateRange
 
 else:
     from .Classes.Asset import USD
     from .Classes.GnuCash import GnuCash
-    from .Functions.GeneralFunctions import showMessage, getPassword, getStartAndEndOfDateRange
+    from .Functions.GeneralFunctions import showMessage, getUsername, getPassword, getStartAndEndOfDateRange
 
 
 def locateChaseWindow(driver):
@@ -33,16 +33,12 @@ def chaseLogin(driver):
     time.sleep(5)
     activateChaseWindow("sign in - chase.com")
     n=1
-    while n<=8: pyautogui.press('tab'); n+=1
-    if not driver.getElementAndClick('id', 'signin-button'): # Sign In 
-        pyautogui.press('enter')
-    if driver.getElementAndClick('id', "simplerAuth-dropdownoptions-styledselect"):
-        driver.getElementAndClick('id', "container-1-simplerAuth-dropdownoptions-styledselect")
-        driver.getElementAndClick('id', "requestIdentificationCode-sm")
-        time.sleep(3)
-        driver.getElementAndSendKeys('id', "password_input-input-field", getPassword('Chase')) # chase password
-        showMessage('Device Verification', 'Enter Code From Phone, Press Enter')
-        driver.getElementAndClick('id', "log_on_to_landing_page-sm") # Next
+    if not driver.getElementAndSendKeys('id', 'userId-input-field-input', getUsername('Chase'), allowFail=False): # chase username  
+        print('FAILED to get username')
+    if not driver.getElementAndSendKeys('id', 'password-input-field-input', getPassword('Chase'), allowFail=False): # chase password
+        print('FAILED to get password')
+    if not driver.getElementAndClick('id', 'signin-button'): # remember me
+         print('FAILED to click sign in')
 
 def getChaseBalance(driver):
     locateChaseWindow(driver)    
@@ -54,20 +50,21 @@ def getChaseBalance(driver):
 def exportChaseTransactions(driver, today):
     driver.webDriver.get("https://secure.chase.com/web/auth/dashboard#/dashboard/transactions/818208017/CARD/BAC")
     time.sleep(3)
-    activateChaseWindow("transactions - chase")
+    activateChaseWindow("Freedom Flex")
     driver.getElementAndClick('id', 'ACTIVITY-header-selector-label') # Activity Since Last Statement
-    pyautogui.press('down');    pyautogui.press('down'); pyautogui.press('down'); pyautogui.press('down'); pyautogui.press('down')
+    driver.randomSleep(2,4)
+    pyautogui.press('down');    pyautogui.press('down'); pyautogui.press('down'); pyautogui.press('down');pyautogui.press('down')
     pyautogui.press('enter')
     time.sleep(1)
     driver.getElementAndClick('id', "quick-action-download-activity-tooltip") # Download
     time.sleep(1)
-    driver.getElementAndClick('id', "download") # Download
-    monthFrom = "12"               if today.month == 1 else "{:02d}".format(today.month - 1)
-    yearfrom = str(today.year - 1) if today.month == 1 else str(today.year)
-    fromDate = yearfrom + monthFrom + "07_"
-    toDate = str(today.year) + today.strftime('%m') + "06_"
+    driver.getElementAndClick('id', "downloadButton") # Download
+    # monthFrom = "12"               if today.month == 1 else "{:02d}".format(today.month - 1)
+    # yearfrom = str(today.year - 1) if today.month == 1 else str(today.year)
+    # fromDate = yearfrom + monthFrom + "07_"
+    # toDate = str(today.year) + today.strftime('%m') + "06_"
     currentDate = str(today.year) + today.strftime('%m') + today.strftime('%d')
-    return r'C:\Users\dmagn\Downloads\Chase2715_Activity' + fromDate + toDate + currentDate + '.csv'
+    return r'C:\Users\dmagn\Downloads\Chase2715_Activity_' + currentDate + '.csv'
 
 def claimChaseRewards(driver, account):
     locateChaseWindow(driver)
@@ -75,24 +72,31 @@ def claimChaseRewards(driver, account):
     driver.webDriver.get("https://ultimaterewardspoints.chase.com/cash-back?lang=en")
     time.sleep(2)
     activateChaseWindow("ultimate rewards - chase")
-    balance = driver.getElementText('xpath', "//*[@id='pointsBalanceId']/div/span[1]", allowFail=False)
-    if float(balance) > 0:
-        n=1
-        while n<=12:
-            pyautogui.press('tab'); time.sleep(1);  n+=1
-        for num in balance: pyautogui.press(num)
-        pyautogui.press('tab'); pyautogui.press('tab')
-        time.sleep(1)
-        pyautogui.press('space')
-        pyautogui.press('tab'); pyautogui.press('tab')
-        pyautogui.press('space')
-        time.sleep(3)
-        n=1
-        while n<=12:
-            pyautogui.press('tab'); time.sleep(1);  n+=1
-        time.sleep(1)
-        pyautogui.press('space') # submit
-        account.value = (float(account.balance) - float(balance))*-1
+    balance = driver.getElementText('id', "cashBackEnterAmountInputLabel-microcopy-text", allowFail=False).replace(' pts', '')
+    if not balance:
+        print('failed to find rewards balance')
+        return False
+    balance = float(balance) / 100 if balance else 0.0
+    print(f"Chase Rewards Balance: {balance}")
+    # if float(balance) > 0:
+    #     n=1
+    #     while n<=12:
+    #         pyautogui.press('tab'); time.sleep(1);  n+=1
+    #     for num in str(int(balance)): pyautogui.press(num)
+    #     pyautogui.press('tab'); pyautogui.press('tab')
+    #     time.sleep(1)
+    #     pyautogui.press('space')
+    #     pyautogui.press('tab'); pyautogui.press('tab')
+    #     pyautogui.press('space')
+    #     time.sleep(3)
+    #     n=1
+    #     while n<=12:
+    #         pyautogui.press('tab'); time.sleep(1);  n+=1
+    #     time.sleep(1)
+    #     pyautogui.press('space') # submit
+    driver.getElementAndClick('xpath', '//*[@id="octagon-root"]/div/div/main/div/div[1]/form/div[3]/button') # next
+    driver.getElementAndClick('xpath', '//*[@id="octagon-root"]/div/div/main/div/div/div[3]/button') # submit
+    account.value = (float(account.balance) - float(balance))*-1
 
 
 def importChaseTransactions(account, chaseActivity, book, gnuCashTransactions):
@@ -119,7 +123,7 @@ def importChaseTransactions(account, chaseActivity, book, gnuCashTransactions):
             toAccount = book.getGnuAccountFullName('Bars & Restaurants')
         elif transactionType == 'Groceries':    
             toAccount = book.getGnuAccountFullName('Groceries')
-        if toAccount == 'Expenses:Other':   reviewTransaction = True
+        if 'Other' in toAccount:   reviewTransaction = True
         splits = [{'amount': -amount, 'account':toAccount}, {'amount': amount, 'account':fromAccount}]
         book.writeUniqueTransaction(account, existingTransactions, postDate, description, splits, reviewTransaction=reviewTransaction)
 
@@ -136,15 +140,24 @@ def runChase(driver, account, book):
     if account.reviewTransactions:  book.openGnuCashUI()
     
 if __name__ == '__main__':
-    driver = Driver("Chrome")
+    driver = WebDriver("Chrome")
     # book = GnuCash('Finance')
     # Chase = USD("Chase", book)
+    driver.findWindowByUrl('chase.com')
     # exportChaseTransactions(driver, datetime.today())  # This line is just to ensure the function is defined
     # runChase(driver, Chase, book)
     # book.closeBook()
 
+    # element = driver.getElement('id', 'ACTIVITY-header-selector-label') # Activity Since Last Statement
+    # driver.clickElement(element, 'activity element')
+    # time.sleep(2)
+    # pyautogui.press('down')
 
-    from Classes.Spreadsheet import Spreadsheet
-    from datetime import datetime
-    year = datetime.today().year
-    CheckingBalance = Spreadsheet('Finances', str(year), driver)
+    # driver.webDriver.get("https://ultimaterewardspoints.chase.com/cash-back?lang=en")
+    balance = driver.getElementText('id', "cashBackEnterAmountInputLabel-microcopy-text", allowFail=False).replace(' pts', '')
+    time.sleep(2)
+    balance = float(balance) / 100 if balance else 0.0
+    print(f"Chase Rewards Balance: {balance}")
+
+    driver.getElementAndClick('xpath', '//*[@id="octagon-root"]/div/div/main/div/div[1]/form/div[3]/button') # next
+    driver.getElementAndClick('xpath', '//*[@id="octagon-root"]/div/div/main/div/div/div[3]/button') # submit

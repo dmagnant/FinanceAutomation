@@ -2,7 +2,7 @@ import subprocess
 import time
 import os
 
-from scripts.scripts.Classes.WebDriver import Driver
+from scripts.scripts.Classes.Selenium import Driver
 from scripts.scripts.Functions.GeneralFunctions import setDirectory
 from selenium.common.exceptions import WebDriverException
 

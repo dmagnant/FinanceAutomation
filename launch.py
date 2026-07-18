@@ -2,7 +2,7 @@ import subprocess
 import time
 import os
 
-from scripts.scripts.Classes.WebDriver import Driver
+from scripts.scripts.Classes.Selenium import WebDriver
 from scripts.scripts.Functions.GeneralFunctions import setDirectory
 from selenium.common.exceptions import WebDriverException
 
@@ -20,7 +20,7 @@ subprocess.Popen('python manage.py runserver', cwd='G:\\My Drive\\Projects\\Codi
 print('page will load automatically after development server starts \n')
 time.sleep(1)
 
-driver = Driver("Chrome")
+driver = WebDriver("Chrome")
 time.sleep(6)
 
 # Attempt to load the page until successful

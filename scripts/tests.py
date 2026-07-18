@@ -30,7 +30,6 @@ from scripts.Swagbucks import *
 from scripts.Tellwut import *
 from scripts.UpdateGoals import *
 from scripts.Vanguard import *
-from scripts.Worthy import *
 from scripts.Classes.WebDriver import Driver
 
 def driverSetup():
@@ -48,7 +47,7 @@ class SofiTest(TestCase):
     
     def balanceTest(self):
         Checking = USD("Sofi Checking")
-        getSofiBalanceAndOrientPage(self.driver, Checking)
+        getSofiBalance(self.driver, Checking)
         balance = round(float(Checking.balance), 0)
         self.assertGreater(int(balance), 0, 'balance not greater than 0')
 

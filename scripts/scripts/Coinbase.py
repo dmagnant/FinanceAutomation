@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 
 if __name__ == '__main__' or __name__ == "Coinbase":
     from Classes.Asset import Security
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Classes.GnuCash import GnuCash    
     from Functions.GeneralFunctions import (getCryptocurrencyPrice, getOTP,
                                             getPassword, getUsername)  
@@ -51,7 +51,7 @@ def runCoinbase(driver, account, book):
     account.updateSpreadsheetAndGnuCash(book)
     
 if __name__ == '__main__':
-    driver = Driver("Chrome")
+    driver = WebDriver("Chrome")
     book = GnuCash('Finance')
     runCoinbase(driver, book)
     book.closeBook()

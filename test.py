@@ -19,19 +19,19 @@ from urllib3.exceptions import ReadTimeoutError, NewConnectionError, MaxRetryErr
 # subprocess.Popen('python manage.py runserver', cwd='G:\\My Drive\\Projects\\Coding\\Python\\FinanceAutomation', shell=True)
 
 
-options = webdriver.ChromeOptions()
-# options.set_capability("pageLoadStrategy", "eager")
-# options.set_capability("timeouts", {"implicit":1000})
-options.add_argument("start-maximized")
-options.add_argument("--no-sandbox")
-options.add_argument("--disable-gpu")
-options.add_argument("--log-level=3")
-options.add_argument(r"--user-data-dir=G:\My Drive\Projects\Coding\customChromeUser\User Data")
-print('got here')
-options.debugger_address="localhost:9223"
+# options = webdriver.ChromeOptions()
+# # options.set_capability("pageLoadStrategy", "eager")
+# # options.set_capability("timeouts", {"implicit":1000})
+# options.add_argument("start-maximized")
+# options.add_argument("--no-sandbox")
+# options.add_argument("--disable-gpu")
+# options.add_argument("--log-level=3")
+# options.add_argument(r"--user-data-dir=G:\My Drive\Projects\Coding\customChromeUser\User Data")
+# print('got here')
+# options.debugger_address="localhost:9223"
 
 
-driver = webdriver.Chrome(service=Service(r"G:\My Drive\Projects\Coding\webdrivers\chromedriver.exe"), options=options)
-driver.get("https://google.com")
-time.sleep(5)
-driver.quit()
+# driver = webdriver.Chrome(service=Service(r"G:\My Drive\Projects\Coding\webdrivers\chromedriver.exe"), options=options)
+# driver.get("https://google.com")
+# time.sleep(5)
+# driver.quit()

@@ -6,7 +6,7 @@ from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "HealthEquity":
     from Classes.Asset import USD, Security
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                             showMessage, setDirectory, getUsername, getPassword)
@@ -31,19 +31,19 @@ def healthEquitylogin(driver):
     if userNameElement:
         userNameElement.clear()
         driver.getElementAndSendKeys('id', 'ctl00_modulePageContent_txtUserIdStandard', getUsername('HealthEquity HSA'))
-        driver.getElementAndClick('id', 'ctl00_modulePageContent_btnSubmitUsername') # Continue
-        passwordElement = driver.getElement('id', 'ctl00_modulePageContent_txtPassword', wait=2)
-        passwordElement.click()
-        passwordElement.clear()
-        driver.getElementAndSendKeys('id', 'ctl00_modulePageContent_txtPassword', getPassword('HealthEquity HSA'))
-        driver.getElementAndClick('id', 'ctl00_modulePageContent_btnLogin') # login
-        if driver.getElementAndClick('xpath', "//*[@id='sendEmailTextVoicePanel']/div[5]/span[1]/span/label/span/strong", wait=1): # send code to phone
-            driver.getElementAndClick('id', 'sendOtp') # Send confirmation code
-            showMessage("Confirmation Code", "Enter code then click OK") # enter text code
-            driver.getElementAndClick('xpath', "//*[@id='VerifyOtpPanel']/div[4]/div[1]/div/label/span") # Remember me
-            driver.getElementAndClick('id', 'verifyOtp') # click Confirm
-        driver.getElementAndClick('xpath', "//*[@id='topmenu']/div[2]/a/span", wait=1) # Home button to bypass error
-    closePopUps(driver)
+        # driver.getElementAndClick('id', 'ctl00_modulePageContent_btnSubmitUsername') # Continue
+        # passwordElement = driver.getElement('id', 'ctl00_modulePageContent_txtPassword', wait=2)
+        # passwordElement.click()
+        # passwordElement.clear()
+        # driver.getElementAndSendKeys('id', 'ctl00_modulePageContent_txtPassword', getPassword('HealthEquity HSA'))
+        # driver.getElementAndClick('id', 'ctl00_modulePageContent_btnLogin') # login
+        # if driver.getElementAndClick('xpath', "//*[@id='sendEmailTextVoicePanel']/div[5]/span[1]/span/label/span/strong", wait=1): # send code to phone
+        #     driver.getElementAndClick('id', 'sendOtp') # Send confirmation code
+        #     showMessage("Confirmation Code", "Enter code then click OK") # enter text code
+        #     driver.getElementAndClick('xpath', "//*[@id='VerifyOtpPanel']/div[4]/div[1]/div/label/span") # Remember me
+        #     driver.getElementAndClick('id', 'verifyOtp') # click Confirm
+        # driver.getElementAndClick('xpath', "//*[@id='topmenu']/div[2]/a/span", wait=1) # Home button to bypass error
+    # closePopUps(driver)
 
 def getHealthEquityBalances(driver, accounts):
     locateHealthEquityWindow(driver)
@@ -90,10 +90,8 @@ def captureHealthEquityInvestmentTransactionsBalanceAndCost(driver, account, boo
     startDateElement.send_keys(datetime.strftime(datetime(2021,1,1,0,0).date(), '%m/%d/%Y'))
     endDateElement.send_keys(datetime.strftime(lastMonth['endDate'], '%m/%d/%Y'))
     driver.getElementAndClick('id', 'fundPerformanceRefresh') # Refresh
-    costHeader = driver.getElementText('xpath', "//*[@id='EditPortfolioTab-panel']/member-portfolio-edit-display/member-overall-portfolio-performance-display/div[1]/div/div[2]", allowFail=False)
-    if 'Trades' in costHeader:
-        cost = driver.getElementText('xpath', "//*[@id='EditPortfolioTab-panel']/member-portfolio-edit-display/member-overall-portfolio-performance-display/div[1]/div/div[2]/div/span", allowFail=False)
-        account.setCost(cost.replace('$', '').replace(',',''))
+    cost = book.getDollarsInvestedPerSecurity(account)
+    account.setCost(cost.replace('$', '').replace(',',''))
     num = 1        
     while True:
         element = driver.getElement('xpath', "//*[@id='fundSelection']/option[" + str(num) + "]")
@@ -215,5 +213,11 @@ def runHealthEquity(driver, accounts, book, gnuCashTransactions, lastMonth):
 #     book.closeBook()
 
 if __name__ == '__main__':
-    driver = Driver("Chrome")
-    locateHealthEquityWindow(driver)
+    # driver = WebDriver("Chrome")
+    # locateHealthEquityWindow(driver)
+    book = GnuCash('Finance')
+    accounts = getHealthEquityAccounts(book)
+    symbol = 'VIIIX'
+
+    cost = book.getDollarsInvestedPerSecurity(accounts[symbol])
+    print(f'cost for {symbol}: {cost}')

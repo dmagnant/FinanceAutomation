@@ -28,15 +28,23 @@ class ExpectedConditions(enum.Enum):
     clickable = EC.element_to_be_clickable
     visible = EC._element_if_visible
 
-def configureDriverOptions(browser, asUser=True):
+def configureDriverOptions(browser, asUser=True, attach_to_remote=True):
+    """Configure Selenium options.
+
+    attach_to_remote=True -> attach to an already running browser via DevTools
+    attach_to_remote=False -> let WebDriver start and own a fresh browser process
+    """
     if browser == "Edge":
         options = webdriver.EdgeOptions()
-        options.add_experimental_option("debuggerAddress", "localhost:9222")
+        if attach_to_remote:
+            options.add_experimental_option("debuggerAddress", "localhost:9222")
         options.add_argument("--no-sandbox")
-        if asUser:  options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\Microsoft\Edge\User Data")
+        if asUser:
+            options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\Microsoft\Edge\User Data")
     else:
         options = webdriver.ChromeOptions()
-        options.debugger_address="localhost:9223"
+        if attach_to_remote:
+            options.debugger_address = "localhost:9223"
         options.add_argument("--log-level=3")
         options.add_argument("--remote-allow-origins=*")
         options.add_argument("--disable-gpu")
@@ -46,11 +54,12 @@ def configureDriverOptions(browser, asUser=True):
     if browser == "Chrome":
         options.set_capability("pageLoadStrategy", "eager")
         options.set_capability("timeouts", {"implicit":1000})
-        if asUser:  
+        if asUser:
             options.add_argument(r"user-data-dir=C:\Users\dmagn\User Data")
     elif browser == "Brave":
         options.binary_location = "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe"
-        if asUser:  options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\BraveSoftware\Brave-Browser\User Data")
+        if asUser:
+            options.add_argument(r"user-data-dir=C:\Users\dmagn\AppData\Local\BraveSoftware\Brave-Browser\User Data")
     options.add_argument("start-maximized")
     return options
 
@@ -201,15 +210,7 @@ class Driver:
         
     def getElementText(self, type, path, wait=3, allowFail=True):
         element = self.getElement(type, path, wait, allowFail)
-        if element: return element.text
-        else:       return False
-
-    def getElementText(self, type, path, wait=3, allowFail=True):
-        element = self.getElement(type, path, wait, allowFail)
-        if element: 
-            return element.text
-        else:       
-            return False
+        return element.text if element else False
 
     def getElementLocateAndClick(self, type, path, wait=3, allowFail=True):
         element = self.getElement(type, path, wait, allowFail)

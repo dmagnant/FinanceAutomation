@@ -4,7 +4,7 @@ from decimal import Decimal
 
 if __name__ == '__main__' or __name__ == "Optum":
     from Classes.Asset import USD, Security
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Classes.GnuCash import GnuCash
     from Functions.GeneralFunctions import (getStartAndEndOfDateRange,
                                             showMessage, setDirectory, getUsername, getPassword, getAnswerForSecurityQuestion)
@@ -148,12 +148,12 @@ def runOptum(driver, accounts, book, gnuCashTransactions, lastMonth):
     accounts['VFIAX'].updateGnuBalanceAndValue(book.getGnuAccountBalance(accounts['VFIAX'].gnuAccount))
     
 if __name__ == '__main__':
-    # driver = Driver("Chrome")
+    # driver = WebDriver("Chrome")
     book = GnuCash('Finance')
     # locateOptumWindow(driver)
     accounts = getOptumAccounts(book)
-    lastMonth = getStartAndEndOfDateRange(timeSpan="month")
-    gnuCashTransactions = book.getTransactionsByDateRange(lastMonth)
+    # lastMonth = getStartAndEndOfDateRange(timeSpan="month")
+    # gnuCashTransactions = book.getTransactionsByDateRange(lastMonth)
     # getOptumBalance(driver, accounts)
     # getOptumPricesSharesAndCost(driver, accounts, book)
     # optumActivity = captureOptumTransactions(driver, lastMonth)
@@ -162,6 +162,11 @@ if __name__ == '__main__':
     # accounts['OptumCash'].updateGnuBalance(book.getGnuAccountBalance(accounts['OptumCash'].gnuAccount))
     # accounts['VFIAX'].updateGnuBalanceAndValue(book.getGnuAccountBalance(accounts['VFIAX'].gnuAccount))    
 
-    optumActivity = optumActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\optum.csv"
-    importOptumTransactions(accounts, optumActivity, book, gnuCashTransactions)
-    book.closeBook()
+    # optumActivity = optumActivity = setDirectory() + r"\Projects\Coding\Python\FinanceAutomation\Resources\optum.csv"
+    # importOptumTransactions(accounts, optumActivity, book, gnuCashTransactions)
+    # book.closeBook()
+
+
+    symbol = 'VFIAX'
+    cost = book.getDollarsInvestedPerSecurity(accounts[symbol])
+    print(f'cost for {symbol}: {cost}')

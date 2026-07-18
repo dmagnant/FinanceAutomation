@@ -3,7 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 
 if __name__ == '__main__' or __name__ == "Paypal":
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Classes.GnuCash import GnuCash
     from Classes.Asset import USD    
     from Functions.GeneralFunctions import getPassword, getStartAndEndOfDateRange
@@ -61,7 +61,7 @@ def runPaypal(driver):
     transferMoney(driver)
     
 if __name__ == '__main__':
-    driver = Driver("Chrome")
+    driver = WebDriver("Chrome")
     runPaypal(driver)
     
     

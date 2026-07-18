@@ -1,4 +1,5 @@
 from datetime import datetime;  from decimal import Decimal
+from unittest import case
 
 if __name__ == "Classes.Asset":
     from Classes.Spreadsheet import Spreadsheet
@@ -19,30 +20,32 @@ def getSymbolByName(self):
         case 'vbirx':                                               return "VBIRX"
         case 'viiix':                                               return 'VIIIX'
         case "iotex":                                               return 'IOTX'
-        case "presearch":                                           return 'PRE'
+        case "presearch legacy"| "presearch crawler":               return 'PRE'
         case "bing":                                                return 'BNG'
         case "pinecone":                                            return 'PNCN'
         case "tellwut":                                             return 'TWT'
         case "swagbucks":                                           return 'SB'
-        case 'small cap index':                                     return 'VSCIX'
-        case 'employee benefit index':                              return 'M038'
-        case 'extended market index':                               return 'M036'
-        case 'total stock market':                                  return 'M078'
-        case 'nm annual fixed rate fund':                           return '4769'
-        case 'target retirement 2020 trust i':                      return '1464'
-        case 'target retirement 2020 trust select':                 return '1676'
+        case 'mypoints':                                            return 'PTS'
         case 'sofi sgov':                                           return 'SGOV'
-        case 'fidelityiragme' | 'fidelityrothiragme' | 'fidelitybrokeragegme':          return 'GME'
-        case 'fidelityiravti' | 'fidelityrothiravti' | 'fidelitybrokeragevti':          return 'VTI'
-        case 'fidelityiravxus' | 'fidelityrothiravxus':                                 return 'VXUS'        
-        case 'fidelityiraspaxx' | 'fidelityrothiraspaxx' | 'fidelitybrokeragespaxx':    return 'SPAXX'
+        case 'vanguard401km038' | 'vanguardroth401km038':           return 'M038'
+        case 'vanguard401km078' | 'vanguardroth401km078':           return 'M078'
+        case 'vanguard401k4769' | 'vanguardroth401k4769':           return '4769'
+        case 'vanguard401k1464' | 'vanguardroth401k1464':           return '1464'
+        case 'vanguard401k1676' | 'vanguardroth401k1676':           return '1676'
+        case 'fidelityiragme' | 'fidelityrothiragme' | 'fidelityindividualgme' | 'fidelitybusinessgme':         return 'GME'
+        case 'fidelityiravoo' | 'fidelityrothiravoo' | 'fidelityindividualvoo' | 'fidelitybusinessvoo':         return 'VOO'
+        case 'fidelityiravti' | 'fidelityrothiravti' | 'fidelityindividualvti' | 'fidelitybusinessvti':         return 'VTI'
+        case 'fidelityiravxus' | 'fidelityrothiravxus' | 'fidelityindividualvxus' | 'fidelitybusinessvxus':     return 'VXUS'
+        case 'fidelityiracash' | 'fidelityrothiracash' | 'fidelity401kcash':                                    return 'FDRXX'       
+        case 'fidelityindividualcash' | 'fidelitybusinesscash':                                                 return 'FZFXX'
         case _:                                                     print(f'Security: {self.name} not found in "getSymbolByName" function')
 
 def updateCoinQuantityFromStakingInGnuCash(self, book):
     coinDifference = round(Decimal(self.balance) - Decimal(self.gnuBalance),3)
     amount = round(self.price * coinDifference, 3)
+    stakingAccount = book.getGnuAccountFullName(f'{self.symbol} Staking')
     if coinDifference > 0.001:
-            splits = [book.createSplit(-amount, 'Income:Investments:Staking'), book.createSplit(amount, self.gnuAccount, quantity=coinDifference)]
+            splits = [book.createSplit(-amount, stakingAccount), book.createSplit(amount, self.gnuAccount, quantity=coinDifference)]
             book.writeTransaction(datetime.today().date(), self.symbol + ' staking', splits)
     elif coinDifference < 0:
         print(f'given balance of {self.balance} {self.symbol} '

@@ -7,7 +7,7 @@ from selenium.webdriver.common.keys import Keys
 
 if __name__ == '__main__' or __name__ == "Presearch":
     from Classes.Asset import Security, USD
-    from Classes.WebDriver import Driver
+    from Classes.Selenium import WebDriver
     from Classes.GnuCash import GnuCash
     from Classes.Spreadsheet import Spreadsheet
     from Functions.GeneralFunctions import showMessage
@@ -130,13 +130,52 @@ def presearchRewardsRedemptionAndBalanceUpdates(driver, account, book, spreadshe
         account.updateSpreadsheetAndGnuCash(spreadsheet, book)
     
 if __name__ == '__main__':
-    driver = Driver("Chrome")
-    book = GnuCash('Finance')
-    Finances = Spreadsheet('Finances', 'Investments', driver)
-    locatePresearchWindow(driver)
-    Presearch = Security("Presearch", book)
-    presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book, Finances)
+    # driver = WebDriver("Chrome")
+    book = GnuCash('Test')
+    # Finances = Spreadsheet('Finances', 'Investments', driver)
+    # locatePresearchWindow(driver)
+    # Presearch = Security("Presearch", book)
+    # presearchRewardsRedemptionAndBalanceUpdates(driver, Presearch, book, Finances)
+    # book.closeBook()
+    writeBook = book.getWriteBook()
+
+    # Now handle ETH staking transactions
+    print('\n--- Processing ETH staking transactions ---')
+    eth_transactions = book.getTransactionsByGnuAccount('Income:Business:Non-SE Taxable:Staking', isReadOnly=False)
+    eth_transactions_to_update = [tr for tr in eth_transactions if tr.description in ['ETH2 staking', 'ETH-Midas staking']]
+    
+    for tr in eth_transactions_to_update:
+        print(f'Updating: {tr.description}')
+        
+        # Collect split data before deleting
+        post_date = tr.post_date
+        split_data = []
+        
+        for spl in tr.splits:
+            split_dict = {'amount': spl.value, 'account': spl.account.fullname}
+            if spl.quantity:
+                split_dict['quantity'] = spl.quantity
+            
+            # Update account for ETH staking split
+            if 'Staking' in spl.account.fullname and spl.account.fullname != 'Income:Business:Non-SE Taxable:Staking:ETH':
+                split_dict['account'] = 'Income:Business:Non-SE Taxable:Staking:ETH'
+                print(f'  Changed account from {spl.account.fullname} to Income:Business:Non-SE Taxable:Staking:ETH')
+            
+            split_data.append(split_dict)
+        
+        # Delete old transaction
+        writeBook.delete(tr)
+        
+        # Create Split objects using createSplit
+        gnu_splits = []
+        for spl in split_data:
+            if 'quantity' in spl:
+                gnu_splits.append(book.createSplit(spl['amount'], spl['account'], spl['quantity'], memo='scripted'))
+            else:
+                gnu_splits.append(book.createSplit(spl['amount'], spl['account'], memo='scripted'))
+        
+        # Write new transaction with updated description
+        book.writeTransaction(post_date, 'ETH staking', gnu_splits)
+        print(f'Changed to: ETH staking')
+
     book.closeBook()
-
-
-

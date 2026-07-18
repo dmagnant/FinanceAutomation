@@ -13,28 +13,40 @@
                 </form>
             </div>
             <div style="display:table-cell;text-align:right">
-                {{accounts.FidelityBrokerage.name}} balance: &thinsp; <br>
+                {{accounts.FidelityIndividual.name}} balance: &thinsp; <br>
                 gnuBalance: &thinsp; <br><br>
-                {{accounts.FidelityBrokerageGME.symbol}} shares: &thinsp; <br>
+                {{accounts.FidelityIndividualGME.symbol}} shares: &thinsp; <br>
                 gnuBalance shares: &thinsp; <br>
-                {{accounts.FidelityBrokerageGME.symbol}} value: &thinsp; <br>
-                ${{accounts.FidelityBrokerageGME.price}} x shares: &thinsp; <br><br>
-                {{accounts.FidelityBrokerageOptions.name}}: &thinsp; <br>
+                {{accounts.FidelityIndividualGME.symbol}} value: &thinsp; <br>
+                ${{accounts.FidelityIndividualGME.price}} x shares: &thinsp; <br><br>
+                {{accounts.FidelityIndividualOptions.name}}: &thinsp; <br>
                 gnuBalance: &thinsp; <br><br>
-                {{accounts.FidelityBrokerageSPAXX.name}} balance: &thinsp; <br>
+                {{accounts.FidelityIndividualCash.name}} balance: &thinsp; <br>
                 gnuBalance: &thinsp; <br><br>
             </div>
             <div style="display:table-cell;text-align:left">
-                <b>${{accounts.FidelityBrokerage.balance}}<br>
-                ${{accounts.FidelityBrokerage.gnuBalance}}<br><br>
-                {{accounts.FidelityBrokerageGME.balance}} {{accounts.FidelityBrokerageGME.symbol}}<br>
-                {{accounts.FidelityBrokerageGME.gnuBalance}} {{accounts.FidelityBrokerageGME.symbol}}<br>
-                ${{accounts.FidelityBrokerageGME.value}}<br>
-                ${{accounts.FidelityBrokerageGME.gnuValue}}<br><br>
-                ${{accounts.FidelityBrokerageOptions.balance}}<br>
-                ${{accounts.FidelityBrokerageOptions.gnuBalance}}<br><br>
-                ${{accounts.FidelityBrokerageSPAXX.balance}}<br>
-                ${{accounts.FidelityBrokerageSPAXX.gnuBalance}}<br><br></b>                       
+                <b>${{accounts.FidelityIndividual.balance}}<br>
+                ${{accounts.FidelityIndividual.gnuBalance}}<br><br>
+                {{accounts.FidelityIndividualGME.balance}} {{accounts.FidelityIndividualGME.symbol}}<br>
+                {{accounts.FidelityIndividualGME.gnuBalance}} {{accounts.FidelityIndividualGME.symbol}}<br>
+                ${{accounts.FidelityIndividualGME.value}}<br>
+                ${{accounts.FidelityIndividualGME.gnuValue}}<br><br>
+                ${{accounts.FidelityIndividualOptions.balance}}<br>
+                ${{accounts.FidelityIndividualOptions.gnuBalance}}<br><br>
+                ${{accounts.FidelityIndividualCash.balance}}<br>
+                ${{accounts.FidelityIndividualCash.gnuBalance}}<br><br></b>                       
+            </div>
+            <div style="display:table-cell;text-align:right">
+                {{accounts.FidelityBusiness.name}} balance: &thinsp; <br>
+                gnuBalance: &thinsp; <br><br>
+                {{accounts.FidelityBusinessCash.name}} balance: &thinsp; <br>
+                gnuBalance: &thinsp; <br><br>
+            </div>
+            <div style="display:table-cell;text-align:left">
+                <b>${{accounts.FidelityBusiness.balance}}<br>
+                ${{accounts.FidelityBusiness.gnuBalance}}<br><br>
+                ${{accounts.FidelityBusinessCash.balance}}<br>
+                ${{accounts.FidelityBusinessCash.gnuBalance}}<br><br></b>                       
             </div>
             <div style="display:table-cell">
                 <div style="display:table-cell;text-align:right">
@@ -46,7 +58,7 @@
                     ${{accounts.FidelityIRAGME.price}} x shares: &thinsp; <br><br>
                     {{accounts.FidelityIRAOptions.name}}: &thinsp; <br>
                     gnuBalance: &thinsp; <br><br>
-                    {{accounts.FidelityIRASPAXX.name}} balance: &thinsp; <br>
+                    {{accounts.FidelityIRACash.name}} balance: &thinsp; <br>
                     gnuBalance: &thinsp; <br><br>                            
                 </div>
                 <div style="display:table-cell;text-align:left">
@@ -58,8 +70,8 @@
                     ${{accounts.FidelityIRAGME.gnuValue}}<br><br>
                     ${{accounts.FidelityIRAOptions.balance}}<br>
                     ${{accounts.FidelityIRAOptions.gnuBalance}}<br><br>
-                    ${{accounts.FidelityIRASPAXX.balance}}<br>
-                    ${{accounts.FidelityIRASPAXX.gnuBalance}}<br><br></b>
+                    ${{accounts.FidelityIRACash.balance}}<br>
+                    ${{accounts.FidelityIRACash.gnuBalance}}<br><br></b>
                 </div>
             </div>
             <div style="display:table-cell">
@@ -72,16 +84,8 @@
                     ${{accounts.FidelityRothIRAGME.price}} x shares: &thinsp; <br><br>
                     {{accounts.FidelityRothIRAOptions.name}}: &thinsp; <br>
                     gnuBalance: &thinsp; <br><br>
-                    {{accounts.FidelityRothIRASPAXX.name}} balance: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>
-                    {{accounts.FidelityRothIRAVTI.symbol}} shares: &thinsp; <br>
-                    gnuBalance shares: &thinsp; <br>
-                    {{accounts.FidelityRothIRAVTI.symbol}} value: &thinsp; <br>
-                    ${{accounts.FidelityRothIRAVTI.price}} x shares: &thinsp; <br><br>
-                    {{accounts.FidelityRothIRAVXUS.symbol}} shares: &thinsp; <br>
-                    gnuBalance shares: &thinsp; <br>
-                    {{accounts.FidelityRothIRAVXUS.symbol}} value: &thinsp; <br>
-                    ${{accounts.FidelityRothIRAVXUS.price}} x shares: &thinsp; <br><br>                            
+                    {{accounts.FidelityRothIRACash.name}} balance: &thinsp; <br>
+                    gnuBalance: &thinsp; <br><br>                 
                 </div>
                 <div style="display:table-cell;text-align:left">
                     <b>${{accounts.FidelityRothIRA.balance}}<br>
@@ -92,16 +96,9 @@
                     ${{accounts.FidelityRothIRAGME.gnuValue}}<br><br>
                     ${{accounts.FidelityRothIRAOptions.balance}}<br>
                     ${{accounts.FidelityRothIRAOptions.gnuBalance}}<br><br>
-                    ${{accounts.FidelityRothIRASPAXX.balance}}<br>
-                    ${{accounts.FidelityRothIRASPAXX.gnuBalance}}<br><br>
-                    {{accounts.FidelityRothIRAVTI.balance}} {{accounts.FidelityRothIRAVTI.symbol}}<br>
-                    {{accounts.FidelityRothIRAVTI.gnuBalance}} {{accounts.FidelityRothIRAVTI.symbol}}<br>
-                    ${{accounts.FidelityRothIRAVTI.value}}<br>
-                    ${{accounts.FidelityRothIRAVTI.gnuValue}}<br><br>
-                    {{accounts.FidelityRothIRAVXUS.balance}} {{accounts.FidelityRothIRAVXUS.symbol}}<br>
-                    {{accounts.FidelityRothIRAVXUS.gnuBalance}} {{accounts.FidelityRothIRAVXUS.symbol}}<br>
-                    ${{accounts.FidelityRothIRAVXUS.value}}<br>
-                    ${{accounts.FidelityRothIRAVXUS.gnuValue}}<br><br></b>
+                    ${{accounts.FidelityRothIRACash.balance}}<br>
+                    ${{accounts.FidelityRothIRACash.gnuBalance}}<br><br>
+                </b>
                 </div>
             </div>
         </div>

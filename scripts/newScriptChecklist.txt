@@ -1,0 +1,5 @@
+- create script in scripts/scripts
+- (optional) add to .gitignore
+- add template to scripts/templates
+- add to scripts/views
+- add to scripts/urls
