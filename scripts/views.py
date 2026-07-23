@@ -153,6 +153,80 @@ def coinbase(request):
 def creditCards(request):
     personalBook, jointBook = GnuCash('Finance'), GnuCash('Home')
     Amex, Barclays, Chase, Discover, BoA_P, BoA_J = USD("Amex", personalBook), USD("Barclays", personalBook), USD("Chase", personalBook), USD("Discover", personalBook), USD("BoA", personalBook), USD("BoA-joint", jointBook)
+    creditCardsDisplay = [
+        {
+            'title': 'Amex',
+            'url': 'Amex',
+            'billDate': '12th',
+            'account': Amex,
+            'buttons': [
+                {'name': 'amexMain', 'label': 'Main'},
+                {'name': 'amexLogin', 'label': 'Login'},
+                {'name': 'amexBalances', 'label': 'Balance'},
+                {'name': 'amexRewards', 'label': 'Rewards'},
+            ],
+        },
+        {
+            'title': 'Barclays',
+            'url': 'Barclays',
+            'billDate': '4th',
+            'account': Barclays,
+            'buttons': [
+                {'name': 'barclaysMain', 'label': 'Main'},
+                {'name': 'barclaysLogin', 'label': 'Login'},
+                {'name': 'barclaysBalances', 'label': 'Balance'},
+                {'name': 'barclaysRewards', 'label': 'Rewards'},
+            ],
+        },
+        {
+            'title': 'BoA Personal',
+            'url': 'BoA',
+            'billDate': '6th',
+            'account': BoA_P,
+            'buttons': [
+                {'name': 'boaPMain', 'label': 'Main'},
+                {'name': 'boaPLogin', 'label': 'Login'},
+                {'name': 'boaPBalances', 'label': 'Balance'},
+                {'name': 'boaPRewards', 'label': 'Rewards'},
+            ],
+        },
+        {
+            'title': 'BoA Joint',
+            'url': 'BoA',
+            'billDate': '17th',
+            'account': BoA_J,
+            'buttons': [
+                {'name': 'boaJMain', 'label': 'Main'},
+                {'name': 'boaJLogin', 'label': 'Login'},
+                {'name': 'boaJBalances', 'label': 'Balance'},
+                {'name': 'boaJRewards', 'label': 'Rewards'},
+            ],
+        },
+        {
+            'title': 'Chase',
+            'url': 'Chase',
+            'billDate': '9th',
+            'account': Chase,
+            'buttons': [
+                {'name': 'chaseMain', 'label': 'Main'},
+                {'name': 'chaseLogin', 'label': 'Login'},
+                {'name': 'chaseBalances', 'label': 'Balance'},
+                {'name': 'chaseRewards', 'label': 'Rewards'},
+            ],
+        },
+        {
+            'title': 'Discover',
+            'url': 'Discover',
+            'billDate': '13th',
+            'account': Discover,
+            'buttons': [
+                {'name': 'discoverMain', 'label': 'Main'},
+                {'name': 'discoverLogin', 'label': 'Login'},
+                {'name': 'discoverBalances', 'label': 'Balance'},
+                {'name': 'discoverRewards', 'label': 'Rewards'},
+            ],
+        },
+    ]
     if request.method == 'POST':
         driver = WebDriver("Chrome")
         if "amexMain" in request.POST:              runAmexCC(driver, Amex, personalBook)
@@ -180,12 +254,29 @@ def creditCards(request):
         elif "discoverBalances" in request.POST:    Discover.setBalance(getDiscoverBalance(driver))
         elif "discoverRewards" in request.POST:     claimDiscoverRewards(driver, Discover)               
         elif "close windows" in request.POST:       driver.closeWindowsExcept([':8000/'])
-    context = {'Amex': Amex, 'Barclays': Barclays, 'Chase': Chase, 'Discover': Discover, 'BoA_P': BoA_P, 'BoA_J': BoA_J}
+    context = {
+        'Amex': Amex,
+        'Barclays': Barclays,
+        'Chase': Chase,
+        'Discover': Discover,
+        'BoA_P': BoA_P,
+        'BoA_J': BoA_J,
+        'creditCardsDisplay': creditCardsDisplay,
+    }
     personalBook.closeBook();   jointBook.closeBook();    return returnRender(request, "banking/creditCards.html", context)
 
 def dailyBank(request):
     personalBook, jointBook = GnuCash('Finance'), GnuCash('Home')
     bankAccounts = getDailyBankAccounts(personalBook, jointBook)
+    sofiAccounts = [
+        {'title': 'Checking', 'account': bankAccounts['Sofi']['Checking'], 'showTransactions': True},
+        {'title': 'Savings', 'account': bankAccounts['Sofi']['Savings'], 'showTransactions': True},
+    ]
+    webullAccounts = [
+        {'title': 'Brokerage', 'account': bankAccounts['Webull']['WebullBrokerage']},
+        {'title': 'Cash', 'account': bankAccounts['Webull']['WebullBrokerageCash']},
+        {'title': 'Options', 'account': bankAccounts['Webull']['WebullBrokerageOptions']},
+    ]
     dateRange = getStartAndEndOfDateRange(timeSpan=7)
     gnuCashTransactions = personalBook.getTransactionsByDateRange(dateRange)
     if request.method == 'POST':
@@ -203,7 +294,14 @@ def dailyBank(request):
         elif "sofiLogout" in request.POST:      sofiLogout(driver)
         elif "sofiBalances" in request.POST:    getSofiBalance(driver, bankAccounts['Sofi']['Checking']); getSofiBalance(driver, bankAccounts['Sofi']['Savings'])
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/']); driver.findWindowByUrl("scripts/daily")
-    context = {'bankAccounts': bankAccounts}
+
+    fidelityGroups = buildFidelityDisplayGroups(bankAccounts['Fidelity'])
+    context = {
+        'bankAccounts': bankAccounts,
+        'fidelityGroups': fidelityGroups,
+        'sofiAccounts': sofiAccounts,
+        'webullAccounts': webullAccounts,
+    }
     if bankAccounts['Sofi']['Checking'].reviewTransactions or bankAccounts['Sofi']['Savings'].reviewTransactions or bankAccounts['Paypal'].reviewTransactions:   personalBook.openGnuCashUI()
     if bankAccounts['Ally'].reviewTransactions:                                                                                                                  jointBook.openGnuCashUI()
     personalBook.closeBook();   jointBook.closeBook();    return returnRender(request, "banking/dailyBank.html", context)
@@ -302,8 +400,9 @@ def fidelity(request):
         elif "balance" in request.POST:         getFidelityBalance(driver, accounts)
         elif "login" in request.POST:           locateFidelityWindow(driver)
         elif "close windows" in request.POST:   driver.closeWindowsExcept([':8000/'], driver.findWindowByUrl("scripts/fidelity"))
+    fidelityGroups = buildFidelityDisplayGroups(accounts)
     book.closeBook()
-    context = {'accounts': accounts};   return returnRender(request, "banking/fidelity.html", context)
+    context = {'accounts': accounts, 'fidelityGroups': fidelityGroups};   return returnRender(request, "banking/fidelity.html", context)
 
 def gamestopCC(request):
     book = GnuCash('Finance')
@@ -410,7 +509,7 @@ def monthly(request):
 
 def myPoints(request):
     book = GnuCash('Finance')
-    MyPoints = USD("MyPoints", book)
+    MyPoints = Security("MyPoints", book)
     if request.method == 'POST':
         driver = WebDriver("Chrome")
         if "main" in request.POST:              runMyPoints(driver, MyPoints, book)

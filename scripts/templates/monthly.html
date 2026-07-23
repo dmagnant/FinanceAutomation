@@ -1,241 +1,279 @@
 {% extends "base.html" %}
 {% block title %}Monthly{% endblock %}
 {% block content %}
-    <h2>Monthly USD</h2>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="USD">USD</button>
-    </form><br>
-    <form method="post">
-        {% csrf_token %}
-        <input type="text" placeholder="enter new pension balance" name="newPensionBalance">
-        <button type="submit" name="Pension">Pension</button><br><br>
-    </form>
-    <div style="width: 100%; display: table;">
-        <div style="display: table-row;">
-            <div style="width: 25%; display:table-cell">
-                <b><a href="{% url 'HealthEquity' %}" target="_blank">Health Equity</a></b><br><br>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="HEMain">Main</button>&emsp;
-                    <button type="submit" name="HELogin">Login</button>&emsp;
-                    <button type="submit" name="HEBalances">Balances</button>&emsp;
-                </form><br>
-                <div style="display: table-row;">
-                    <div style="display:table-cell;text-align:right">
-                        HSA Cash balance: &thinsp; <br>
-                        gnuBalance: &thinsp; <br><br>
-                        HSA Investment shares: &thinsp; <br>
-                        gnuBalance shares: &thinsp; <br><br>
-                        HSA Investment Value: &thinsp; <br>
-                        ${{usdAccounts.HealthEquity.VIIIX.price}} x shares: &thinsp; <br>
-                    </div>
-                    <div style="display:table-cell;text-align:left">
-                        <b>${{usdAccounts.HealthEquity.HECash.balance}}<br>
-                        ${{usdAccounts.HealthEquity.HECash.gnuBalance}}<br><br>
-                        {{usdAccounts.HealthEquity.VIIIX.balance}} {{usdAccounts.HealthEquity.VIIIX.symbol}}<br>
-                        {{usdAccounts.HealthEquity.VIIIX.gnuBalance}} {{usdAccounts.HealthEquity.VIIIX.symbol}}<br><br>
-                        ${{usdAccounts.HealthEquity.VIIIX.value}}<br>
-                        ${{usdAccounts.HealthEquity.VIIIX.gnuValue}}</b><br><br>
-                    </div>
-                </div>
+<h2>Monthly USD</h2>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" name="USD">USD</button>
+</form>
+<br>
+<form method="post">
+    {% csrf_token %}
+    <input type="text" placeholder="enter new pension balance" name="newPensionBalance">
+    <button type="submit" name="Pension">Pension</button>
+</form>
+<br>
+
+<div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
+    <div style="min-width:420px;max-width:520px;flex:1 1 420px;padding:14px;border:1px solid #2d63b3;border-radius:6px;">
+        <div style="font-weight:700;"><a href="{% url 'HealthEquity' %}" target="_blank">Health Equity</a></div>
+        <br>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="HEMain">Main</button>
+            <button type="submit" name="HELogin">Login</button>
+            <button type="submit" name="HEBalances">Balances</button>
+        </form>
+        <br>
+        <div style="padding:10px;border:1px solid #2d63b3;border-radius:6px;">
+            <table style="width:100%;border-collapse:collapse;">
+                <tr>
+                    <td>HSA Cash balance:</td>
+                    <td style="text-align:right;"><b>${{usdAccounts.HealthEquity.HECash.balance}}</b></td>
+                </tr>
+                <tr>
+                    <td>gnuBalance:</td>
+                    <td style="text-align:right;"><b>${{usdAccounts.HealthEquity.HECash.gnuBalance}}</b></td>
+                </tr>
+                <tr><td colspan="2" style="padding-top:8px;"><b>{{usdAccounts.HealthEquity.VIIIX.symbol}}</b></td></tr>
+                <tr>
+                    <td>shares:</td>
+                    <td style="text-align:right;"><b>{{usdAccounts.HealthEquity.VIIIX.balance}} {{usdAccounts.HealthEquity.VIIIX.symbol}}</b></td>
+                </tr>
+                <tr>
+                    <td>gnuBalance shares:</td>
+                    <td style="text-align:right;"><b>{{usdAccounts.HealthEquity.VIIIX.gnuBalance}} {{usdAccounts.HealthEquity.VIIIX.symbol}}</b></td>
+                </tr>
+                <tr>
+                    <td>value:</td>
+                    <td style="text-align:right;"><b>${{usdAccounts.HealthEquity.VIIIX.value}}</b></td>
+                </tr>
+                <tr>
+                    <td>${{usdAccounts.HealthEquity.VIIIX.price}} x shares:</td>
+                    <td style="text-align:right;"><b>${{usdAccounts.HealthEquity.VIIIX.gnuValue}}</b></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div style="min-width:420px;max-width:520px;flex:1 1 420px;padding:14px;border:1px solid #2d63b3;border-radius:6px;">
+        <div style="font-weight:700;"><a href="{% url 'Optum' %}" target="_blank">Optum HSA</a></div>
+        <br>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="optumMain">Main</button>
+            <button type="submit" name="optumLogin">Login</button>
+            <button type="submit" name="optumBalance">Balance</button>
+        </form>
+        <br>
+        <div style="padding:10px;border:1px solid #2d63b3;border-radius:6px;">
+            <table style="width:100%;border-collapse:collapse;">
+                <tr>
+                    <td>HSA Cash balance:</td>
+                    <td style="text-align:right;"><b>${{usdAccounts.Optum.OptumCash.balance}}</b></td>
+                </tr>
+                <tr>
+                    <td>gnuBalance:</td>
+                    <td style="text-align:right;"><b>${{usdAccounts.Optum.OptumCash.gnuBalance}}</b></td>
+                </tr>
+                <tr><td colspan="2" style="padding-top:8px;"><b>{{usdAccounts.Optum.VFIAX.symbol}}</b></td></tr>
+                <tr>
+                    <td>shares:</td>
+                    <td style="text-align:right;"><b>{{usdAccounts.Optum.VFIAX.balance}} {{usdAccounts.Optum.VFIAX.symbol}}</b></td>
+                </tr>
+                <tr>
+                    <td>gnuBalance shares:</td>
+                    <td style="text-align:right;"><b>{{usdAccounts.Optum.VFIAX.gnuBalance}} {{usdAccounts.Optum.VFIAX.symbol}}</b></td>
+                </tr>
+                <tr>
+                    <td>value:</td>
+                    <td style="text-align:right;"><b>${{usdAccounts.Optum.VFIAX.value}}</b></td>
+                </tr>
+                <tr>
+                    <td>${{usdAccounts.Optum.VFIAX.price}} x shares:</td>
+                    <td style="text-align:right;"><b>${{usdAccounts.Optum.VFIAX.gnuValue}}</b></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div style="min-width:900px;max-width:1100px;flex:1 1 900px;padding:14px;border:1px solid #2d63b3;border-radius:6px;">
+        <div style="font-weight:700;"><a href="{% url 'Vanguard' %}" target="_blank">Vanguard</a></div>
+        <br>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="vanguard401k">401k</button>
+            <button type="submit" name="vanguardLogin">Login</button>
+            <button type="submit" name="vanguardBalances">Balances</button>
+        </form>
+        <br>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">
+            <div style="padding:10px;border:1px solid #2d63b3;border-radius:6px;">
+                <div style="font-weight:700;">401k</div>
+                <table style="width:100%;border-collapse:collapse;">
+                    <tr>
+                        <td>balance:</td>
+                        <td style="text-align:right;"><b>${{usdAccounts.Vanguard.Vanguard401k.gnuBalance}}</b></td>
+                    </tr>
+
+                    <tr><td colspan="2" style="padding-top:8px;"><b>{{usdAccounts.Vanguard.Vanguard401k1464.symbol}}</b></td></tr>
+                    <tr><td>shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.Vanguard401k1464.balance}} ({{usdAccounts.Vanguard.Vanguard401k1464.symbol}})</b></td></tr>
+                    <tr><td>gnuBalance shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.Vanguard401k1464.gnuBalance}} ({{usdAccounts.Vanguard.Vanguard401k1464.symbol}})</b></td></tr>
+                    <tr><td>value:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.Vanguard401k1464.value}}</b></td></tr>
+                    <tr><td>${{usdAccounts.Vanguard.Vanguard401k1464.price}} x shares:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.Vanguard401k1464.gnuValue}}</b></td></tr>
+
+                    <tr><td colspan="2" style="padding-top:8px;"><b>{{usdAccounts.Vanguard.Vanguard401k1676.symbol}}</b></td></tr>
+                    <tr><td>shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.Vanguard401k1676.balance}} ({{usdAccounts.Vanguard.Vanguard401k1676.symbol}})</b></td></tr>
+                    <tr><td>gnuBalance shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.Vanguard401k1676.gnuBalance}} ({{usdAccounts.Vanguard.Vanguard401k1676.symbol}})</b></td></tr>
+                    <tr><td>value:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.Vanguard401k1676.value}}</b></td></tr>
+                    <tr><td>${{usdAccounts.Vanguard.Vanguard401k1676.price}} x shares:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.Vanguard401k1676.gnuValue}}</b></td></tr>
+
+                    <tr><td colspan="2" style="padding-top:8px;"><b>{{usdAccounts.Vanguard.Vanguard401k4769.symbol}}</b></td></tr>
+                    <tr><td>shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.Vanguard401k4769.balance}} ({{usdAccounts.Vanguard.Vanguard401k4769.symbol}})</b></td></tr>
+                    <tr><td>gnuBalance shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.Vanguard401k4769.gnuBalance}} ({{usdAccounts.Vanguard.Vanguard401k4769.symbol}})</b></td></tr>
+                    <tr><td>value:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.Vanguard401k4769.value}}</b></td></tr>
+                    <tr><td>${{usdAccounts.Vanguard.Vanguard401k4769.price}} x shares:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.Vanguard401k4769.gnuValue}}</b></td></tr>
+
+                    <tr><td colspan="2" style="padding-top:8px;"><b>{{usdAccounts.Vanguard.Vanguard401kM038.symbol}}</b></td></tr>
+                    <tr><td>shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.Vanguard401kM038.balance}} ({{usdAccounts.Vanguard.Vanguard401kM038.symbol}})</b></td></tr>
+                    <tr><td>gnuBalance shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.Vanguard401kM038.gnuBalance}} ({{usdAccounts.Vanguard.Vanguard401kM038.symbol}})</b></td></tr>
+                    <tr><td>value:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.Vanguard401kM038.value}}</b></td></tr>
+                    <tr><td>${{usdAccounts.Vanguard.Vanguard401kM038.price}} x shares:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.Vanguard401kM038.gnuValue}}</b></td></tr>
+
+                    <tr><td colspan="2" style="padding-top:8px;"><b>{{usdAccounts.Vanguard.Vanguard401kM078.symbol}}</b></td></tr>
+                    <tr><td>shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.Vanguard401kM078.balance}} ({{usdAccounts.Vanguard.Vanguard401kM078.symbol}})</b></td></tr>
+                    <tr><td>gnuBalance shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.Vanguard401kM078.gnuBalance}} ({{usdAccounts.Vanguard.Vanguard401kM078.symbol}})</b></td></tr>
+                    <tr><td>value:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.Vanguard401kM078.value}}</b></td></tr>
+                    <tr><td>${{usdAccounts.Vanguard.Vanguard401kM078.price}} x shares:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.Vanguard401kM078.gnuValue}}</b></td></tr>
+                </table>
             </div>
-            <div style="width: 25%; display:table-cell">
-                <b><a href="{% url 'Optum' %}" target="_blank">Optum HSA</a></b><br><br>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="optumMain">Main</button>&emsp;
-                    <button type="submit" name="optumLogin">Login</button>&emsp;
-                    <button type="submit" name="optumBalance">Balance</button>&emsp;
-                </form><br>
-                <div style="display: table-row;">
-                    <div style="display:table-cell;text-align:right">
-                        HSA Cash balance: &thinsp; <br>
-                        gnuBalance: &thinsp; <br><br>
-                        HSA Investment shares: &thinsp; <br>
-                        gnuBalance shares: &thinsp; <br><br>
-                        HSA Investment Value: &thinsp; <br>
-                        ${{usdAccounts.Optum.VFIAX.price}} x shares: &thinsp; <br><br>
-                    </div>
-                    <div style="display:table-cell;text-align:left">
-                        <b>${{usdAccounts.Optum.OptumCash.balance}}<br>
-                        ${{usdAccounts.Optum.OptumCash.gnuBalance}}<br><br>
-                        {{usdAccounts.Optum.VFIAX.balance}} {{usdAccounts.Optum.VFIAX.symbol}}<br>
-                        {{usdAccounts.Optum.VFIAX.gnuBalance}} {{usdAccounts.Optum.VFIAX.symbol}}<br><br>
-                        ${{usdAccounts.Optum.VFIAX.value}}<br>
-                        ${{usdAccounts.Optum.VFIAX.gnuValue}}</b><br><br>
-                    </div>
-                </div><br><br>
-            </div>
-            <div style="width: 50%; display:table-cell">
-                <b><a href="{% url 'Vanguard' %}" target="_blank">Vanguard</a></b><br><br>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="vanguard401k">401k</button>&emsp;
-                    <button type="submit" name="vanguardLogin">Login</button>&emsp;
-                    <button type="submit" name="vanguardBalances">Balances</button>&emsp;
-                </form><br>
-                <div style="display: table-row;">
-                    <div style="display:table-cell;text-align:right">
-                        401k Balance: &thinsp; <br><br>
-                        1464 shares: &thinsp; <br>
-                        gnuBalance shares: &thinsp; <br> 
-                        1464 Value: &thinsp; <br>
-                        ${{usdAccounts.Vanguard.Vanguard401k1464.price}} x shares: &thinsp; <br><br>
-                        1676 shares: &thinsp; <br>
-                        gnuBalance shares: &thinsp; <br> 
-                        1676 Value: &thinsp; <br>
-                        ${{usdAccounts.Vanguard.Vanguard401k1676.price}} x shares: &thinsp; <br><br>
-                        4769 shares: &thinsp; <br>
-                        gnuBalance shares: &thinsp; <br> 
-                        4769 Value: &thinsp; <br>
-                        ${{usdAccounts.Vanguard.Vanguard401k4769.price}} x shares: &thinsp; <br><br>
-                        M038 shares: &thinsp; <br>
-                        gnuBalance shares: &thinsp; <br> 
-                        M038 Value: &thinsp; <br>
-                        ${{usdAccounts.Vanguard.Vanguard401kM038.price}} x shares: &thinsp; <br><br>
-                        M078 shares: &thinsp; <br>
-                        gnuBalance shares: &thinsp; <br> 
-                        M078 Value: &thinsp; <br>
-                        ${{usdAccounts.Vanguard.Vanguard401kM078.price}} x shares: &thinsp; <br><br>
-                    </div>
-                    <div style="display:table-cell;text-align:left;padding-right: 30px;">
-                        <b>${{usdAccounts.Vanguard.Vanguard401k.gnuBalance}}<br><br>
-                        {{usdAccounts.Vanguard.Vanguard401k1464.balance}} ({{usdAccounts.Vanguard.Vanguard401k1464.symbol}})<br>
-                        {{usdAccounts.Vanguard.Vanguard401k1464.gnuBalance}} ({{usdAccounts.Vanguard.Vanguard401k1464.symbol}})<br>
-                        ${{usdAccounts.Vanguard.Vanguard401k1464.value}}<br>
-                        ${{usdAccounts.Vanguard.Vanguard401k1464.gnuValue}}<br><br>
-                        {{usdAccounts.Vanguard.Vanguard401k1676.balance}} ({{usdAccounts.Vanguard.Vanguard401k1676.symbol}})<br>
-                        {{usdAccounts.Vanguard.Vanguard401k1676.gnuBalance}} ({{usdAccounts.Vanguard.Vanguard401k1676.symbol}})<br>
-                        ${{usdAccounts.Vanguard.Vanguard401k1676.value}}<br>
-                        ${{usdAccounts.Vanguard.Vanguard401k1676.gnuValue}}<br><br>
-                        {{usdAccounts.Vanguard.Vanguard401k4769.balance}} ({{usdAccounts.Vanguard.Vanguard401k4769.symbol}})<br>
-                        {{usdAccounts.Vanguard.Vanguard401k4769.gnuBalance}} ({{usdAccounts.Vanguard.Vanguard401k4769.symbol}})<br>
-                        ${{usdAccounts.Vanguard.Vanguard401k4769.value}}<br>
-                        ${{usdAccounts.Vanguard.Vanguard401k4769.gnuValue}}<br><br>
-                        {{usdAccounts.Vanguard.Vanguard401kM038.balance}} ({{usdAccounts.Vanguard.Vanguard401kM038.symbol}})<br>
-                        {{usdAccounts.Vanguard.Vanguard401kM038.gnuBalance}} ({{usdAccounts.Vanguard.Vanguard401kM038.symbol}})<br>
-                        ${{usdAccounts.Vanguard.Vanguard401kM038.value}}<br>
-                        ${{usdAccounts.Vanguard.Vanguard401kM038.gnuValue}}<br><br>
-                        {{usdAccounts.Vanguard.Vanguard401kM078.balance}} ({{usdAccounts.Vanguard.Vanguard401kM078.symbol}})<br>
-                        {{usdAccounts.Vanguard.Vanguard401kM078.gnuBalance}} ({{usdAccounts.Vanguard.Vanguard401kM078.symbol}})<br>
-                        ${{usdAccounts.Vanguard.Vanguard401kM078.value}}<br>
-                        ${{usdAccounts.Vanguard.Vanguard401kM078.gnuValue}}<br><br></b>
-                    </div>
-                    <div style="display:table-cell;text-align:right;padding-left: 30px;">
-                        Roth 401k Balance: &thinsp; <br><br>
-                        1464 shares: &thinsp; <br>
-                        gnuBalance shares: &thinsp; <br> 
-                        1464 Value: &thinsp; <br>
-                        ${{usdAccounts.Vanguard.VanguardRoth401k1464.price}} x shares: &thinsp; <br><br>
-                        1676 shares: &thinsp; <br>
-                        gnuBalance shares: &thinsp; <br> 
-                        1676 Value: &thinsp; <br>
-                        ${{usdAccounts.Vanguard.VanguardRoth401k1676.price}} x shares: &thinsp; <br><br>
-                        4769 shares: &thinsp; <br>
-                        gnuBalance shares: &thinsp; <br> 
-                        4769 Value: &thinsp; <br>
-                        ${{usdAccounts.Vanguard.VanguardRoth401k4769.price}} x shares: &thinsp; <br><br>
-                        M038 shares: &thinsp; <br>
-                        gnuBalance shares: &thinsp; <br> 
-                        M038 Value: &thinsp; <br>
-                        ${{usdAccounts.Vanguard.VanguardRoth401kM038.price}} x shares: &thinsp; <br><br>
-                        M078 shares: &thinsp; <br>
-                        gnuBalance shares: &thinsp; <br> 
-                        M078 Value: &thinsp; <br>
-                        ${{usdAccounts.Vanguard.VanguardRoth401kM078.price}} x shares: &thinsp; <br><br>
-                    </div>
-                    <div style="display:table-cell;text-align:left">
-                        <b>${{usdAccounts.Vanguard.VanguardRoth401k.gnuBalance}}<br><br>
-                        {{usdAccounts.Vanguard.VanguardRoth401k1464.balance}} ({{usdAccounts.Vanguard.VanguardRoth401k1464.symbol}})<br>
-                        {{usdAccounts.Vanguard.VanguardRoth401k1464.gnuBalance}} ({{usdAccounts.Vanguard.VanguardRoth401k1464.symbol}})<br>
-                        ${{usdAccounts.Vanguard.VanguardRoth401k1464.value}}<br>
-                        ${{usdAccounts.Vanguard.VanguardRoth401k1464.gnuValue}}<br><br>
-                        {{usdAccounts.Vanguard.VanguardRoth401k1676.balance}} ({{usdAccounts.Vanguard.VanguardRoth401k1676.symbol}})<br>
-                        {{usdAccounts.Vanguard.VanguardRoth401k1676.gnuBalance}} ({{usdAccounts.Vanguard.VanguardRoth401k1676.symbol}})<br>
-                        ${{usdAccounts.Vanguard.VanguardRoth401k1676.value}}<br>
-                        ${{usdAccounts.Vanguard.VanguardRoth401k1676.gnuValue}}<br><br>
-                        {{usdAccounts.Vanguard.VanguardRoth401k4769.balance}} ({{usdAccounts.Vanguard.VanguardRoth401k4769.symbol}})<br>
-                        {{usdAccounts.Vanguard.VanguardRoth401k4769.gnuBalance}} ({{usdAccounts.Vanguard.VanguardRoth401k4769.symbol}})<br>
-                        ${{usdAccounts.Vanguard.VanguardRoth401k4769.value}}<br>
-                        ${{usdAccounts.Vanguard.VanguardRoth401k4769.gnuValue}}<br><br>
-                        {{usdAccounts.Vanguard.VanguardRoth401kM038.balance}} ({{usdAccounts.Vanguard.VanguardRoth401kM038.symbol}})<br>
-                        {{usdAccounts.Vanguard.VanguardRoth401kM038.gnuBalance}} ({{usdAccounts.Vanguard.VanguardRoth401kM038.symbol}})<br>
-                        ${{usdAccounts.Vanguard.VanguardRoth401kM038.value}}<br>
-                        ${{usdAccounts.Vanguard.VanguardRoth401kM038.gnuValue}}<br><br>
-                        {{usdAccounts.Vanguard.VanguardRoth401kM078.balance}} ({{usdAccounts.Vanguard.VanguardRoth401kM078.symbol}})<br>
-                        {{usdAccounts.Vanguard.VanguardRoth401kM078.gnuBalance}} ({{usdAccounts.Vanguard.VanguardRoth401kM078.symbol}})<br>
-                        ${{usdAccounts.Vanguard.VanguardRoth401kM078.value}}<br>
-                        ${{usdAccounts.Vanguard.VanguardRoth401kM078.gnuValue}}<br><br></b>
-                    </div>
-                </div>
+
+            <div style="padding:10px;border:1px solid #2d63b3;border-radius:6px;">
+                <div style="font-weight:700;">Roth 401k</div>
+                <table style="width:100%;border-collapse:collapse;">
+                    <tr>
+                        <td>balance:</td>
+                        <td style="text-align:right;"><b>${{usdAccounts.Vanguard.VanguardRoth401k.gnuBalance}}</b></td>
+                    </tr>
+
+                    <tr><td colspan="2" style="padding-top:8px;"><b>{{usdAccounts.Vanguard.VanguardRoth401k1464.symbol}}</b></td></tr>
+                    <tr><td>shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.VanguardRoth401k1464.balance}} ({{usdAccounts.Vanguard.VanguardRoth401k1464.symbol}})</b></td></tr>
+                    <tr><td>gnuBalance shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.VanguardRoth401k1464.gnuBalance}} ({{usdAccounts.Vanguard.VanguardRoth401k1464.symbol}})</b></td></tr>
+                    <tr><td>value:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.VanguardRoth401k1464.value}}</b></td></tr>
+                    <tr><td>${{usdAccounts.Vanguard.VanguardRoth401k1464.price}} x shares:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.VanguardRoth401k1464.gnuValue}}</b></td></tr>
+
+                    <tr><td colspan="2" style="padding-top:8px;"><b>{{usdAccounts.Vanguard.VanguardRoth401k1676.symbol}}</b></td></tr>
+                    <tr><td>shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.VanguardRoth401k1676.balance}} ({{usdAccounts.Vanguard.VanguardRoth401k1676.symbol}})</b></td></tr>
+                    <tr><td>gnuBalance shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.VanguardRoth401k1676.gnuBalance}} ({{usdAccounts.Vanguard.VanguardRoth401k1676.symbol}})</b></td></tr>
+                    <tr><td>value:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.VanguardRoth401k1676.value}}</b></td></tr>
+                    <tr><td>${{usdAccounts.Vanguard.VanguardRoth401k1676.price}} x shares:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.VanguardRoth401k1676.gnuValue}}</b></td></tr>
+
+                    <tr><td colspan="2" style="padding-top:8px;"><b>{{usdAccounts.Vanguard.VanguardRoth401k4769.symbol}}</b></td></tr>
+                    <tr><td>shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.VanguardRoth401k4769.balance}} ({{usdAccounts.Vanguard.VanguardRoth401k4769.symbol}})</b></td></tr>
+                    <tr><td>gnuBalance shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.VanguardRoth401k4769.gnuBalance}} ({{usdAccounts.Vanguard.VanguardRoth401k4769.symbol}})</b></td></tr>
+                    <tr><td>value:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.VanguardRoth401k4769.value}}</b></td></tr>
+                    <tr><td>${{usdAccounts.Vanguard.VanguardRoth401k4769.price}} x shares:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.VanguardRoth401k4769.gnuValue}}</b></td></tr>
+
+                    <tr><td colspan="2" style="padding-top:8px;"><b>{{usdAccounts.Vanguard.VanguardRoth401kM038.symbol}}</b></td></tr>
+                    <tr><td>shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.VanguardRoth401kM038.balance}} ({{usdAccounts.Vanguard.VanguardRoth401kM038.symbol}})</b></td></tr>
+                    <tr><td>gnuBalance shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.VanguardRoth401kM038.gnuBalance}} ({{usdAccounts.Vanguard.VanguardRoth401kM038.symbol}})</b></td></tr>
+                    <tr><td>value:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.VanguardRoth401kM038.value}}</b></td></tr>
+                    <tr><td>${{usdAccounts.Vanguard.VanguardRoth401kM038.price}} x shares:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.VanguardRoth401kM038.gnuValue}}</b></td></tr>
+
+                    <tr><td colspan="2" style="padding-top:8px;"><b>{{usdAccounts.Vanguard.VanguardRoth401kM078.symbol}}</b></td></tr>
+                    <tr><td>shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.VanguardRoth401kM078.balance}} ({{usdAccounts.Vanguard.VanguardRoth401kM078.symbol}})</b></td></tr>
+                    <tr><td>gnuBalance shares:</td><td style="text-align:right;"><b>{{usdAccounts.Vanguard.VanguardRoth401kM078.gnuBalance}} ({{usdAccounts.Vanguard.VanguardRoth401kM078.symbol}})</b></td></tr>
+                    <tr><td>value:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.VanguardRoth401kM078.value}}</b></td></tr>
+                    <tr><td>${{usdAccounts.Vanguard.VanguardRoth401kM078.price}} x shares:</td><td style="text-align:right;"><b>${{usdAccounts.Vanguard.VanguardRoth401kM078.gnuValue}}</b></td></tr>
+                </table>
             </div>
         </div>
     </div>
-    <h2>Monthly Crypto</h2>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="Crypto">Crypto</button><br><br>
-    </form>
-    <div style="width: 100%; display: table;">
-        <div style="display: table-row;">
-            <div style="width: 16%; display:table-cell">
-                <b><a href="{% url 'Eternl' %}" target="_blank">Eternl</a></b><br><br>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="eternlMain">Main</button>
-                    <button type="submit" name="eternlLogin">Login</button>
-                    <button type="submit" name="eternlBalance">Balance</button>
-                </form><br><br>
-                <div style="display: table-row;">
-                    <div style="display:table-cell;text-align:right">
-                        ADA balance: &thinsp; <br>
-                        gnuBalance: &thinsp; <br><br>
-                    </div>
-                    <div style="display:table-cell;text-align:left">
-                        <b>{{cryptoAccounts.Cardano.balance}}<br>
-                        {{cryptoAccounts.Cardano.gnuBalance}}</b><br><br>
-                    </div>
-                </div>
-            </div>
-            <div style="width: 16%; display:table-cell">
-                <b><a href="{% url 'IoPay' %}" target="_blank">IoPay</a></b><br><br>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="ioPayMain">Main</button>
-                </form><br><br>
-                <div style="display: table-row;">
-                    <div style="display:table-cell;text-align:right">
-                        IOTX balance: &thinsp; <br>
-                        gnuBalance: &thinsp; <br><br>
-                    </div>
-                    <div style="display:table-cell;text-align:left">
-                        <b>{{cryptoAccounts.IoTex.balance}}<br>
-                        {{cryptoAccounts.IoTex.gnuBalance}}</b><br><br>
-                    </div>
-                </div>
-            </div>
-            <div style="width: 16%; display:table-cell">
-                <b><a href="{% url 'Ledger' %}" target="_blank">Ledger</a></b><br><br>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="ledgerMain">Main</button>
-                </form><br><br>
-                <div style="display: table-row;">
-                    <div style="display:table-cell;text-align:right">
-                        {{cryptoAccounts.ledgerAccounts.Bitcoin.symbol}} balance: &thinsp;<br>
-                        gnuBalance: &thinsp;<br><br>
-                        {{cryptoAccounts.ledgerAccounts.Ethereum.symbol}} balance: &thinsp;<br>
-                        gnuBalance: &thinsp;<br><br>
-                    </div>
-                    <div style="display:table-cell;text-align:left">
-                        <b>{{cryptoAccounts.ledgerAccounts.Bitcoin.balance}}<br>
-                        {{cryptoAccounts.ledgerAccounts.Bitcoin.gnuBalance}}</b><br><br>
-                        <b>{{cryptoAccounts.ledgerAccounts.Ethereum.balance}}<br>
-                        {{cryptoAccounts.ledgerAccounts.Ethereum.gnuBalance}}</b><br><br>
-                    </div>
-                </div>
-            </div>
+</div>
+
+<h2>Monthly Crypto</h2>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" name="Crypto">Crypto</button>
+</form>
+<br>
+
+<div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
+    <div style="min-width:420px;max-width:520px;flex:1 1 420px;padding:14px;border:1px solid #2d63b3;border-radius:6px;">
+        <div style="font-weight:700;"><a href="{% url 'Eternl' %}" target="_blank">Eternl</a></div>
+        <br>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="eternlMain">Main</button>
+            <button type="submit" name="eternlLogin">Login</button>
+            <button type="submit" name="eternlBalance">Balance</button>
+        </form>
+        <br>
+        <div style="padding:10px;border:1px solid #2d63b3;border-radius:6px;">
+            <table style="width:100%;border-collapse:collapse;">
+                <tr>
+                    <td>{{cryptoAccounts.Cardano.symbol}} balance:</td>
+                    <td style="text-align:right;"><b>{{cryptoAccounts.Cardano.balance}}</b></td>
+                </tr>
+                <tr>
+                    <td>gnuBalance:</td>
+                    <td style="text-align:right;"><b>{{cryptoAccounts.Cardano.gnuBalance}}</b></td>
+                </tr>
+            </table>
         </div>
     </div>
+
+    <div style="min-width:420px;max-width:520px;flex:1 1 420px;padding:14px;border:1px solid #2d63b3;border-radius:6px;">
+        <div style="font-weight:700;"><a href="{% url 'IoPay' %}" target="_blank">IoPay</a></div>
+        <br>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="ioPayMain">Main</button>
+        </form>
+        <br>
+        <div style="padding:10px;border:1px solid #2d63b3;border-radius:6px;">
+            <table style="width:100%;border-collapse:collapse;">
+                <tr>
+                    <td>{{cryptoAccounts.IoTex.symbol}} balance:</td>
+                    <td style="text-align:right;"><b>{{cryptoAccounts.IoTex.balance}}</b></td>
+                </tr>
+                <tr>
+                    <td>gnuBalance:</td>
+                    <td style="text-align:right;"><b>{{cryptoAccounts.IoTex.gnuBalance}}</b></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div style="min-width:420px;max-width:520px;flex:1 1 420px;padding:14px;border:1px solid #2d63b3;border-radius:6px;">
+        <div style="font-weight:700;"><a href="{% url 'Ledger' %}" target="_blank">Ledger</a></div>
+        <br>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="ledgerMain">Main</button>
+        </form>
+        <br>
+        <div style="padding:10px;border:1px solid #2d63b3;border-radius:6px;">
+            <table style="width:100%;border-collapse:collapse;">
+                <tr>
+                    <td>{{cryptoAccounts.ledgerAccounts.Bitcoin.symbol}} balance:</td>
+                    <td style="text-align:right;"><b>{{cryptoAccounts.ledgerAccounts.Bitcoin.balance}}</b></td>
+                </tr>
+                <tr>
+                    <td>gnuBalance:</td>
+                    <td style="text-align:right;"><b>{{cryptoAccounts.ledgerAccounts.Bitcoin.gnuBalance}}</b></td>
+                </tr>
+                <tr><td colspan="2" style="padding-top:8px;"></td></tr>
+                <tr>
+                    <td>{{cryptoAccounts.ledgerAccounts.Ethereum.symbol}} balance:</td>
+                    <td style="text-align:right;"><b>{{cryptoAccounts.ledgerAccounts.Ethereum.balance}}</b></td>
+                </tr>
+                <tr>
+                    <td>gnuBalance:</td>
+                    <td style="text-align:right;"><b>{{cryptoAccounts.ledgerAccounts.Ethereum.gnuBalance}}</b></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

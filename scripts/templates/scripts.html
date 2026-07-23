@@ -1,33 +1,42 @@
 {% extends "base.html" %}
 {% block title %}All Scripts{% endblock %}
 {% block content %}
-    <h1>All Scripts</h1>
-    <div style="width: 100%; display: table;">
-        <div style="display: table-row;">
-            <div style="width: 25%; display:table-cell">
-                <b>Bank Accounts</b><br><br>
-                {% for script in bank %}
-                <a href="{% url script %}" target="_blank">{{script}}</a><br>
-                {% endfor %}
-            </div> 
-            <div style="width: 25%; display:table-cell">
-                <b>Credit Cards</b><br><br>
-                {% for script in cc %}
-                <a href="{% url script %}" target="_blank">{{script}}</a><br>
-                {% endfor %}
-            </div>
-            <div style="width: 25%; display:table-cell">
-                <b>Crypto Accounts</b><br><br>
-                {% for script in crypto %}
-                <a href="{% url script %}" target="_blank">{{script}}</a><br>
-                {% endfor %}
-            </div>
-            <div style="width: 25%; display:table-cell">
-                <b>MR Scripts</b><br><br>
-                {% for script in mr %}
-                <a href="{% url script %}" target="_blank">{{script}}</a><br>
-                {% endfor %}
-            </div>
+<h1>All Scripts</h1>
+<div class="script-types-row" style="display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:24px; align-items:start;">
+    <div class="card card-tight" style="min-width:0; max-width:none; width:100%;">
+        <div class="section-title" style="font-weight:700; font-size:1.2rem; margin-bottom:10px;">Bank Accounts</div>
+        <div class="vertical-list" style="display:flex; flex-direction:column; gap:4px;">
+            {% for script in bank %}
+                <a href="{% url script %}" target="_blank" style="display:block; margin-right:0;">{{script}}</a>
+            {% endfor %}
         </div>
     </div>
+
+    <div class="card card-tight" style="min-width:0; max-width:none; width:100%;">
+        <div class="section-title" style="font-weight:700; font-size:1.2rem; margin-bottom:10px;">Credit Cards</div>
+        <div class="vertical-list" style="display:flex; flex-direction:column; gap:4px;">
+            {% for script in cc %}
+                <a href="{% url script %}" target="_blank" style="display:block; margin-right:0;">{{script}}</a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card card-tight" style="min-width:0; max-width:none; width:100%;">
+        <div class="section-title" style="font-weight:700; font-size:1.2rem; margin-bottom:10px;">Crypto Accounts</div>
+        <div class="vertical-list" style="display:flex; flex-direction:column; gap:4px;">
+            {% for script in crypto %}
+                <a href="{% url script %}" target="_blank" style="display:block; margin-right:0;">{{script}}</a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card card-tight" style="min-width:0; max-width:none; width:100%;">
+        <div class="section-title" style="font-weight:700; font-size:1.2rem; margin-bottom:10px;">MR Scripts</div>
+        <div class="vertical-list" style="display:flex; flex-direction:column; gap:4px;">
+            {% for script in mr %}
+                <a href="{% url script %}" target="_blank" style="display:block; margin-right:0;">{{script}}</a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 {% endblock %}

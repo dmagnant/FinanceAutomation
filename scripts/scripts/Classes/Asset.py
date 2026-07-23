@@ -35,8 +35,9 @@ def getSymbolByName(self):
         case 'fidelityiragme' | 'fidelityrothiragme' | 'fidelityindividualgme' | 'fidelitybusinessgme':         return 'GME'
         case 'fidelityiravoo' | 'fidelityrothiravoo' | 'fidelityindividualvoo' | 'fidelitybusinessvoo':         return 'VOO'
         case 'fidelityiravti' | 'fidelityrothiravti' | 'fidelityindividualvti' | 'fidelitybusinessvti':         return 'VTI'
-        case 'fidelityiravxus' | 'fidelityrothiravxus' | 'fidelityindividualvxus' | 'fidelitybusinessvxus':     return 'VXUS'
-        case 'fidelityiracash' | 'fidelityrothiracash' | 'fidelity401kcash':                                    return 'FDRXX'       
+        case 'fidelityiraiaum' | 'fidelityrothiraiaum':                                                         return 'IAUM'
+        case 'fidelityindividualvxus':                                                                          return 'VXUS'
+        case 'fidelityiracash' | 'fidelityrothiracash' | 'fidelity401kcash':                                    return 'FDRXX'
         case 'fidelityindividualcash' | 'fidelitybusinesscash':                                                 return 'FZFXX'
         case _:                                                     print(f'Security: {self.name} not found in "getSymbolByName" function')
 

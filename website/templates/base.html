@@ -27,19 +27,46 @@
     <b>Spreadsheets: </b> &emsp;
     <a href="https://docs.google.com/spreadsheets/d/1sWJuxtYI-fJ6bUHBWHZTQwcggd30RcOSTMlqIzd1BBo/edit#gid=361024172" target="_blank">Finances</a>
     <a href="https://docs.google.com/spreadsheets/d/1oP3U7y8qywvXG9U_zYXgjFfqHrCyPtUDl4zPDftFCdM/edit#gid=45925201" target="_blank">Home</a><br><br>
-    <div style="width: 100%; display: table;"><div style="display: table-row;">
-        <div style="width: 33%; display:table-cell"><b>Scripts for Yesterday:</b> <br><br>
-            {% for script in scriptsToRunYesterday %} {{script}}<br>{% endfor %}</div> 
-        <div style="width: 33%; display:table-cell"><b>Scripts for Today:</b> <br><br>
-            {% for script in scriptsToRunToday %} {{script}}<br> {% endfor %}</div>
-        <div style="width: 33%; display:table-cell"><b>Scripts for Tomorrow:</b> <br><br>
-            {% for script in scriptsToRunTomorrow %} {{script}}<br> {% endfor %}</div></div></div><br><br>
-    <div style="width: 100%; display: table;"> <div style="display: table-row;">
-        <div style="width: 33%; display:table-cell"> <b>Events for Yesterday:</b> <br><br>
-            {% for event in eventsYesterday %}{{event}}<br>{% endfor %}</div> 
-        <div style="width: 33%; display:table-cell"><b>Events for Today:</b> <br><br>
-            {% for event in eventsToday %}{{event}}<br>{% endfor %}</div>
-        <div style="width: 33%; display:table-cell"><b>Events for Tomorrow:</b> <br><br>
-            {% for event in eventsTomorrow %} {{event}}<br>{% endfor %}</div></div></div>
+    <div class="three-col-row" style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:24px; align-items:start;">
+        <div class="card card-tight" style="min-width:0; max-width:none; width:100%;">
+            <div class="section-title" style="font-weight:700; font-size:1.2rem; margin-bottom:10px;">Scripts for Yesterday:</div>
+            <div class="vertical-list" style="display:flex; flex-direction:column; gap:4px;">
+                {% for script in scriptsToRunYesterday %}<div style="display:block;">{{script}}</div>{% endfor %}
+            </div>
+        </div>
+        <div class="card card-tight" style="min-width:0; max-width:none; width:100%;">
+            <div class="section-title" style="font-weight:700; font-size:1.2rem; margin-bottom:10px;">Scripts for Today:</div>
+            <div class="vertical-list" style="display:flex; flex-direction:column; gap:4px;">
+                {% for script in scriptsToRunToday %}<div style="display:block;">{{script}}</div>{% endfor %}
+            </div>
+        </div>
+        <div class="card card-tight" style="min-width:0; max-width:none; width:100%;">
+            <div class="section-title" style="font-weight:700; font-size:1.2rem; margin-bottom:10px;">Scripts for Tomorrow:</div>
+            <div class="vertical-list" style="display:flex; flex-direction:column; gap:4px;">
+                {% for script in scriptsToRunTomorrow %}<div style="display:block;">{{script}}</div>{% endfor %}
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="three-col-row" style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:24px; align-items:start;">
+        <div class="card card-tight" style="min-width:0; max-width:none; width:100%;">
+            <div class="section-title" style="font-weight:700; font-size:1.2rem; margin-bottom:10px;">Events for Yesterday:</div>
+            <div class="vertical-list" style="display:flex; flex-direction:column; gap:4px;">
+                {% for event in eventsYesterday %}<div style="display:block;">{{event}}</div>{% endfor %}
+            </div>
+        </div>
+        <div class="card card-tight" style="min-width:0; max-width:none; width:100%;">
+            <div class="section-title" style="font-weight:700; font-size:1.2rem; margin-bottom:10px;">Events for Today:</div>
+            <div class="vertical-list" style="display:flex; flex-direction:column; gap:4px;">
+                {% for event in eventsToday %}<div style="display:block;">{{event}}</div>{% endfor %}
+            </div>
+        </div>
+        <div class="card card-tight" style="min-width:0; max-width:none; width:100%;">
+            <div class="section-title" style="font-weight:700; font-size:1.2rem; margin-bottom:10px;">Events for Tomorrow:</div>
+            <div class="vertical-list" style="display:flex; flex-direction:column; gap:4px;">
+                {% for event in eventsTomorrow %}<div style="display:block;">{{event}}</div>{% endfor %}
+            </div>
+        </div>
+    </div>
 </body>
 </html>

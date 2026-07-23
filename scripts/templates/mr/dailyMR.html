@@ -1,111 +1,130 @@
 {% extends "base.html" %}
 {% block title %}Daily MR{% endblock %}
 {% block content %}
-    <h2>Daily Market Research</h2>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="MR">Daily MR</button><br><br>
-    </form>
-    <div style="width: 100%; display: table;">
-        <div style="display: table-row;">
-            <div style="width: 14%; display:table-cell">
-                <b><a href="{% url 'AmazonGC' %}" target="_blank">Amazon GC</a></b><br><br>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="amazonMain">Main</button><br><br><br>
-                </form>
-                &emsp;&ensp;Balance: <b>${{mrAccounts.AmazonGC.balance}}</b><br>
-                gnuBalance: <b>${{mrAccounts.AmazonGC.gnuBalance}}</b><br>
-            </div>
-            <div style="width: 14%; display:table-cell">
-                <b><a href="{% url 'InboxDollars' %}" target="_blank">InboxDollars</a></b><br><br>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="inboxDollarsMain">Main</button>
-                    <button type="submit" name="inboxDollarsLogin">Login</button>
-                    <button type="submit" name="inboxDollarsBalance">Balance</button>
-                    <button type="submit" name="inboxDollarsRewards">Rewards</button><br><br>
-                </form>
-                &emsp;&thinsp;Balance: <b>{{mrAccounts.InboxDollars.gnuBalance}}</b><br>
-                Redeem at: $100<br><br>
-                                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="inboxDollarsMobile">Mobile</button><input type="text" placeholder="Integer value" name="amount" size=8><br>
-                </form>
-            </div>
-            <div style="width: 14%; display:table-cell">
-                <b><a href="{% url 'Paidviewpoint' %}" target="_blank">Paidviewpoint</a></b><br><br>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="paidviewpointMain">Main</button>
-                    <button type="submit" name="paidviewpointLogin">Login</button>                
-                    <button type="submit" name="paidviewpointSurvey">Survey</button><br>
-                    <button type="submit" name="paidviewpointBalance">Balance</button>
-                    <button type="submit" name="paidviewpointRewards">Rewards</button><br><br>
-                </form>
-                &emsp;&thinsp;Balance: <b>${{mrAccounts.Paidviewpoint.gnuBalance}}</b><br>
-                Redeem at: $15.00<br>
-            </div>
-            <div style="width: 14%; display:table-cell">
-                <b><a href="{% url 'Pinecone' %}" target="_blank">Pinecone</a></b><br><br>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="pineconeMain">Main</button>
-                    <button type="submit" name="pineconeLogin">Login</button><br>
-                    <button type="submit" name="pineconeBalance">Balance</button>
-                    <button type="submit" name="pineconeRewards">Rewards</button><br><br>
-                </form>
-                &emsp;&thinsp;Balance: <b>{{mrAccounts.Pinecone.gnuBalance}}</b><br>
-                Redeem at: 1000<br>
-            </div>
-            <div style="width: 14%; display:table-cell">
-                <b><a href="{% url 'Presearch' %}" target="_blank">Presearch</a></b><br><br>
-                <form method="post">
-                    {% csrf_token %}                
-                    <button type="submit" name="presearchMain">Main</button>
-                    <button type="submit" name="presearchLogin">Login</button>
-                    <button type="submit" name="presearchBalance">Balance</button>
-                    <button type="submit" name="presearchRewards">Rewards</button><br><br>
-                </form>
-                &emsp;&ensp;Balance: <b>{{mrAccounts.Presearch.balance}}</b> pre<br>
-                gnuBalance: {{mrAccounts.Presearch.gnuBalance}} pre<br>
-            </div>
-            <div style="width: 14%; display:table-cell">
-                <b><a href="{% url 'Swagbucks' %}" target="_blank">Swagbucks</a></b><br><br>
-                <form method="post">
-                    {% csrf_token %}
-                    <input type="checkbox" name="DailyGame" checked="yes">DailyGame?</input>
-                    <button type="submit" name="swagbucksMain">Main</button>
-                </form>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="swagbucksLogin">Login</button>
-                    <button type="submit" name="swagbucksBalance">Balance</button>
-                    <button type="submit" name="swagbucksRewards">Rewards</button><br><br>
-                </form>
-                &emsp;&thinsp;Balance: <b>{{mrAccounts.Swagbucks.gnuBalance}}</b><br>
-                Redeem at: 10000<br><br>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="swagbucksInbox">Inbox</button>
-                    <button type="submit" name="swagbucksContent">Content</button>
-                    <button type="submit" name="swabucksSearch">Search</button><br>
-                    <button type="submit" name="swagbucksMobile">Mobile</button><input type="text" placeholder="Integer value" name="amount" size=8><br>
-                </form>
-            </div>
-            <div style="width: 14%; display:table-cell">
-                <b><a href="{% url 'Tellwut' %}" target="_blank">Tellwut</a></b><br><br>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="tellwutMain">Main</button>
-                    <button type="submit" name="tellwutLogin">Login</button>
-                    <button type="submit" name="tellwutSurveys">Surveys</button><br>
-                    <button type="submit" name="tellwutBalance">Balance</button>
-                    <button type="submit" name="tellwutRewards">Rewards</button><br><br>
-                </form>
-                &emsp;&thinsp;Balance: <b>{{mrAccounts.Tellwut.gnuBalance}}</b><br>
-                Redeem at: 11000<br>
-            </div>
-        </div>
+<h2>Daily Market Research</h2>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" name="MR">Daily MR</button>
+</form>
+<br>
+
+<div class="layout-grid">
+    <div class="card card-tight">
+        <div class="section-title"><a href="{% url 'AmazonGC' %}" target="_blank">Amazon GC</a></div><br>
+        <form method="post">{% csrf_token %}<button type="submit" name="amazonMain">Main</button></form><br>
+        <table class="metrics-table">
+            <tr><td>balance:</td><td><b>${{mrAccounts.AmazonGC.balance}}</b></td></tr>
+            <tr><td>gnuBalance:</td><td><b>${{mrAccounts.AmazonGC.gnuBalance}}</b></td></tr>
+        </table>
     </div>
+
+    <div class="card card-tight">
+        <div class="section-title"><a href="{% url 'InboxDollars' %}" target="_blank">InboxDollars</a></div><br>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="inboxDollarsMain">Main</button>
+            <button type="submit" name="inboxDollarsLogin">Login</button>
+            <button type="submit" name="inboxDollarsBalance">Balance</button>
+            <button type="submit" name="inboxDollarsRewards">Rewards</button>
+        </form><br>
+        <table class="metrics-table">
+            <tr><td>balance:</td><td><b>{{mrAccounts.InboxDollars.gnuBalance}}</b></td></tr>
+            <tr><td>redeem at:</td><td><b>$100</b></td></tr>
+        </table><br>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="inboxDollarsMobile">Mobile</button>
+            <input type="text" placeholder="Integer value" name="amount" size="8">
+        </form>
+    </div>
+
+    <div class="card card-tight">
+        <div class="section-title"><a href="{% url 'Paidviewpoint' %}" target="_blank">Paidviewpoint</a></div><br>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="paidviewpointMain">Main</button>
+            <button type="submit" name="paidviewpointLogin">Login</button>
+            <button type="submit" name="paidviewpointSurvey">Survey</button>
+            <button type="submit" name="paidviewpointBalance">Balance</button>
+            <button type="submit" name="paidviewpointRewards">Rewards</button>
+        </form><br>
+        <table class="metrics-table">
+            <tr><td>balance:</td><td><b>${{mrAccounts.Paidviewpoint.gnuBalance}}</b></td></tr>
+            <tr><td>redeem at:</td><td><b>$15.00</b></td></tr>
+        </table>
+    </div>
+
+    <div class="card card-tight">
+        <div class="section-title"><a href="{% url 'Pinecone' %}" target="_blank">Pinecone</a></div><br>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="pineconeMain">Main</button>
+            <button type="submit" name="pineconeLogin">Login</button>
+            <button type="submit" name="pineconeBalance">Balance</button>
+            <button type="submit" name="pineconeRewards">Rewards</button>
+        </form><br>
+        <table class="metrics-table">
+            <tr><td>balance:</td><td><b>{{mrAccounts.Pinecone.gnuBalance}}</b></td></tr>
+            <tr><td>redeem at:</td><td><b>1000</b></td></tr>
+        </table>
+    </div>
+
+    <div class="card card-tight">
+        <div class="section-title"><a href="{% url 'Presearch' %}" target="_blank">Presearch</a></div><br>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="presearchMain">Main</button>
+            <button type="submit" name="presearchLogin">Login</button>
+            <button type="submit" name="presearchBalance">Balance</button>
+            <button type="submit" name="presearchRewards">Rewards</button>
+        </form><br>
+        <table class="metrics-table">
+            <tr><td>balance:</td><td><b>{{mrAccounts.Presearch.balance}} pre</b></td></tr>
+            <tr><td>gnuBalance:</td><td><b>{{mrAccounts.Presearch.gnuBalance}} pre</b></td></tr>
+        </table>
+    </div>
+
+    <div class="card card-tight">
+        <div class="section-title"><a href="{% url 'Swagbucks' %}" target="_blank">Swagbucks</a></div><br>
+        <form method="post">
+            {% csrf_token %}
+            <input type="checkbox" name="DailyGame" checked="yes">DailyGame?</input>
+            <button type="submit" name="swagbucksMain">Main</button>
+        </form>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="swagbucksLogin">Login</button>
+            <button type="submit" name="swagbucksBalance">Balance</button>
+            <button type="submit" name="swagbucksRewards">Rewards</button>
+        </form><br>
+        <table class="metrics-table">
+            <tr><td>balance:</td><td><b>{{mrAccounts.Swagbucks.gnuBalance}}</b></td></tr>
+            <tr><td>redeem at:</td><td><b>10000</b></td></tr>
+        </table><br>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="swagbucksInbox">Inbox</button>
+            <button type="submit" name="swagbucksContent">Content</button>
+            <button type="submit" name="swabucksSearch">Search</button><br>
+            <button type="submit" name="swagbucksMobile">Mobile</button>
+            <input type="text" placeholder="Integer value" name="amount" size="8">
+        </form>
+    </div>
+
+    <div class="card card-tight">
+        <div class="section-title"><a href="{% url 'Tellwut' %}" target="_blank">Tellwut</a></div><br>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="tellwutMain">Main</button>
+            <button type="submit" name="tellwutLogin">Login</button>
+            <button type="submit" name="tellwutSurveys">Surveys</button>
+            <button type="submit" name="tellwutBalance">Balance</button>
+            <button type="submit" name="tellwutRewards">Rewards</button>
+        </form><br>
+        <table class="metrics-table">
+            <tr><td>balance:</td><td><b>{{mrAccounts.Tellwut.gnuBalance}}</b></td></tr>
+            <tr><td>redeem at:</td><td><b>11000</b></td></tr>
+        </table>
+    </div>
+</div>
 {% endblock %}

@@ -1,25 +1,28 @@
 {% extends "base.html" %}
 {% block title %}Health Equity{% endblock %}
 {% block content %}
-    <h1>Health Equity</h1>
-    <div style="width: 100%; display: table;">
-        <div style="display: table-row;">
-            <div style="width: 20%; display:table-cell">
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="main">Main</button><br>
-                    <button type="submit" name="login">Login</button><br>
-                    <button type="submit" name="balance">Balance</button><br>
-                </form>
-            </div>
-            <div style="width: 80%; display:table-cell">
-                &emsp;&emsp;HSA Cash balance: <b>${{HEaccounts.HECash.balance}}</b><br>
-                &emsp;&emsp;&emsp;&emsp;&emsp;&thinsp;gnuBalance: <b>${{HEaccounts.HECash.gnuBalance}}</b><br><br>
-                HSA Investment shares: <b>{{HEaccounts.VIIIX.balance}} {{HEaccounts.VIIIX.symbol}}</b><br>
-                &emsp;&ensp;&thinsp;&thinsp;gnuBalance shares: <b>{{HEaccounts.VIIIX.gnuBalance}} {{HEaccounts.VIIIX.symbol}}</b><br>
-                &ensp;HSA Investment Value: <b>${{HEaccounts.VIIIX.value}}</b><br>
-                &emsp;&emsp;&ensp;&thinsp;&thinsp;${{HEaccounts.VIIIX.price}} x shares: <b>${{HEaccounts.VIIIX.gnuValue}}</b><br><br>
-            </div>
+<h1>Health Equity</h1>
+<div class="layout-grid">
+    <div class="card">
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="main">Main</button>
+            <button type="submit" name="login">Login</button>
+            <button type="submit" name="balance">Balance</button>
+        </form>
+    </div>
+    <div class="card">
+        <div class="subcard" style="margin-bottom:0;">
+            <table class="metrics-table">
+                <tr><td>HSA Cash balance:</td><td><b>${{HEaccounts.HECash.balance}}</b></td></tr>
+                <tr><td>gnuBalance:</td><td><b>${{HEaccounts.HECash.gnuBalance}}</b></td></tr>
+                <tr><td colspan="2" style="padding-top:8px;"><b>{{HEaccounts.VIIIX.symbol}}</b></td></tr>
+                <tr><td>shares:</td><td><b>{{HEaccounts.VIIIX.balance}} {{HEaccounts.VIIIX.symbol}}</b></td></tr>
+                <tr><td>gnuBalance shares:</td><td><b>{{HEaccounts.VIIIX.gnuBalance}} {{HEaccounts.VIIIX.symbol}}</b></td></tr>
+                <tr><td>value:</td><td><b>${{HEaccounts.VIIIX.value}}</b></td></tr>
+                <tr><td>${{HEaccounts.VIIIX.price}} x shares:</td><td><b>${{HEaccounts.VIIIX.gnuValue}}</b></td></tr>
+            </table>
         </div>
-    </div>&emsp;&emsp;&emsp;&emsp;&ensp;
+    </div>
+</div>
 {% endblock %}

@@ -35,6 +35,49 @@ def getFidelityAccounts(book):
 
 def getFidelityBaseAccounts(fidelityAccounts):  return {'FidelityRothIRA':fidelityAccounts['FidelityRothIRA'], 'FidelityIndividual':fidelityAccounts['FidelityIndividual'],'FidelityIRA':fidelityAccounts['FidelityIRA'], 'FidelityBusiness':fidelityAccounts['FidelityBusiness']} #, fidelityAccounts['Fidelity401k']}
 
+def buildFidelityDisplayGroups(accounts):
+    baseAccountOrder = ['FidelityIndividual', 'FidelityBusiness', 'FidelityIRA', 'FidelityRothIRA']
+    suffixSortOrder = {
+        'GME': 1,
+        'VOO': 2,
+        'VXUS': 3,
+        'VTI': 4,
+        'IAUM': 5,
+        'Cash': 90,
+        'Options': 91,
+    }
+    groups = []
+    for baseKey in baseAccountOrder:
+        baseAccount = accounts.get(baseKey)
+        if not baseAccount:
+            continue
+        childKeys = [key for key in accounts.keys() if key.startswith(baseKey) and key != baseKey]
+        childKeys.sort(key=lambda key: (suffixSortOrder.get(key.replace(baseKey, '', 1), 50), key.replace(baseKey, '', 1)))
+        holdings = []
+        for key in childKeys:
+            holding = accounts[key]
+            suffix = key.replace(baseKey, '', 1)
+            if hasattr(holding, 'symbol'):
+                holdings.append({
+                    'type': 'security',
+                    'name': suffix,
+                    'symbol': holding.symbol,
+                    'price': holding.price,
+                    'balance': holding.balance,
+                    'gnuBalance': holding.gnuBalance,
+                    'value': holding.value,
+                    'gnuValue': holding.gnuValue,
+                })
+            else:
+                holdings.append({
+                    'type': 'cash',
+                    'name': suffix,
+                    'balance': holding.balance,
+                    'gnuBalance': holding.gnuBalance,
+                })
+        groups.append({'base': baseAccount, 'holdings': holdings})
+    return groups
+
 def getFidelityCSVFile(account):
     return setDirectory() + rf"\Projects\Coding\Python\FinanceAutomation\Resources\{account}.csv"
 
@@ -215,6 +258,85 @@ def toggleFidelityTransactionDetails(driver, eRow):
 def getFidelityNextPageSelector():
     return "history-table activity-table ag-grid-angular .ag-paging-panel span.ag-icon.ag-icon-next"
 
+def normalizeFidelityHoldingLabel(rawLabel):
+    if not rawLabel:
+        return ''
+    label = rawLabel.replace('$', '').strip()
+    upperLabel = label.upper()
+
+    if 'CASH' in upperLabel:
+        return 'Cash'
+    # "Option summary" appears on account header rows and is not a holding.
+    if 'OPTION SUMMARY' in upperLabel:
+        return ''
+    if 'CALL' in upperLabel or 'PUT' in upperLabel or upperLabel == 'OPTIONS':
+        return 'Options'
+
+    # Check GMEWS before GME so warrants never get treated as common shares.
+    for ticker in ['IAUM', 'VXUS', 'VOO', 'VTI', 'GMEWS', 'GME']:
+        if ticker in upperLabel:
+            return ticker
+
+    return label
+
+def resolveFidelityHoldingAccount(allAccounts, accountPrefix, normalizedLabel):
+    if not accountPrefix or not normalizedLabel:
+        return False, normalizedLabel
+
+    # Business rule: treat GMEWS as part of the Options bucket, not GME equity.
+    if normalizedLabel == 'GMEWS':
+        optionsKey = accountPrefix + 'Options'
+        if optionsKey in allAccounts:
+            return allAccounts[optionsKey], 'Options'
+
+    directKey = accountPrefix + normalizedLabel
+    if directKey in allAccounts:
+        return allAccounts[directKey], normalizedLabel
+
+    if normalizedLabel == 'Options':
+        optionsKey = accountPrefix + 'Options'
+        if optionsKey in allAccounts:
+            return allAccounts[optionsKey], normalizedLabel
+
+    for key in allAccounts.keys():
+        if not key.startswith(accountPrefix):
+            continue
+        suffix = key.replace(accountPrefix, '', 1)
+        suffixUpper = suffix.upper()
+        labelUpper = normalizedLabel.upper()
+        if suffixUpper == labelUpper or suffixUpper in labelUpper or labelUpper in suffixUpper:
+            return allAccounts[key], suffix
+
+    return False, normalizedLabel
+
+def getFidelityTransactionDescription(driver, eRow):
+    """Return (descriptionText, descriptionElement) using resilient fallbacks across account layouts."""
+    descriptionSuffixes = [
+        '/div/span/description/div/span',
+        '/div/span/description/div',
+        '/div/span/div/span',
+        '/div/span',
+        '',
+    ]
+
+    for suffix in descriptionSuffixes:
+        cellPath = getFidelityTransactionCellPath(eRow, 'description', suffix) if suffix else getFidelityTransactionCellPath(eRow, 'description')
+        descriptionElement = driver.getElement('xpath', cellPath, wait=0.1)
+        if descriptionElement:
+            descriptionText = descriptionElement.text.strip() if descriptionElement.text else ''
+            if descriptionText:
+                return descriptionText, descriptionElement
+
+    # Last resort: read text from entire description cell container.
+    descriptionCellPath = getFidelityTransactionCellPath(eRow, 'description', '')
+    descriptionCell = driver.getElement('xpath', descriptionCellPath, wait=0.1)
+    if descriptionCell:
+        descriptionText = descriptionCell.text.strip() if descriptionCell.text else ''
+        if descriptionText:
+            return descriptionText, descriptionCell
+
+    return False, False
+
 def setFidelityElementPath(eRow, eTable, eColumn):  return getFidelityElementPathRoot() + str(eTable)+']/div['+str(eRow)+']/div/div['+str(eColumn) + ']'
 
 def getFidelityElementPathRoot():   return "//*[@id='accountDetails']/div/div[2]/div/new-tab-group/new-tab-group-ui/div[2]/activity-orders-shell/div/ap143528-portsum-dashboard-activity-orders-home-root/div/div/account-activity-container/div/div[2]/activity-list[2]/div[2]/div["
@@ -245,13 +367,22 @@ def getFidelityBalance(driver, allAccounts, accountBalanceToGet='all'):
     print('Got Fidelity Balances')
 
 def getCurrentValue(driver, row, column):
-    value = driver.getElementText('xpath', f"//*[@id='posweb-grid']/div/div[3]/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[{str(row)}]/div[{str(column)}]/div/span", wait=0.1).replace('$', '').replace(',','')
+    valueText = driver.getElementText('xpath', f"//*[@id='posweb-grid']/div/div[3]/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[{str(row)}]/div[{str(column)}]/div/span", wait=0.1)
+    if not valueText:
+        return Decimal(0.00)
+    value = str(valueText).replace('$', '').replace(',','').strip()
+    if not value or value == '--':
+        return Decimal(0.00)
     return Decimal(value)
 
 def getCost(driver, row, column):
-    cost = driver.getElementText('xpath', f"//*[@id='posweb-grid']/div/div[3]/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[{str(row)}]/div[{str(column)}]/div/span", wait=0.1).replace('$', '').replace(',','').replace('c','').replace('d','')
-    if '--' in cost:    return Decimal(0.00)
-    else:               return Decimal(cost)
+    costText = driver.getElementText('xpath', f"//*[@id='posweb-grid']/div/div[3]/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[{str(row)}]/div[{str(column)}]/div/span", wait=0.1)
+    if not costText:
+        return Decimal(0.00)
+    cost = str(costText).replace('$', '').replace(',','').replace('c','').replace('d','').strip()
+    if not cost or '--' in cost:
+        return Decimal(0.00)
+    return Decimal(cost)
 
 def getPositionsPageColumnNums(driver):
     fidelityTable = {}
@@ -275,31 +406,47 @@ def getFidelityPricesSharesAndCost(driver, allAccounts, book, accountToGet='all'
     columnMapping = getPositionsPageColumnNums(driver)
     symbolsWithPricesUpdated = ['GME']
     row = 0
+    currentAccount = ''
     while True:
         row += 1
         cost = 0
         print(f'row: {row}')
-        symbol = driver.getElementText('xpath', f"//*[@id='posweb-grid']/div/div[3]/div[2]/div[2]/div[3]/div[1]/div[1]/div[{str(row)}]/div/div/span/div/div[2]/button/div/span", wait=0.1)
-        print(f'Found symbol: {symbol}')
-        if not symbol: # this row lists the account Name
-            accountName = driver.getElementText('xpath', f"//*[@id='posweb-grid']/div/div[3]/div[2]/div[2]/div[3]/div[1]/div[1]/div[{str(row)}]/div/div", wait=0.1)
-            if not accountName:
-                showMessage('ERROR', 'Error finding the Account name in GetFidelityPricesSharesAndCost')
+        rawSymbol = driver.getElementText('xpath', f"//*[@id='posweb-grid']/div/div[3]/div[2]/div[2]/div[3]/div[1]/div[1]/div[{str(row)}]/div/div/span/div/div[2]/button/div/span", wait=0.1)
+        rawRowText = False
+        if not rawSymbol:
+            rawRowText = driver.getElementText('xpath', f"//*[@id='posweb-grid']/div/div[3]/div[2]/div[2]/div[3]/div[1]/div[1]/div[{str(row)}]/div/div", wait=0.1)
+
+            # Account header rows can include extra lines like "Option summary".
+            accountName = rawRowText.split('\n')[0].strip() if rawRowText else ''
+            mappedAccount = mapFidelityUIToAccount(accountName) if accountName else False
+
+            if accountName == 'Grand total':
                 break
-            print(f'Found account name: {accountName}')
             if accountName == 'Account total':
-                row+=1
-            elif accountName == 'Grand total':
-                break
-            else:
+                row += 1
+                continue
+            if mappedAccount:
                 currentAccount = accountName
+                print(f'Found account name: {currentAccount}')
+                continue
+
+        symbol = normalizeFidelityHoldingLabel(rawSymbol)
+        print(f'Found symbol: {symbol} (raw={rawSymbol})')
+
+        if not symbol:
+            # Unknown/non-holding row text: skip instead of hard-failing the run.
             continue
-        elif row == 1:  showMessage('ERROR', 'Error finding the Account name in GetFidelityPricesSharesAndCost')
-        symbol = symbol.replace('$','')
+
+        if not currentAccount:
+            if FIDELITY_TX_DEBUG:
+                print(f"[Fidelity] row={row} has holding-like text before account header; rawRowText={rawRowText}")
+            continue
+
         print(f'Processing symbol: {symbol}')
         accountPrefix = mapFidelityUIToAccount(currentAccount)
-        if symbol in ['VXUS', 'VTI', 'Cash', 'GME']:
-            account = allAccounts[accountPrefix + symbol]
+        account, resolvedSuffix = resolveFidelityHoldingAccount(allAccounts, accountPrefix, symbol)
+        if account:
+            symbol = resolvedSuffix
         elif 'Call' in symbol or 'Put' in symbol or 'GMEWS' in symbol:
             account = allAccounts[accountPrefix + 'Options']
             balance = account.balance + getCurrentValue(driver, row, columnMapping['Current value']) if account.balance else getCurrentValue(driver, row, columnMapping['Current value'])
@@ -308,6 +455,15 @@ def getFidelityPricesSharesAndCost(driver, allAccounts, book, accountToGet='all'
             account.setCost(cost)
             continue
         else:   continue
+
+        # Options/Cash accounts are USD objects (no symbol/price fields); avoid security-only logic.
+        if symbol == 'Options' or not hasattr(account, 'symbol'):
+            balance = account.balance + getCurrentValue(driver, row, columnMapping['Current value']) if account.balance else getCurrentValue(driver, row, columnMapping['Current value'])
+            account.setBalance(balance)
+            cost = account.cost + getCost(driver, row, columnMapping['Cost basis total']) if account.cost else getCost(driver, row, columnMapping['Cost basis total'])
+            account.setCost(cost)
+            continue
+
         if symbol == 'Cash': account.setBalance(getCurrentValue(driver, row, columnMapping['Current value']))
         else: # get equity positions
             price = driver.getElementText('xpath', f"//*[@id='posweb-grid']/div/div[3]/div[2]/div[2]/div[3]/div[1]/div[2]/div/div[{str(row)}]/div[{str(columnMapping['Last price'])}]/div/span", wait=0.1)
@@ -360,16 +516,21 @@ def captureFidelityTransactions(driver, dateRange, account='all'):
             amount = driver.getElementText('xpath', getFidelityTransactionCellPath(row, 'amount')).replace('$','').replace(',','').replace('-','').replace('+','')
             if not amount:
                 continue
-            descriptionElement = driver.getElement('xpath', getFidelityTransactionCellPath(row, 'description', '/div/span/description/div/span'), wait=0.1)
-            description = descriptionElement.text
+            description, descriptionElement = getFidelityTransactionDescription(driver, row)
+            print(f'row={row} descriptionElement={descriptionElement}')
+            if not description:
+                if FIDELITY_TX_DEBUG:
+                    print(f"[Fidelity] row={row} missing description; skipping transaction row")
+                continue
             fees = 0
             if "CASH CONTRIBUTION" in description or "Electronic Funds Transfer" in description or "REINVESTMENT" in description or "JOURNAL" in description or "EXPIRED" in description or "ASSIGNED as of" in description or "TRANSFER OF ASSETS" in description or "DISTRIBUTION" in description:
                 continue
             elif "YOU BOUGHT" in description.upper() or "YOU SOLD" in description.upper():
                 expanded = toggleFidelityTransactionDetails(driver, row)
                 if not expanded:
-                    descriptionElement.click()
-                    time.sleep(0.08)
+                    if descriptionElement:
+                        descriptionElement.click()
+                        time.sleep(0.08)
                 if FIDELITY_TX_DEBUG:
                     print(f"[Fidelity] processing trade row={row} description={description}")
 
@@ -409,7 +570,8 @@ def captureFidelityTransactions(driver, dateRange, account='all'):
                 if expanded:
                     toggleFidelityTransactionDetails(driver, row)
                 else:
-                    descriptionElement.click()
+                    if descriptionElement:
+                        descriptionElement.click()
             else:
                 shares = amount
 
@@ -513,10 +675,13 @@ def importFidelityTransactions(account, fidelityActivity, book, gnuCashTransacti
             if float(amount)>1 and float(shares)<1:
                 shares = -shares
             description = accountinTrans + " Sale"
-        if "VXUS" in rawDescription and "DIVIDEND" not in rawDescription and "TRANSACTION" not in rawDescription:           fromAccount += ":VXUS"
-        elif "VTI" in rawDescription and "DIVIDEND" not in rawDescription and "TRANSACTION" not in rawDescription:          fromAccount += ":VTI"                                     
-        elif "GME" in rawDescription and "DIVIDEND" not in rawDescription and "TRANSACTION" not in rawDescription:          fromAccount += ":GME"
-        elif "VOO" in rawDescription and "DIVIDEND" not in rawDescription and "TRANSACTION" not in rawDescription:          fromAccount += ":VOO"
+        if "DIVIDEND" not in rawDescription and "TRANSACTION" not in rawDescription:
+            if 'VXUS' in rawDescription:         fromAccount += ":VXUS"
+            elif 'VTI' in rawDescription:        fromAccount += ":VTI"
+            elif 'GMEWS' in rawDescription:      fromAccount += ":Options"
+            elif 'GME' in rawDescription:        fromAccount += ":GME"
+            elif 'VOO' in rawDescription:        fromAccount += ":VOO"
+            elif 'IAUM' in rawDescription:       fromAccount += ":IAUM"
         if toAccount == book.getGnuAccountFullName('Other'):
             if "FidelityIndividual" in description:            
                 toAccount = book.getGnuAccountFullName('FidelityIndividualCash')

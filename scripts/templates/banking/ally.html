@@ -2,39 +2,33 @@
 {% block title %}{{account.name}}{% endblock %}
 {% block content %}
 <h1>{{account.name}}</h1>
-    <div style="width: 100%; display: table;">
-        <div style="display: table-row;">
-            <div style="width: 20%; display:table-cell">
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="main">Main</button><br>
-                    <button type="submit" name="login">Login</button><br>
-                    <button type="submit" name="balance">Balance</button><br>
-                    <button type="submit" name="logWater">log water bill</button><br>
-                    <button type="submit" name="payWater">pay water bill</button><br>
-                    <button type="submit" name="mortgage">mortgage bill</button><br>
-                    <button type="submit" name="logout">Logout</button><br><br>
-                </form>
-                <form method="post">
-                    {% csrf_token %}
-                    <input type="text" placeholder="enter amount" name="energyTotal">
-                    <button type="submit" name="energy">energy bill</button><br><br>
-                </form>
-            </div>
-            <div style="width: 80%; display:table-cell">
-                &emsp;&emsp;&emsp;&emsp;&thinsp;balance: <b>${{account.balance}}</b><br>
-                gnuCash balance: <b>${{account.gnuBalance}}</b><br>
-                Review Transactions: <br><br>
-                <div style="width: 50%; display: table;">
-                    {%for tr in account.reviewTransactions %}
-                    <div style="display: table-row;">
-                        <div style="width: 20%; display:table-cell">
-                            {{tr}}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
+<div class="layout-grid">
+    <div class="card">
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="main">Main</button>
+            <button type="submit" name="login">Login</button>
+            <button type="submit" name="balance">Balance</button>
+            <button type="submit" name="logWater">log water bill</button>
+            <button type="submit" name="payWater">pay water bill</button>
+            <button type="submit" name="mortgage">mortgage bill</button>
+            <button type="submit" name="logout">Logout</button>
+        </form>
+        <br>
+        <form method="post">
+            {% csrf_token %}
+            <input type="text" placeholder="enter amount" name="energyTotal">
+            <button type="submit" name="energy">energy bill</button>
+        </form>
     </div>
+
+    <div class="card">
+        <table class="metrics-table">
+            <tr><td>balance:</td><td><b>${{account.balance}}</b></td></tr>
+            <tr><td>gnuCash balance:</td><td><b>${{account.gnuBalance}}</b></td></tr>
+        </table>
+        <div style="margin-top:8px;">Review Transactions:</div>
+        {% for tr in account.reviewTransactions %}<div>{{tr}}</div>{% empty %}<div>None</div>{% endfor %}
+    </div>
+</div>
 {% endblock %}

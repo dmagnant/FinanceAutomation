@@ -22,3 +22,121 @@ button {
     display: inline-block;
     margin-right: 20px;
 }
+
+.layout-grid {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.scripts-grid .card-tight {
+    min-width: 240px;
+    max-width: none;
+    flex: 1 1 240px;
+}
+
+.footer-row .card-tight {
+    min-width: 260px;
+    max-width: none;
+    flex: 1 1 260px;
+}
+
+.script-types-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+    align-items: start;
+}
+
+.three-col-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    align-items: start;
+}
+
+.script-types-row .card,
+.script-types-row .card-tight,
+.three-col-row .card,
+.three-col-row .card-tight {
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+    flex: 0 0 auto;
+}
+
+.card {
+    min-width: 420px;
+    max-width: 520px;
+    flex: 1 1 420px;
+    padding: 14px;
+    border: 1px solid #2d63b3;
+    border-radius: 6px;
+}
+
+.card-tight {
+    min-width: 320px;
+    max-width: 380px;
+    flex: 1 1 320px;
+}
+
+.subcard {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #2d63b3;
+    border-radius: 6px;
+}
+
+.section-title {
+    font-weight: 700;
+}
+
+.metrics-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.metrics-table td {
+    padding: 2px 0;
+    vertical-align: top;
+}
+
+.metrics-table td:last-child {
+    text-align: right;
+}
+
+.quad-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.link-list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 6px 12px;
+}
+
+.link-list-grid a,
+.link-list-grid a:visited {
+    margin-right: 0;
+}
+
+.text-list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 4px 12px;
+}
+
+.vertical-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.vertical-list a,
+.vertical-list a:visited {
+    margin-right: 0;
+}
+

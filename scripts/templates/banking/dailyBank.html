@@ -1,212 +1,179 @@
 {% extends "base.html" %}
 {% block title %}Daily{% endblock %}
 {% block content %}
-    <h2>Daily Banking</h2>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="bank">Daily Banking</button>
-        <button type="submit" name="crypto">Crypto Portfolio Total</button>
-        <button type="submit" name="tearDown">teardown</button>
-        <button type="submit" name="paypalAdjust">Paypal Recategorize</button>
-        <br><br>
-        &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<b>${{bankAccounts.CryptoPortfolio.gnuBalance}}</b>
-        <br><br>
-    </form>
-    <div style="width: 100%; display: table;">
-        <div style="display: table-row;">
-            <div style="width: 17%; display:table-cell">
-                <b><a href="{% url 'Sofi' %}" target="_blank">Sofi</a></b><br><br>
-                    <form method="post">
-                        {% csrf_token %}
-                        <button type="submit" name="sofiMain">Main</button>
-                        <button type="submit" name="sofiLogin" value="login">Login</button>
-                        <button type="submit" name="sofiBalances">Balances</button>
-                    </form><br>
-                <div style="display: table-row;">
-                    <div class="test" style="display:table-cell;text-align:right">
-                        Checking Balance: &thinsp; <br>
-                        gnuCash Balance: &thinsp; <br><br>
-                    </div>
-                    <div style="display:table-cell;text-align:left">
-                        <b>${{bankAccounts.Sofi.Checking.balance}}<br>
-                        ${{bankAccounts.Sofi.Checking.gnuBalance}}</b><br><br>
-                    </div>
-                </div>
-                Review Transactions:<br><br>
-                <div style="width: 50%; display: table;">
-                    {%for tr in bankAccounts.Sofi.Checking.reviewTransactions %}
-                    <div style="display: table-row;">
-                        <div style="width: 20%; display:table-cell">
-                            {{tr}}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                <div style="display: table-row;">
-                    <div style="display:table-cell;text-align:right">
-                        Savings Balance: &thinsp; <br>
-                        gnuCash Balance: &thinsp; <br><br>
-                    </div>
-                    <div style="display:table-cell;text-align:left">
-                        <b>${{bankAccounts.Sofi.Savings.balance}} <br>
-                        ${{bankAccounts.Sofi.Savings.gnuBalance}}</b> <br><br>
-                    </div>
-                </div>
-                Review Transactions:<br><br>
-                <div style="width: 50%; display: table;">
-                    {%for tr in bankAccounts.Sofi.Savings.reviewTransactions %}
-                    <div style="display: table-row;">
-                        <div style="width: 20%; display:table-cell">
-                            {{tr}}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                &emsp;&thinsp;SGOV Balance: <b>{{bankAccounts.Sofi.SGOV.balance}}</b><br>
-                &thinsp;gnuCash Balance: <b>{{bankAccounts.Sofi.SGOV.gnuBalance}}</b> {{bankAccounts.Sofi.SGOV.symbol}}<br>
+<h2>Daily Banking</h2>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" name="bank">Daily Banking</button>
+    <button type="submit" name="crypto">Crypto Portfolio Total</button>
+    <button type="submit" name="tearDown">teardown</button>
+    <button type="submit" name="paypalAdjust">Paypal Recategorize</button>
+    <br><br>
+    <b>Crypto Portfolio (gnuBalance): ${{bankAccounts.CryptoPortfolio.gnuBalance}}</b>
+    <br><br>
+</form>
+
+<div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
+    <div style="min-width:420px;max-width:520px;flex:1 1 420px;padding:14px;border:1px solid #2d63b3;border-radius:6px;">
+        <div style="font-weight:700;"><a href="{% url 'Sofi' %}" target="_blank">Sofi</a></div>
+        <br>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="sofiMain">Main</button>
+            <button type="submit" name="sofiLogin" value="login">Login</button>
+            <button type="submit" name="sofiBalances">Balances</button>
+        </form>
+        <br>
+
+        {% for entry in sofiAccounts %}
+            <div style="padding:10px;margin-bottom:10px;border:1px solid #2d63b3;border-radius:6px;">
+                <div style="font-weight:700;">{{entry.title}}</div>
+                <table style="width:100%;border-collapse:collapse;">
+                    <tr>
+                        <td>balance:</td>
+                        <td style="text-align:right;"><b>${{entry.account.balance}}</b></td>
+                    </tr>
+                    <tr>
+                        <td>gnuBalance:</td>
+                        <td style="text-align:right;"><b>${{entry.account.gnuBalance}}</b></td>
+                    </tr>
+                </table>
+                {% if entry.showTransactions %}
+                    <div style="margin-top:6px;">Review Transactions:</div>
+                    {% if entry.account.reviewTransactions %}
+                        {% for tr in entry.account.reviewTransactions %}
+                            <div>{{tr}}</div>
+                        {% endfor %}
+                    {% else %}
+                        <div>None</div>
+                    {% endif %}
+                {% endif %}
             </div>
-            <div style="width: 11%; display:table-cell">
-                <b><a href="{% url 'Fidelity' %}" target="_blank">Fidelity</a></b><br><br>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="fidelityMain">Main</button>
-                    <button type="submit" name="fidelityLogin">Login</button>
-                    <button type="submit" name="fidelityBalance">Balance</button>
-                </form><br>
-                <div style="display:table-cell;text-align:right">
-                    Individual balance: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>
-                    {{bankAccounts.Fidelity.FidelityIndividualGME.symbol}} shares: &thinsp; <br>
-                    gnuBalance shares: &thinsp; <br>
-                    {{bankAccounts.Fidelity.FidelityIndividualGME.symbol}} value: &thinsp; <br>
-                    ${{bankAccounts.Fidelity.FidelityIndividualGME.price}} x shares: &thinsp; <br><br>
-                    Options Balance: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>
-                    Individual Cash balance: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>
-                </div>
-                <div style="display:table-cell;text-align:left">
-                    <b>${{bankAccounts.Fidelity.FidelityIndividual.balance}}<br>
-                    ${{bankAccounts.Fidelity.FidelityIndividual.gnuBalance}}<br><br>
-                    {{bankAccounts.Fidelity.FidelityIndividualGME.balance}} {{bankAccounts.Fidelity.FidelityIndividualGME.symbol}}<br>
-                    {{bankAccounts.Fidelity.FidelityIndividualGME.gnuBalance}} {{bankAccounts.Fidelity.FidelityIndividualGME.symbol}}<br>
-                    ${{bankAccounts.Fidelity.FidelityIndividualGME.value}}<br>
-                    ${{bankAccounts.Fidelity.FidelityIndividualGME.gnuValue}}<br><br>
-                    ${{bankAccounts.Fidelity.FidelityIndividualOptions.balance}}<br>
-                    ${{bankAccounts.Fidelity.FidelityIndividualOptions.gnuBalance}}<br><br>
-                    ${{bankAccounts.Fidelity.FidelityIndividualCash.balance}}<br>
-                    ${{bankAccounts.Fidelity.FidelityIndividualCash.gnuBalance}}<br><br></b>
-                </div>
-            </div>
-            <div style="width: 11%; display:table-cell">
-                <br><br><br><br>
-                <div style="display:table-cell;text-align:right">
-                    Business balance: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>
-                    Cash balance: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>
-                    Options Balance: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>
-                </div>
-                <div style="display:table-cell;text-align:left">
-                    <b>${{bankAccounts.Fidelity.FidelityBusiness.balance}}<br>
-                    ${{bankAccounts.Fidelity.FidelityBusiness.gnuBalance}}<br><br>
-                    ${{bankAccounts.Fidelity.FidelityBusinessCash.balance}}<br>
-                    ${{bankAccounts.Fidelity.FidelityBusinessCash.gnuBalance}}<br><br>
-                    ${{bankAccounts.Fidelity.FidelityBusinessOptions.balance}}<br>
-                    ${{bankAccounts.Fidelity.FidelityBusinessOptions.gnuBalance}}<br><br></b>
-                </div>
-            </div>
-            <div style="width: 11%; display:table-cell">
-                <br><br><br><br>
-                <div style="display:table-cell;text-align:right">
-                    IRA balance: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>
-                    {{bankAccounts.Fidelity.FidelityIRAGME.symbol}} shares: &thinsp; <br>
-                    gnuBalance shares: &thinsp; <br>
-                    {{bankAccounts.Fidelity.FidelityIRAGME.symbol}} value: &thinsp; <br>
-                    ${{bankAccounts.Fidelity.FidelityIRAGME.price}} x shares: &thinsp; <br><br>
-                    Options Balance: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>
-                    IRA Cash balance: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>
-                </div>
-                <div style="display:table-cell;text-align:left">
-                    <b>${{bankAccounts.Fidelity.FidelityIRA.balance}}<br>
-                    ${{bankAccounts.Fidelity.FidelityIRA.gnuBalance}}<br><br>
-                    {{bankAccounts.Fidelity.FidelityIRAGME.balance}} {{bankAccounts.Fidelity.FidelityIRAGME.symbol}}<br>
-                    {{bankAccounts.Fidelity.FidelityIRAGME.gnuBalance}} {{bankAccounts.Fidelity.FidelityIRAGME.symbol}}<br>
-                    ${{bankAccounts.Fidelity.FidelityIRAGME.value}}<br>
-                    ${{bankAccounts.Fidelity.FidelityIRAGME.gnuValue}}<br><br>
-                    ${{bankAccounts.Fidelity.FidelityIRAOptions.balance}}<br>
-                    ${{bankAccounts.Fidelity.FidelityIRAOptions.gnuBalance}}<br><br>
-                    ${{bankAccounts.Fidelity.FidelityIRACash.balance}}<br>
-                    ${{bankAccounts.Fidelity.FidelityIRACash.gnuBalance}}<br><br></b>
-                </div>
-            </div>
-            <div style="width: 11%; display:table-cell">
-                <br><br><br><br>
-                <div style="display:table-cell;text-align:right">
-                    Roth IRA balance: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>
-                    {{bankAccounts.Fidelity.FidelityRothIRAGME.symbol}} shares: &thinsp; <br>
-                    gnuBalance shares: &thinsp; <br>
-                    {{bankAccounts.Fidelity.FidelityRothIRAGME.symbol}} value: &thinsp; <br>
-                    ${{bankAccounts.Fidelity.FidelityRothIRAGME.price}} x shares: &thinsp; <br><br>
-                    Options Balance: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>
-                    Roth IRA Cash balance: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>
-                </div>
-                <div style="display:table-cell;text-align:left">
-                    <b>${{bankAccounts.Fidelity.FidelityRothIRA.balance}}<br>
-                    ${{bankAccounts.Fidelity.FidelityRothIRA.gnuBalance}}<br><br>
-                    {{bankAccounts.Fidelity.FidelityRothIRAGME.balance}} {{bankAccounts.Fidelity.FidelityRothIRAGME.symbol}}<br>
-                    {{bankAccounts.Fidelity.FidelityRothIRAGME.gnuBalance}} {{bankAccounts.Fidelity.FidelityRothIRAGME.symbol}}<br>
-                    ${{bankAccounts.Fidelity.FidelityRothIRAGME.value}}<br>
-                    ${{bankAccounts.Fidelity.FidelityRothIRAGME.gnuValue}}<br><br>
-                    ${{bankAccounts.Fidelity.FidelityRothIRAOptions.balance}}<br>
-                    ${{bankAccounts.Fidelity.FidelityRothIRAOptions.gnuBalance}}<br><br>
-                    ${{bankAccounts.Fidelity.FidelityRothIRACash.balance}}<br>
-                    ${{bankAccounts.Fidelity.FidelityRothIRACash.gnuBalance}}<br><br></b>
-                </div>
-            </div>            <div style="width: 2%; display:table-cell">
-            </div>            <div style="width: 17%; display:table-cell">
-                <b><a href="{% url 'Webull' %}"target="_blank">Webull</a></b><br><br>
-                    <form method="post">
-                        {% csrf_token %}
-                        <button type="submit" name="webullMain">Main</button>
-                        <button type="submit" name="webullLogin">Login</button>
-                        <button type="submit" name="webullBalances">Balances</button>
-                    </form><br>
-                <div style="display: table-row;">
-                    <div class="test" style="display:table-cell;text-align:right">
-                        Webull Brokerage Balance: &thinsp; <br>
-                        gnuCash Balance: &thinsp; <br><br>
-                        Webull Cash balance: &thinsp; <br>
-                        gnuCash Balance: &thinsp; <br><br>
-                        Webull Options balance: &thinsp; <br>
-                        gnuCash Balance: &thinsp; <br><br>                        
-                    </div>
-                    <div style="display:table-cell;text-align:left">
-                        <b>${{bankAccounts.Webull.WebullBrokerage.balance}}<br>
-                        ${{bankAccounts.Webull.WebullBrokerage.gnuBalance}}<br><br>
-                        ${{bankAccounts.Webull.WebullBrokerageCash.balance}} <br>
-                        ${{bankAccounts.Webull.WebullBrokerageCash.gnuBalance}}<br><br>
-                        ${{bankAccounts.Webull.WebullBrokerageOptions.balance}} <br>
-                        ${{bankAccounts.Webull.WebullBrokerageOptions.gnuBalance}}</b><br><br>
-                    </div>
-                </div>
-            </div>
-            <div style="width: 9%; display:table-cell">
-                <br><br>{%for tr in bankAccounts.Paypal.reviewTransactions %}
-                <div style="display: table-row;">
-                    <div style="width: 20%; display:table-cell">
-                        {{tr}}
-                    </div>
-                </div>
+        {% endfor %}
+
+        <div style="padding:10px;border:1px solid #2d63b3;border-radius:6px;">
+            <div style="font-weight:700;">{{bankAccounts.Sofi.SGOV.symbol}}</div>
+            <table style="width:100%;border-collapse:collapse;">
+                <tr>
+                    <td>shares:</td>
+                    <td style="text-align:right;"><b>{{bankAccounts.Sofi.SGOV.balance}} {{bankAccounts.Sofi.SGOV.symbol}}</b></td>
+                </tr>
+                <tr>
+                    <td>gnuBalance shares:</td>
+                    <td style="text-align:right;"><b>{{bankAccounts.Sofi.SGOV.gnuBalance}} {{bankAccounts.Sofi.SGOV.symbol}}</b></td>
+                </tr>
+                <tr>
+                    <td>value:</td>
+                    <td style="text-align:right;"><b>${{bankAccounts.Sofi.SGOV.value}}</b></td>
+                </tr>
+                <tr>
+                    <td>${{bankAccounts.Sofi.SGOV.price}} x shares:</td>
+                    <td style="text-align:right;"><b>${{bankAccounts.Sofi.SGOV.gnuValue}}</b></td>
+                </tr>
+            </table>
+        </div>
+
+        <div style="padding:10px;margin-top:10px;border:1px solid #2d63b3;border-radius:6px;">
+            <div style="font-weight:700;">Paypal Review Transactions</div>
+            <br>
+            {% if bankAccounts.Paypal.reviewTransactions %}
+                {% for tr in bankAccounts.Paypal.reviewTransactions %}
+                    <div>{{tr}}</div>
                 {% endfor %}
-            </div>        
+            {% else %}
+                <div>None</div>
+            {% endif %}
         </div>
     </div>
+
+    <div style="min-width:420px;max-width:520px;flex:1 1 420px;padding:14px;border:1px solid #2d63b3;border-radius:6px;">
+        <div style="font-weight:700;"><a href="{% url 'Fidelity' %}" target="_blank">Fidelity</a></div>
+        <br>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="fidelityMain">Main</button>
+            <button type="submit" name="fidelityLogin">Login</button>
+            <button type="submit" name="fidelityBalance">Balance</button>
+        </form>
+        <br>
+
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;">
+            {% for group in fidelityGroups %}
+            <div style="padding:10px;border:1px solid #2d63b3;border-radius:6px;">
+                    <div style="font-weight:700;">{{group.base.name}}</div>
+                    <table style="width:100%;border-collapse:collapse;">
+                        <tr>
+                            <td>balance:</td>
+                            <td style="text-align:right;"><b>${{group.base.balance}}</b></td>
+                        </tr>
+                        <tr>
+                            <td>gnuBalance:</td>
+                            <td style="text-align:right;"><b>${{group.base.gnuBalance}}</b></td>
+                        </tr>
+                        {% for holding in group.holdings %}
+                            {% if holding.type == 'security' %}
+                                <tr><td colspan="2" style="padding-top:6px;"><b>{{holding.symbol}}</b></td></tr>
+                                <tr>
+                                    <td>shares:</td>
+                                    <td style="text-align:right;"><b>{{holding.balance}} {{holding.symbol}}</b></td>
+                                </tr>
+                                <tr>
+                                    <td>gnuBalance shares:</td>
+                                    <td style="text-align:right;"><b>{{holding.gnuBalance}} {{holding.symbol}}</b></td>
+                                </tr>
+                                <tr>
+                                    <td>value:</td>
+                                    <td style="text-align:right;"><b>${{holding.value}}</b></td>
+                                </tr>
+                                <tr>
+                                    <td>${{holding.price}} x shares:</td>
+                                    <td style="text-align:right;"><b>${{holding.gnuValue}}</b></td>
+                                </tr>
+                            {% else %}
+                                <tr><td colspan="2" style="padding-top:6px;"><b>{{holding.name}}</b></td></tr>
+                                <tr>
+                                    <td>balance:</td>
+                                    <td style="text-align:right;"><b>${{holding.balance}}</b></td>
+                                </tr>
+                                <tr>
+                                    <td>gnuBalance:</td>
+                                    <td style="text-align:right;"><b>${{holding.gnuBalance}}</b></td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div style="min-width:420px;max-width:520px;flex:1 1 420px;padding:14px;border:1px solid #2d63b3;border-radius:6px;">
+        <div style="font-weight:700;"><a href="{% url 'Webull' %}" target="_blank">Webull</a></div>
+        <br>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="webullMain">Main</button>
+            <button type="submit" name="webullLogin">Login</button>
+            <button type="submit" name="webullBalances">Balances</button>
+        </form>
+        <br>
+
+        {% for entry in webullAccounts %}
+            <div style="padding:10px;margin-bottom:10px;border:1px solid #2d63b3;border-radius:6px;">
+                <div style="font-weight:700;">{{entry.title}}</div>
+                <table style="width:100%;border-collapse:collapse;">
+                    <tr>
+                        <td>balance:</td>
+                        <td style="text-align:right;"><b>${{entry.account.balance}}</b></td>
+                    </tr>
+                    <tr>
+                        <td>gnuBalance:</td>
+                        <td style="text-align:right;"><b>${{entry.account.gnuBalance}}</b></td>
+                    </tr>
+                </table>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
 {% endblock %}

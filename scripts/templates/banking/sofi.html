@@ -1,48 +1,51 @@
 {% extends "base.html" %}
 {% block title %}Sofi{% endblock %}
 {% block content %}
-    <h1>Sofi</h1>
-    <div style="width: 100%; display: table;">
-        <div style="display: table-row;">
-            <div style="width: 20%; display:table-cell">
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="main">Main</button><br>
-                    <button type="submit" name="login">Login</button><br>
-                    <button type="submit" name="balances">Get Balances</button><br>
-                    <button type="submit" name="ally">Calculate Ally Transfer</button>{{transferAmount}}<br>
-                    <button type="submit" name="transfer">Ally Transfer</button><br>
-                    <button type="submit" name="logout">Logout</button><br>
-                </form>
-            </div>
-            <div style="width: 80%; display:table-cell">
-                Checking Balance: <b>${{Sofi.Checking.balance}}</b><br>
-                &thinsp;gnuCash Balance: <b>${{Sofi.Checking.gnuBalance}}</b><br>
-                Review Transactions:<br><br>
-                <div style="width: 50%; display: table;">
-                    {%for tr in Sofi.Checking.reviewTransactions %}
-                    <div style="display: table-row;">
-                        <div style="width: 20%; display:table-cell">
-                            {{tr}}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div><br>
-                &ensp;Savings Balance: <b>${{Sofi.Savings.balance}}</b><br>
-                &thinsp;gnuCash Balance: <b>${{Sofi.Savings.gnuBalance}}</b><br>
-                Review Transactions: <br><br>
-                <div style="width: 50%; display: table;">
-                    {%for tr in Sofi.Savings.reviewTransactions %}
-                    <div style="display: table-row;">
-                        <div style="width: 20%; display:table-cell">
-                            {{tr}}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                &ensp;SGOV Balance: <b>{{Sofi.SGOV.balance}}</b><br>
-                &thinsp;gnuCash Balance: <b>{{Sofi.SGOV.gnuBalance}}</b> {{Sofi.SGOV.symbol}}<br>
-            </div>
+<h1>Sofi</h1>
+<div class="layout-grid">
+    <div class="card">
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="main">Main</button>
+            <button type="submit" name="login">Login</button>
+            <button type="submit" name="balances">Get Balances</button>
+            <button type="submit" name="ally">Calculate Ally Transfer</button>
+            <button type="submit" name="transfer">Ally Transfer</button>
+            <button type="submit" name="logout">Logout</button>
+        </form>
+        <div style="margin-top:8px;"><b>{{transferAmount}}</b></div>
+    </div>
+
+    <div class="card">
+        <div class="subcard">
+            <div class="section-title">Checking</div>
+            <table class="metrics-table">
+                <tr><td>balance:</td><td><b>${{Sofi.Checking.balance}}</b></td></tr>
+                <tr><td>gnuBalance:</td><td><b>${{Sofi.Checking.gnuBalance}}</b></td></tr>
+            </table>
+            <div style="margin-top:8px;">Review Transactions:</div>
+            {% for tr in Sofi.Checking.reviewTransactions %}<div>{{tr}}</div>{% empty %}<div>None</div>{% endfor %}
+        </div>
+
+        <div class="subcard">
+            <div class="section-title">Savings</div>
+            <table class="metrics-table">
+                <tr><td>balance:</td><td><b>${{Sofi.Savings.balance}}</b></td></tr>
+                <tr><td>gnuBalance:</td><td><b>${{Sofi.Savings.gnuBalance}}</b></td></tr>
+            </table>
+            <div style="margin-top:8px;">Review Transactions:</div>
+            {% for tr in Sofi.Savings.reviewTransactions %}<div>{{tr}}</div>{% empty %}<div>None</div>{% endfor %}
+        </div>
+
+        <div class="subcard" style="margin-bottom:0;">
+            <div class="section-title">{{Sofi.SGOV.symbol}}</div>
+            <table class="metrics-table">
+                <tr><td>shares:</td><td><b>{{Sofi.SGOV.balance}} {{Sofi.SGOV.symbol}}</b></td></tr>
+                <tr><td>gnuBalance shares:</td><td><b>{{Sofi.SGOV.gnuBalance}} {{Sofi.SGOV.symbol}}</b></td></tr>
+                <tr><td>value:</td><td><b>${{Sofi.SGOV.value}}</b></td></tr>
+                <tr><td>${{Sofi.SGOV.price}} x shares:</td><td><b>${{Sofi.SGOV.gnuValue}}</b></td></tr>
+            </table>
         </div>
     </div>
+</div>
 {% endblock %}

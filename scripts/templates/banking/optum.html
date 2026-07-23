@@ -1,25 +1,28 @@
 {% extends "base.html" %}
 {% block title %}Optum HSA{% endblock %}
 {% block content %}
-    <h1>Optum HSA</h1>
-    <div style="width: 100%; display: table;">
-        <div style="display: table-row;">
-            <div style="width: 20%; display:table-cell">
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="main">Main</button><br>
-                    <button type="submit" name="login">Login</button><br>
-                    <button type="submit" name="balance">Balance</button><br>
-                </form>
-            </div>
-            <div style="width: 80%; display:table-cell">
-                &emsp;&emsp;HSA Cash balance: <b>${{OptumAccounts.OptumCash.balance}}</b><br>
-                &emsp;&emsp;&emsp;&emsp;&emsp;&thinsp;gnuBalance: <b>${{OptumAccounts.OptumCash.gnuBalance}}</b><br><br>
-                HSA Investment shares: <b>{{OptumAccounts.VFIAX.balance}} {{OptumAccounts.VFIAX.symbol}}</b><br>
-                &emsp;&ensp;&thinsp;&thinsp;gnuBalance shares: <b>{{OptumAccounts.VFIAX.gnuBalance}} {{OptumAccounts.VFIAX.symbol}}</b><br>
-                &ensp;HSA Investment Value: <b>${{OptumAccounts.VFIAX.value}}</b><br>
-                &emsp;&emsp;&ensp;&thinsp;&thinsp;${{OptumAccounts.VFIAX.price}} x shares: <b>${{OptumAccounts.VFIAX.gnuValue}}</b>
-            </div>
+<h1>Optum HSA</h1>
+<div class="layout-grid">
+    <div class="card">
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="main">Main</button>
+            <button type="submit" name="login">Login</button>
+            <button type="submit" name="balance">Balance</button>
+        </form>
+    </div>
+    <div class="card">
+        <div class="subcard" style="margin-bottom:0;">
+            <table class="metrics-table">
+                <tr><td>HSA Cash balance:</td><td><b>${{OptumAccounts.OptumCash.balance}}</b></td></tr>
+                <tr><td>gnuBalance:</td><td><b>${{OptumAccounts.OptumCash.gnuBalance}}</b></td></tr>
+                <tr><td colspan="2" style="padding-top:8px;"><b>{{OptumAccounts.VFIAX.symbol}}</b></td></tr>
+                <tr><td>shares:</td><td><b>{{OptumAccounts.VFIAX.balance}} {{OptumAccounts.VFIAX.symbol}}</b></td></tr>
+                <tr><td>gnuBalance shares:</td><td><b>{{OptumAccounts.VFIAX.gnuBalance}} {{OptumAccounts.VFIAX.symbol}}</b></td></tr>
+                <tr><td>value:</td><td><b>${{OptumAccounts.VFIAX.value}}</b></td></tr>
+                <tr><td>${{OptumAccounts.VFIAX.price}} x shares:</td><td><b>${{OptumAccounts.VFIAX.gnuValue}}</b></td></tr>
+            </table>
         </div>
     </div>
+</div>
 {% endblock %}

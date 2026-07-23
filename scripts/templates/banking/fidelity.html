@@ -1,106 +1,63 @@
 {% extends "base.html" %}
 {% block title %}Fidelity{% endblock %}
 {% block content %}
-    <h1>Fidelity</h1>
-    <div style="width: 100%; display: table;">
-        <div style="display: table-row;">
-            <div style=" display:table-cell">
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="main">Main</button><br>
-                    <button type="submit" name="login">Login</button><br>
-                    <button type="submit" name="balance">Balance</button><br>
-                </form>
-            </div>
-            <div style="display:table-cell;text-align:right">
-                {{accounts.FidelityIndividual.name}} balance: &thinsp; <br>
-                gnuBalance: &thinsp; <br><br>
-                {{accounts.FidelityIndividualGME.symbol}} shares: &thinsp; <br>
-                gnuBalance shares: &thinsp; <br>
-                {{accounts.FidelityIndividualGME.symbol}} value: &thinsp; <br>
-                ${{accounts.FidelityIndividualGME.price}} x shares: &thinsp; <br><br>
-                {{accounts.FidelityIndividualOptions.name}}: &thinsp; <br>
-                gnuBalance: &thinsp; <br><br>
-                {{accounts.FidelityIndividualCash.name}} balance: &thinsp; <br>
-                gnuBalance: &thinsp; <br><br>
-            </div>
-            <div style="display:table-cell;text-align:left">
-                <b>${{accounts.FidelityIndividual.balance}}<br>
-                ${{accounts.FidelityIndividual.gnuBalance}}<br><br>
-                {{accounts.FidelityIndividualGME.balance}} {{accounts.FidelityIndividualGME.symbol}}<br>
-                {{accounts.FidelityIndividualGME.gnuBalance}} {{accounts.FidelityIndividualGME.symbol}}<br>
-                ${{accounts.FidelityIndividualGME.value}}<br>
-                ${{accounts.FidelityIndividualGME.gnuValue}}<br><br>
-                ${{accounts.FidelityIndividualOptions.balance}}<br>
-                ${{accounts.FidelityIndividualOptions.gnuBalance}}<br><br>
-                ${{accounts.FidelityIndividualCash.balance}}<br>
-                ${{accounts.FidelityIndividualCash.gnuBalance}}<br><br></b>                       
-            </div>
-            <div style="display:table-cell;text-align:right">
-                {{accounts.FidelityBusiness.name}} balance: &thinsp; <br>
-                gnuBalance: &thinsp; <br><br>
-                {{accounts.FidelityBusinessCash.name}} balance: &thinsp; <br>
-                gnuBalance: &thinsp; <br><br>
-            </div>
-            <div style="display:table-cell;text-align:left">
-                <b>${{accounts.FidelityBusiness.balance}}<br>
-                ${{accounts.FidelityBusiness.gnuBalance}}<br><br>
-                ${{accounts.FidelityBusinessCash.balance}}<br>
-                ${{accounts.FidelityBusinessCash.gnuBalance}}<br><br></b>                       
-            </div>
-            <div style="display:table-cell">
-                <div style="display:table-cell;text-align:right">
-                    {{accounts.FidelityIRA.name}} balance: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>
-                    {{accounts.FidelityIRAGME.symbol}} shares: &thinsp; <br>
-                    gnuBalance shares: &thinsp; <br>
-                    {{accounts.FidelityIRAGME.symbol}} value: &thinsp; <br>
-                    ${{accounts.FidelityIRAGME.price}} x shares: &thinsp; <br><br>
-                    {{accounts.FidelityIRAOptions.name}}: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>
-                    {{accounts.FidelityIRACash.name}} balance: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>                            
-                </div>
-                <div style="display:table-cell;text-align:left">
-                    <b>${{accounts.FidelityIRA.balance}}<br>
-                    ${{accounts.FidelityIRA.gnuBalance}}<br><br>
-                    {{accounts.FidelityIRAGME.balance}} {{accounts.FidelityIRAGME.symbol}}<br>
-                    {{accounts.FidelityIRAGME.gnuBalance}} {{accounts.FidelityIRAGME.symbol}}<br>
-                    ${{accounts.FidelityIRAGME.value}}<br>
-                    ${{accounts.FidelityIRAGME.gnuValue}}<br><br>
-                    ${{accounts.FidelityIRAOptions.balance}}<br>
-                    ${{accounts.FidelityIRAOptions.gnuBalance}}<br><br>
-                    ${{accounts.FidelityIRACash.balance}}<br>
-                    ${{accounts.FidelityIRACash.gnuBalance}}<br><br></b>
-                </div>
-            </div>
-            <div style="display:table-cell">
-                <div style="display:table-cell;text-align:right">
-                    {{accounts.FidelityRothIRA.name}} balance: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>
-                    {{accounts.FidelityRothIRAGME.symbol}} shares: &thinsp; <br>
-                    gnuBalance shares: &thinsp; <br>
-                    {{accounts.FidelityRothIRAGME.symbol}} value: &thinsp; <br>
-                    ${{accounts.FidelityRothIRAGME.price}} x shares: &thinsp; <br><br>
-                    {{accounts.FidelityRothIRAOptions.name}}: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>
-                    {{accounts.FidelityRothIRACash.name}} balance: &thinsp; <br>
-                    gnuBalance: &thinsp; <br><br>                 
-                </div>
-                <div style="display:table-cell;text-align:left">
-                    <b>${{accounts.FidelityRothIRA.balance}}<br>
-                    ${{accounts.FidelityRothIRA.gnuBalance}}<br><br>
-                    {{accounts.FidelityRothIRAGME.balance}} {{accounts.FidelityRothIRAGME.symbol}}<br>
-                    {{accounts.FidelityRothIRAGME.gnuBalance}} {{accounts.FidelityRothIRAGME.symbol}}<br>
-                    ${{accounts.FidelityRothIRAGME.value}}<br>
-                    ${{accounts.FidelityRothIRAGME.gnuValue}}<br><br>
-                    ${{accounts.FidelityRothIRAOptions.balance}}<br>
-                    ${{accounts.FidelityRothIRAOptions.gnuBalance}}<br><br>
-                    ${{accounts.FidelityRothIRACash.balance}}<br>
-                    ${{accounts.FidelityRothIRACash.gnuBalance}}<br><br>
-                </b>
-                </div>
-            </div>
-        </div>
+<h1>Fidelity</h1>
+<div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
+    <div style="min-width:140px;">
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="main">Main</button><br>
+            <button type="submit" name="login">Login</button><br>
+            <button type="submit" name="balance">Balance</button><br>
+        </form>
     </div>
+
+    {% for group in fidelityGroups %}
+    <div style="min-width:320px;max-width:360px;flex:1 1 320px;padding:10px;border:1px solid #2d63b3;border-radius:6px;">
+        <div style="font-weight:700;margin-bottom:8px;">{{group.base.name}}</div>
+        <table style="width:100%;border-collapse:collapse;">
+            <tr>
+                <td style="padding:2px 0;">balance:</td>
+                <td style="padding:2px 0;text-align:right;"><b>${{group.base.balance}}</b></td>
+            </tr>
+            <tr>
+                <td style="padding:2px 0;">gnuBalance:</td>
+                <td style="padding:2px 0;text-align:right;"><b>${{group.base.gnuBalance}}</b></td>
+            </tr>
+
+            {% for holding in group.holdings %}
+                {% if holding.type == 'security' %}
+                    <tr><td colspan="2" style="padding-top:8px;"><b>{{holding.symbol}}</b></td></tr>
+                    <tr>
+                        <td style="padding:2px 0;">shares:</td>
+                        <td style="padding:2px 0;text-align:right;"><b>{{holding.balance}} {{holding.symbol}}</b></td>
+                    </tr>
+                    <tr>
+                        <td style="padding:2px 0;">gnuBalance shares:</td>
+                        <td style="padding:2px 0;text-align:right;"><b>{{holding.gnuBalance}} {{holding.symbol}}</b></td>
+                    </tr>
+                    <tr>
+                        <td style="padding:2px 0;">value:</td>
+                        <td style="padding:2px 0;text-align:right;"><b>${{holding.value}}</b></td>
+                    </tr>
+                    <tr>
+                        <td style="padding:2px 0;">${{holding.price}} x shares:</td>
+                        <td style="padding:2px 0;text-align:right;"><b>${{holding.gnuValue}}</b></td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="2" style="padding-top:8px;"><b>{{holding.name}}</b></td></tr>
+                    <tr>
+                        <td style="padding:2px 0;">balance:</td>
+                        <td style="padding:2px 0;text-align:right;"><b>${{holding.balance}}</b></td>
+                    </tr>
+                    <tr>
+                        <td style="padding:2px 0;">gnuBalance:</td>
+                        <td style="padding:2px 0;text-align:right;"><b>${{holding.gnuBalance}}</b></td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+    </div>
+    {% endfor %}
+</div>
 {% endblock %}
